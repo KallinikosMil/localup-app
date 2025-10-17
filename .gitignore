@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Ignore local config files
+.prettierrc
+tsconfig.json
