@@ -1,7 +1,13 @@
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, TextInput, Button, useTheme, Switch } from 'react-native-paper';
-import { useThemeMode } from '../_layout';
+import {
+  Text,
+  TextInput,
+  useTheme,
+} from 'react-native-paper';
+import { useThemeMode } from '@theme/ThemeModeProvider';
+import { Spacing } from '@theme/constants/Spacing';
+import BottomButton from '@components/BottomButton';
 
 const LoginScreen = () => {
   const theme = useTheme();
@@ -9,26 +15,24 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView
-      style={[styles.safe, { backgroundColor: theme.colors.background }]}
+      style={[
+        styles.safe,
+        { backgroundColor: theme.colors.background },
+      ]}
     >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        <View>
-          <Text
-            variant="titleLarge"
-            style={{ color: theme.colors.onBackground }}
-          >
-            LocalUp
-          </Text>
+        <View style={styles.logoWrap}>
+          <Text variant="titleLarge">LocalUp</Text>
         </View>
         <View style={styles.form}>
           <TextInput
             label="Email"
             mode="outlined"
-            style={styles.input}
+            dense
             autoCapitalize="none"
             keyboardType="email-address"
             returnKeyType="next"
@@ -36,28 +40,12 @@ const LoginScreen = () => {
           <TextInput
             label="Password"
             mode="outlined"
+            dense
             secureTextEntry
-            style={styles.input}
             returnKeyType="done"
           />
-          <Button
-            mode="contained"
-            onPress={() => {
-              /* TODO */
-            }}
-          >
-            Login
-          </Button>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={{ color: theme.colors.onBackground, marginRight: 8 }}>
-            Dark mode
-          </Text>
-          <Switch
-            value={mode === 'dark'}
-            onValueChange={v => setMode(v ? 'dark' : 'light')}
-          />
-        </View>
+        <BottomButton text="Login" onPress={() => {}} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -70,25 +58,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
+    paddingTop: 60,
     flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: Spacing.SPACING_PADDING_24,
   },
   logoWrap: {
     alignItems: 'center',
   },
-
   form: {
     width: '100%',
     maxWidth: 360,
   },
   input: {
     backgroundColor: 'transparent',
-    // marginBottom: 12,
+  },
+  inputContent: {},
+  switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    // marginTop: 16,
-    marginVertical: 10,
   },
 });

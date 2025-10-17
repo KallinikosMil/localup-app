@@ -1,0 +1,6 @@
+export const Spacing = {
+  SPACING_PADDING_8: 8,
+  SPACING_PADDING_16: 16,
+  SPACING_PADDING_24: 24,
+  SPACING_PADDING_32: 32,
+};
