@@ -1,36 +1,36 @@
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import {
   Text,
   TextInput,
   useTheme,
 } from 'react-native-paper';
-import { useThemeMode } from '@theme/ThemeModeProvider';
-import { Spacing } from '@theme/constants/Spacing';
+
 import BottomButton from '@components/BottomButton';
 
+import { Spacing } from '@theme/constants/Spacing';
+import { Translations } from './i18n/translationKeys';
+
 const LoginScreen = () => {
-  const theme = useTheme();
-  const { mode, setMode } = useThemeMode();
+  const { t } = useTranslation();
 
   return (
-    <SafeAreaView
-      style={[
-        styles.safe,
-        { backgroundColor: theme.colors.background },
-      ]}
-    >
+    <SafeAreaView style={styles.safe}>
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
         <View style={styles.logoWrap}>
-          <Text variant="titleLarge">LocalUp</Text>
+          <Text variant="titleLarge">
+            {t(Translations.AUTH_HEADER_TEXT)}
+          </Text>
         </View>
+
         <View style={styles.form}>
           <TextInput
-            label="Email"
+            label={t(Translations.AUTH_EMAIL_LABEL)}
             mode="outlined"
             dense
             autoCapitalize="none"
@@ -38,14 +38,17 @@ const LoginScreen = () => {
             returnKeyType="next"
           />
           <TextInput
-            label="Password"
+            label={t(Translations.AUTH_PASSWORD_LABEL)}
             mode="outlined"
             dense
             secureTextEntry
             returnKeyType="done"
           />
         </View>
-        <BottomButton text="Login" onPress={() => {}} />
+        <BottomButton
+          text={t(Translations.AUTH_LOGIN_BUTTON)}
+          onPress={() => {}}
+        />
       </ScrollView>
     </SafeAreaView>
   );
