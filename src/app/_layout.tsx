@@ -5,7 +5,7 @@ import AppProviders from './core/AppProviders';
 export default function RootLayout() {
   return (
     <AppProviders>
-      <Slot />  {/* file-based routes render here */}
+      <Slot />
     </AppProviders>
   );
 }
