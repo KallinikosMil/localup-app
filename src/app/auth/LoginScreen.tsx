@@ -10,7 +10,7 @@ import {
 import BottomButton from '@components/BottomButton';
 
 import { Spacing } from '@theme/constants/Spacing';
-import { Translations } from '../../modules/auth/i18n/translationKeys';
+import { Translations } from '@modules/auth/i18n/translationKeys';
 
 const LoginScreen = () => {
   const { t } = useTranslation();

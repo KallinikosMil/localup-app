@@ -6,15 +6,18 @@ module.exports = function (api) {
       [
         'module-resolver',
         {
-          root: ['./'],
+          root: ['./'], // match tsconfig baseUrl
           extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
           alias: {
-            '@app': './src/app',
+            '@app': './app',
+            '@modules': './src/modules',   // ← requested alias
+            '@core': './src/core',
             '@components': './src/ui/components',
-            '@theme': './src/ui/theme',
-          },
-        },
+            '@theme': './src/ui/theme'
+          }
+        }
       ],
-    ],
+      'react-native-reanimated/plugin'
+    ]
   };
 };
