@@ -6,9 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function RootLayout() {
   return (
     <AppProviders>
-      <SafeAreaView style={{flex:1}}>
         <Slot />
-      </SafeAreaView>
     </AppProviders>
   );
 }

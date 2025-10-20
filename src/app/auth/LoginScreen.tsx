@@ -12,7 +12,7 @@ import { Translations } from '@modules/auth/i18n/translationKeys';
 
 const LoginScreen = () => {
   const { t } = useTranslation();
-
+  
   return (
       <View
         style={styles.container}
