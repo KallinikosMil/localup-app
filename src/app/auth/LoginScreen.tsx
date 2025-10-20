@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Text,
   TextInput,
-  useTheme,
 } from 'react-native-paper';
 
 import BottomButton from '@components/BottomButton';
@@ -27,7 +26,6 @@ const LoginScreen = () => {
             {t(Translations.AUTH_HEADER_TEXT)}
           </Text>
         </View>
-
         <View style={styles.form}>
           <TextInput
             label={t(Translations.AUTH_EMAIL_LABEL)}
@@ -77,7 +75,6 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: 'transparent',
   },
-  inputContent: {},
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
