@@ -1,5 +1,4 @@
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
   Text,
@@ -15,11 +14,8 @@ const LoginScreen = () => {
   const { t } = useTranslation();
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
+      <View
+        style={styles.container}
       >
         <View style={styles.logoWrap}>
           <Text variant="titleLarge">
@@ -47,8 +43,7 @@ const LoginScreen = () => {
           text={t(Translations.AUTH_LOGIN_BUTTON)}
           onPress={() => {}}
         />
-      </ScrollView>
-    </SafeAreaView>
+      </View>
   );
 };
 
