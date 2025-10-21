@@ -7,19 +7,19 @@ import {
 import { Button } from 'react-native-paper';
 
 type BottomButtonProps = {
-  text: string;
+  label: string;
   onPress: () => void;
   width?: DimensionValue;
 };
 
 const BottomButton = ({
-  text,
+  label,
   onPress,
   width = '100%',
 }: BottomButtonProps) => (
   <View style={[styles.container, { width }]}>
     <Button mode="contained" onPress={onPress}>
-      {text}
+      {label}
     </Button>
   </View>
 );

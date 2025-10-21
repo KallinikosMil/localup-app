@@ -1,7 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// per-feature locales (auth for now)
 import en_auth from '../../auth/i18n/locales.ts/en.js';
 import el_auth from '../../auth/i18n/locales.ts/el.js';
 

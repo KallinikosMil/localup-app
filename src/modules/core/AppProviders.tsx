@@ -2,7 +2,6 @@ import React from 'react';
 import { StatusBar } from 'react-native';
 import {
   Provider as PaperProvider,
-  useTheme,
 } from 'react-native-paper';
 import {
   SafeAreaProvider,
@@ -20,7 +19,7 @@ function Shell({
 }: {
   children: React.ReactNode;
 }) {
-  const { resolvedMode } = useThemeMode(); // 'light' | 'dark'
+  const { resolvedMode } = useThemeMode();
   const paper =
     resolvedMode === 'dark' ? PaperDark : PaperLight;
   const barStyle =
