@@ -12,12 +12,13 @@ import BottomButton from '@components/BottomButton';
 import { Spacing } from '@theme/constants/Spacing';
 import { Translations } from '@modules/auth/i18n/translationKeys';
 import Spacer from '@components/Spacer';
+import Container from '@components/Container';
 
 const LoginScreen = () => {
   const { t } = useTranslation();
 
   return (
-    <View style={styles.container}>
+    <Container>
       <View style={styles.logoWrap}>
         <Text variant="titleLarge">
           {t(Translations.AUTH_HEADER_TEXT)}
@@ -54,7 +55,7 @@ const LoginScreen = () => {
       >
         Register
       </Button>
-    </View>
+    </Container>
   );
 };
 
@@ -63,13 +64,6 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-  },
-  container: {
-    paddingTop: 60,
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.SPACING_PADDING_24,
   },
   logoWrap: {
     alignItems: 'center',
