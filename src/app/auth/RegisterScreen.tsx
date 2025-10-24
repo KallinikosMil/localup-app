@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import {
   Button,
   Text,
-  TextInput,
   useTheme,
 } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,7 +29,7 @@ const RegisterScreen = (props: Props) => {
       confirmPassword: '',
     },
   });
-  const { handleSubmit, trigger } = form;
+  const { handleSubmit } = form;
 
   const onSubmit = (data: RegisterFormData) => {
     console.log('Form data:', data);

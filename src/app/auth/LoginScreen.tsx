@@ -5,7 +5,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 import {
   Button,
   Text,
-  TextInput,
 } from 'react-native-paper';
 
 import BottomButton from '@components/BottomButton';
@@ -14,21 +13,25 @@ import { Spacing } from '@theme/constants/Spacing';
 import { Translations } from '@modules/auth/i18n/translationKeys';
 import Spacer from '@components/Spacer';
 import Container from '@components/Container';
-type RegisterFormData = {
+import { InputField } from '@components/InputField';
+type LoginFormData = {
   email: string;
   password: string;
-  confirmPassword: string;
 };
 
 const LoginScreen = () => {
   const { t } = useTranslation();
-  const form = useForm<RegisterFormData>({
+  const form = useForm<LoginFormData>({
     defaultValues: {
       email: '',
       password: '',
-      confirmPassword: '',
     },
   });
+  const {handleSubmit, } = form;
+  const onSubmit = (data: LoginFormData) => {
+    console.log(data);
+  };
+
   return (
       <Container>
         <View style={styles.logoWrap}>
@@ -37,25 +40,44 @@ const LoginScreen = () => {
           </Text>
         </View>
         <View style={styles.form}>
-          <TextInput
+          <FormProvider {...form}>
+          <InputField
+            name="email"
             label={t(Translations.AUTH_EMAIL_LABEL)}
-            mode="outlined"
+            rules={{
+              required: {
+                value: true,
+                message: 'Please enter your email',
+              },
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Please enter a valid email',
+              },
+            }}
             dense
             autoCapitalize="none"
             keyboardType="email-address"
             returnKeyType="next"
           />
-          <TextInput
+          <Spacer spacing={Spacing.SPACING_PADDING_8} />
+          <InputField
+            name="password"
             label={t(Translations.AUTH_PASSWORD_LABEL)}
-            mode="outlined"
+            rules={{
+              required: {
+                value: true,
+                message: 'Please enter your password',
+              },
+            }}
             dense
             secureTextEntry
             returnKeyType="done"
           />
+          </FormProvider>
         </View>
         <BottomButton
           label={t(Translations.AUTH_LOGIN_BUTTON)}
-          onPress={() => {}}
+          onPress={handleSubmit(onSubmit)}
         />
         <Spacer spacing={Spacing.SPACING_PADDING_8} />
         <Button
