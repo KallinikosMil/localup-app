@@ -43,3 +43,6 @@ yarn-error.*
 # Ignore local config files
 .prettierrc
 tsconfig.json
+
+#Enviroment variables
+.env

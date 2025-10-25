@@ -6,6 +6,7 @@ import {
   Button,
   Text,
 } from 'react-native-paper';
+import { useDispatch } from 'react-redux';
 
 import BottomButton from '@components/BottomButton';
 
@@ -14,12 +15,14 @@ import { Translations } from '@modules/auth/i18n/translationKeys';
 import Spacer from '@components/Spacer';
 import Container from '@components/Container';
 import { InputField } from '@components/InputField';
+import { login } from '@modules/auth/slices/authSlice';
 type LoginFormData = {
   email: string;
   password: string;
 };
 
 const LoginScreen = () => {
+  const dispatch = useDispatch();
   const { t } = useTranslation();
   const form = useForm<LoginFormData>({
     defaultValues: {
@@ -77,7 +80,9 @@ const LoginScreen = () => {
         </View>
         <BottomButton
           label={t(Translations.AUTH_LOGIN_BUTTON)}
-          onPress={handleSubmit(onSubmit)}
+          onPress={() => {
+            console.log('dispatched')
+            dispatch(login())}}
         />
         <Spacer spacing={Spacing.SPACING_PADDING_8} />
         <Button
