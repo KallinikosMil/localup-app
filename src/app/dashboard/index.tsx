@@ -3,14 +3,14 @@ import React from 'react'
 
 type Props = {}
 
-const Dashboard = (props: Props) => {
+const DashboardScreen = (props: Props) => {
   return (
     <View>
-      <Text>Dashboard</Text>
+      <Text>DashboardScreen</Text>
     </View>
   )
 }
 
-export default Dashboard
+export default DashboardScreen
 
 const styles = StyleSheet.create({})

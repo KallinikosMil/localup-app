@@ -84,7 +84,7 @@ const LoginScreen = () => {
           mode="outlined"
           style={{ width: '100%' }}
           onPress={() => {
-            router.push('/auth/RegisterScreen');
+            router.push('/auth/register');
           }}
         >
           Register

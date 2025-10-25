@@ -2,6 +2,9 @@
   "name": "localup-app",
   "version": "1.0.0",
   "main": "expo-router/entry",
+  "expo-router":{
+    "root":"./src/app"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -14,7 +17,7 @@
     "expo": "^54.0.16",
     "expo-constants": "~18.0.9",
     "expo-linking": "~8.0.8",
-    "expo-router": "^6.0.13",
+    "expo-router": "latest",
     "expo-status-bar": "~3.0.8",
     "i18next": "^25.6.0",
     "react": "19.1.0",
