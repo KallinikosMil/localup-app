@@ -10,15 +10,17 @@ type BottomButtonProps = {
   label: string;
   onPress: () => void;
   width?: DimensionValue;
+  disabled?: boolean;
 };
 
 const BottomButton = ({
   label,
   onPress,
   width = '100%',
+  disabled = false,
 }: BottomButtonProps) => (
   <View style={[styles.container, { width }]}>
-    <Button mode="contained" onPress={onPress}>
+    <Button disabled={disabled} mode="contained" onPress={onPress}>
       {label}
     </Button>
   </View>
