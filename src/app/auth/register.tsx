@@ -6,9 +6,9 @@ import { useForm, FormProvider } from 'react-hook-form';
 
 import Spacer from '@components/Spacer';
 import PressableIcon from '@components/PressableIcon';
+import  InputField  from '@components/InputField';
 
 import { Spacing } from '@theme/constants/Spacing';
-import { InputField } from '@components/InputField';
 
 type RegisterFormData = {
   email: string;

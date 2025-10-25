@@ -17,13 +17,13 @@ export type InputFieldProps<T extends FieldValues> = {
   validateOnBlur?: boolean;
 } & Omit<PaperInputProps, 'value' | 'onChangeText' | 'onBlur' | 'error' | 'label' | 'mode'>;
 
-export function InputField<T extends FieldValues>({
+const InputField = <T extends FieldValues> ({
   name,
   label,
   rules,
   validateOnBlur = true,
   ...rest
-}: InputFieldProps<T>) {
+}: InputFieldProps<T>) => {
   const { control, trigger } = useFormContext<T>();
 
   const {
@@ -56,4 +56,5 @@ export function InputField<T extends FieldValues>({
       ) : null}
     </>
   );
-}
+};  
+export default InputField;
