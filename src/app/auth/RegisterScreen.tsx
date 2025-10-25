@@ -1,16 +1,14 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import {
-  Button,
-  Text,
-  useTheme,
-} from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, View } from 'react-native';
+import { Button, Text, useTheme } from 'react-native-paper';
 import { router } from 'expo-router';
 import { useForm, FormProvider } from 'react-hook-form';
-import { InputField } from '@components/InputField';
+
 import Spacer from '@components/Spacer';
+import PressableIcon from '@components/PressableIcon';
+
 import { Spacing } from '@theme/constants/Spacing';
+import { InputField } from '@components/InputField';
 
 type RegisterFormData = {
   email: string;
@@ -21,7 +19,6 @@ type RegisterFormData = {
 type Props = {};
 
 const RegisterScreen = (props: Props) => {
-  const theme = useTheme();
   const form = useForm<RegisterFormData>({
     defaultValues: {
       email: '',
@@ -37,17 +34,7 @@ const RegisterScreen = (props: Props) => {
   };
   return (
     <>
-      <Pressable
-        onPress={() => {
-          router.back();
-        }}
-      >
-        <Ionicons
-          name="chevron-back-outline"
-          size={32}
-          color={theme.colors.primary}
-        />
-      </Pressable>
+      <PressableIcon onPress={() => router.back()} />
       <FormProvider {...form}>
         <View
           style={{

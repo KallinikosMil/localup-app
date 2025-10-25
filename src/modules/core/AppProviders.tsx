@@ -1,8 +1,6 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
-import {
-  Provider as PaperProvider,
-} from 'react-native-paper';
+import { Provider as PaperProvider } from 'react-native-paper';
 import {
   SafeAreaProvider,
   SafeAreaView,
@@ -13,7 +11,8 @@ import {
   ThemeModeProvider,
   useThemeMode,
 } from '@theme/ThemeModeProvider';
-
+import { store } from './store';
+import { Provider } from 'react-redux';
 function Shell({
   children,
 }: {
@@ -54,8 +53,10 @@ export default function AppProviders({
   children: React.ReactNode;
 }) {
   return (
+    <Provider store={store}>
     <ThemeModeProvider>
       <Shell>{children}</Shell>
     </ThemeModeProvider>
+    </Provider>
   );
 }

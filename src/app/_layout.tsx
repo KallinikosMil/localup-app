@@ -23,9 +23,7 @@ export default function RootLayout() {
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{ flexGrow: 1, padding: Spacing.SPACING_PADDING_24 }}
           >
-            <View style={{ flex: 1 }}>
               <Slot />
-            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
