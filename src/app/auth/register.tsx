@@ -4,9 +4,9 @@ import { Button, Text } from 'react-native-paper';
 import { router } from 'expo-router';
 import { useForm, FormProvider } from 'react-hook-form';
 
-import Spacer from '@components/Spacer';
-import PressableIcon from '@components/PressableIcon';
-import  InputField  from '@components/InputField';
+import Spacer from '@shared/components/Spacer';
+import PressableIcon from '@shared/components/PressableIcon';
+import InputField from '@shared/components/InputField';
 
 import { Spacing } from '@theme/constants/Spacing';
 

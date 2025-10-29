@@ -1,7 +1,7 @@
 import { StyleSheet, Pressable, View } from 'react-native'
 import { Text } from 'react-native-paper'
 import React from 'react'
-import { supabase } from '@modules/core/supabase/supabase'
+import { supabase } from '@config/supabase'
 type Props = {}
 
 const DashboardScreen = (props: Props) => {

@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, View, Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
-import type { RootState } from '@modules/core/store';
+import type { RootState } from '@store';
 
 export default function CoreScreen() {
   const router = useRouter();

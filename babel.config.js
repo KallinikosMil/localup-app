@@ -9,11 +9,13 @@ module.exports = function (api) {
           root: ['./'], // match tsconfig baseUrl
           extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
           alias: {
-            '@app': './app',
-            '@modules': './src/modules',   // ← requested alias
-            '@core': './src/core',
-            '@components': './src/ui/components',
-            '@theme': './src/ui/theme'
+            '@app': './src/app',
+            '@features': './src/features',
+            '@shared': './src/shared',
+            '@providers': './src/providers',
+            '@store': './src/store',
+            '@config': './src/config',
+            '@theme': './src/theme'
           }
         }
       ],

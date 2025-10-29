@@ -46,3 +46,6 @@ tsconfig.json
 
 #Enviroment variables
 .env
+
+# Local assistant notes
+agents.md

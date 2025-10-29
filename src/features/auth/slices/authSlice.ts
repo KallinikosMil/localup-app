@@ -3,7 +3,7 @@ import {
   createAsyncThunk,
   PayloadAction,
 } from '@reduxjs/toolkit';
-import { supabase } from '@modules/core/supabase/supabase';
+import { supabase } from '@config/supabase';
 
 export interface AuthState {
   user: { uid: string; email: string | null } | null;

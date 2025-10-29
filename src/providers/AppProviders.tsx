@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import { Provider, useSelector } from 'react-redux';
 import { useRouter, useSegments } from 'expo-router';
-import { store, RootState } from './store';
+import { store, RootState } from '@store';
 import { ThemeModeProvider, useThemeMode } from '@theme/ThemeModeProvider';
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
-import { PaperLight, PaperDark } from './theme';
-import { supabase } from './supabase/supabase';
-import { setInitialized, setUser } from '../../modules/auth/slices/authSlice';
-import './i18n';
+import { PaperLight, PaperDark } from '@theme/paper';
+import { supabase } from '@config/supabase';
+import { setInitialized, setUser } from '@features/auth/slices/authSlice';
+import '@config/i18n';
 
 function Shell({ children }: { children: React.ReactNode }) {
   const { resolvedMode } = useThemeMode();
@@ -54,7 +54,7 @@ export default function AppProviders({ children }: { children: React.ReactNode }
     supabase.auth.getSession().then(({ data }) => {
       const session = data.session;
       const user = session?.user
-        ? { uid: session.user.id, email: session.user.email }
+        ? { uid: session.user.id, email: session.user.email ?? null }
         : null;
       store.dispatch(setUser(user));
       store.dispatch(setInitialized(true));
@@ -63,7 +63,7 @@ export default function AppProviders({ children }: { children: React.ReactNode }
     // ✅ Συνδρομή σε login/logout changes
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       const user = session?.user
-        ? { uid: session.user.id, email: session.user.email }
+        ? { uid: session.user.id, email: session.user.email ?? null }
         : null;
       store.dispatch(setUser(user));
     });

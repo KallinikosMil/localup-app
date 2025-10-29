@@ -10,19 +10,16 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
 
-import { loginUser } from '@modules/auth/slices/authSlice';
-import type {
-  RootState,
-  AppDispatch,
-} from '@modules/core/store';
+import { loginUser } from '@features/auth/slices/authSlice';
+import type { RootState, AppDispatch } from '@store';
 
-import Container from '@components/Container';
-import Spacer from '@components/Spacer';
-import BottomButton from '@components/BottomButton';
-import InputField from '@components/InputField';
+import Container from '@shared/components/Container';
+import Spacer from '@shared/components/Spacer';
+import BottomButton from '@shared/components/BottomButton';
+import InputField from '@shared/components/InputField';
 
 import { Spacing } from '@theme/constants/Spacing';
-import { Translations } from '@modules/auth/i18n/translationKeys';
+import { Translations } from '@features/auth/i18n/translationKeys';
 
 type LoginFormData = {
   email: string;

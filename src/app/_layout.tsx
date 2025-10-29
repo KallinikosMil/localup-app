@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Slot } from 'expo-router';
-import AppProviders from '../modules/core/AppProviders';
+import AppProviders from '@providers/AppProviders';
 import { Spacing } from '@theme/constants/Spacing';
 
 export default function RootLayout() {
