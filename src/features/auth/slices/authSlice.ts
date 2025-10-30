@@ -60,13 +60,6 @@ export const registerUser = createAsyncThunk<
       email: email.trim(),
       password,
     });
-
-    console.log('[registerUser] signUp response', {
-      user: data?.user,
-      session: data?.session,
-      error,
-    });
-
     const identities = data?.user?.identities;
     if (Array.isArray(identities) && identities.length === 0) {
       return rejectWithValue(
@@ -89,7 +82,6 @@ const setFulfilled = (state: AuthState) => {
 
 const setRejected =
   (fallback: string) => (state: AuthState, action: any) => {
-    console.log('rejected')
     state.status = RequestStatus.ERROR;
     state.error = action.payload ?? fallback;
   };
