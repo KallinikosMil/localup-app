@@ -4,19 +4,20 @@ import {
   PayloadAction,
 } from '@reduxjs/toolkit';
 import { supabase } from '@config/supabase';
+import { RequestStatus } from '@shared/types/RequestStatus';
 
 export interface AuthState {
   user: { uid: string; email: string | null } | null;
-  loading: boolean;
   error: string | null;
   initialized: boolean;
+  status: RequestStatus;
 }
 
 const initialState: AuthState = {
   user: null,
-  loading: false,
   error: null,
   initialized: false,
+  status: RequestStatus.IDLE,
 };
 
 // Login
@@ -55,27 +56,41 @@ export const registerUser = createAsyncThunk<
 >(
   'auth/registerUser',
   async ({ email, password }, { rejectWithValue }) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
     });
+
+    console.log('[registerUser] signUp response', {
+      user: data?.user,
+      session: data?.session,
+      error,
+    });
+
+    const identities = data?.user?.identities;
+    if (Array.isArray(identities) && identities.length === 0) {
+      return rejectWithValue(
+        'Email already registered. Please log in.',
+      );
+    }
 
     if (error) return rejectWithValue(error.message);
   },
 );
 
 const setPending = (state: AuthState) => {
-  state.loading = true;
+  state.status = RequestStatus.LOADING;
   state.error = null;
 };
 
 const setFulfilled = (state: AuthState) => {
-  state.loading = false;
+  state.status = RequestStatus.SUCCESS;
 };
 
 const setRejected =
   (fallback: string) => (state: AuthState, action: any) => {
-    state.loading = false;
+    console.log('rejected')
+    state.status = RequestStatus.ERROR;
     state.error = action.payload ?? fallback;
   };
 
@@ -98,6 +113,7 @@ const authSlice = createSlice({
     ) => {
       state.user = action.payload;
     },
+    resetState: () => initialState,
   },
   extraReducers: builder => {
     builder
@@ -127,6 +143,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setInitialized, setUser } =
+export const { setInitialized, setUser, resetState } =
   authSlice.actions;
 export default authSlice.reducer;
