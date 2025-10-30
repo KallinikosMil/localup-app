@@ -6,9 +6,7 @@ type Props = {}
 
 const DashboardScreen = (props: Props) => {
 const onPress = async()=>{
-  console.log('ready to sign out')
   const {error} = await supabase.auth.signOut()   
-  console.log(error)
 }
 return (
   <View>
