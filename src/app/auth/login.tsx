@@ -8,7 +8,6 @@ import { StyleSheet, View } from 'react-native';
 import {
   ActivityIndicator,
   Button,
-  Switch,
   Text,
 } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
@@ -17,7 +16,10 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
 import type { RootState, AppDispatch } from '@store';
-import { resetState, loginUser } from '@features/auth/slices/authSlice';
+import {
+  resetState,
+  loginUser,
+} from '@features/auth/slices/authSlice';
 import useModal from '@shared/hooks/useModal';
 
 import Container from '@shared/components/Container';
@@ -28,7 +30,6 @@ import CustomModal from '@shared/components/CustomModal';
 import { RequestStatus } from '@shared/types/RequestStatus';
 
 import { Spacing } from '@theme/constants/Spacing';
-import { useThemeMode } from '@theme/ThemeModeProvider';
 import { Translations } from '@features/auth/i18n/translationKeys';
 
 type LoginFormData = {
@@ -40,7 +41,6 @@ const LoginScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { t } = useTranslation();
   const theme = useTheme();
-  const { resolvedMode, setMode } = useThemeMode();
   const { status, error } = useSelector(
     (root: RootState) => root.auth,
   );
@@ -95,17 +95,6 @@ const LoginScreen = () => {
               <Text variant="titleLarge">
                 {t(Translations.AUTH_HEADER_TEXT)}
               </Text>
-            </View>
-            <View style={styles.switchRow}>
-              <Text variant="bodyMedium">
-                {resolvedMode === 'dark'
-                  ? t('theme.darkMode', 'Dark Mode')
-                  : t('theme.lightMode', 'Light Mode')}
-              </Text>
-              <Switch
-                value={resolvedMode === 'dark'}
-                onValueChange={value => setMode(value ? 'dark' : 'light')}
-              />
             </View>
             <Spacer spacing={Spacing.SPACING_PADDING_8} />
             <View style={styles.form}>
@@ -208,7 +197,7 @@ const styles = StyleSheet.create({
   modalContent: {
     alignItems: 'center',
     padding: 24,
-    borderRadius:16,
+    borderRadius: 16,
   },
   modalButton: {
     alignSelf: 'center',
