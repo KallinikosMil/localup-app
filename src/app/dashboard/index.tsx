@@ -1,23 +1,34 @@
-import { StyleSheet, Pressable, View } from 'react-native'
-import { Text } from 'react-native-paper'
-import React from 'react'
-import { supabase } from '@config/supabase'
-type Props = {}
+import { View } from 'react-native';
+import { Button, Text } from 'react-native-paper';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '@store';
+import { logoutUser } from '@features/auth/slices/authSlice';
+import { RequestStatus } from '@shared/types/RequestStatus';
 
-const DashboardScreen = (props: Props) => {
-const onPress = async()=>{
-  const {error} = await supabase.auth.signOut()   
-}
-return (
-  <View>
-    <Pressable onPress={onPress}>
+const DashboardScreen = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { status } = useSelector(
+    (s: RootState) => s.auth,
+  );
 
-    <Text>DashboardScreen</Text>
-    </Pressable>
-  </View>
-)
-}
+  const onLogout = () => {
+    dispatch(logoutUser());
+  };
 
-export default DashboardScreen
+  return (
+    <View>
+      <Text>DashboardScreen</Text>
+      <Button
+        mode="outlined"
+        onPress={onLogout}
+        loading={status === RequestStatus.LOADING}
+        disabled={status === RequestStatus.LOADING}
+      >
+        Logout
+      </Button>
+    </View>
+  );
+};
 
-const styles = StyleSheet.create({})
+export default DashboardScreen;

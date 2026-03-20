@@ -1,3 +1,3 @@
+import { Redirect } from 'expo-router';
 
-import CoreScreen from './core';
-export default CoreScreen;
+export default () => Redirect({ href: '/core' });

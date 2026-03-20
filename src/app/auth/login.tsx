@@ -31,6 +31,8 @@ import { RequestStatus } from '@shared/types/RequestStatus';
 
 import { Spacing } from '@theme/constants/Spacing';
 import { Translations } from '@features/auth/i18n/translationKeys';
+import { useThemeMode } from '@theme/ThemeModeProvider';
+import { IconButton } from 'react-native-paper';
 
 type LoginFormData = {
   email: string;
@@ -41,6 +43,8 @@ const LoginScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { t } = useTranslation();
   const theme = useTheme();
+  const { mode, setMode, resolvedMode } =
+    useThemeMode();
   const { status, error } = useSelector(
     (root: RootState) => root.auth,
   );
@@ -48,6 +52,12 @@ const LoginScreen = () => {
   const [modalMessage, setModalMessage] =
     useState<string>('');
   const lastErrorRef = useRef<string | null>(null);
+
+  const toggleTheme = () => {
+    setMode(prev =>
+      prev === 'light' ? 'dark' : 'light',
+    );
+  };
 
   const form = useForm<LoginFormData>({
     defaultValues: { email: '', password: '' },
@@ -91,6 +101,18 @@ const LoginScreen = () => {
           <ActivityIndicator animating />
         ) : (
           <>
+            <View style={styles.header}>
+              <IconButton
+                icon={
+                  resolvedMode === 'dark'
+                    ? 'white-balance-sunny'
+                    : 'moon-waning-crescent'
+                }
+                size={24}
+                onPress={toggleTheme}
+                style={styles.themeButton}
+              />
+            </View>
             <View style={styles.logoWrap}>
               <Text variant="titleLarge">
                 {t(Translations.AUTH_HEADER_TEXT)}
@@ -185,15 +207,16 @@ const LoginScreen = () => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
+  header: {
+    width: '100%',
+    alignItems: 'flex-end',
+    marginBottom: Spacing.SPACING_PADDING_8,
+  },
+  themeButton: {
+    margin: 0,
+  },
   logoWrap: { alignItems: 'center' },
   form: { width: '100%', maxWidth: 360 },
-  input: { backgroundColor: 'transparent' },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   modalContent: {
     alignItems: 'center',
     padding: 24,

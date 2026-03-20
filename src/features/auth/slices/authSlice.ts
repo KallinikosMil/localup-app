@@ -105,7 +105,10 @@ const authSlice = createSlice({
     ) => {
       state.user = action.payload;
     },
-    resetState: () => initialState,
+    resetState: state => {
+      state.status = RequestStatus.IDLE;
+      state.error = null;
+    },
   },
   extraReducers: builder => {
     builder

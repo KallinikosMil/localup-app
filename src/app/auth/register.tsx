@@ -35,9 +35,7 @@ type RegisterFormData = {
   confirmPassword: string;
 };
 
-type Props = {};
-
-const RegisterScreen = (props: Props) => {
+const RegisterScreen = () => {
   const form = useForm<RegisterFormData>({
     defaultValues: {
       email: '',
@@ -203,11 +201,7 @@ const RegisterScreen = (props: Props) => {
             mode="contained"
             onPress={handleDismiss}
             style={styles.modalButton}
-            buttonColor={
-              status === RequestStatus.SUCCESS
-                ? theme.colors.primary
-                : theme.colors.primary
-            }
+            buttonColor={theme.colors.primary}
             textColor={theme.colors.onPrimary}
           >
             Dismiss
