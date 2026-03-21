@@ -1,0 +1,338 @@
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+} from 'react-native';
+import {
+  Button,
+  TextInput,
+  ActivityIndicator,
+  useTheme,
+} from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+
+import AppText from '@shared/components/AppText';
+import Spacer from '@shared/components/Spacer';
+import InterestChip from '@shared/components/InterestChip';
+import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
+import { useCompleteOnboarding } from '@features/onboarding/hooks/useOnboarding';
+import { Translations } from '@features/onboarding/i18n/translationKeys';
+import { supabase } from '@config/supabase';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
+
+const MIN_INTERESTS = 3;
+const MAX_INTERESTS = 5;
+
+type Interest = {
+  id: string;
+  name: string;
+  icon: string | null;
+  category: string;
+  is_active: boolean;
+};
+
+const InterestsScreen = () => {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const { data: onboardingData, update } =
+    useOnboardingData();
+
+  const [selectedIds, setSelectedIds] = useState<
+    string[]
+  >(onboardingData.interestIds);
+  const [bio, setBio] = useState(
+    onboardingData.bio,
+  );
+
+  const { mutate, isPending } =
+    useCompleteOnboarding();
+
+  const { data: interests = [], isLoading } =
+    useQuery({
+      queryKey: ['interests'],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('interests')
+          .select('*')
+          .eq('is_active', true);
+        if (error) throw error;
+        return data as Interest[];
+      },
+    });
+
+  const grouped = interests.reduce<
+    Record<string, Interest[]>
+  >((acc, interest) => {
+    const cat = interest.category;
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(interest);
+    return acc;
+  }, {});
+
+  const toggleInterest = (id: string) => {
+    setSelectedIds(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(i => i !== id);
+      }
+      if (prev.length >= MAX_INTERESTS) {
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
+
+  const canFinish =
+    selectedIds.length >= MIN_INTERESTS;
+
+  const onFinish = () => {
+    update({ interestIds: selectedIds, bio });
+
+    mutate({
+      displayName:
+        onboardingData.displayName,
+      dateOfBirth:
+        onboardingData.dateOfBirth
+          ?.toISOString()
+          .split('T')[0] ?? '',
+      homeCity: onboardingData.homeCity,
+      homeLat: onboardingData.homeLat ?? 0,
+      homeLng: onboardingData.homeLng ?? 0,
+      photoUri: onboardingData.photoUri ?? '',
+      interestIds: selectedIds,
+      bio,
+    });
+  };
+
+  return (
+    <View
+      style={[
+        styles.root,
+        {
+          backgroundColor:
+            theme.colors.background,
+        },
+      ]}
+    >
+      <ScrollView
+        contentContainerStyle={
+          styles.scrollContent
+        }
+      >
+        <View style={styles.progress}>
+          <AppText
+            variant="caption"
+            style={{
+              color:
+                theme.colors
+                  .onSurfaceVariant,
+            }}
+          >
+            4 / 4
+          </AppText>
+        </View>
+
+        <Spacer
+          spacing={Spacing.SPACING_PADDING_16}
+        />
+
+        <AppText
+          variant="h2"
+          style={{
+            color:
+              theme.colors.onBackground,
+          }}
+        >
+          {t(
+            Translations.ONBOARDING_STEP_4_TITLE,
+          )}
+        </AppText>
+
+        <Spacer
+          spacing={Spacing.SPACING_PADDING_8}
+        />
+
+        <AppText
+          variant="body"
+          style={{
+            color:
+              theme.colors.onSurfaceVariant,
+          }}
+        >
+          {t(
+            Translations.ONBOARDING_STEP_4_SUBTITLE,
+          )}
+        </AppText>
+
+        <Spacer
+          spacing={Spacing.SPACING_PADDING_16}
+        />
+
+        <AppText
+          variant="caption"
+          style={{
+            color:
+              theme.colors.onSurfaceVariant,
+          }}
+        >
+          {selectedIds.length}/{MAX_INTERESTS}{' '}
+          selected
+        </AppText>
+
+        <Spacer
+          spacing={Spacing.SPACING_PADDING_8}
+        />
+
+        {isLoading ? (
+          <ActivityIndicator
+            style={styles.loader}
+          />
+        ) : (
+          Object.entries(grouped).map(
+            ([category, items]) => (
+              <View
+                key={category}
+                style={styles.categoryBlock}
+              >
+                <AppText
+                  variant="label"
+                  style={{
+                    color:
+                      theme.colors
+                        .onSurfaceVariant,
+                  }}
+                >
+                  {category}
+                </AppText>
+                <View style={styles.chipRow}>
+                  {items.map(interest => (
+                    <InterestChip
+                      key={interest.id}
+                      label={interest.name}
+                      icon={
+                        interest.icon ??
+                        undefined
+                      }
+                      selected={selectedIds.includes(
+                        interest.id,
+                      )}
+                      onPress={() =>
+                        toggleInterest(
+                          interest.id,
+                        )
+                      }
+                    />
+                  ))}
+                </View>
+              </View>
+            ),
+          )
+        )}
+
+        {!canFinish &&
+          selectedIds.length > 0 && (
+            <>
+              <Spacer
+                spacing={
+                  Spacing.SPACING_PADDING_8
+                }
+              />
+              <AppText
+                variant="caption"
+                style={{
+                  color: theme.colors.error,
+                }}
+              >
+                {t(
+                  Translations.ONBOARDING_INTERESTS_MIN,
+                )}
+              </AppText>
+            </>
+          )}
+
+        <Spacer
+          spacing={Spacing.SPACING_PADDING_24}
+        />
+
+        <TextInput
+          label={t(
+            Translations.ONBOARDING_BIO_LABEL,
+          )}
+          placeholder={t(
+            Translations.ONBOARDING_BIO_PLACEHOLDER,
+          )}
+          value={bio}
+          onChangeText={setBio}
+          mode="outlined"
+          multiline
+          numberOfLines={4}
+          style={styles.bioInput}
+        />
+
+        <View style={styles.bottomSection}>
+          {isPending ? (
+            <ActivityIndicator size="large" />
+          ) : (
+            <Button
+              mode="contained"
+              onPress={onFinish}
+              disabled={!canFinish}
+              contentStyle={styles.btnContent}
+              style={styles.pillBtn}
+            >
+              {t(
+                Translations.ONBOARDING_FINISH,
+              )}
+            </Button>
+          )}
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
+
+export default InterestsScreen;
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal:
+      Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_60,
+    paddingBottom:
+      Spacing.SPACING_PADDING_32,
+  },
+  progress: {
+    alignItems: 'flex-end',
+  },
+  categoryBlock: {
+    marginBottom: Spacing.SPACING_PADDING_16,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: Spacing.SPACING_PADDING_8,
+  },
+  loader: {
+    marginVertical:
+      Spacing.SPACING_PADDING_32,
+  },
+  bioInput: {
+    maxHeight: 120,
+  },
+  bottomSection: {
+    marginTop: 'auto',
+    paddingTop: Spacing.SPACING_PADDING_32,
+  },
+  pillBtn: {
+    borderRadius: BorderRadius.pill,
+  },
+  btnContent: {
+    height: 52,
+  },
+});
