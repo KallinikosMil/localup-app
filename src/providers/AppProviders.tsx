@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react';
-import { Provider, useSelector } from 'react-redux';
+import {
+  Provider,
+  useSelector,
+} from 'react-redux';
 import {
   useRouter,
   useSegments,
@@ -19,11 +22,15 @@ import {
   SafeAreaView,
 } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
-import { PaperLight, PaperDark } from '@theme/paper';
+import {
+  PaperLight,
+  PaperDark,
+} from '@theme/paper';
 import { supabase } from '@config/supabase';
 import {
   setInitialized,
   setUser,
+  setOnboardingComplete,
 } from '@features/auth/slices/authSlice';
 import '@config/i18n';
 
@@ -72,21 +79,53 @@ function AppGuard({
 }) {
   const router = useRouter();
   const segments = useSegments();
-  const { user, initialized } = useSelector(
+  const {
+    user,
+    initialized,
+    onboardingComplete,
+  } = useSelector(
     (s: RootState) => s.auth,
   );
 
   useEffect(() => {
     if (!initialized) return;
 
-    const inAuthGroup = segments[0] === 'auth';
+    const inAuthGroup =
+      segments[0] === 'auth';
+    const inOnboarding =
+      segments[0] === 'onboarding';
 
     if (!user && !inAuthGroup) {
       router.replace('/auth/login');
     } else if (user && inAuthGroup) {
-      router.replace('/dashboard');
+      if (onboardingComplete) {
+        router.replace('/(tabs)/discover');
+      } else {
+        router.replace(
+          '/onboarding/name-age',
+        );
+      }
+    } else if (
+      user &&
+      !onboardingComplete &&
+      !inOnboarding
+    ) {
+      router.replace(
+        '/onboarding/name-age',
+      );
+    } else if (
+      user &&
+      onboardingComplete &&
+      inOnboarding
+    ) {
+      router.replace('/(tabs)/discover');
     }
-  }, [initialized, user, segments]);
+  }, [
+    initialized,
+    user,
+    onboardingComplete,
+    segments,
+  ]);
 
   return <>{children}</>;
 }
@@ -99,7 +138,7 @@ export default function AppProviders({
   useEffect(() => {
     supabase.auth
       .getSession()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         const session = data.session;
         const user = session?.user
           ? {
@@ -109,12 +148,31 @@ export default function AppProviders({
             }
           : null;
         store.dispatch(setUser(user));
-        store.dispatch(setInitialized(true));
+
+        if (session?.user) {
+          const { data: profile } =
+            await supabase
+              .from('profiles')
+              .select('onboarding_complete')
+              .eq('user_id', session.user.id)
+              .single();
+
+          store.dispatch(
+            setOnboardingComplete(
+              profile?.onboarding_complete ??
+                false,
+            ),
+          );
+        }
+
+        store.dispatch(
+          setInitialized(true),
+        );
       });
 
     const { data: sub } =
       supabase.auth.onAuthStateChange(
-        (_event, session) => {
+        async (_event, session) => {
           const user = session?.user
             ? {
                 uid: session.user.id,
@@ -123,6 +181,28 @@ export default function AppProviders({
               }
             : null;
           store.dispatch(setUser(user));
+
+          if (session?.user) {
+            const { data: profile } =
+              await supabase
+                .from('profiles')
+                .select(
+                  'onboarding_complete',
+                )
+                .eq('user_id', session.user.id)
+                .single();
+
+            store.dispatch(
+              setOnboardingComplete(
+                profile?.onboarding_complete ??
+                  false,
+              ),
+            );
+          } else {
+            store.dispatch(
+              setOnboardingComplete(false),
+            );
+          }
         },
       );
 
@@ -132,11 +212,15 @@ export default function AppProviders({
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider
+      client={queryClient}
+    >
       <Provider store={store}>
         <ThemeModeProvider>
           <Shell>
-            <AppGuard>{children}</AppGuard>
+            <AppGuard>
+              {children}
+            </AppGuard>
           </Shell>
         </ThemeModeProvider>
       </Provider>

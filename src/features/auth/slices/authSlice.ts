@@ -9,11 +9,13 @@ export interface AuthState {
     email: string | null;
   } | null;
   initialized: boolean;
+  onboardingComplete: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
   initialized: false,
+  onboardingComplete: false,
 };
 
 const authSlice = createSlice({
@@ -35,9 +37,19 @@ const authSlice = createSlice({
     ) => {
       state.user = action.payload;
     },
+    setOnboardingComplete: (
+      state,
+      action: PayloadAction<boolean>,
+    ) => {
+      state.onboardingComplete =
+        action.payload;
+    },
   },
 });
 
-export const { setInitialized, setUser } =
-  authSlice.actions;
+export const {
+  setInitialized,
+  setUser,
+  setOnboardingComplete,
+} = authSlice.actions;
 export default authSlice.reducer;
