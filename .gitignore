@@ -49,3 +49,6 @@ tsconfig.json
 
 # Local assistant notes
 agents.md
+.mcp.json
+CLAUDE.md
+SUPABASE_SETUP.md

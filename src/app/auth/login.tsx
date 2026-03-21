@@ -1,57 +1,50 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import {
   ActivityIndicator,
   Button,
   Text,
+  IconButton,
+  Divider,
 } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
+import AppText from '@shared/components/AppText';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
-import type { RootState, AppDispatch } from '@store';
-import {
-  resetState,
-  loginUser,
-} from '@features/auth/slices/authSlice';
+import { useLogin } from '@features/auth/hooks/useAuth';
 import useModal from '@shared/hooks/useModal';
 
-import Container from '@shared/components/Container';
 import Spacer from '@shared/components/Spacer';
-import BottomButton from '@shared/components/BottomButton';
 import InputField from '@shared/components/InputField';
 import CustomModal from '@shared/components/CustomModal';
-import { RequestStatus } from '@shared/types/RequestStatus';
 
 import { Spacing } from '@theme/constants/Spacing';
 import { Translations } from '@features/auth/i18n/translationKeys';
 import { useThemeMode } from '@theme/ThemeModeProvider';
-import { IconButton } from 'react-native-paper';
 
 type LoginFormData = {
   email: string;
   password: string;
 };
 
+const PILL_RADIUS = 28;
+
 const LoginScreen = () => {
-  const dispatch = useDispatch<AppDispatch>();
   const { t } = useTranslation();
   const theme = useTheme();
-  const { mode, setMode, resolvedMode } =
-    useThemeMode();
-  const { status, error } = useSelector(
-    (root: RootState) => root.auth,
-  );
-  const { modalProps, openModal, closeModal } = useModal();
+  const { setMode, resolvedMode } = useThemeMode();
+  const login = useLogin();
+  const { modalProps, openModal, closeModal } =
+    useModal();
   const [modalMessage, setModalMessage] =
-    useState<string>('');
-  const lastErrorRef = useRef<string | null>(null);
+    useState('');
 
   const toggleTheme = () => {
     setMode(prev =>
@@ -70,38 +63,60 @@ const LoginScreen = () => {
     formState: { isValid },
   } = form;
 
-  useEffect(() => {
-    if (status === RequestStatus.ERROR && error) {
-      if (error !== lastErrorRef.current) {
-        setModalMessage(error);
-        openModal();
-      }
-      lastErrorRef.current = error;
-    } else {
-      lastErrorRef.current = null;
-      closeModal();
-    }
-  }, [status, error, openModal, closeModal]);
+  const onSubmit = handleSubmit(
+    ({ email, password }) => {
+      login.mutate(
+        { email, password },
+        {
+          onError: err => {
+            setModalMessage(
+              err instanceof Error
+                ? err.message
+                : 'Login failed',
+            );
+            openModal();
+          },
+        },
+      );
+    },
+  );
 
-  const handleDismiss = useCallback(() => {
-    dispatch(resetState());
+  const handleDismiss = () => {
+    login.reset();
     closeModal();
-  }, [closeModal, dispatch]);
-
-  const onSubmit = handleSubmit(({ email, password }) => {
-    dispatch(loginUser({ email: email.trim(), password }));
-  });
-
-  const isLoading = status === RequestStatus.LOADING;
+  };
 
   return (
     <>
-      <Container>
-        {isLoading ? (
-          <ActivityIndicator animating />
+      <KeyboardAvoidingView
+        style={[
+          styles.root,
+          {
+            backgroundColor:
+              theme.colors.background,
+          },
+        ]}
+        behavior={
+          Platform.OS === 'ios'
+            ? 'padding'
+            : 'height'
+        }
+      >
+        {login.isPending ? (
+          <View style={styles.loaderWrap}>
+            <ActivityIndicator
+              animating
+              size="large"
+            />
+          </View>
         ) : (
-          <>
-            <View style={styles.header}>
+          <ScrollView
+            contentContainerStyle={
+              styles.scrollContent
+            }
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.themeRow}>
               <IconButton
                 icon={
                   resolvedMode === 'dark'
@@ -110,28 +125,67 @@ const LoginScreen = () => {
                 }
                 size={24}
                 onPress={toggleTheme}
-                style={styles.themeButton}
               />
             </View>
-            <View style={styles.logoWrap}>
-              <Text variant="titleLarge">
+
+            <View style={styles.heroSection}>
+              <AppText
+                variant="h1"
+                style={{
+                  color: theme.colors.primary,
+                }}
+              >
                 {t(Translations.AUTH_HEADER_TEXT)}
-              </Text>
+              </AppText>
+              <Spacer
+                spacing={Spacing.SPACING_PADDING_8}
+              />
+              <AppText
+                variant="h3"
+                style={{
+                  color:
+                    theme.colors.onBackground,
+                }}
+              >
+                {t(Translations.AUTH_WELCOME_TEXT)}
+              </AppText>
+              <Spacer
+                spacing={Spacing.SPACING_PADDING_8}
+              />
+              <AppText
+                variant="body"
+                style={{
+                  color:
+                    theme.colors.onSurfaceVariant,
+                  textAlign: 'center',
+                }}
+              >
+                {t(Translations.AUTH_SUBTITLE_TEXT)}
+              </AppText>
             </View>
-            <Spacer spacing={Spacing.SPACING_PADDING_8} />
-            <View style={styles.form}>
+
+            <Spacer
+              spacing={Spacing.SPACING_PADDING_32}
+            />
+
+            <View style={styles.formSection}>
               <FormProvider {...form}>
                 <InputField
                   name="email"
-                  label={t(Translations.AUTH_EMAIL_LABEL)}
+                  label={t(
+                    Translations.AUTH_EMAIL_LABEL,
+                  )}
                   rules={{
                     required: {
                       value: true,
-                      message: 'Please enter your email',
+                      message:
+                        'Please enter your email',
                     },
                     pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: 'Please enter a valid email',
+                      value:
+                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message:
+                        'Please enter a valid email',
                     },
                   }}
                   dense
@@ -150,7 +204,8 @@ const LoginScreen = () => {
                   rules={{
                     required: {
                       value: true,
-                      message: 'Please enter your password',
+                      message:
+                        'Please enter your password',
                     },
                   }}
                   dense
@@ -158,24 +213,126 @@ const LoginScreen = () => {
                   returnKeyType="done"
                 />
               </FormProvider>
+
+              <View style={styles.forgotRow}>
+                <Button
+                  mode="text"
+                  compact
+                  labelStyle={styles.forgotLabel}
+                  onPress={() => {}}
+                >
+                  {t(
+                    Translations.AUTH_FORGOT_PASSWORD,
+                  )}
+                </Button>
+              </View>
+
+              <Spacer
+                spacing={Spacing.SPACING_PADDING_24}
+              />
+
+              <Button
+                mode="contained"
+                onPress={onSubmit}
+                disabled={
+                  login.isPending || !isValid
+                }
+                contentStyle={styles.btnContent}
+                style={styles.pillBtn}
+                labelStyle={styles.loginBtnLabel}
+              >
+                {t(Translations.AUTH_LOGIN_BUTTON)}
+              </Button>
+
+              <Spacer
+                spacing={Spacing.SPACING_PADDING_24}
+              />
+
+              <View style={styles.dividerRow}>
+                <Divider
+                  style={[
+                    styles.dividerLine,
+                    {
+                      backgroundColor:
+                        theme.colors.outlineVariant,
+                    },
+                  ]}
+                />
+                <AppText
+                  variant="caption"
+                  style={{
+                    color:
+                      theme.colors.onSurfaceVariant,
+                    paddingHorizontal: 16,
+                  }}
+                >
+                  {t(Translations.AUTH_OR_DIVIDER)}
+                </AppText>
+                <Divider
+                  style={[
+                    styles.dividerLine,
+                    {
+                      backgroundColor:
+                        theme.colors.outlineVariant,
+                    },
+                  ]}
+                />
+              </View>
+
+              <Spacer
+                spacing={Spacing.SPACING_PADDING_24}
+              />
+
+              <Button
+                mode="outlined"
+                icon="google"
+                onPress={() => {}}
+                contentStyle={styles.btnContent}
+                style={[
+                  styles.pillBtn,
+                  {
+                    borderColor:
+                      theme.colors.outline,
+                  },
+                ]}
+                textColor={
+                  theme.colors.onBackground
+                }
+              >
+                {t(
+                  Translations.AUTH_GOOGLE_SIGN_IN,
+                )}
+              </Button>
             </View>
-            <BottomButton
-              label={t(Translations.AUTH_LOGIN_BUTTON)}
-              onPress={onSubmit}
-              disabled={isLoading || !isValid}
-            />
-            <Spacer spacing={Spacing.SPACING_PADDING_8} />
-            <Button
-              mode="outlined"
-              style={{ width: '100%' }}
-              onPress={() => router.push('/auth/register')}
-              disabled={isLoading}
-            >
-              Register
-            </Button>
-          </>
+
+            <View style={styles.registerRow}>
+              <AppText
+                variant="bodySmall"
+                style={{
+                  color:
+                    theme.colors.onSurfaceVariant,
+                }}
+              >
+                {t(Translations.AUTH_NO_ACCOUNT)}
+              </AppText>
+              <Button
+                mode="text"
+                compact
+                onPress={() =>
+                  router.push('/auth/register')
+                }
+                disabled={login.isPending}
+                labelStyle={{
+                  color: theme.colors.primary,
+                }}
+              >
+                {t(Translations.AUTH_REGISTER)}
+              </Button>
+            </View>
+          </ScrollView>
         )}
-      </Container>
+      </KeyboardAvoidingView>
+
       <CustomModal
         {...modalProps}
         onDismiss={handleDismiss}
@@ -188,11 +345,12 @@ const LoginScreen = () => {
             {modalMessage ||
               'Something went wrong. Please try again.'}
           </Text>
-          <Spacer spacing={Spacing.SPACING_PADDING_16} />
+          <Spacer
+            spacing={Spacing.SPACING_PADDING_16}
+          />
           <Button
             mode="contained"
             onPress={handleDismiss}
-            style={styles.modalButton}
             buttonColor={theme.colors.primary}
             textColor={theme.colors.onPrimary}
           >
@@ -207,22 +365,69 @@ const LoginScreen = () => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  header: {
+  root: {
+    flex: 1,
+  },
+  loaderWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+  },
+  themeRow: {
     width: '100%',
     alignItems: 'flex-end',
-    marginBottom: Spacing.SPACING_PADDING_8,
+    paddingTop: 8,
   },
-  themeButton: {
-    margin: 0,
+  heroSection: {
+    alignItems: 'center',
+    marginTop: 24,
   },
-  logoWrap: { alignItems: 'center' },
-  form: { width: '100%', maxWidth: 360 },
+  formSection: {
+    width: '100%',
+    maxWidth: 360,
+    alignSelf: 'center',
+  },
+  forgotRow: {
+    alignItems: 'flex-end',
+    marginTop: 4,
+  },
+  forgotLabel: {
+    fontSize: 13,
+  },
+  pillBtn: {
+    borderRadius: PILL_RADIUS,
+  },
+  btnContent: {
+    height: 52,
+  },
+  loginBtnLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  registerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
+    paddingTop: 32,
+  },
   modalContent: {
     alignItems: 'center',
     padding: 24,
     borderRadius: 16,
-  },
-  modalButton: {
-    alignSelf: 'center',
   },
 });

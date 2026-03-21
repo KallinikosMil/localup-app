@@ -1,26 +1,63 @@
 import React, { useEffect } from 'react';
 import { Provider, useSelector } from 'react-redux';
-import { useRouter, useSegments } from 'expo-router';
+import {
+  useRouter,
+  useSegments,
+} from 'expo-router';
+import {
+  QueryClientProvider,
+} from '@tanstack/react-query';
 import { store, RootState } from '@store';
-import { ThemeModeProvider, useThemeMode } from '@theme/ThemeModeProvider';
+import { queryClient } from '@config/queryClient';
+import {
+  ThemeModeProvider,
+  useThemeMode,
+} from '@theme/ThemeModeProvider';
 import { PaperProvider } from 'react-native-paper';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+} from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
 import { PaperLight, PaperDark } from '@theme/paper';
 import { supabase } from '@config/supabase';
-import { setInitialized, setUser } from '@features/auth/slices/authSlice';
+import {
+  setInitialized,
+  setUser,
+} from '@features/auth/slices/authSlice';
 import '@config/i18n';
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { resolvedMode } = useThemeMode();
-  const paper = resolvedMode === 'dark' ? PaperDark : PaperLight;
-  const barStyle = resolvedMode === 'dark' ? 'light-content' : 'dark-content';
+  const paper =
+    resolvedMode === 'dark'
+      ? PaperDark
+      : PaperLight;
+  const barStyle =
+    resolvedMode === 'dark'
+      ? 'light-content'
+      : 'dark-content';
 
   return (
     <PaperProvider theme={paper}>
       <SafeAreaProvider>
-        <StatusBar barStyle={barStyle} backgroundColor={paper.colors.background} />
-        <SafeAreaView style={{ flex: 1, backgroundColor: paper.colors.background }}>
+        <StatusBar
+          barStyle={barStyle}
+          backgroundColor={
+            paper.colors.background
+          }
+        />
+        <SafeAreaView
+          style={{
+            flex: 1,
+            backgroundColor:
+              paper.colors.background,
+          }}
+        >
           {children}
         </SafeAreaView>
       </SafeAreaProvider>
@@ -28,10 +65,16 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AppGuard({ children }: { children: React.ReactNode }) {
+function AppGuard({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const segments = useSegments();
-  const { user, initialized } = useSelector((s: RootState) => s.auth);
+  const { user, initialized } = useSelector(
+    (s: RootState) => s.auth,
+  );
 
   useEffect(() => {
     if (!initialized) return;
@@ -48,25 +91,40 @@ function AppGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export default function AppProviders({ children }: { children: React.ReactNode }) {
+export default function AppProviders({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   useEffect(() => {
-    // ✅ Ανάγνωση session
-    supabase.auth.getSession().then(({ data }) => {
-      const session = data.session;
-      const user = session?.user
-        ? { uid: session.user.id, email: session.user.email ?? null }
-        : null;
-      store.dispatch(setUser(user));
-      store.dispatch(setInitialized(true));
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        const session = data.session;
+        const user = session?.user
+          ? {
+              uid: session.user.id,
+              email:
+                session.user.email ?? null,
+            }
+          : null;
+        store.dispatch(setUser(user));
+        store.dispatch(setInitialized(true));
+      });
 
-    // ✅ Συνδρομή σε login/logout changes
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      const user = session?.user
-        ? { uid: session.user.id, email: session.user.email ?? null }
-        : null;
-      store.dispatch(setUser(user));
-    });
+    const { data: sub } =
+      supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          const user = session?.user
+            ? {
+                uid: session.user.id,
+                email:
+                  session.user.email ?? null,
+              }
+            : null;
+          store.dispatch(setUser(user));
+        },
+      );
 
     return () => {
       sub?.subscription.unsubscribe();
@@ -74,12 +132,14 @@ export default function AppProviders({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <Provider store={store}>
-      <ThemeModeProvider>
-        <Shell>
-          <AppGuard>{children}</AppGuard>
-        </Shell>
-      </ThemeModeProvider>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <ThemeModeProvider>
+          <Shell>
+            <AppGuard>{children}</AppGuard>
+          </Shell>
+        </ThemeModeProvider>
+      </Provider>
+    </QueryClientProvider>
   );
 }
