@@ -26,6 +26,7 @@ import InputField from '@shared/components/InputField';
 import CustomModal from '@shared/components/CustomModal';
 
 import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/auth/i18n/translationKeys';
 import { useThemeMode } from '@theme/ThemeModeProvider';
 
@@ -33,8 +34,6 @@ type LoginFormData = {
   email: string;
   password: string;
 };
-
-const PILL_RADIUS = 28;
 
 const LoginScreen = () => {
   const { t } = useTranslation();
@@ -400,7 +399,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   pillBtn: {
-    borderRadius: PILL_RADIUS,
+    borderRadius: BorderRadius.pill,
   },
   btnContent: {
     height: 52,
