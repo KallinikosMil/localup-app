@@ -1,0 +1,36 @@
+export default {
+  onboarding: {
+    step1Title: 'About You',
+    step1Subtitle:
+      "Let's start with the basics",
+    nameLabel: 'Display Name',
+    nameRequired:
+      'Please enter your name',
+    dobLabel: 'Date of Birth',
+    dobRequired:
+      'Please enter your date of birth',
+    next: 'Next',
+    step2Title: 'Where Do You Live?',
+    step2Subtitle:
+      'This helps us connect you with travelers or locals',
+    cityLabel: 'Home City',
+    cityRequired:
+      'Please select your home city',
+    cityExplanation:
+      'We use this to know if you are a local or a traveler in any given location.',
+    step3Title: 'Add a Photo',
+    step3Subtitle:
+      'Help others recognize you',
+    uploadPhoto: 'Upload Photo',
+    changePhoto: 'Change Photo',
+    step4Title: 'Your Interests',
+    step4Subtitle:
+      'Pick at least 3 interests to help us find your match',
+    bioLabel: 'Bio',
+    bioPlaceholder:
+      'Tell others a bit about yourself...',
+    interestsMin:
+      'Select at least 3 interests',
+    finish: 'Get Started',
+  },
+};
