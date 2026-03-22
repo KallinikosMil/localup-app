@@ -50,11 +50,16 @@ const InputField = <T extends FieldValues> ({
         {...rest}
       />
       {!!error?.message ? (
-        <HelperText type="error" visible>
+        <HelperText
+          type="error"
+          visible
+          padding="none"
+        >
           {error.message}
         </HelperText>
       ) : null}
     </>
   );
-};  
+};
+
 export default InputField;

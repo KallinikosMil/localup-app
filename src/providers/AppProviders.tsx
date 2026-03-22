@@ -94,6 +94,10 @@ function AppGuard({
       segments[0] === 'auth';
     const inOnboarding =
       segments[0] === 'onboarding';
+    const inDev =
+      __DEV__ && segments[0] === 'dev';
+
+    if (inDev) return;
 
     if (!user && !inAuthGroup) {
       router.replace('/auth/login');

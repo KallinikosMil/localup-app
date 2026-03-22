@@ -5,7 +5,6 @@ import {
   ScrollView,
 } from 'react-native';
 import {
-  Button,
   TextInput,
   ActivityIndicator,
   useTheme,
@@ -13,15 +12,26 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
-import AppText from '@shared/components/AppText';
-import Spacer from '@shared/components/Spacer';
-import InterestChip from '@shared/components/InterestChip';
-import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
-import { useCompleteOnboarding } from '@features/onboarding/hooks/useOnboarding';
-import { Translations } from '@features/onboarding/i18n/translationKeys';
-import { supabase } from '@config/supabase';
-import { Spacing } from '@theme/constants/Spacing';
-import { BorderRadius } from '@theme/constants/BorderRadius';
+import AppText from
+  '@shared/components/AppText';
+import AppButton from
+  '@shared/components/AppButton';
+import Spacer from
+  '@shared/components/Spacer';
+import InterestChip from
+  '@shared/components/InterestChip';
+import OnboardingProgress from
+  '@shared/components/OnboardingProgress';
+import { useOnboardingData } from
+  '@features/onboarding/context/OnboardingContext';
+import { useCompleteOnboarding } from
+  '@features/onboarding/hooks/useOnboarding';
+import { Translations } from
+  '@features/onboarding/i18n/translationKeys';
+import { supabase } from
+  '@config/supabase';
+import { Spacing } from
+  '@theme/constants/Spacing';
 
 const MIN_INTERESTS = 3;
 const MAX_INTERESTS = 5;
@@ -40,9 +50,10 @@ const InterestsScreen = () => {
   const { data: onboardingData, update } =
     useOnboardingData();
 
-  const [selectedIds, setSelectedIds] = useState<
-    string[]
-  >(onboardingData.interestIds);
+  const [selectedIds, setSelectedIds] =
+    useState<string[]>(
+      onboardingData.interestIds,
+    );
   const [bio, setBio] = useState(
     onboardingData.bio,
   );
@@ -50,18 +61,21 @@ const InterestsScreen = () => {
   const { mutate, isPending } =
     useCompleteOnboarding();
 
-  const { data: interests = [], isLoading } =
-    useQuery({
-      queryKey: ['interests'],
-      queryFn: async () => {
-        const { data, error } = await supabase
+  const {
+    data: interests = [],
+    isLoading,
+  } = useQuery({
+    queryKey: ['interests'],
+    queryFn: async () => {
+      const { data, error } =
+        await supabase
           .from('interests')
           .select('*')
           .eq('is_active', true);
-        if (error) throw error;
-        return data as Interest[];
-      },
-    });
+      if (error) throw error;
+      return data as Interest[];
+    },
+  });
 
   const grouped = interests.reduce<
     Record<string, Interest[]>
@@ -75,9 +89,13 @@ const InterestsScreen = () => {
   const toggleInterest = (id: string) => {
     setSelectedIds(prev => {
       if (prev.includes(id)) {
-        return prev.filter(i => i !== id);
+        return prev.filter(
+          i => i !== id,
+        );
       }
-      if (prev.length >= MAX_INTERESTS) {
+      if (
+        prev.length >= MAX_INTERESTS
+      ) {
         return prev;
       }
       return [...prev, id];
@@ -88,7 +106,10 @@ const InterestsScreen = () => {
     selectedIds.length >= MIN_INTERESTS;
 
   const onFinish = () => {
-    update({ interestIds: selectedIds, bio });
+    update({
+      interestIds: selectedIds,
+      bio,
+    });
 
     mutate({
       displayName:
@@ -98,9 +119,12 @@ const InterestsScreen = () => {
           ?.toISOString()
           .split('T')[0] ?? '',
       homeCity: onboardingData.homeCity,
-      homeLat: onboardingData.homeLat ?? 0,
-      homeLng: onboardingData.homeLng ?? 0,
-      photoUri: onboardingData.photoUri ?? '',
+      homeLat:
+        onboardingData.homeLat ?? 0,
+      homeLng:
+        onboardingData.homeLng ?? 0,
+      photoUri:
+        onboardingData.photoUri ?? '',
       interestIds: selectedIds,
       bio,
     });
@@ -121,34 +145,13 @@ const InterestsScreen = () => {
           styles.scrollContent
         }
       >
-        <View style={styles.progress}>
-          <AppText
-            variant="caption"
-            style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
-            }}
-          >
-            4 / 4
-          </AppText>
-        </View>
-
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
-        />
-
-        <AppText
-          variant="h2"
-          style={{
-            color:
-              theme.colors.onBackground,
-          }}
-        >
-          {t(
+        <OnboardingProgress
+          step={4}
+          totalSteps={4}
+          title={t(
             Translations.ONBOARDING_STEP_4_TITLE,
           )}
-        </AppText>
+        />
 
         <Spacer
           spacing={Spacing.SPACING_PADDING_8}
@@ -158,7 +161,8 @@ const InterestsScreen = () => {
           variant="body"
           style={{
             color:
-              theme.colors.onSurfaceVariant,
+              theme.colors
+                .onSurfaceVariant,
           }}
         >
           {t(
@@ -167,18 +171,21 @@ const InterestsScreen = () => {
         </AppText>
 
         <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
+          spacing={
+            Spacing.SPACING_PADDING_16
+          }
         />
 
         <AppText
           variant="caption"
           style={{
             color:
-              theme.colors.onSurfaceVariant,
+              theme.colors
+                .onSurfaceVariant,
           }}
         >
-          {selectedIds.length}/{MAX_INTERESTS}{' '}
-          selected
+          {selectedIds.length}/
+          {MAX_INTERESTS} selected
         </AppText>
 
         <Spacer
@@ -194,7 +201,9 @@ const InterestsScreen = () => {
             ([category, items]) => (
               <View
                 key={category}
-                style={styles.categoryBlock}
+                style={
+                  styles.categoryBlock
+                }
               >
                 <AppText
                   variant="label"
@@ -206,25 +215,33 @@ const InterestsScreen = () => {
                 >
                   {category}
                 </AppText>
-                <View style={styles.chipRow}>
-                  {items.map(interest => (
-                    <InterestChip
-                      key={interest.id}
-                      label={interest.name}
-                      icon={
-                        interest.icon ??
-                        undefined
-                      }
-                      selected={selectedIds.includes(
-                        interest.id,
-                      )}
-                      onPress={() =>
-                        toggleInterest(
+                <View
+                  style={styles.chipRow}
+                >
+                  {items.map(
+                    interest => (
+                      <InterestChip
+                        key={
+                          interest.id
+                        }
+                        label={
+                          interest.name
+                        }
+                        icon={
+                          interest.icon ??
+                          undefined
+                        }
+                        selected={selectedIds.includes(
                           interest.id,
-                        )
-                      }
-                    />
-                  ))}
+                        )}
+                        onPress={() =>
+                          toggleInterest(
+                            interest.id,
+                          )
+                        }
+                      />
+                    ),
+                  )}
                 </View>
               </View>
             ),
@@ -242,7 +259,8 @@ const InterestsScreen = () => {
               <AppText
                 variant="caption"
                 style={{
-                  color: theme.colors.error,
+                  color:
+                    theme.colors.error,
                 }}
               >
                 {t(
@@ -253,7 +271,9 @@ const InterestsScreen = () => {
           )}
 
         <Spacer
-          spacing={Spacing.SPACING_PADDING_24}
+          spacing={
+            Spacing.SPACING_PADDING_24
+          }
         />
 
         <TextInput
@@ -273,19 +293,19 @@ const InterestsScreen = () => {
 
         <View style={styles.bottomSection}>
           {isPending ? (
-            <ActivityIndicator size="large" />
+            <ActivityIndicator
+              size="large"
+            />
           ) : (
-            <Button
-              mode="contained"
+            <AppButton
+              variant="primary"
               onPress={onFinish}
               disabled={!canFinish}
-              contentStyle={styles.btnContent}
-              style={styles.pillBtn}
             >
               {t(
                 Translations.ONBOARDING_FINISH,
               )}
-            </Button>
+            </AppButton>
           )}
         </View>
       </ScrollView>
@@ -303,15 +323,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal:
       Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_60,
+    paddingTop:
+      Spacing.SPACING_PADDING_24,
     paddingBottom:
       Spacing.SPACING_PADDING_32,
   },
-  progress: {
-    alignItems: 'flex-end',
-  },
   categoryBlock: {
-    marginBottom: Spacing.SPACING_PADDING_16,
+    marginBottom:
+      Spacing.SPACING_PADDING_16,
   },
   chipRow: {
     flexDirection: 'row',
@@ -327,12 +346,7 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     marginTop: 'auto',
-    paddingTop: Spacing.SPACING_PADDING_32,
-  },
-  pillBtn: {
-    borderRadius: BorderRadius.pill,
-  },
-  btnContent: {
-    height: 52,
+    paddingTop:
+      Spacing.SPACING_PADDING_32,
   },
 });

@@ -6,52 +6,62 @@ import {
   Image,
   Pressable,
 } from 'react-native';
-import {
-  Button,
-  useTheme,
-} from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import AppText from '@shared/components/AppText';
-import Spacer from '@shared/components/Spacer';
-import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
-import { Translations } from '@features/onboarding/i18n/translationKeys';
-import { Spacing } from '@theme/constants/Spacing';
-import { BorderRadius } from '@theme/constants/BorderRadius';
+import AppText from
+  '@shared/components/AppText';
+import AppButton from
+  '@shared/components/AppButton';
+import Spacer from
+  '@shared/components/Spacer';
+import OnboardingProgress from
+  '@shared/components/OnboardingProgress';
+import { useOnboardingData } from
+  '@features/onboarding/context/OnboardingContext';
+import { Translations } from
+  '@features/onboarding/i18n/translationKeys';
+import { Spacing } from
+  '@theme/constants/Spacing';
 
 const PHOTO_SIZE = 200;
 
 const PhotoScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { data, update } = useOnboardingData();
+  const { data, update } =
+    useOnboardingData();
 
-  const pickImage = useCallback(async () => {
-    const result =
-      await ImagePicker.launchImageLibraryAsync(
-        {
-          mediaTypes: 'images',
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.8,
-        },
-      );
+  const pickImage =
+    useCallback(async () => {
+      const result =
+        await ImagePicker.launchImageLibraryAsync(
+          {
+            mediaTypes: 'images',
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+          },
+        );
 
-    if (
-      !result.canceled &&
-      result.assets.length > 0
-    ) {
-      update({
-        photoUri: result.assets[0].uri,
-      });
-    }
-  }, [update]);
+      if (
+        !result.canceled &&
+        result.assets.length > 0
+      ) {
+        update({
+          photoUri:
+            result.assets[0].uri,
+        });
+      }
+    }, [update]);
 
   const onNext = () => {
-    router.push('/onboarding/interests');
+    router.push(
+      '/onboarding/interests',
+    );
   };
 
   return (
@@ -69,34 +79,13 @@ const PhotoScreen = () => {
           styles.scrollContent
         }
       >
-        <View style={styles.progress}>
-          <AppText
-            variant="caption"
-            style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
-            }}
-          >
-            3 / 4
-          </AppText>
-        </View>
-
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
-        />
-
-        <AppText
-          variant="h2"
-          style={{
-            color:
-              theme.colors.onBackground,
-          }}
-        >
-          {t(
+        <OnboardingProgress
+          step={3}
+          totalSteps={4}
+          title={t(
             Translations.ONBOARDING_STEP_3_TITLE,
           )}
-        </AppText>
+        />
 
         <Spacer
           spacing={Spacing.SPACING_PADDING_8}
@@ -106,7 +95,8 @@ const PhotoScreen = () => {
           variant="body"
           style={{
             color:
-              theme.colors.onSurfaceVariant,
+              theme.colors
+                .onSurfaceVariant,
           }}
         >
           {t(
@@ -115,13 +105,19 @@ const PhotoScreen = () => {
         </AppText>
 
         <Spacer
-          spacing={Spacing.SPACING_PADDING_32}
+          spacing={
+            Spacing.SPACING_PADDING_32
+          }
         />
 
-        <View style={styles.photoContainer}>
+        <View
+          style={styles.photoContainer}
+        >
           {data.photoUri ? (
             <Image
-              source={{ uri: data.photoUri }}
+              source={{
+                uri: data.photoUri,
+              }}
               style={styles.photoPreview}
             />
           ) : (
@@ -174,27 +170,27 @@ const PhotoScreen = () => {
                 Spacing.SPACING_PADDING_16
               }
             />
-            <Button
-              mode="text"
+            <AppButton
+              variant="link"
               onPress={pickImage}
             >
               {t(
                 Translations.ONBOARDING_CHANGE_PHOTO,
               )}
-            </Button>
+            </AppButton>
           </>
         )}
 
         <View style={styles.bottomSection}>
-          <Button
-            mode="contained"
+          <AppButton
+            variant="primary"
             onPress={onNext}
             disabled={!data.photoUri}
-            contentStyle={styles.btnContent}
-            style={styles.pillBtn}
           >
-            {t(Translations.ONBOARDING_NEXT)}
-          </Button>
+            {t(
+              Translations.ONBOARDING_NEXT,
+            )}
+          </AppButton>
         </View>
       </ScrollView>
     </View>
@@ -211,12 +207,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal:
       Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_60,
+    paddingTop:
+      Spacing.SPACING_PADDING_24,
     paddingBottom:
       Spacing.SPACING_PADDING_32,
-  },
-  progress: {
-    alignItems: 'flex-end',
   },
   photoContainer: {
     alignItems: 'center',
@@ -237,12 +231,7 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     marginTop: 'auto',
-    paddingTop: Spacing.SPACING_PADDING_32,
-  },
-  pillBtn: {
-    borderRadius: BorderRadius.pill,
-  },
-  btnContent: {
-    height: 52,
+    paddingTop:
+      Spacing.SPACING_PADDING_32,
   },
 });

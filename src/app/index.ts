@@ -1,4 +1,8 @@
 import { Redirect } from 'expo-router';
 
 export default () =>
-  Redirect({ href: '/(tabs)/discover' });
+  Redirect({
+    href: __DEV__
+      ? '/dev'
+      : '/(tabs)/discover',
+  });

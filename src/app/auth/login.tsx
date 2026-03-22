@@ -2,33 +2,44 @@ import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from 'react-native';
 import {
   ActivityIndicator,
-  Button,
   Text,
   IconButton,
   Divider,
 } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
-import AppText from '@shared/components/AppText';
-import { FormProvider, useForm } from 'react-hook-form';
+import {
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import AppText from
+  '@shared/components/AppText';
+import AppButton from
+  '@shared/components/AppButton';
+import {
+  FormProvider,
+  useForm,
+} from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { useLogin } from '@features/auth/hooks/useAuth';
+import { useLogin } from
+  '@features/auth/hooks/useAuth';
 import useModal from '@shared/hooks/useModal';
 
 import Spacer from '@shared/components/Spacer';
-import InputField from '@shared/components/InputField';
-import CustomModal from '@shared/components/CustomModal';
+import InputField from
+  '@shared/components/InputField';
+import CustomModal from
+  '@shared/components/CustomModal';
 
-import { Spacing } from '@theme/constants/Spacing';
-import { BorderRadius } from '@theme/constants/BorderRadius';
-import { Translations } from '@features/auth/i18n/translationKeys';
-import { useThemeMode } from '@theme/ThemeModeProvider';
+import { Spacing } from
+  '@theme/constants/Spacing';
+import { Translations } from
+  '@features/auth/i18n/translationKeys';
+import { useThemeMode } from
+  '@theme/ThemeModeProvider';
 
 type LoginFormData = {
   email: string;
@@ -38,7 +49,9 @@ type LoginFormData = {
 const LoginScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { setMode, resolvedMode } = useThemeMode();
+  const insets = useSafeAreaInsets();
+  const { setMode, resolvedMode } =
+    useThemeMode();
   const login = useLogin();
   const { modalProps, openModal, closeModal } =
     useModal();
@@ -52,9 +65,11 @@ const LoginScreen = () => {
   };
 
   const form = useForm<LoginFormData>({
-    defaultValues: { email: '', password: '' },
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    mode: 'onTouched',
   });
 
   const {
@@ -71,7 +86,9 @@ const LoginScreen = () => {
             setModalMessage(
               err instanceof Error
                 ? err.message
-                : 'Login failed',
+                : t(
+                    Translations.AUTH_ERROR_FALLBACK,
+                  ),
             );
             openModal();
           },
@@ -85,252 +102,284 @@ const LoginScreen = () => {
     closeModal();
   };
 
-  return (
-    <>
-      <KeyboardAvoidingView
+  const goToRegister = () => {
+    router.push('/auth/register');
+  };
+
+  if (login.isPending) {
+    return (
+      <View
         style={[
-          styles.root,
+          styles.loaderWrap,
           {
             backgroundColor:
               theme.colors.background,
           },
         ]}
-        behavior={
-          Platform.OS === 'ios'
-            ? 'padding'
-            : 'height'
-        }
       >
-        {login.isPending ? (
-          <View style={styles.loaderWrap}>
-            <ActivityIndicator
-              animating
-              size="large"
+        <ActivityIndicator
+          animating
+          size="large"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <View
+        style={[
+          styles.root,
+          {
+            backgroundColor:
+              theme.colors.background,
+            paddingBottom: insets.bottom,
+          },
+        ]}
+      >
+        <ScrollView
+          contentContainerStyle={
+            styles.scrollContent
+          }
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.themeRow}>
+            <IconButton
+              icon={
+                resolvedMode === 'dark'
+                  ? 'white-balance-sunny'
+                  : 'moon-waning-crescent'
+              }
+              size={24}
+              onPress={toggleTheme}
             />
           </View>
-        ) : (
-          <ScrollView
-            contentContainerStyle={
-              styles.scrollContent
-            }
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.themeRow}>
-              <IconButton
-                icon={
-                  resolvedMode === 'dark'
-                    ? 'white-balance-sunny'
-                    : 'moon-waning-crescent'
-                }
-                size={24}
-                onPress={toggleTheme}
-              />
-            </View>
 
-            <View style={styles.heroSection}>
-              <AppText
-                variant="h1"
-                style={{
-                  color: theme.colors.primary,
-                }}
-              >
-                {t(Translations.AUTH_HEADER_TEXT)}
-              </AppText>
-              <Spacer
-                spacing={Spacing.SPACING_PADDING_8}
-              />
-              <AppText
-                variant="h3"
-                style={{
-                  color:
-                    theme.colors.onBackground,
-                }}
-              >
-                {t(Translations.AUTH_WELCOME_TEXT)}
-              </AppText>
-              <Spacer
-                spacing={Spacing.SPACING_PADDING_8}
-              />
-              <AppText
-                variant="body"
-                style={{
-                  color:
-                    theme.colors.onSurfaceVariant,
-                  textAlign: 'center',
-                }}
-              >
-                {t(Translations.AUTH_SUBTITLE_TEXT)}
-              </AppText>
-            </View>
-
+          <View style={styles.heroSection}>
+            <AppText
+              variant="h1"
+              style={{
+                color:
+                  theme.colors.primary,
+              }}
+            >
+              {t(
+                Translations.AUTH_HEADER_TEXT,
+              )}
+            </AppText>
             <Spacer
-              spacing={Spacing.SPACING_PADDING_32}
+              spacing={
+                Spacing.SPACING_PADDING_8
+              }
             />
+            <AppText
+              variant="h3"
+              style={{
+                color:
+                  theme.colors.onBackground,
+              }}
+            >
+              {t(
+                Translations.AUTH_WELCOME_TEXT,
+              )}
+            </AppText>
+            <Spacer
+              spacing={
+                Spacing.SPACING_PADDING_8
+              }
+            />
+            <AppText
+              variant="body"
+              style={{
+                color:
+                  theme.colors
+                    .onSurfaceVariant,
+                textAlign: 'center',
+              }}
+            >
+              {t(
+                Translations.AUTH_SUBTITLE_TEXT,
+              )}
+            </AppText>
+          </View>
 
-            <View style={styles.formSection}>
-              <FormProvider {...form}>
-                <InputField
-                  name="email"
-                  label={t(
-                    Translations.AUTH_EMAIL_LABEL,
-                  )}
-                  rules={{
-                    required: {
-                      value: true,
-                      message:
-                        'Please enter your email',
-                    },
-                    pattern: {
-                      value:
-                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message:
-                        'Please enter a valid email',
-                    },
-                  }}
-                  dense
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  returnKeyType="next"
-                />
-                <Spacer
-                  spacing={Spacing.SPACING_PADDING_16}
-                />
-                <InputField
-                  name="password"
-                  label={t(
-                    Translations.AUTH_PASSWORD_LABEL,
-                  )}
-                  rules={{
-                    required: {
-                      value: true,
-                      message:
-                        'Please enter your password',
-                    },
-                  }}
-                  dense
-                  secureTextEntry
-                  returnKeyType="done"
-                />
-              </FormProvider>
+          <Spacer
+            spacing={
+              Spacing.SPACING_PADDING_32
+            }
+          />
 
-              <View style={styles.forgotRow}>
-                <Button
-                  mode="text"
-                  compact
-                  labelStyle={styles.forgotLabel}
-                  onPress={() => {}}
-                >
-                  {t(
-                    Translations.AUTH_FORGOT_PASSWORD,
-                  )}
-                </Button>
-              </View>
-
-              <Spacer
-                spacing={Spacing.SPACING_PADDING_24}
-              />
-
-              <Button
-                mode="contained"
-                onPress={onSubmit}
-                disabled={
-                  login.isPending || !isValid
-                }
-                contentStyle={styles.btnContent}
-                style={styles.pillBtn}
-                labelStyle={styles.loginBtnLabel}
-              >
-                {t(Translations.AUTH_LOGIN_BUTTON)}
-              </Button>
-
-              <Spacer
-                spacing={Spacing.SPACING_PADDING_24}
-              />
-
-              <View style={styles.dividerRow}>
-                <Divider
-                  style={[
-                    styles.dividerLine,
-                    {
-                      backgroundColor:
-                        theme.colors.outlineVariant,
-                    },
-                  ]}
-                />
-                <AppText
-                  variant="caption"
-                  style={{
-                    color:
-                      theme.colors.onSurfaceVariant,
-                    paddingHorizontal: 16,
-                  }}
-                >
-                  {t(Translations.AUTH_OR_DIVIDER)}
-                </AppText>
-                <Divider
-                  style={[
-                    styles.dividerLine,
-                    {
-                      backgroundColor:
-                        theme.colors.outlineVariant,
-                    },
-                  ]}
-                />
-              </View>
-
-              <Spacer
-                spacing={Spacing.SPACING_PADDING_24}
-              />
-
-              <Button
-                mode="outlined"
-                icon="google"
-                onPress={() => {}}
-                contentStyle={styles.btnContent}
-                style={[
-                  styles.pillBtn,
-                  {
-                    borderColor:
-                      theme.colors.outline,
+          <View style={styles.formSection}>
+            <FormProvider {...form}>
+              <InputField
+                name="email"
+                label={t(
+                  Translations.AUTH_EMAIL_LABEL,
+                )}
+                rules={{
+                  required: {
+                    value: true,
+                    message:
+                      'Please enter your email',
                   },
-                ]}
-                textColor={
-                  theme.colors.onBackground
+                  pattern: {
+                    value:
+                      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message:
+                      'Please enter a valid email',
+                  },
+                }}
+                dense
+                autoCapitalize="none"
+                keyboardType="email-address"
+                returnKeyType="next"
+              />
+              <Spacer
+                spacing={
+                  Spacing.SPACING_PADDING_16
+                }
+              />
+              <InputField
+                name="password"
+                label={t(
+                  Translations.AUTH_PASSWORD_LABEL,
+                )}
+                rules={{
+                  required: {
+                    value: true,
+                    message:
+                      'Please enter your password',
+                  },
+                }}
+                dense
+                secureTextEntry
+                returnKeyType="done"
+              />
+            </FormProvider>
+
+            <View style={styles.forgotRow}>
+              <AppButton
+                variant="link"
+                compact
+                onPress={() => {}}
+                contentStyle={null}
+                labelStyle={
+                  styles.forgotLabel
                 }
               >
                 {t(
-                  Translations.AUTH_GOOGLE_SIGN_IN,
+                  Translations.AUTH_FORGOT_PASSWORD,
                 )}
-              </Button>
+              </AppButton>
             </View>
 
-            <View style={styles.registerRow}>
+            <Spacer
+              spacing={
+                Spacing.SPACING_PADDING_24
+              }
+            />
+
+            <AppButton
+              variant="primary"
+              onPress={onSubmit}
+              disabled={
+                login.isPending || !isValid
+              }
+            >
+              {t(
+                Translations.AUTH_LOGIN_BUTTON,
+              )}
+            </AppButton>
+
+            <Spacer
+              spacing={
+                Spacing.SPACING_PADDING_24
+              }
+            />
+
+            <View style={styles.dividerRow}>
+              <Divider
+                style={[
+                  styles.dividerLine,
+                  {
+                    backgroundColor:
+                      theme.colors
+                        .outlineVariant,
+                  },
+                ]}
+              />
               <AppText
-                variant="bodySmall"
+                variant="caption"
                 style={{
                   color:
-                    theme.colors.onSurfaceVariant,
+                    theme.colors
+                      .onSurfaceVariant,
+                  paddingHorizontal:
+                    Spacing.SPACING_PADDING_16,
                 }}
               >
-                {t(Translations.AUTH_NO_ACCOUNT)}
+                {t(
+                  Translations.AUTH_OR_DIVIDER,
+                )}
               </AppText>
-              <Button
-                mode="text"
-                compact
-                onPress={() =>
-                  router.push('/auth/register')
-                }
-                disabled={login.isPending}
-                labelStyle={{
-                  color: theme.colors.primary,
-                }}
-              >
-                {t(Translations.AUTH_REGISTER)}
-              </Button>
+              <Divider
+                style={[
+                  styles.dividerLine,
+                  {
+                    backgroundColor:
+                      theme.colors
+                        .outlineVariant,
+                  },
+                ]}
+              />
             </View>
-          </ScrollView>
-        )}
-      </KeyboardAvoidingView>
+
+            <Spacer
+              spacing={
+                Spacing.SPACING_PADDING_24
+              }
+            />
+
+            <AppButton
+              variant="google"
+              icon="google"
+              onPress={() => {}}
+            >
+              {t(
+                Translations.AUTH_GOOGLE_SIGN_IN,
+              )}
+            </AppButton>
+          </View>
+
+          <View style={styles.registerRow}>
+            <AppText
+              variant="bodySmall"
+              style={{
+                color:
+                  theme.colors
+                    .onSurfaceVariant,
+              }}
+            >
+              {t(
+                Translations.AUTH_NO_ACCOUNT,
+              )}
+            </AppText>
+            <AppText
+              variant="bodySmall"
+              onPress={goToRegister}
+              style={[
+                styles.authLink,
+                {
+                  color:
+                    theme.colors.primary,
+                },
+              ]}
+            >
+              {t(Translations.AUTH_REGISTER)}
+            </AppText>
+          </View>
+        </ScrollView>
+      </View>
 
       <CustomModal
         {...modalProps}
@@ -339,22 +388,26 @@ const LoginScreen = () => {
         <View style={styles.modalContent}>
           <Text
             variant="bodyMedium"
-            style={{ color: theme.colors.error }}
+            style={{
+              color: theme.colors.error,
+            }}
           >
             {modalMessage ||
-              'Something went wrong. Please try again.'}
+              t(
+                Translations.AUTH_ERROR_FALLBACK,
+              )}
           </Text>
           <Spacer
-            spacing={Spacing.SPACING_PADDING_16}
+            spacing={
+              Spacing.SPACING_PADDING_16
+            }
           />
-          <Button
-            mode="contained"
+          <AppButton
+            variant="primary"
             onPress={handleDismiss}
-            buttonColor={theme.colors.primary}
-            textColor={theme.colors.onPrimary}
           >
-            Dismiss
-          </Button>
+            {t(Translations.AUTH_DISMISS)}
+          </AppButton>
         </View>
       </CustomModal>
     </>
@@ -374,17 +427,17 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingHorizontal:
+      Spacing.SPACING_PADDING_24,
   },
   themeRow: {
     width: '100%',
     alignItems: 'flex-end',
-    paddingTop: 8,
+    paddingTop: Spacing.SPACING_PADDING_8,
   },
   heroSection: {
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: Spacing.SPACING_PADDING_24,
   },
   formSection: {
     width: '100%',
@@ -393,21 +446,10 @@ const styles = StyleSheet.create({
   },
   forgotRow: {
     alignItems: 'flex-end',
-    marginTop: 4,
+    marginTop: Spacing.SPACING_PADDING_8 / 2,
   },
   forgotLabel: {
     fontSize: 13,
-  },
-  pillBtn: {
-    borderRadius: BorderRadius.pill,
-  },
-  btnContent: {
-    height: 52,
-  },
-  loginBtnLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.5,
   },
   dividerRow: {
     flexDirection: 'row',
@@ -421,12 +463,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 'auto',
-    paddingTop: 32,
+    paddingVertical:
+      Spacing.SPACING_PADDING_16,
+  },
+  authLink: {
+    marginLeft: Spacing.SPACING_PADDING_8 / 2,
+    fontWeight: '600',
   },
   modalContent: {
     alignItems: 'center',
-    padding: 24,
-    borderRadius: 16,
+    padding: Spacing.SPACING_PADDING_24,
+    borderRadius: Spacing.SPACING_PADDING_16,
   },
 });

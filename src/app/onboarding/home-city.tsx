@@ -6,26 +6,33 @@ import React, {
 import {
   StyleSheet,
   View,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   FlatList,
   Pressable,
 } from 'react-native';
 import {
-  Button,
   TextInput,
   useTheme,
 } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
-import AppText from '@shared/components/AppText';
-import Spacer from '@shared/components/Spacer';
-import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
-import { Translations } from '@features/onboarding/i18n/translationKeys';
-import { Spacing } from '@theme/constants/Spacing';
-import { BorderRadius } from '@theme/constants/BorderRadius';
+import AppText from
+  '@shared/components/AppText';
+import AppButton from
+  '@shared/components/AppButton';
+import Spacer from
+  '@shared/components/Spacer';
+import OnboardingProgress from
+  '@shared/components/OnboardingProgress';
+import { useOnboardingData } from
+  '@features/onboarding/context/OnboardingContext';
+import { Translations } from
+  '@features/onboarding/i18n/translationKeys';
+import { Spacing } from
+  '@theme/constants/Spacing';
+import { BorderRadius } from
+  '@theme/constants/BorderRadius';
 
 type CityResult = {
   place_id: number;
@@ -39,7 +46,8 @@ const DEBOUNCE_MS = 300;
 const HomeCityScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { data, update } = useOnboardingData();
+  const { data, update } =
+    useOnboardingData();
 
   const [query, setQuery] = useState(
     data.homeCity,
@@ -83,9 +91,12 @@ const HomeCityScreen = () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
-      timerRef.current = setTimeout(() => {
-        searchCities(text);
-      }, DEBOUNCE_MS);
+      timerRef.current = setTimeout(
+        () => {
+          searchCities(text);
+        },
+        DEBOUNCE_MS,
+      );
     },
     [searchCities],
   );
@@ -127,7 +138,8 @@ const HomeCityScreen = () => {
       <AppText
         variant="body"
         style={{
-          color: theme.colors.onSurface,
+          color:
+            theme.colors.onSurface,
         }}
       >
         {item.display_name}
@@ -136,7 +148,7 @@ const HomeCityScreen = () => {
   );
 
   return (
-    <KeyboardAvoidingView
+    <View
       style={[
         styles.root,
         {
@@ -144,11 +156,6 @@ const HomeCityScreen = () => {
             theme.colors.background,
         },
       ]}
-      behavior={
-        Platform.OS === 'ios'
-          ? 'padding'
-          : 'height'
-      }
     >
       <ScrollView
         contentContainerStyle={
@@ -156,34 +163,13 @@ const HomeCityScreen = () => {
         }
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.progress}>
-          <AppText
-            variant="caption"
-            style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
-            }}
-          >
-            2 / 4
-          </AppText>
-        </View>
-
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
-        />
-
-        <AppText
-          variant="h2"
-          style={{
-            color:
-              theme.colors.onBackground,
-          }}
-        >
-          {t(
+        <OnboardingProgress
+          step={2}
+          totalSteps={4}
+          title={t(
             Translations.ONBOARDING_STEP_2_TITLE,
           )}
-        </AppText>
+        />
 
         <Spacer
           spacing={Spacing.SPACING_PADDING_8}
@@ -193,7 +179,8 @@ const HomeCityScreen = () => {
           variant="body"
           style={{
             color:
-              theme.colors.onSurfaceVariant,
+              theme.colors
+                .onSurfaceVariant,
           }}
         >
           {t(
@@ -202,7 +189,9 @@ const HomeCityScreen = () => {
         </AppText>
 
         <Spacer
-          spacing={Spacing.SPACING_PADDING_32}
+          spacing={
+            Spacing.SPACING_PADDING_32
+          }
         />
 
         <TextInput
@@ -213,7 +202,9 @@ const HomeCityScreen = () => {
           onChangeText={onChangeText}
           mode="outlined"
           left={
-            <TextInput.Icon icon="magnify" />
+            <TextInput.Icon
+              icon="magnify"
+            />
           }
         />
 
@@ -242,14 +233,17 @@ const HomeCityScreen = () => {
         )}
 
         <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
+          spacing={
+            Spacing.SPACING_PADDING_16
+          }
         />
 
         <AppText
           variant="caption"
           style={{
             color:
-              theme.colors.onSurfaceVariant,
+              theme.colors
+                .onSurfaceVariant,
           }}
         >
           {t(
@@ -258,18 +252,18 @@ const HomeCityScreen = () => {
         </AppText>
 
         <View style={styles.bottomSection}>
-          <Button
-            mode="contained"
+          <AppButton
+            variant="primary"
             onPress={onNext}
             disabled={!selectedCity}
-            contentStyle={styles.btnContent}
-            style={styles.pillBtn}
           >
-            {t(Translations.ONBOARDING_NEXT)}
-          </Button>
+            {t(
+              Translations.ONBOARDING_NEXT,
+            )}
+          </AppButton>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -283,12 +277,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal:
       Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_60,
+    paddingTop:
+      Spacing.SPACING_PADDING_24,
     paddingBottom:
       Spacing.SPACING_PADDING_32,
-  },
-  progress: {
-    alignItems: 'flex-end',
   },
   resultsList: {
     borderWidth: 1,
@@ -305,12 +297,7 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     marginTop: 'auto',
-    paddingTop: Spacing.SPACING_PADDING_32,
-  },
-  pillBtn: {
-    borderRadius: BorderRadius.pill,
-  },
-  btnContent: {
-    height: 52,
+    paddingTop:
+      Spacing.SPACING_PADDING_32,
   },
 });

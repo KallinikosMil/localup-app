@@ -10,4 +10,18 @@ export enum Translations {
   AUTH_GOOGLE_SIGN_IN = 'authGoogleSignIn',
   AUTH_NO_ACCOUNT = 'authNoAccount',
   AUTH_REGISTER = 'authRegister',
+  AUTH_CREATE_ACCOUNT_TITLE =
+    'authCreateAccountTitle',
+  AUTH_CREATE_ACCOUNT_SUBTITLE =
+    'authCreateAccountSubtitle',
+  AUTH_CREATE_ACCOUNT_BUTTON =
+    'authCreateAccountButton',
+  AUTH_CONFIRM_PASSWORD_LABEL =
+    'authConfirmPasswordLabel',
+  AUTH_HAS_ACCOUNT = 'authHasAccount',
+  AUTH_LOGIN_LINK = 'authLoginLink',
+  AUTH_ERROR_FALLBACK = 'authErrorFallback',
+  AUTH_DISMISS = 'authDismiss',
+  AUTH_CONFIRM_EMAIL_SENT =
+    'authConfirmEmailSent',
 }

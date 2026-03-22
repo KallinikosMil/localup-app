@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Pressable,
 } from 'react-native';
-import { Button } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
@@ -17,13 +14,24 @@ import {
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
-import AppText from '@shared/components/AppText';
-import Spacer from '@shared/components/Spacer';
-import InputField from '@shared/components/InputField';
-import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
-import { Translations } from '@features/onboarding/i18n/translationKeys';
-import { Spacing } from '@theme/constants/Spacing';
-import { BorderRadius } from '@theme/constants/BorderRadius';
+import AppText from
+  '@shared/components/AppText';
+import AppButton from
+  '@shared/components/AppButton';
+import Spacer from
+  '@shared/components/Spacer';
+import InputField from
+  '@shared/components/InputField';
+import OnboardingProgress from
+  '@shared/components/OnboardingProgress';
+import { useOnboardingData } from
+  '@features/onboarding/context/OnboardingContext';
+import { Translations } from
+  '@features/onboarding/i18n/translationKeys';
+import { Spacing } from
+  '@theme/constants/Spacing';
+import { BorderRadius } from
+  '@theme/constants/BorderRadius';
 
 type NameAgeForm = {
   displayName: string;
@@ -45,16 +53,17 @@ const formatDate = (date: Date) =>
 const NameAgeScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { data, update } = useOnboardingData();
+  const { data, update } =
+    useOnboardingData();
 
   const maxDate = getMaxDate();
 
-  const [dob, setDob] = useState<Date | null>(
-    data.dateOfBirth,
-  );
+  const [dob, setDob] =
+    useState<Date | null>(data.dateOfBirth);
   const [showPicker, setShowPicker] =
     useState(false);
-  const [dobError, setDobError] = useState('');
+  const [dobError, setDobError] =
+    useState('');
 
   const form = useForm<NameAgeForm>({
     defaultValues: {
@@ -73,7 +82,7 @@ const NameAgeScreen = () => {
     _event: unknown,
     selected?: Date,
   ) => {
-    setShowPicker(Platform.OS === 'ios');
+    setShowPicker(false);
     if (selected) {
       setDob(selected);
       setDobError('');
@@ -99,7 +108,7 @@ const NameAgeScreen = () => {
   );
 
   return (
-    <KeyboardAvoidingView
+    <View
       style={[
         styles.root,
         {
@@ -107,11 +116,6 @@ const NameAgeScreen = () => {
             theme.colors.background,
         },
       ]}
-      behavior={
-        Platform.OS === 'ios'
-          ? 'padding'
-          : 'height'
-      }
     >
       <ScrollView
         contentContainerStyle={
@@ -119,33 +123,14 @@ const NameAgeScreen = () => {
         }
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.progress}>
-          <AppText
-            variant="caption"
-            style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
-            }}
-          >
-            1 / 4
-          </AppText>
-        </View>
-
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
-        />
-
-        <AppText
-          variant="h2"
-          style={{
-            color: theme.colors.onBackground,
-          }}
-        >
-          {t(
+        <OnboardingProgress
+          step={1}
+          totalSteps={4}
+          title={t(
             Translations.ONBOARDING_STEP_1_TITLE,
           )}
-        </AppText>
+          showBack={false}
+        />
 
         <Spacer
           spacing={Spacing.SPACING_PADDING_8}
@@ -155,7 +140,8 @@ const NameAgeScreen = () => {
           variant="body"
           style={{
             color:
-              theme.colors.onSurfaceVariant,
+              theme.colors
+                .onSurfaceVariant,
           }}
         >
           {t(
@@ -164,7 +150,9 @@ const NameAgeScreen = () => {
         </AppText>
 
         <Spacer
-          spacing={Spacing.SPACING_PADDING_32}
+          spacing={
+            Spacing.SPACING_PADDING_32
+          }
         />
 
         <FormProvider {...form}>
@@ -187,13 +175,16 @@ const NameAgeScreen = () => {
         </FormProvider>
 
         <Spacer
-          spacing={Spacing.SPACING_PADDING_24}
+          spacing={
+            Spacing.SPACING_PADDING_24
+          }
         />
 
         <AppText
           variant="label"
           style={{
-            color: theme.colors.onBackground,
+            color:
+              theme.colors.onBackground,
             marginBottom:
               Spacing.SPACING_PADDING_8,
           }}
@@ -204,7 +195,9 @@ const NameAgeScreen = () => {
         </AppText>
 
         <Pressable
-          onPress={() => setShowPicker(true)}
+          onPress={() =>
+            setShowPicker(true)
+          }
           style={[
             styles.dobButton,
             {
@@ -252,22 +245,32 @@ const NameAgeScreen = () => {
             display="spinner"
             maximumDate={maxDate}
             onChange={onDateChange}
+            positiveButton={{
+              label: 'OK',
+              textColor:
+                theme.colors.primary,
+            }}
+            negativeButton={{
+              label: 'Cancel',
+              textColor:
+                theme.colors.primary,
+            }}
           />
         )}
 
         <View style={styles.bottomSection}>
-          <Button
-            mode="contained"
+          <AppButton
+            variant="primary"
             onPress={onNext}
             disabled={!isValid}
-            contentStyle={styles.btnContent}
-            style={styles.pillBtn}
           >
-            {t(Translations.ONBOARDING_NEXT)}
-          </Button>
+            {t(
+              Translations.ONBOARDING_NEXT,
+            )}
+          </AppButton>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -281,16 +284,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal:
       Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_60,
+    paddingTop:
+      Spacing.SPACING_PADDING_24,
     paddingBottom:
       Spacing.SPACING_PADDING_32,
   },
-  progress: {
-    alignItems: 'flex-end',
-  },
   dobButton: {
     borderWidth: 1,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.lg,
     paddingVertical:
       Spacing.SPACING_PADDING_16,
     paddingHorizontal:
@@ -298,12 +299,7 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     marginTop: 'auto',
-    paddingTop: Spacing.SPACING_PADDING_32,
-  },
-  pillBtn: {
-    borderRadius: BorderRadius.pill,
-  },
-  btnContent: {
-    height: 52,
+    paddingTop:
+      Spacing.SPACING_PADDING_32,
   },
 });
