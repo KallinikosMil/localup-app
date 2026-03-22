@@ -33,7 +33,8 @@ import {
 
 const { width: SCREEN_WIDTH } =
   Dimensions.get('window');
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
+const SWIPE_THRESHOLD =
+  SCREEN_WIDTH * 0.3;
 
 type SwipeCardProps = {
   candidate: Candidate;
@@ -52,7 +53,8 @@ const SwipeCard = ({
 
   const pan = Gesture.Pan()
     .onUpdate(e => {
-      translateX.value = e.translationX;
+      translateX.value =
+        e.translationX;
       translateY.value =
         e.translationY * 0.3;
     })
@@ -76,17 +78,15 @@ const SwipeCard = ({
         );
         runOnJS(onSwipeLeft)();
       } else {
-        translateX.value = withSpring(
-          0,
-        );
-        translateY.value = withSpring(
-          0,
-        );
+        translateX.value =
+          withSpring(0);
+        translateY.value =
+          withSpring(0);
       }
     });
 
-  const cardStyle = useAnimatedStyle(
-    () => ({
+  const cardStyle =
+    useAnimatedStyle(() => ({
       transform: [
         {
           translateX:
@@ -109,30 +109,27 @@ const SwipeCard = ({
           )}deg`,
         },
       ],
-    }),
-  );
+    }));
 
-  const likeOpacity = useAnimatedStyle(
-    () => ({
+  const likeOpacity =
+    useAnimatedStyle(() => ({
       opacity: interpolate(
         translateX.value,
         [0, SWIPE_THRESHOLD],
         [0, 1],
         Extrapolation.CLAMP,
       ),
-    }),
-  );
+    }));
 
-  const nopeOpacity = useAnimatedStyle(
-    () => ({
+  const nopeOpacity =
+    useAnimatedStyle(() => ({
       opacity: interpolate(
         translateX.value,
         [-SWIPE_THRESHOLD, 0],
         [1, 0],
         Extrapolation.CLAMP,
       ),
-    }),
-  );
+    }));
 
   return (
     <GestureDetector gesture={pan}>
@@ -190,7 +187,9 @@ const SwipeCard = ({
 
           {candidate.home_city && (
             <View
-              style={styles.locationRow}
+              style={
+                styles.locationRow
+              }
             >
               <MaterialCommunityIcons
                 name="map-marker-outline"

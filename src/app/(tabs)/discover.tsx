@@ -7,6 +7,7 @@ import {
   View,
   Pressable,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   ActivityIndicator,
   useTheme,
@@ -14,9 +15,6 @@ import {
   Modal,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  GestureHandlerRootView,
-} from 'react-native-gesture-handler';
 
 import AppText from
   '@shared/components/AppText';
