@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   useTheme,
 } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import AppText from
@@ -30,6 +31,7 @@ const AVATAR_SIZE = 56;
 
 export default function MatchesScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const {
     data: matches,
     isLoading,
@@ -52,7 +54,14 @@ export default function MatchesScreen() {
         },
       ]}
       onPress={() => {
-        // TODO: navigate to chat
+        router.push({
+          pathname: '/chat/[matchId]',
+          params: {
+            matchId: item.id,
+            name:
+              item.display_name,
+          },
+        });
       }}
     >
       {item.avatar_url ? (
