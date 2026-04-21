@@ -27,7 +27,7 @@ import { Spacing } from
 import { BorderRadius } from
   '@theme/constants/BorderRadius';
 
-const AVATAR_SIZE = 56;
+const AVATAR_SIZE = 60;
 
 export default function MatchesScreen() {
   const theme = useTheme();
@@ -48,9 +48,8 @@ export default function MatchesScreen() {
         styles.card,
         {
           backgroundColor:
-            theme.colors.surface,
-          borderColor:
-            theme.colors.outlineVariant,
+            theme.colors
+              .surfaceVariant,
         },
       ]}
       onPress={() => {
@@ -268,10 +267,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding:
       Spacing.SPACING_PADDING_16,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    borderRadius: BorderRadius.xl,
     marginBottom:
-      Spacing.SPACING_PADDING_8,
+      Spacing.SPACING_PADDING_16,
   },
   avatar: {
     width: AVATAR_SIZE,

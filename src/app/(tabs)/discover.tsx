@@ -266,10 +266,8 @@ export default function DiscoverScreen() {
             styles.actionBtnSmall,
             {
               backgroundColor:
-                theme.colors.surface,
-              borderColor:
                 theme.colors
-                  .outlineVariant,
+                  .surfaceVariant,
             },
           ]}
         >
@@ -305,10 +303,8 @@ export default function DiscoverScreen() {
             styles.actionBtnSmall,
             {
               backgroundColor:
-                theme.colors.surface,
-              borderColor:
                 theme.colors
-                  .outlineVariant,
+                  .surfaceVariant,
             },
           ]}
         >
@@ -434,7 +430,6 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    borderWidth: 1,
   },
   actionBtnLarge: {
     width: 64,

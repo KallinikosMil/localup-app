@@ -16,6 +16,7 @@ import {
   useLocalSearchParams,
   useRouter,
 } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store';
@@ -46,6 +47,7 @@ export default function ChatScreen() {
     (s: RootState) => s.auth.user?.uid,
   );
 
+  const insets = useSafeAreaInsets();
   const { data: threadId, isLoading } =
     useThread(matchId);
   const { data: messages } =
@@ -131,9 +133,12 @@ export default function ChatScreen() {
         style={[
           styles.header,
           {
-            borderBottomColor:
+            backgroundColor:
               theme.colors
-                .outlineVariant,
+                .surfaceVariant,
+            paddingTop:
+              insets.top +
+              Spacing.SPACING_PADDING_8,
           },
         ]}
       >
@@ -208,11 +213,9 @@ export default function ChatScreen() {
         style={[
           styles.inputRow,
           {
-            borderTopColor:
-              theme.colors
-                .outlineVariant,
             backgroundColor:
-              theme.colors.surface,
+              theme.colors
+                .surfaceVariant,
           },
         ]}
       >
@@ -221,8 +224,7 @@ export default function ChatScreen() {
             styles.input,
             {
               backgroundColor:
-                theme.colors
-                  .surfaceVariant,
+                theme.colors.surface,
               color:
                 theme.colors.onSurface,
             },
@@ -278,11 +280,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal:
       Spacing.SPACING_PADDING_16,
-    paddingTop:
-      Spacing.SPACING_PADDING_24,
     paddingBottom:
       Spacing.SPACING_PADDING_16,
-    borderBottomWidth: 1,
   },
   center: {
     flex: 1,
@@ -317,7 +316,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     padding: Spacing.SPACING_PADDING_8,
-    borderTopWidth: 1,
   },
   input: {
     flex: 1,

@@ -162,20 +162,22 @@ export default function ProfileScreen() {
             styles.section,
             {
               backgroundColor:
-                theme.colors.surface,
-              borderColor:
                 theme.colors
-                  .outlineVariant,
+                  .surfaceVariant,
             },
           ]}
         >
           <AppText
-            variant="caption"
+            variant="label"
             style={{
               color:
                 theme.colors
                   .onSurfaceVariant,
-              marginBottom: 4,
+              marginBottom: 8,
+              letterSpacing: 1,
+              textTransform:
+                'uppercase',
+              fontSize: 11,
             }}
           >
             About
@@ -185,6 +187,7 @@ export default function ProfileScreen() {
             style={{
               color:
                 theme.colors.onSurface,
+              lineHeight: 22,
             }}
           >
             {profile.bio}
@@ -194,7 +197,7 @@ export default function ProfileScreen() {
 
       <Spacer
         spacing={
-          Spacing.SPACING_PADDING_8
+          Spacing.SPACING_PADDING_16
         }
       />
 
@@ -206,20 +209,22 @@ export default function ProfileScreen() {
               styles.section,
               {
                 backgroundColor:
-                  theme.colors.surface,
-                borderColor:
                   theme.colors
-                    .outlineVariant,
+                    .surfaceVariant,
               },
             ]}
           >
             <AppText
-              variant="caption"
+              variant="label"
               style={{
                 color:
                   theme.colors
                     .onSurfaceVariant,
-                marginBottom: 8,
+                marginBottom: 12,
+                letterSpacing: 1,
+                textTransform:
+                  'uppercase',
+                fontSize: 11,
               }}
             >
               Interests
@@ -234,13 +239,13 @@ export default function ProfileScreen() {
                       {
                         backgroundColor:
                           theme.colors
-                            .surfaceVariant,
+                            .surface,
                       },
                     ]}
                     textStyle={{
                       color:
                         theme.colors
-                          .onSurfaceVariant,
+                          .onSurface,
                     }}
                   >
                     {interest}
@@ -317,8 +322,7 @@ const styles = StyleSheet.create({
   section: {
     padding:
       Spacing.SPACING_PADDING_16,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    borderRadius: BorderRadius.xl,
   },
   chips: {
     flexDirection: 'row',
