@@ -23,6 +23,15 @@ export function useCompleteOnboarding() {
       if (!user)
         throw new Error('Not authenticated');
 
+      // Defense-in-depth: name-age screen blocks Next without DOB,
+      // but refuse here too so onboarding_complete=true can never
+      // coexist with a missing/empty date_of_birth.
+      if (!data.dateOfBirth) {
+        throw new Error(
+          'date_of_birth is required to complete onboarding',
+        );
+      }
+
       // 1. Upload photo using FormData (RN-safe)
       const fileExt =
         data.photoUri.split('.').pop() ?? 'jpg';

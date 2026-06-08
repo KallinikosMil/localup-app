@@ -143,6 +143,7 @@ INSERT INTO public.profiles (
   home_lat, home_lng,
   current_lat, current_lng,
   last_location_at,
+  date_of_birth,
   bio, onboarding_complete
 ) VALUES
   (
@@ -151,6 +152,7 @@ INSERT INTO public.profiles (
     37.9838, 23.7275,
     37.9838, 23.7275,
     now(),
+    DATE '1996-03-15',
     'Love exploring hidden gems and street food spots!',
     true
   ),
@@ -160,6 +162,7 @@ INSERT INTO public.profiles (
     40.6401, 22.9444,
     40.6401, 22.9444,
     now(),
+    DATE '1989-06-20',
     'Backpacker and live music enthusiast.',
     true
   ),
@@ -169,6 +172,7 @@ INSERT INTO public.profiles (
     41.3851, 2.1734,
     37.9838, 23.7275,
     now(),
+    DATE '1998-04-10',
     'Traveling through Greece this summer.',
     true
   ),
@@ -178,6 +182,7 @@ INSERT INTO public.profiles (
     37.9838, 23.7275,
     37.9838, 23.7275,
     now(),
+    DATE '1993-09-05',
     'Local foodie, ask me about the best souvlaki.',
     true
   ),
@@ -187,6 +192,7 @@ INSERT INTO public.profiles (
     35.3387, 25.1442,
     37.9838, 23.7275,
     now(),
+    DATE '1995-11-25',
     'History nerd and sunset chaser.',
     true
   )
