@@ -54,26 +54,26 @@ CREATE POLICY
   FOR ALL
   USING (auth.uid() = user_id);
 
--- ----- MATCH QUEUE -----
+-- ----- SWIPES -----
 DROP POLICY IF EXISTS
-  "Match queue access by user"
-  ON public.match_queue;
+  "Swipes access by swiper"
+  ON public.swipes;
 DROP POLICY IF EXISTS
-  "Match queue target readable"
-  ON public.match_queue;
+  "Swipes target readable"
+  ON public.swipes;
 
 CREATE POLICY
-  "Match queue access by user"
-  ON public.match_queue
+  "Swipes access by swiper"
+  ON public.swipes
   FOR ALL
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = swiper_id);
 
 CREATE POLICY
-  "Match queue target readable"
-  ON public.match_queue
+  "Swipes target readable"
+  ON public.swipes
   FOR SELECT
   USING (
-    auth.uid() = target_user_id
+    auth.uid() = swiped_id
   );
 
 -- ----- MATCHES -----

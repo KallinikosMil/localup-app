@@ -104,13 +104,13 @@ export const useCandidates = (
       // Get IDs the user has already swiped
       const { data: swiped } =
         await supabase
-          .from('match_queue')
-          .select('target_user_id')
-          .eq('user_id', uid!);
+          .from('swipes')
+          .select('swiped_id')
+          .eq('swiper_id', uid!);
 
       const swipedIds = (
         swiped ?? []
-      ).map(s => s.target_user_id);
+      ).map(s => s.swiped_id);
 
       // Fetch profiles excluding self
       // and already-swiped
@@ -262,10 +262,10 @@ export const useSwipe = () => {
     }) => {
       // Insert the swipe
       const { error } = await supabase
-        .from('match_queue')
+        .from('swipes')
         .insert({
-          user_id: uid,
-          target_user_id: targetId,
+          swiper_id: uid,
+          swiped_id: targetId,
           status: action,
         });
       if (error) throw error;
@@ -274,11 +274,11 @@ export const useSwipe = () => {
       if (action === 'liked') {
         const { data: mutual } =
           await supabase
-            .from('match_queue')
+            .from('swipes')
             .select('id')
-            .eq('user_id', targetId)
+            .eq('swiper_id', targetId)
             .eq(
-              'target_user_id',
+              'swiped_id',
               uid!,
             )
             .eq('status', 'liked')
@@ -296,24 +296,24 @@ export const useSwipe = () => {
 
           // Update both queue entries
           await supabase
-            .from('match_queue')
+            .from('swipes')
             .update({
               status: 'matched',
             })
-            .eq('user_id', uid!)
+            .eq('swiper_id', uid!)
             .eq(
-              'target_user_id',
+              'swiped_id',
               targetId,
             );
 
           await supabase
-            .from('match_queue')
+            .from('swipes')
             .update({
               status: 'matched',
             })
-            .eq('user_id', targetId)
+            .eq('swiper_id', targetId)
             .eq(
-              'target_user_id',
+              'swiped_id',
               uid!,
             );
 
