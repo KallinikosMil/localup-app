@@ -28,6 +28,7 @@ import SwipeCard from
   '@features/discover/components/SwipeCard';
 import {
   useCandidates,
+  useStaleLocationRefetch,
   useSwipe,
   type Candidate,
 } from
@@ -39,16 +40,14 @@ import { BorderRadius } from
 
 export default function DiscoverScreen() {
   const theme = useTheme();
-  const { latitude, longitude, loading: locLoading, error: locError } =
+  const { latitude, longitude, loading: locLoading } =
     useLocation();
+  useStaleLocationRefetch(latitude, longitude);
   const {
     data: candidates,
     isLoading,
     refetch,
-  } = useCandidates(
-    latitude,
-    longitude,
-  );
+  } = useCandidates();
   const swipe = useSwipe();
 
   const [currentIndex, setCurrentIndex] =

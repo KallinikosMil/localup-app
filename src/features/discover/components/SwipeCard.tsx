@@ -208,14 +208,14 @@ const SwipeCard = ({
             <View
               style={[
                 styles.modeBadge,
-                candidate.mode === 'traveler'
+                candidate.candidate_mode === 'traveler'
                   ? styles.modeTraveler
                   : styles.modeLocal,
               ]}
             >
               <MaterialCommunityIcons
                 name={
-                  candidate.mode === 'traveler'
+                  candidate.candidate_mode === 'traveler'
                     ? 'airplane'
                     : 'home-variant-outline'
                 }
@@ -226,7 +226,7 @@ const SwipeCard = ({
                 variant="caption"
                 style={styles.modeText}
               >
-                {candidate.mode === 'traveler'
+                {candidate.candidate_mode === 'traveler'
                   ? 'TRAVELER'
                   : 'LOCAL'}
               </AppText>
