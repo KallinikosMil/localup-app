@@ -185,25 +185,53 @@ const SwipeCard = ({
             {candidate.display_name}
           </AppText>
 
-          {candidate.home_city && (
+          <View style={styles.metaRow}>
+            {candidate.home_city && (
+              <View
+                style={
+                  styles.locationRow
+                }
+              >
+                <MaterialCommunityIcons
+                  name="home-outline"
+                  size={14}
+                  color="#fff"
+                />
+                <AppText
+                  variant="caption"
+                  style={styles.location}
+                >
+                  {candidate.home_city}
+                </AppText>
+              </View>
+            )}
             <View
-              style={
-                styles.locationRow
-              }
+              style={[
+                styles.modeBadge,
+                candidate.mode === 'traveler'
+                  ? styles.modeTraveler
+                  : styles.modeLocal,
+              ]}
             >
               <MaterialCommunityIcons
-                name="map-marker-outline"
-                size={16}
+                name={
+                  candidate.mode === 'traveler'
+                    ? 'airplane'
+                    : 'home-variant-outline'
+                }
+                size={12}
                 color="#fff"
               />
               <AppText
                 variant="caption"
-                style={styles.location}
+                style={styles.modeText}
               >
-                {candidate.home_city}
+                {candidate.mode === 'traveler'
+                  ? 'TRAVELER'
+                  : 'LOCAL'}
               </AppText>
             </View>
-          )}
+          </View>
 
           {candidate.bio && (
             <AppText
@@ -314,14 +342,40 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
   },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.SPACING_PADDING_8,
+    marginTop: 6,
+    flexWrap: 'wrap',
+  },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 4,
   },
   location: {
     color: 'rgba(255,255,255,0.85)',
+  },
+  modeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.pill,
+  },
+  modeTraveler: {
+    backgroundColor: 'rgba(101, 63, 212, 0.85)',
+  },
+  modeLocal: {
+    backgroundColor: 'rgba(34, 139, 96, 0.85)',
+  },
+  modeText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 10,
+    letterSpacing: 0.5,
   },
   bio: {
     color: 'rgba(255,255,255,0.8)',

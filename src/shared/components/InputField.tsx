@@ -22,6 +22,8 @@ const InputField = <T extends FieldValues> ({
   label,
   rules,
   validateOnBlur = true,
+  secureTextEntry,
+  right,
   ...rest
 }: InputFieldProps<T>) => {
   const { control, trigger } = useFormContext<T>();
@@ -31,10 +33,26 @@ const InputField = <T extends FieldValues> ({
     fieldState: { error },
   } = useController({ name, control, rules });
 
+  const [isVisible, setIsVisible] =
+    React.useState(false);
+
   const handleBlur = React.useCallback(() => {
     onBlur();
     if (validateOnBlur) void trigger(name);
   }, [onBlur, validateOnBlur, trigger, name]);
+
+  const passwordToggle =
+    secureTextEntry && !right ? (
+      <TextInput.Icon
+        icon={isVisible ? 'eye-off' : 'eye'}
+        onPress={() =>
+          setIsVisible(v => !v)
+        }
+        forceTextInputFocus={false}
+      />
+    ) : (
+      right
+    );
 
   return (
     <>
@@ -47,6 +65,10 @@ const InputField = <T extends FieldValues> ({
         onBlur={handleBlur}
         style={{ width: '100%' }}
         error={!!error}
+        secureTextEntry={
+          secureTextEntry && !isVisible
+        }
+        right={passwordToggle}
         {...rest}
       />
       {!!error?.message ? (

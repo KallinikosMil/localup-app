@@ -3,8 +3,16 @@ import { Tabs } from 'expo-router';
 import { useTheme } from 'react-native-paper';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
+import useLocation from
+  '@shared/hooks/useLocation';
+import { useSyncLocation } from
+  '@features/profile/hooks/useProfile';
+
 export default function TabLayout() {
   const theme = useTheme();
+  const { latitude, longitude } =
+    useLocation();
+  useSyncLocation(latitude, longitude);
 
   return (
     <Tabs

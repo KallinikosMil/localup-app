@@ -35,6 +35,7 @@ export default function MatchesScreen() {
   const {
     data: matches,
     isLoading,
+    isFetching,
     refetch,
   } = useMatches();
 
@@ -104,18 +105,21 @@ export default function MatchesScreen() {
         >
           {item.display_name}
         </AppText>
-        {item.home_city && (
-          <AppText
-            variant="caption"
-            style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
-            }}
-          >
-            {item.home_city}
-          </AppText>
-        )}
+        <AppText
+          variant="caption"
+          numberOfLines={1}
+          style={{
+            color:
+              theme.colors
+                .onSurfaceVariant,
+            fontStyle: item.last_message
+              ? 'normal'
+              : 'italic',
+          }}
+        >
+          {item.last_message ??
+            'Say hello'}
+        </AppText>
       </View>
 
       <MaterialCommunityIcons
@@ -225,7 +229,9 @@ export default function MatchesScreen() {
             styles.list
           }
           onRefresh={refetch}
-          refreshing={isLoading}
+          refreshing={
+            isFetching && !isLoading
+          }
         />
       )}
     </View>

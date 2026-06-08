@@ -4,13 +4,16 @@ import {
   View,
   Image,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import {
   useTheme,
   ActivityIndicator,
   Chip,
 } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from
+  '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 import AppText from
   '@shared/components/AppText';
@@ -18,22 +21,41 @@ import AppButton from
   '@shared/components/AppButton';
 import Spacer from
   '@shared/components/Spacer';
+import useLocation from
+  '@shared/hooks/useLocation';
 import { useLogout } from
   '@features/auth/hooks/useAuth';
-import { useProfile } from
+import {
+  useProfile,
+  usePhotos,
+  computeMode,
+} from
   '@features/profile/hooks/useProfile';
 import { Spacing } from
   '@theme/constants/Spacing';
 import { BorderRadius } from
   '@theme/constants/BorderRadius';
 
-const AVATAR_SIZE = 96;
+const AVATAR_SIZE = 112;
+const PHOTO_SIZE = 96;
 
 export default function ProfileScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const logout = useLogout();
   const { data: profile, isLoading } =
     useProfile();
+  const { data: photos } = usePhotos(
+    profile?.user_id,
+  );
+  const { latitude, longitude } =
+    useLocation();
+
+  const mode = computeMode(
+    profile,
+    profile?.current_lat ?? latitude,
+    profile?.current_lng ?? longitude,
+  );
 
   if (isLoading) {
     return (
@@ -54,19 +76,24 @@ export default function ProfileScreen() {
     );
   }
 
+  const surfaceLow = blendSurface(
+    theme.colors.background,
+    theme.colors.primaryContainer,
+    0.18,
+  );
+
   return (
     <ScrollView
-      style={[
-        styles.root,
-        {
-          backgroundColor:
-            theme.colors.background,
-        },
-      ]}
+      style={{
+        flex: 1,
+        backgroundColor:
+          theme.colors.background,
+      }}
       contentContainerStyle={
         styles.content
       }
     >
+      {/* Header */}
       <View style={styles.header}>
         <AppText
           variant="h2"
@@ -77,10 +104,42 @@ export default function ProfileScreen() {
         >
           Profile
         </AppText>
+        <Pressable
+          onPress={() =>
+            router.push('/profile/edit')
+          }
+          hitSlop={12}
+          style={[
+            styles.editPill,
+            {
+              backgroundColor:
+                theme.colors.primary,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name="pencil-outline"
+            size={14}
+            color={
+              theme.colors.onPrimary
+            }
+          />
+          <AppText
+            variant="caption"
+            style={{
+              color:
+                theme.colors.onPrimary,
+              fontWeight: '700',
+              marginLeft: 6,
+            }}
+          >
+            Edit
+          </AppText>
+        </Pressable>
       </View>
 
-      {/* Avatar */}
-      <View style={styles.avatarWrap}>
+      {/* Avatar + identity */}
+      <View style={styles.identity}>
         {profile?.avatar_url ? (
           <Image
             source={{
@@ -95,14 +154,13 @@ export default function ProfileScreen() {
               styles.avatarPlaceholder,
               {
                 backgroundColor:
-                  theme.colors
-                    .surfaceVariant,
+                  surfaceLow,
               },
             ]}
           >
             <MaterialCommunityIcons
               name="account"
-              size={48}
+              size={56}
               color={
                 theme.colors
                   .onSurfaceVariant
@@ -110,29 +168,66 @@ export default function ProfileScreen() {
             />
           </View>
         )}
-      </View>
-
-      {/* Name */}
-      <AppText
-        variant="h2"
-        style={{
-          color:
-            theme.colors.onBackground,
-          textAlign: 'center',
-        }}
-      >
-        {profile?.display_name ?? '—'}
-      </AppText>
-
-      {/* City */}
-      {profile?.home_city && (
-        <View style={styles.cityRow}>
+        <Spacer
+          spacing={Spacing.SPACING_PADDING_12}
+        />
+        <AppText
+          variant="h2"
+          style={{
+            color:
+              theme.colors.onBackground,
+            textAlign: 'center',
+          }}
+        >
+          {profile?.display_name ?? '—'}
+        </AppText>
+        {profile?.home_city && (
+          <View style={styles.cityRow}>
+            <MaterialCommunityIcons
+              name="map-marker-outline"
+              size={14}
+              color={
+                theme.colors
+                  .onSurfaceVariant
+              }
+            />
+            <AppText
+              variant="caption"
+              style={{
+                color:
+                  theme.colors
+                    .onSurfaceVariant,
+                marginLeft: 4,
+              }}
+            >
+              {profile.home_city}
+            </AppText>
+          </View>
+        )}
+        <Spacer
+          spacing={Spacing.SPACING_PADDING_8}
+        />
+        {/* Mode badge */}
+        <View
+          style={[
+            styles.modeBadge,
+            {
+              backgroundColor:
+                theme.colors
+                  .primaryContainer,
+            },
+          ]}
+        >
           <MaterialCommunityIcons
-            name="map-marker-outline"
-            size={16}
+            name={
+              mode === 'traveler'
+                ? 'airplane'
+                : 'home-variant-outline'
+            }
+            size={14}
             color={
               theme.colors
-                .onSurfaceVariant
+                .onPrimaryContainer
             }
           />
           <AppText
@@ -140,126 +235,117 @@ export default function ProfileScreen() {
             style={{
               color:
                 theme.colors
-                  .onSurfaceVariant,
-              marginLeft: 4,
+                  .onPrimaryContainer,
+              fontWeight: '700',
+              marginLeft: 6,
+              letterSpacing: 0.5,
             }}
           >
-            {profile.home_city}
+            {mode === 'traveler'
+              ? 'TRAVELER'
+              : 'LOCAL'}
           </AppText>
         </View>
-      )}
+      </View>
 
       <Spacer
-        spacing={
-          Spacing.SPACING_PADDING_16
-        }
+        spacing={Spacing.SPACING_PADDING_24}
       />
 
-      {/* Bio */}
-      {profile?.bio && (
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor:
-                theme.colors
-                  .surfaceVariant,
-            },
-          ]}
+      {/* About */}
+      <Section
+        title="About"
+        bg={theme.colors.surface}
+      >
+        <AppText
+          variant="body"
+          style={{
+            color: theme.colors.onSurface,
+            lineHeight: 22,
+          }}
         >
-          <AppText
-            variant="label"
-            style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
-              marginBottom: 8,
-              letterSpacing: 1,
-              textTransform:
-                'uppercase',
-              fontSize: 11,
-            }}
-          >
-            About
-          </AppText>
-          <AppText
-            variant="body"
-            style={{
-              color:
-                theme.colors.onSurface,
-              lineHeight: 22,
-            }}
-          >
-            {profile.bio}
-          </AppText>
-        </View>
-      )}
+          {profile?.bio?.trim() ||
+            'Tell people a bit about yourself — tap Edit to add a bio.'}
+        </AppText>
+      </Section>
 
-      <Spacer
-        spacing={
-          Spacing.SPACING_PADDING_16
-        }
-      />
+      {/* Photos */}
+      {photos && photos.length > 0 && (
+        <>
+          <Spacer
+            spacing={Spacing.SPACING_PADDING_16}
+          />
+          <Section
+            title="Gallery"
+            bg={theme.colors.surface}
+          >
+            <View
+              style={styles.photoGrid}
+            >
+              {photos.map(p => (
+                <View
+                  key={p.id}
+                  style={[
+                    styles.photoCell,
+                    {
+                      backgroundColor:
+                        surfaceLow,
+                    },
+                  ]}
+                >
+                  <Image
+                    source={{ uri: p.url }}
+                    style={
+                      styles.photoImg
+                    }
+                  />
+                </View>
+              ))}
+            </View>
+          </Section>
+        </>
+      )}
 
       {/* Interests */}
       {profile?.interests &&
         profile.interests.length > 0 && (
-          <View
-            style={[
-              styles.section,
-              {
-                backgroundColor:
-                  theme.colors
-                    .surfaceVariant,
-              },
-            ]}
-          >
-            <AppText
-              variant="label"
-              style={{
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
-                marginBottom: 12,
-                letterSpacing: 1,
-                textTransform:
-                  'uppercase',
-                fontSize: 11,
-              }}
+          <>
+            <Spacer
+              spacing={Spacing.SPACING_PADDING_16}
+            />
+            <Section
+              title="Interests"
+              bg={theme.colors.surface}
             >
-              Interests
-            </AppText>
-            <View style={styles.chips}>
-              {profile.interests.map(
-                interest => (
-                  <Chip
-                    key={interest}
-                    style={[
-                      styles.chip,
-                      {
-                        backgroundColor:
+              <View style={styles.chips}>
+                {profile.interests.map(
+                  interest => (
+                    <Chip
+                      key={interest}
+                      style={[
+                        styles.chip,
+                        {
+                          backgroundColor:
+                            surfaceLow,
+                        },
+                      ]}
+                      textStyle={{
+                        color:
                           theme.colors
-                            .surface,
-                      },
-                    ]}
-                    textStyle={{
-                      color:
-                        theme.colors
-                          .onSurface,
-                    }}
-                  >
-                    {interest}
-                  </Chip>
-                ),
-              )}
-            </View>
-          </View>
+                            .onSurface,
+                      }}
+                    >
+                      {interest}
+                    </Chip>
+                  ),
+                )}
+              </View>
+            </Section>
+          </>
         )}
 
       <Spacer
-        spacing={
-          Spacing.SPACING_PADDING_32
-        }
+        spacing={Spacing.SPACING_PADDING_32}
       />
 
       <AppButton
@@ -272,18 +358,83 @@ export default function ProfileScreen() {
       </AppButton>
 
       <Spacer
-        spacing={
-          Spacing.SPACING_PADDING_32
-        }
+        spacing={Spacing.SPACING_PADDING_32}
       />
     </ScrollView>
   );
 }
 
+const Section = ({
+  title,
+  bg,
+  children,
+}: {
+  title: string;
+  bg: string;
+  children: React.ReactNode;
+}) => {
+  const theme = useTheme();
+  return (
+    <View>
+      <AppText
+        variant="caption"
+        style={{
+          color:
+            theme.colors.onSurfaceVariant,
+          letterSpacing: 1.2,
+          textTransform: 'uppercase',
+          fontSize: 11,
+          marginBottom: 8,
+          marginLeft: 4,
+          fontWeight: '600',
+        }}
+      >
+        {title}
+      </AppText>
+      <View
+        style={[
+          styles.sectionCard,
+          { backgroundColor: bg },
+        ]}
+      >
+        {children}
+      </View>
+    </View>
+  );
+};
+
+const blendSurface = (
+  base: string,
+  tint: string,
+  t: number,
+) => {
+  const b = hexToRgb(base);
+  const tt = hexToRgb(tint);
+  if (!b || !tt) return base;
+  const r = Math.round(
+    b.r + (tt.r - b.r) * t,
+  );
+  const g = Math.round(
+    b.g + (tt.g - b.g) * t,
+  );
+  const bl = Math.round(
+    b.b + (tt.b - b.b) * t,
+  );
+  return `rgb(${r}, ${g}, ${bl})`;
+};
+
+const hexToRgb = (hex: string) => {
+  const m = /^#?([a-f0-9]{6})$/i.exec(hex);
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return {
+    r: (n >> 16) & 255,
+    g: (n >> 8) & 255,
+    b: n & 255,
+  };
+};
+
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
   center: {
     flex: 1,
     alignItems: 'center',
@@ -292,17 +443,26 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal:
       Spacing.SPACING_PADDING_24,
-  },
-  header: {
     paddingTop:
       Spacing.SPACING_PADDING_24,
     paddingBottom:
-      Spacing.SPACING_PADDING_16,
+      Spacing.SPACING_PADDING_32,
   },
-  avatarWrap: {
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom:
-      Spacing.SPACING_PADDING_16,
+  },
+  editPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.pill,
+  },
+  identity: {
+    alignItems: 'center',
+    marginTop: Spacing.SPACING_PADDING_16,
   },
   avatar: {
     width: AVATAR_SIZE,
@@ -316,13 +476,34 @@ const styles = StyleSheet.create({
   cityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 4,
   },
-  section: {
+  modeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.pill,
+  },
+  sectionCard: {
     padding:
       Spacing.SPACING_PADDING_16,
-    borderRadius: BorderRadius.xl,
+    borderRadius: BorderRadius.xxl,
+  },
+  photoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  photoCell: {
+    width: PHOTO_SIZE,
+    height: PHOTO_SIZE,
+    borderRadius: BorderRadius.lg,
+    overflow: 'hidden',
+  },
+  photoImg: {
+    width: '100%',
+    height: '100%',
   },
   chips: {
     flexDirection: 'row',

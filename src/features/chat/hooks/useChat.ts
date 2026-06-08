@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   useQuery,
   useMutation,
@@ -21,12 +22,12 @@ export const useThread = (
   const uid = useSelector(
     (s: RootState) => s.auth.user?.uid,
   );
+  const queryClient = useQueryClient();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['thread', matchId],
     enabled: !!uid && !!matchId,
     queryFn: async () => {
-      // Find or note absence of thread
       const { data, error } =
         await supabase
           .from('chat_threads')
@@ -38,15 +39,50 @@ export const useThread = (
       return data?.id ?? null;
     },
   });
+
+  // Subscribe to thread creation when
+  // no thread exists yet
+  useEffect(() => {
+    if (!matchId || query.data) return;
+
+    const channel = supabase
+      .channel(`thread-${matchId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_threads',
+          filter: `match_id=eq.${matchId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: ['thread', matchId],
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [
+    matchId,
+    query.data,
+    queryClient,
+  ]);
+
+  return query;
 };
 
 export const useMessages = (
   threadId: string | null,
 ) => {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ['messages', threadId],
     enabled: !!threadId,
-    refetchInterval: 3000,
     queryFn: async () => {
       const { data, error } =
         await supabase
@@ -63,6 +99,52 @@ export const useMessages = (
       return (data ?? []) as ChatMessage[];
     },
   });
+
+  // Subscribe to new messages in real-time
+  useEffect(() => {
+    if (!threadId) return;
+
+    const channel = supabase
+      .channel(`messages-${threadId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `thread_id=eq.${threadId}`,
+        },
+        payload => {
+          queryClient.setQueryData<
+            ChatMessage[]
+          >(
+            ['messages', threadId],
+            old => {
+              const next =
+                payload.new as ChatMessage;
+              if (
+                (old ?? []).some(
+                  m => m.id === next.id,
+                )
+              ) {
+                return old;
+              }
+              return [
+                ...(old ?? []),
+                next,
+              ];
+            },
+          );
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [threadId, queryClient]);
+
+  return query;
 };
 
 export const useSendMessage = (

@@ -18,7 +18,15 @@ INSERT INTO auth.users (
   raw_app_meta_data,
   raw_user_meta_data,
   aud,
-  role
+  role,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
+  email_change_token_current,
+  phone_change,
+  phone_change_token,
+  reauthentication_token
 ) VALUES
   (
     'aaaaaaaa-0001-4000-8000-000000000001',
@@ -27,7 +35,8 @@ INSERT INTO auth.users (
     crypt('password123', gen_salt('bf')),
     now(), now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{}', 'authenticated', 'authenticated'
+    '{}', 'authenticated', 'authenticated',
+    '', '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0002-4000-8000-000000000002',
@@ -36,7 +45,8 @@ INSERT INTO auth.users (
     crypt('password123', gen_salt('bf')),
     now(), now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{}', 'authenticated', 'authenticated'
+    '{}', 'authenticated', 'authenticated',
+    '', '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0003-4000-8000-000000000003',
@@ -45,7 +55,8 @@ INSERT INTO auth.users (
     crypt('password123', gen_salt('bf')),
     now(), now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{}', 'authenticated', 'authenticated'
+    '{}', 'authenticated', 'authenticated',
+    '', '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0004-4000-8000-000000000004',
@@ -54,7 +65,8 @@ INSERT INTO auth.users (
     crypt('password123', gen_salt('bf')),
     now(), now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{}', 'authenticated', 'authenticated'
+    '{}', 'authenticated', 'authenticated',
+    '', '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0005-4000-8000-000000000005',
@@ -63,7 +75,8 @@ INSERT INTO auth.users (
     crypt('password123', gen_salt('bf')),
     now(), now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{}', 'authenticated', 'authenticated'
+    '{}', 'authenticated', 'authenticated',
+    '', '', '', '', '', '', '', ''
   )
 ON CONFLICT (id) DO NOTHING;
 
@@ -117,37 +130,63 @@ INSERT INTO auth.identities (
 ON CONFLICT DO NOTHING;
 
 -- 2. Create completed profiles
+--    home_lat/lng = where they live.
+--    current_lat/lng = where they are now.
+--    Scenarios:
+--      Alice    : Athens local (home & now Athens)
+--      Bob      : Thessaloniki local (home & now Thessaloniki)
+--      Carla    : Barcelona local visiting Athens (traveler)
+--      Dimitris : Athens local (home & now Athens)
+--      Elena    : Heraklion local visiting Athens (traveler)
 INSERT INTO public.profiles (
   user_id, display_name, home_city,
+  home_lat, home_lng,
+  current_lat, current_lng,
+  last_location_at,
   bio, onboarding_complete
 ) VALUES
   (
     'aaaaaaaa-0001-4000-8000-000000000001',
     'Alice', 'Athens',
+    37.9838, 23.7275,
+    37.9838, 23.7275,
+    now(),
     'Love exploring hidden gems and street food spots!',
     true
   ),
   (
     'aaaaaaaa-0002-4000-8000-000000000002',
     'Bob', 'Thessaloniki',
+    40.6401, 22.9444,
+    40.6401, 22.9444,
+    now(),
     'Backpacker and live music enthusiast.',
     true
   ),
   (
     'aaaaaaaa-0003-4000-8000-000000000003',
     'Carla', 'Barcelona',
+    41.3851, 2.1734,
+    37.9838, 23.7275,
+    now(),
     'Traveling through Greece this summer.',
     true
   ),
   (
     'aaaaaaaa-0004-4000-8000-000000000004',
     'Dimitris', 'Athens',
+    37.9838, 23.7275,
+    37.9838, 23.7275,
+    now(),
     'Local foodie, ask me about the best souvlaki.',
     true
   ),
   (
     'aaaaaaaa-0005-4000-8000-000000000005',
     'Elena', 'Heraklion',
+    35.3387, 25.1442,
+    37.9838, 23.7275,
+    now(),
     'History nerd and sunset chaser.',
     true
   )
@@ -163,7 +202,8 @@ SELECT
   'aaaaaaaa-0001-4000-8000-000000000001',
   id
 FROM public.interests
-LIMIT 3;
+LIMIT 3
+ON CONFLICT DO NOTHING;
 
 INSERT INTO public.user_interests (
   user_id, interest_id
@@ -172,7 +212,8 @@ SELECT
   'aaaaaaaa-0002-4000-8000-000000000002',
   id
 FROM public.interests
-OFFSET 1 LIMIT 3;
+OFFSET 1 LIMIT 3
+ON CONFLICT DO NOTHING;
 
 INSERT INTO public.user_interests (
   user_id, interest_id
@@ -181,7 +222,8 @@ SELECT
   'aaaaaaaa-0003-4000-8000-000000000003',
   id
 FROM public.interests
-OFFSET 2 LIMIT 3;
+OFFSET 2 LIMIT 3
+ON CONFLICT DO NOTHING;
 
 INSERT INTO public.user_interests (
   user_id, interest_id
@@ -190,7 +232,8 @@ SELECT
   'aaaaaaaa-0004-4000-8000-000000000004',
   id
 FROM public.interests
-OFFSET 3 LIMIT 3;
+OFFSET 3 LIMIT 3
+ON CONFLICT DO NOTHING;
 
 INSERT INTO public.user_interests (
   user_id, interest_id
@@ -199,7 +242,8 @@ SELECT
   'aaaaaaaa-0005-4000-8000-000000000005',
   id
 FROM public.interests
-OFFSET 4 LIMIT 3;
+OFFSET 4 LIMIT 3
+ON CONFLICT DO NOTHING;
 
 -- Done! You now have 5 test users:
 -- alice@test.local    / password123

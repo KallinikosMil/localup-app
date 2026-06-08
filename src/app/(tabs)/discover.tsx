@@ -118,44 +118,8 @@ export default function DiscoverScreen() {
     );
   }
 
-  if (locError) {
-    return (
-      <View
-        style={[
-          styles.center,
-          {
-            backgroundColor:
-              theme.colors.background,
-          },
-        ]}
-      >
-        <MaterialCommunityIcons
-          name="map-marker-off-outline"
-          size={48}
-          color={
-            theme.colors
-              .onSurfaceVariant
-          }
-        />
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_16
-          }
-        />
-        <AppText
-          variant="body"
-          style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
-            textAlign: 'center',
-          }}
-        >
-          {locError}
-        </AppText>
-      </View>
-    );
-  }
+  // Note: locError no longer blocks rendering — useCandidates falls
+  // back to the swiper's persisted current_lat/lng from profile.
 
   if (!current) {
     return (
@@ -296,24 +260,6 @@ export default function DiscoverScreen() {
           />
         </Pressable>
 
-        <Pressable
-          onPress={handleSwipeRight}
-          style={[
-            styles.actionBtn,
-            styles.actionBtnSmall,
-            {
-              backgroundColor:
-                theme.colors
-                  .surfaceVariant,
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name="star"
-            size={28}
-            color="#FFD60A"
-          />
-        </Pressable>
       </View>
 
       <Portal>
