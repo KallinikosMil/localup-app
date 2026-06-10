@@ -24,6 +24,15 @@ export const lightColors = {
   success: "#00C853",
   warning: "#F59E0B",
   info: "#3B82F6",
+
+  // UI redesign tokens (spec 2026-06-10-ui-redesign §2.3)
+  modeLocal: "#228B60",
+  modeTraveler: "#653FD4",
+  like: "#00C853",
+  pass: "#EF4444",
+  gradientStart: "#653FD4",
+  gradientEnd: "#A78BFA",
+  surfaceElevated: "#FFFFFF",
 };
 
 export const darkColors = {
@@ -52,4 +61,13 @@ export const darkColors = {
   success: "#00E676",
   warning: "#FFD740",
   info: "#8AB4F8",
+
+  // UI redesign tokens (spec 2026-06-10-ui-redesign §2.3)
+  modeLocal: "#34D399",
+  modeTraveler: "#D0BCFF",
+  like: "#00E676",
+  pass: "#F87171",
+  gradientStart: "#7C5CE0",
+  gradientEnd: "#B79CFF",
+  surfaceElevated: "#27252B",
 };

@@ -1,15 +1,27 @@
 import { TextStyle } from 'react-native';
 
+// UI redesign scale (spec 2026-06-10-ui-redesign §2.1):
+// Plus Jakarta Sans for headlines, Inter for body. Fonts
+// are loaded in AppProviders via useFonts — fontFamily here
+// must match the loaded names exactly. fontWeight is NOT
+// set alongside fontFamily: Android resolves weight from
+// the font file itself, and a mismatched fontWeight makes
+// it silently fall back to the system font.
 export type TypographyVariant =
+  | 'display'
   | 'h1'
   | 'h2'
   | 'h3'
+  | 'bodyLg'
+  | 'body'
+  | 'caption'
+  | 'overline'
+  // legacy variants — still used by pre-redesign screens;
+  // migrate call sites per UI PR, then remove
   | 'title'
   | 'subtitle'
-  | 'body'
   | 'bodySmall'
-  | 'label'
-  | 'caption';
+  | 'label';
 
 type PaperVariant =
   | 'displaySmall'
@@ -33,62 +45,104 @@ export const Typography: Record<
   TypographyVariant,
   TypographyDef
 > = {
+  display: {
+    paperVariant: 'displayMedium',
+    style: {
+      fontFamily: 'PlusJakartaSans_800ExtraBold',
+      fontSize: 32,
+      lineHeight: 38,
+    },
+  },
   h1: {
     paperVariant: 'displaySmall',
     style: {
-      fontWeight: '700',
-      letterSpacing: -1,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontSize: 28,
+      lineHeight: 34,
     },
   },
   h2: {
     paperVariant: 'headlineLarge',
     style: {
-      fontWeight: '700',
-      letterSpacing: -0.5,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontSize: 22,
+      lineHeight: 28,
     },
   },
   h3: {
     paperVariant: 'headlineSmall',
     style: {
-      fontWeight: '600',
+      fontFamily: 'PlusJakartaSans_600SemiBold',
+      fontSize: 18,
+      lineHeight: 24,
     },
   },
-  title: {
-    paperVariant: 'titleLarge',
+  bodyLg: {
+    paperVariant: 'bodyLarge',
     style: {
-      fontWeight: '600',
-    },
-  },
-  subtitle: {
-    paperVariant: 'titleMedium',
-    style: {
-      fontWeight: '500',
+      fontFamily: 'Inter_400Regular',
+      fontSize: 16,
+      lineHeight: 24,
     },
   },
   body: {
-    paperVariant: 'bodyLarge',
-    style: {
-      fontWeight: '400',
-    },
-  },
-  bodySmall: {
     paperVariant: 'bodyMedium',
     style: {
-      fontWeight: '400',
-    },
-  },
-  label: {
-    paperVariant: 'labelLarge',
-    style: {
-      fontWeight: '500',
-      letterSpacing: 0.5,
+      fontFamily: 'Inter_400Regular',
+      fontSize: 14,
+      lineHeight: 20,
     },
   },
   caption: {
     paperVariant: 'labelSmall',
     style: {
-      fontWeight: '400',
-      letterSpacing: 0.4,
+      fontFamily: 'Inter_400Regular',
+      fontSize: 12,
+      lineHeight: 16,
+    },
+  },
+  overline: {
+    paperVariant: 'labelSmall',
+    style: {
+      fontFamily: 'Inter_700Bold',
+      fontSize: 10,
+      lineHeight: 14,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+    },
+  },
+  // ---- legacy variants (pre-redesign call sites) ----
+  title: {
+    paperVariant: 'titleLarge',
+    style: {
+      fontFamily: 'Inter_600SemiBold',
+      fontSize: 20,
+      lineHeight: 26,
+    },
+  },
+  subtitle: {
+    paperVariant: 'titleMedium',
+    style: {
+      fontFamily: 'Inter_500Medium',
+      fontSize: 16,
+      lineHeight: 22,
+    },
+  },
+  bodySmall: {
+    paperVariant: 'bodyMedium',
+    style: {
+      fontFamily: 'Inter_400Regular',
+      fontSize: 13,
+      lineHeight: 18,
+    },
+  },
+  label: {
+    paperVariant: 'labelLarge',
+    style: {
+      fontFamily: 'Inter_500Medium',
+      fontSize: 13,
+      lineHeight: 18,
+      letterSpacing: 0.5,
     },
   },
 };
