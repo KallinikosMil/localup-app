@@ -176,39 +176,59 @@ export default function AppProviders({
   }, [fontsLoaded]);
 
   useEffect(() => {
-    supabase.auth
-      .getSession()
-      .then(async ({ data }) => {
-        const session = data.session;
-        const user = session?.user
-          ? {
-              uid: session.user.id,
-              email:
-                session.user.email ?? null,
-            }
-          : null;
-        store.dispatch(setUser(user));
+    const initSession = async () => {
+      const { data, error } =
+        await supabase.auth.getSession();
 
-        if (session?.user) {
-          const { data: profile } =
-            await supabase
-              .from('profiles')
-              .select('onboarding_complete')
-              .eq('user_id', session.user.id)
-              .single();
-
-          store.dispatch(
-            setOnboardingComplete(
-              profile?.onboarding_complete ??
-                false,
-            ),
-          );
+      if (
+        error &&
+        /refresh token/i.test(error.message)
+      ) {
+        // Stale persisted session: the stored
+        // refresh token was already rotated
+        // (single-use). Clear it locally so the
+        // auto-refresh loop stops retrying a
+        // dead token (dev LogBox error spam);
+        // the user lands on login as before.
+        try {
+          await supabase.auth.signOut({
+            scope: 'local',
+          });
+        } catch {
+          // best-effort cleanup
         }
+      }
+
+      const session = data.session;
+      const user = session?.user
+        ? {
+            uid: session.user.id,
+            email:
+              session.user.email ?? null,
+          }
+        : null;
+      store.dispatch(setUser(user));
+
+      if (session?.user) {
+        const { data: profile } =
+          await supabase
+            .from('profiles')
+            .select('onboarding_complete')
+            .eq('user_id', session.user.id)
+            .single();
 
         store.dispatch(
-          setInitialized(true),
+          setOnboardingComplete(
+            profile?.onboarding_complete ??
+              false,
+          ),
         );
-      });
+      }
+
+      store.dispatch(setInitialized(true));
+    };
+
+    initSession();
 
     const { data: sub } =
       supabase.auth.onAuthStateChange(

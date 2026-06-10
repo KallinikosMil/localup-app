@@ -300,21 +300,23 @@ export const useSyncLocation = (
       at: now,
     };
 
-    supabase
-      .from('profiles')
-      .update({
-        current_lat: lat,
-        current_lng: lng,
-        last_location_at:
-          new Date().toISOString(),
-      })
-      .eq('user_id', uid)
-      .then(({ error }) => {
-        if (error) {
-          // Reset so we retry next change.
-          lastSync.current = null;
-        }
-      });
+    const syncLocation = async () => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          current_lat: lat,
+          current_lng: lng,
+          last_location_at:
+            new Date().toISOString(),
+        })
+        .eq('user_id', uid);
+      if (error) {
+        // Reset so we retry next change.
+        lastSync.current = null;
+      }
+    };
+
+    syncLocation();
   }, [uid, lat, lng]);
 };
 
