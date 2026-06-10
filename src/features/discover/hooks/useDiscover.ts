@@ -243,14 +243,14 @@ export const useSwipe = () => {
       };
     },
     onSuccess: result => {
-      // Partial-key invalidation — covers all
-      // filter variants for this swiper.
-      queryClient.invalidateQueries({
-        queryKey: [
-          'discover-candidates',
-          uid,
-        ],
-      });
+      // Deliberately NO deck invalidation here.
+      // The deck is consumed locally and only
+      // refetched on exhaustion — swipe-exclusion
+      // in the RPC IS the pagination (Captured
+      // Decision #1). Per-swipe invalidation
+      // would re-pack the deck from 0 while the
+      // screen's cursor keeps advancing,
+      // skipping candidates.
       if (result.matched) {
         queryClient.invalidateQueries({
           queryKey: ['matches'],

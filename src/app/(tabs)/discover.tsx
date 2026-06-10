@@ -1,6 +1,7 @@
 import React, {
   useState,
   useCallback,
+  useEffect,
 } from 'react';
 import {
   StyleSheet,
@@ -46,7 +47,9 @@ export default function DiscoverScreen() {
   const {
     data: candidates,
     isLoading,
+    isFetching,
     refetch,
+    dataUpdatedAt,
   } = useCandidates();
   const swipe = useSwipe();
 
@@ -54,6 +57,29 @@ export default function DiscoverScreen() {
     useState(0);
   const [matchedUser, setMatchedUser] =
     useState<Candidate | null>(null);
+
+  // Every fresh deck is re-packed from
+  // position 0 (the RPC excludes already-
+  // swiped users), so the local cursor
+  // must follow it.
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [dataUpdatedAt]);
+
+  // Swipe through the cached deck
+  // locally; fetch the next page only
+  // when it's consumed. Swipe-exclusion
+  // in the RPC is the pagination.
+  const deckConsumed =
+    !!candidates &&
+    candidates.length > 0 &&
+    currentIndex >= candidates.length;
+
+  useEffect(() => {
+    if (deckConsumed && !isFetching) {
+      refetch();
+    }
+  }, [deckConsumed, isFetching, refetch]);
 
   const current =
     candidates?.[currentIndex] ?? null;
@@ -98,7 +124,11 @@ export default function DiscoverScreen() {
     setMatchedUser(null);
   };
 
-  if (locLoading || isLoading) {
+  if (
+    locLoading ||
+    isLoading ||
+    deckConsumed
+  ) {
     return (
       <View
         style={[
