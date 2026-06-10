@@ -23,6 +23,12 @@ const ModeBadge = ({
   const bg = isTraveler
     ? theme.colors.modeTraveler
     : theme.colors.modeLocal;
+  // Mode colors are dark-on-light in dark mode
+  // (#D0BCFF / #34D399) — white text would fall
+  // under the 4.5:1 contrast floor there.
+  const fg = theme.dark
+    ? theme.colors.background
+    : '#fff';
   const sm = size === 'sm';
 
   return (
@@ -40,11 +46,11 @@ const ModeBadge = ({
             : 'home-variant-outline'
         }
         size={sm ? 10 : 12}
-        color="#fff"
+        color={fg}
       />
       <AppText
         variant="overline"
-        style={styles.text}
+        style={{ color: fg }}
       >
         {isTraveler ? 'Traveler' : 'Local'}
       </AppText>
@@ -69,8 +75,5 @@ const styles = StyleSheet.create({
   pillSm: {
     paddingHorizontal: 8,
     paddingVertical: 3,
-  },
-  text: {
-    color: '#fff',
   },
 });

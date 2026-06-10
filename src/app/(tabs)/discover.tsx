@@ -11,7 +11,6 @@ import {
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   ActivityIndicator,
-  useTheme,
   Portal,
   Modal,
   Snackbar,
@@ -22,8 +21,13 @@ import AppText from
   '@shared/components/AppText';
 import AppButton from
   '@shared/components/AppButton';
+import EmptyState from
+  '@shared/components/EmptyState';
+import GradientButton from
+  '@shared/components/GradientButton';
 import Spacer from
   '@shared/components/Spacer';
+import { useAppTheme } from '@theme/paper';
 import useLocation from
   '@shared/hooks/useLocation';
 import SwipeCard from
@@ -40,8 +44,12 @@ import { Spacing } from
 import { BorderRadius } from
   '@theme/constants/BorderRadius';
 
+// Placeholder for the sibling discovery-filters spec —
+// the header filter button renders only when this flips.
+const FILTERS_ENABLED = false;
+
 export default function DiscoverScreen() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const { latitude, longitude, loading: locLoading } =
     useLocation();
   useStaleLocationRefetch(latitude, longitude);
@@ -155,64 +163,25 @@ export default function DiscoverScreen() {
     return (
       <View
         style={[
-          styles.center,
+          styles.root,
           {
             backgroundColor:
               theme.colors.background,
           },
         ]}
       >
-        <MaterialCommunityIcons
-          name="compass-off-outline"
-          size={48}
-          color={
-            theme.colors
-              .onSurfaceVariant
-          }
-        />
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_16
-          }
-        />
-        <AppText
-          variant="h3"
-          style={{
-            color:
-              theme.colors.onBackground,
+        <EmptyState
+          icon="compass-off-outline"
+          title="No one nearby"
+          subtitle="Check back later for new people"
+          action={{
+            label: 'Refresh',
+            onPress: () => {
+              setCurrentIndex(0);
+              refetch();
+            },
           }}
-        >
-          No one nearby
-        </AppText>
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_8}
         />
-        <AppText
-          variant="body"
-          style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
-            textAlign: 'center',
-          }}
-        >
-          Check back later for new
-          people
-        </AppText>
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_24
-          }
-        />
-        <AppButton
-          variant="outlined"
-          onPress={() => {
-            setCurrentIndex(0);
-            refetch();
-          }}
-        >
-          Refresh
-        </AppButton>
       </View>
     );
   }
@@ -227,6 +196,36 @@ export default function DiscoverScreen() {
         },
       ]}
     >
+      <View style={styles.header}>
+        <AppText
+          variant="h2"
+          style={{
+            color: theme.colors.primary,
+          }}
+        >
+          LocalUp
+        </AppText>
+        {FILTERS_ENABLED && (
+          <Pressable
+            style={[
+              styles.filterBtn,
+              {
+                borderColor:
+                  theme.colors.outline,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="tune-variant"
+              size={20}
+              color={
+                theme.colors.onSurface
+              }
+            />
+          </Pressable>
+        )}
+      </View>
+
       <View style={styles.cardStack}>
         {next && (
           <View
@@ -255,40 +254,44 @@ export default function DiscoverScreen() {
       >
         <Pressable
           onPress={handleSwipeLeft}
-          style={[
+          style={({ pressed }) => [
             styles.actionBtn,
             styles.actionBtnSmall,
             {
               backgroundColor:
                 theme.colors
-                  .surfaceVariant,
+                  .surfaceElevated,
+            },
+            pressed && {
+              transform: [
+                { scale: 0.96 },
+              ],
             },
           ]}
         >
           <MaterialCommunityIcons
             name="close"
             size={28}
-            color="#FF3B30"
+            color={theme.colors.pass}
           />
         </Pressable>
 
-        <Pressable
+        <GradientButton
           onPress={handleSwipeRight}
-          style={[
-            styles.actionBtn,
-            styles.actionBtnLarge,
-            {
-              backgroundColor:
-                theme.colors.primary,
-            },
-          ]}
+          circleSize={68}
         >
           <MaterialCommunityIcons
             name="heart"
             size={32}
-            color="#fff"
+            color={
+              theme.colors.onPrimary
+            }
+            // optical centering — the
+            // heart glyph sits high in
+            // its em box
+            style={{ marginTop: 2 }}
           />
-        </Pressable>
+        </GradientButton>
 
       </View>
 
@@ -378,15 +381,28 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.xl,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+  },
+  filterBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardStack: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop:
-      Spacing.SPACING_PADDING_16,
+    paddingTop: Spacing.lg,
   },
   backCard: {
     transform: [{ scale: 0.95 }],
@@ -396,11 +412,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: Spacing.SPACING_PADDING_24,
-    paddingVertical:
-      Spacing.SPACING_PADDING_16,
-    paddingBottom:
-      Spacing.SPACING_PADDING_24,
+    gap: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    paddingBottom: Spacing.xl,
   },
   actionBtn: {
     alignItems: 'center',
@@ -412,19 +426,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   actionBtnSmall: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-  },
-  actionBtnLarge: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
   },
   matchModal: {
     alignItems: 'center',
-    padding: Spacing.SPACING_PADDING_32,
-    margin: Spacing.SPACING_PADDING_24,
-    borderRadius: BorderRadius.xxl,
+    padding: Spacing.xxl,
+    margin: Spacing.xl,
+    borderRadius: BorderRadius.lg,
   },
 });

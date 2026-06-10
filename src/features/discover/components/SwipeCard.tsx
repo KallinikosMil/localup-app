@@ -5,7 +5,6 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import { useTheme } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, {
@@ -23,6 +22,11 @@ import {
 
 import AppText from
   '@shared/components/AppText';
+import ModeBadge from
+  '@shared/components/ModeBadge';
+import InterestChip from
+  '@shared/components/InterestChip';
+import { useAppTheme } from '@theme/paper';
 import { Spacing } from
   '@theme/constants/Spacing';
 import { BorderRadius } from
@@ -30,6 +34,8 @@ import { BorderRadius } from
 import {
   type Candidate,
 } from '../hooks/useDiscover';
+
+const MAX_CHIPS = 3;
 
 const { width: SCREEN_WIDTH } =
   Dimensions.get('window');
@@ -47,9 +53,13 @@ const SwipeCard = ({
   onSwipeLeft,
   onSwipeRight,
 }: SwipeCardProps) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
+  const overflow = Math.max(
+    candidate.interests.length - MAX_CHIPS,
+    0,
+  );
 
   const pan = Gesture.Pan()
     .onUpdate(e => {
@@ -172,14 +182,32 @@ const SwipeCard = ({
         <LinearGradient
           colors={[
             'transparent',
-            'rgba(0,0,0,0.7)',
+            'rgba(0,0,0,0.35)',
+            'rgba(0,0,0,0.75)',
           ]}
           style={styles.gradient}
         />
 
+        <View style={styles.distancePill}>
+          <MaterialCommunityIcons
+            name="map-marker-outline"
+            size={12}
+            color="#fff"
+          />
+          <AppText
+            variant="caption"
+            style={styles.distanceText}
+          >
+            {candidate.distance_km.toFixed(
+              1,
+            )}{' '}
+            km
+          </AppText>
+        </View>
+
         <View style={styles.info}>
           <AppText
-            variant="h2"
+            variant="h1"
             style={styles.name}
           >
             {candidate.display_name}
@@ -205,32 +233,11 @@ const SwipeCard = ({
                 </AppText>
               </View>
             )}
-            <View
-              style={[
-                styles.modeBadge,
-                candidate.candidate_mode === 'traveler'
-                  ? styles.modeTraveler
-                  : styles.modeLocal,
-              ]}
-            >
-              <MaterialCommunityIcons
-                name={
-                  candidate.candidate_mode === 'traveler'
-                    ? 'airplane'
-                    : 'home-variant-outline'
-                }
-                size={12}
-                color="#fff"
-              />
-              <AppText
-                variant="caption"
-                style={styles.modeText}
-              >
-                {candidate.candidate_mode === 'traveler'
-                  ? 'TRAVELER'
-                  : 'LOCAL'}
-              </AppText>
-            </View>
+            <ModeBadge
+              mode={
+                candidate.candidate_mode
+              }
+            />
           </View>
 
           {candidate.bio && (
@@ -249,24 +256,20 @@ const SwipeCard = ({
               style={styles.tagRow}
             >
               {candidate.interests
-                .slice(0, 3)
+                .slice(0, MAX_CHIPS)
                 .map(tag => (
-                  <View
+                  <InterestChip
                     key={tag}
-                    style={
-                      styles.tag
-                    }
-                  >
-                    <AppText
-                      variant="caption"
-                      style={
-                        styles.tagText
-                      }
-                    >
-                      {tag}
-                    </AppText>
-                  </View>
+                    label={tag}
+                    variant="frosted"
+                  />
                 ))}
+              {overflow > 0 && (
+                <InterestChip
+                  label={`+${overflow}`}
+                  variant="frosted"
+                />
+              )}
             </View>
           )}
         </View>
@@ -275,12 +278,18 @@ const SwipeCard = ({
           style={[
             styles.stamp,
             styles.likeStamp,
+            {
+              borderColor:
+                theme.colors.like,
+            },
             likeOpacity,
           ]}
         >
           <AppText
             variant="h2"
-            style={styles.likeText}
+            style={{
+              color: theme.colors.like,
+            }}
           >
             LIKE
           </AppText>
@@ -290,12 +299,18 @@ const SwipeCard = ({
           style={[
             styles.stamp,
             styles.nopeStamp,
+            {
+              borderColor:
+                theme.colors.pass,
+            },
             nopeOpacity,
           ]}
         >
           <AppText
             variant="h2"
-            style={styles.nopeText}
+            style={{
+              color: theme.colors.pass,
+            }}
           >
             NOPE
           </AppText>
@@ -311,7 +326,7 @@ const styles = StyleSheet.create({
   card: {
     width: SCREEN_WIDTH - 32,
     height: '100%',
-    borderRadius: BorderRadius.xxl,
+    borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     position: 'absolute',
   },
@@ -328,24 +343,39 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: '45%',
+    height: '50%',
+  },
+  distancePill: {
+    position: 'absolute',
+    top: Spacing.lg,
+    right: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor:
+      'rgba(0,0,0,0.35)',
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  distanceText: {
+    color: '#fff',
+    fontVariant: ['tabular-nums'],
   },
   info: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: Spacing.SPACING_PADDING_24,
+    padding: Spacing.xl,
   },
   name: {
     color: '#fff',
-    fontSize: 28,
-    fontWeight: '700',
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.SPACING_PADDING_8,
+    gap: Spacing.sm,
     marginTop: 6,
     flexWrap: 'wrap',
   },
@@ -357,47 +387,15 @@ const styles = StyleSheet.create({
   location: {
     color: 'rgba(255,255,255,0.85)',
   },
-  modeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.pill,
-  },
-  modeTraveler: {
-    backgroundColor: 'rgba(101, 63, 212, 0.85)',
-  },
-  modeLocal: {
-    backgroundColor: 'rgba(34, 139, 96, 0.85)',
-  },
-  modeText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 10,
-    letterSpacing: 0.5,
-  },
   bio: {
     color: 'rgba(255,255,255,0.8)',
-    marginTop:
-      Spacing.SPACING_PADDING_8,
+    marginTop: Spacing.sm,
   },
   tagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.SPACING_PADDING_8,
-    marginTop:
-      Spacing.SPACING_PADDING_8,
-  },
-  tag: {
-    backgroundColor:
-      'rgba(255,255,255,0.2)',
-    borderRadius: BorderRadius.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  tagText: {
-    color: '#fff',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
   },
   stamp: {
     position: 'absolute',
@@ -409,24 +407,14 @@ const styles = StyleSheet.create({
   },
   likeStamp: {
     left: 24,
-    borderColor: '#4CD964',
     transform: [
       { rotate: '-20deg' },
     ],
   },
   nopeStamp: {
     right: 24,
-    borderColor: '#FF3B30',
     transform: [
       { rotate: '20deg' },
     ],
-  },
-  likeText: {
-    color: '#4CD964',
-    fontWeight: '700',
-  },
-  nopeText: {
-    color: '#FF3B30',
-    fontWeight: '700',
   },
 });
