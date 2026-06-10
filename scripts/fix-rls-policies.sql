@@ -55,17 +55,25 @@ CREATE POLICY
   USING (auth.uid() = user_id);
 
 -- ----- SWIPES -----
+-- SELECT-only since PR #2 (migrations 2c + 2e): all writes go through
+-- the handle_swipe RPC (SECURITY DEFINER). No client INSERT/UPDATE/
+-- DELETE policies — that's deliberate, do not re-add them. 2e also
+-- dropped the legacy "Match queue *" policies that survived the #0a
+-- table rename and the duplicate "Users can ..." set.
 DROP POLICY IF EXISTS
   "Swipes access by swiper"
+  ON public.swipes;
+DROP POLICY IF EXISTS
+  "Swipes readable by swiper"
   ON public.swipes;
 DROP POLICY IF EXISTS
   "Swipes target readable"
   ON public.swipes;
 
 CREATE POLICY
-  "Swipes access by swiper"
+  "Swipes readable by swiper"
   ON public.swipes
-  FOR ALL
+  FOR SELECT
   USING (auth.uid() = swiper_id);
 
 CREATE POLICY
