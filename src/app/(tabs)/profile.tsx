@@ -5,6 +5,7 @@ import {
   Image,
   ScrollView,
   Pressable,
+  RefreshControl,
 } from 'react-native';
 import {
   useTheme,
@@ -43,11 +44,24 @@ export default function ProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
   const logout = useLogout();
-  const { data: profile, isLoading } =
-    useProfile();
-  const { data: photos } = usePhotos(
-    profile?.user_id,
-  );
+  const {
+    data: profile,
+    isLoading,
+    refetch: refetchProfile,
+    isRefetching: profileRefetching,
+  } = useProfile();
+  const {
+    data: photos,
+    refetch: refetchPhotos,
+    isRefetching: photosRefetching,
+  } = usePhotos(profile?.user_id);
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      refetchProfile(),
+      refetchPhotos(),
+    ]);
+  };
   const { latitude, longitude } =
     useLocation();
 
@@ -91,6 +105,15 @@ export default function ProfileScreen() {
       }}
       contentContainerStyle={
         styles.content
+      }
+      refreshControl={
+        <RefreshControl
+          refreshing={
+            profileRefetching ||
+            photosRefetching
+          }
+          onRefresh={handleRefresh}
+        />
       }
     >
       {/* Header */}

@@ -5,6 +5,8 @@ import {
   FlatList,
   Image,
   Pressable,
+  ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {
   ActivityIndicator,
@@ -175,7 +177,20 @@ export default function MatchesScreen() {
       </View>
 
       {!matches?.length ? (
-        <View style={styles.empty}>
+        <ScrollView
+          contentContainerStyle={
+            styles.empty
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={
+                isFetching &&
+                !isLoading
+              }
+              onRefresh={refetch}
+            />
+          }
+        >
           <MaterialCommunityIcons
             name="heart-outline"
             size={48}
@@ -217,7 +232,7 @@ export default function MatchesScreen() {
             people who share your
             interests
           </AppText>
-        </View>
+        </ScrollView>
       ) : (
         <FlatList
           data={matches}
@@ -262,7 +277,7 @@ const styles = StyleSheet.create({
       Spacing.SPACING_PADDING_32,
   },
   empty: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal:

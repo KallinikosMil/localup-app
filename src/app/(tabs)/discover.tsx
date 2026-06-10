@@ -7,6 +7,8 @@ import {
   StyleSheet,
   View,
   Pressable,
+  ScrollView,
+  RefreshControl,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -50,8 +52,15 @@ const FILTERS_ENABLED = false;
 
 export default function DiscoverScreen() {
   const theme = useAppTheme();
-  const { latitude, longitude, loading: locLoading } =
-    useLocation();
+  // GPS is background refinement only — the deck is computed
+  // from the swiper's persisted location server-side, and the
+  // 5km-drift hook refetches if a fresh fix lands far away.
+  // Never gate the render on it (P0 fix 2026-06-10).
+  const {
+    latitude,
+    longitude,
+    refresh: refreshLocation,
+  } = useLocation();
   useStaleLocationRefetch(latitude, longitude);
   const {
     data: candidates,
@@ -133,11 +142,29 @@ export default function DiscoverScreen() {
     setMatchedUser(null);
   };
 
-  if (
-    locLoading ||
-    isLoading ||
-    deckConsumed
-  ) {
+  // Manual refresh (header icon / empty-state
+  // pull): force a fresh GPS fix, then re-pack
+  // the deck. No pull-to-refresh on the deck
+  // itself — it conflicts with the card pan
+  // gesture.
+  const [
+    manualRefreshing,
+    setManualRefreshing,
+  ] = useState(false);
+
+  const handleRefresh =
+    useCallback(async () => {
+      setManualRefreshing(true);
+      try {
+        await refreshLocation();
+        setCurrentIndex(0);
+        await refetch();
+      } finally {
+        setManualRefreshing(false);
+      }
+    }, [refreshLocation, refetch]);
+
+  if (isLoading || deckConsumed) {
     return (
       <View
         style={[
@@ -161,14 +188,22 @@ export default function DiscoverScreen() {
 
   if (!current) {
     return (
-      <View
-        style={[
-          styles.root,
-          {
-            backgroundColor:
-              theme.colors.background,
-          },
-        ]}
+      <ScrollView
+        style={{
+          backgroundColor:
+            theme.colors.background,
+        }}
+        contentContainerStyle={
+          styles.emptyScroll
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={
+              manualRefreshing
+            }
+            onRefresh={handleRefresh}
+          />
+        }
       >
         <EmptyState
           icon="compass-off-outline"
@@ -176,13 +211,10 @@ export default function DiscoverScreen() {
           subtitle="Check back later for new people"
           action={{
             label: 'Refresh',
-            onPress: () => {
-              setCurrentIndex(0);
-              refetch();
-            },
+            onPress: handleRefresh,
           }}
         />
-      </View>
+      </ScrollView>
     );
   }
 
@@ -205,25 +237,58 @@ export default function DiscoverScreen() {
         >
           LocalUp
         </AppText>
-        {FILTERS_ENABLED && (
+        <View
+          style={styles.headerActions}
+        >
+          {FILTERS_ENABLED && (
+            <Pressable
+              style={[
+                styles.headerBtn,
+                {
+                  borderColor:
+                    theme.colors
+                      .outline,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="tune-variant"
+                size={20}
+                color={
+                  theme.colors
+                    .onSurface
+                }
+              />
+            </Pressable>
+          )}
           <Pressable
+            onPress={handleRefresh}
+            disabled={manualRefreshing}
             style={[
-              styles.filterBtn,
+              styles.headerBtn,
               {
                 borderColor:
                   theme.colors.outline,
               },
             ]}
           >
-            <MaterialCommunityIcons
-              name="tune-variant"
-              size={20}
-              color={
-                theme.colors.onSurface
-              }
-            />
+            {manualRefreshing ? (
+              <ActivityIndicator
+                animating
+                size={20}
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name="refresh"
+                size={20}
+                color={
+                  theme.colors
+                    .onSurface
+                }
+              />
+            )}
           </Pressable>
-        )}
+        </View>
       </View>
 
       <View style={styles.cardStack}>
@@ -390,12 +455,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
   },
-  filterBtn: {
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  headerBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
     borderWidth: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyScroll: {
+    flexGrow: 1,
     justifyContent: 'center',
   },
   cardStack: {
