@@ -14,6 +14,7 @@ import {
   useTheme,
   Portal,
   Modal,
+  Snackbar,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -356,6 +357,15 @@ export default function DiscoverScreen() {
           </AppButton>
         </Modal>
       </Portal>
+
+      <Snackbar
+        visible={swipe.isError}
+        onDismiss={() => swipe.reset()}
+        duration={3000}
+      >
+        Swipe didn&apos;t go through —
+        check your connection
+      </Snackbar>
     </GestureHandlerRootView>
   );
 }

@@ -221,55 +221,34 @@ export const useSwipe = () => {
       targetId: string;
       action: 'liked' | 'passed';
     }) => {
-      const { error } = await supabase
-        .from('swipes')
-        .insert({
-          swiper_id: uid,
-          swiped_id: targetId,
-          status: action,
+      // Single atomic round trip: swipe insert,
+      // mutual check, match creation and role
+      // assignment all happen server-side
+      // (handle_swipe RPC, SECURITY DEFINER —
+      // PR #2 spec). Swiper identity comes
+      // from the JWT, not a parameter.
+      const { data, error } =
+        await supabase.rpc('handle_swipe', {
+          p_swiped_id: targetId,
+          p_action: action,
         });
       if (error) throw error;
 
-      if (action === 'liked') {
-        const { data: mutual } =
-          await supabase
-            .from('swipes')
-            .select('id')
-            .eq('swiper_id', targetId)
-            .eq('swiped_id', uid!)
-            .eq('status', 'liked')
-            .maybeSingle();
-
-        if (mutual) {
-          await supabase
-            .from('matches')
-            .insert({
-              traveler_id: uid,
-              host_id: targetId,
-              status: 'active',
-            });
-
-          await supabase
-            .from('swipes')
-            .update({ status: 'matched' })
-            .eq('swiper_id', uid!)
-            .eq('swiped_id', targetId);
-
-          await supabase
-            .from('swipes')
-            .update({ status: 'matched' })
-            .eq('swiper_id', targetId)
-            .eq('swiped_id', uid!);
-
-          return {
-            matched: true,
-            targetId,
-          };
-        }
-      }
+      const row = (
+        data as
+          | {
+              matched: boolean;
+              match_id: string | null;
+            }[]
+          | null
+      )?.[0];
 
       return {
-        matched: false,
+        matched: !!row?.matched,
+        // Pass-through for the match
+        // celebration → /chat/[matchId] nav
+        // (UI redesign spec).
+        matchId: row?.match_id ?? null,
         targetId,
       };
     },
@@ -287,6 +266,18 @@ export const useSwipe = () => {
           queryKey: ['matches'],
         });
       }
+    },
+    onError: () => {
+      // The card already advanced
+      // optimistically; resync the deck so
+      // the candidate the failed swipe
+      // skipped comes back.
+      queryClient.invalidateQueries({
+        queryKey: [
+          'discover-candidates',
+          uid,
+        ],
+      });
     },
   });
 
