@@ -36,9 +36,7 @@ const Avatar = ({
     .toUpperCase();
 
   const insetBorder =
-    theme.dark
-      ? 'rgba(255,255,255,0.1)'
-      : 'rgba(0,0,0,0.1)';
+    theme.colors.imageInset;
 
   const face = uri ? (
     <Image

@@ -23,12 +23,13 @@ const ModeBadge = ({
   const bg = isTraveler
     ? theme.colors.modeTraveler
     : theme.colors.modeLocal;
-  // Mode colors are dark-on-light in dark mode
-  // (#D0BCFF / #34D399) — white text would fall
-  // under the 4.5:1 contrast floor there.
+  // In dark mode the mode pills flip to light
+  // tints (VIOLET_500/GREEN_700 dark values) —
+  // white text would fall under the 4.5:1
+  // contrast floor there, so fg flips too.
   const fg = theme.dark
     ? theme.colors.background
-    : '#fff';
+    : theme.colors.ON_PHOTO;
   const sm = size === 'sm';
 
   return (

@@ -182,21 +182,35 @@ const SwipeCard = ({
         <LinearGradient
           colors={[
             'transparent',
-            'rgba(0,0,0,0.35)',
-            'rgba(0,0,0,0.75)',
+            theme.colors.BLACK_A35,
+            theme.colors.BLACK_A75,
           ]}
           style={styles.gradient}
         />
 
-        <View style={styles.distancePill}>
+        <View
+          style={[
+            styles.distancePill,
+            {
+              backgroundColor:
+                theme.colors.BLACK_A35,
+            },
+          ]}
+        >
           <MaterialCommunityIcons
             name="map-marker-outline"
             size={12}
-            color="#fff"
+            color={theme.colors.ON_PHOTO}
           />
           <AppText
             variant="caption"
-            style={styles.distanceText}
+            style={[
+              styles.distanceText,
+              {
+                color:
+                  theme.colors.ON_PHOTO,
+              },
+            ]}
           >
             {candidate.distance_km.toFixed(
               1,
@@ -208,7 +222,10 @@ const SwipeCard = ({
         <View style={styles.info}>
           <AppText
             variant="h1"
-            style={styles.name}
+            style={{
+              color:
+                theme.colors.ON_PHOTO,
+            }}
           >
             {candidate.display_name}
           </AppText>
@@ -223,11 +240,17 @@ const SwipeCard = ({
                 <MaterialCommunityIcons
                   name="home-outline"
                   size={14}
-                  color="#fff"
+                  color={
+                    theme.colors.ON_PHOTO
+                  }
                 />
                 <AppText
                   variant="caption"
-                  style={styles.location}
+                  style={{
+                    color:
+                      theme.colors
+                        .WHITE_A85,
+                  }}
                 >
                   {candidate.home_city}
                 </AppText>
@@ -243,7 +266,14 @@ const SwipeCard = ({
           {candidate.bio && (
             <AppText
               variant="body"
-              style={styles.bio}
+              style={[
+                styles.bio,
+                {
+                  color:
+                    theme.colors
+                      .WHITE_A85,
+                },
+              ]}
               numberOfLines={2}
             >
               {candidate.bio}
@@ -352,14 +382,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor:
-      'rgba(0,0,0,0.35)',
     borderRadius: BorderRadius.pill,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   distanceText: {
-    color: '#fff',
     fontVariant: ['tabular-nums'],
   },
   info: {
@@ -368,9 +395,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: Spacing.xl,
-  },
-  name: {
-    color: '#fff',
   },
   metaRow: {
     flexDirection: 'row',
@@ -384,11 +408,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  location: {
-    color: 'rgba(255,255,255,0.85)',
-  },
   bio: {
-    color: 'rgba(255,255,255,0.8)',
     marginTop: Spacing.sm,
   },
   tagRow: {

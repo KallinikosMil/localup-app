@@ -35,20 +35,19 @@ const InterestChip = ({
       <View
         style={[
           styles.pill,
-          frosted
-            ? styles.frosted
-            : {
-                backgroundColor:
-                  theme.colors
-                    .secondaryContainer,
-              },
+          {
+            backgroundColor: frosted
+              ? theme.colors.WHITE_A20
+              : theme.colors
+                  .secondaryContainer,
+          },
         ]}
       >
         <AppText
           variant="caption"
           style={{
             color: frosted
-              ? '#fff'
+              ? theme.colors.ON_PHOTO
               : theme.colors
                   .onSecondaryContainer,
           }}
@@ -81,9 +80,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
     paddingHorizontal: 12,
     paddingVertical: 4,
-  },
-  frosted: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   legacy: {
     margin: 4,
