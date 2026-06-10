@@ -1,4 +1,7 @@
-import { useEffect } from 'react';
+import {
+  useEffect,
+  useRef,
+} from 'react';
 import {
   useQuery,
   useMutation,
@@ -144,6 +147,15 @@ export const useStaleLocationRefetch = (
   );
   const { data: swiper } = useProfile();
   const queryClient = useQueryClient();
+  // Coords of the last invalidation. Until
+  // useSyncLocation writes the new position to
+  // the profile, drift stays > threshold on
+  // every GPS tick — without this guard each
+  // tick would invalidate → refetch in a loop.
+  const lastInvalidated = useRef<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
     if (
@@ -162,11 +174,30 @@ export const useStaleLocationRefetch = (
       freshLat,
       freshLng,
     );
-    if (drift > STALE_GPS_KM_THRESHOLD) {
-      queryClient.invalidateQueries({
-        queryKey: ['discover-candidates', uid],
-      });
+    if (drift <= STALE_GPS_KM_THRESHOLD) {
+      return;
     }
+    const last = lastInvalidated.current;
+    if (
+      last &&
+      haversineKm(
+        last.lat,
+        last.lng,
+        freshLat,
+        freshLng,
+      ) <= STALE_GPS_KM_THRESHOLD
+    ) {
+      // Already refetched for (near) these
+      // coords — wait for real movement.
+      return;
+    }
+    lastInvalidated.current = {
+      lat: freshLat,
+      lng: freshLng,
+    };
+    queryClient.invalidateQueries({
+      queryKey: ['discover-candidates', uid],
+    });
   }, [
     uid,
     swiper,
