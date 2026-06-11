@@ -37,6 +37,12 @@ import {
 
 const MAX_CHIPS = 3;
 
+// Distance display rule (UI-1 nit):
+// "0.0 km" reads broken — anything
+// under 1 km is just "nearby".
+const formatDistance = (km: number) =>
+  km < 1 ? 'nearby' : `${km.toFixed(1)} km`;
+
 const { width: SCREEN_WIDTH } =
   Dimensions.get('window');
 const SWIPE_THRESHOLD =
@@ -212,10 +218,9 @@ const SwipeCard = ({
               },
             ]}
           >
-            {candidate.distance_km.toFixed(
-              1,
-            )}{' '}
-            km
+            {formatDistance(
+              candidate.distance_km,
+            )}
           </AppText>
         </View>
 

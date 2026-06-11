@@ -37,9 +37,14 @@ export default function TabLayout() {
           tabBarIcon: ({
             color,
             size,
+            focused,
           }) => (
             <Icon
-              name="compass-outline"
+              name={
+                focused
+                  ? 'compass'
+                  : 'compass-outline'
+              }
               size={size}
               color={color}
             />
@@ -53,9 +58,14 @@ export default function TabLayout() {
           tabBarIcon: ({
             color,
             size,
+            focused,
           }) => (
             <Icon
-              name="chat-outline"
+              name={
+                focused
+                  ? 'chat'
+                  : 'chat-outline'
+              }
               size={size}
               color={color}
             />
@@ -69,9 +79,14 @@ export default function TabLayout() {
           tabBarIcon: ({
             color,
             size,
+            focused,
           }) => (
             <Icon
-              name="account-outline"
+              name={
+                focused
+                  ? 'account'
+                  : 'account-outline'
+              }
               size={size}
               color={color}
             />
