@@ -13,6 +13,11 @@ export type Match = {
   display_name: string;
   avatar_url: string | null;
   home_city: string | null;
+  // Thread for this match (null until the
+  // first message creates it). Passed to the
+  // chat screen so it skips the thread lookup
+  // (§1b), and used to scope realtime here.
+  thread_id: string | null;
   last_message: string | null;
   last_message_at: string | null;
   created_at: string;
@@ -91,6 +96,12 @@ export const useMatches = () => {
           t.match_id,
         ]),
       );
+      const matchIdToThreadId = new Map(
+        (threads ?? []).map(t => [
+          t.match_id,
+          t.id,
+        ]),
+      );
       const threadIds = (
         threads ?? []
       ).map(t => t.id);
@@ -154,6 +165,9 @@ export const useMatches = () => {
             profile?.avatar_url ?? null,
           home_city:
             profile?.home_city ?? null,
+          thread_id:
+            matchIdToThreadId.get(m.id) ??
+            null,
           last_message:
             lastMsg?.body ?? null,
           last_message_at:
@@ -162,6 +176,10 @@ export const useMatches = () => {
         } as Match;
       });
     },
+    // Re-opening Matches renders instantly from cache; realtime
+    // (below) keeps previews current, so no spinner-on-every-visit
+    // (U4-a).
+    staleTime: 30_000,
   });
 
   // Subscribe to new matches and new
@@ -191,10 +209,47 @@ export const useMatches = () => {
           schema: 'public',
           table: 'chat_messages',
         },
-        () => {
-          queryClient.invalidateQueries({
-            queryKey: ['matches', uid],
-          });
+        payload => {
+          // Patch only the affected row's preview instead of
+          // refetching the whole list on every message (U4-a).
+          const msg = payload.new as {
+            thread_id: string;
+            body: string | null;
+            created_at: string;
+          };
+          const cached =
+            queryClient.getQueryData<
+              Match[]
+            >(['matches', uid]);
+          const known = cached?.some(
+            m =>
+              m.thread_id ===
+              msg.thread_id,
+          );
+          if (!known) {
+            // New thread we don't have yet (e.g. first message
+            // of a fresh match) — fall back to a refetch.
+            queryClient.invalidateQueries({
+              queryKey: ['matches', uid],
+            });
+            return;
+          }
+          queryClient.setQueryData<
+            Match[]
+          >(['matches', uid], old =>
+            (old ?? []).map(m =>
+              m.thread_id ===
+              msg.thread_id
+                ? {
+                    ...m,
+                    last_message:
+                      msg.body ?? '',
+                    last_message_at:
+                      msg.created_at,
+                  }
+                : m,
+            ),
+          );
         },
       )
       .subscribe();

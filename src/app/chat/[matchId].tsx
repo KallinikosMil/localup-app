@@ -1,4 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+} from 'react';
 import {
   StyleSheet,
   View,
@@ -24,8 +28,7 @@ import { RootState } from '@store';
 import AppText from
   '@shared/components/AppText';
 import {
-  useThread,
-  useMessages,
+  useChat,
   useSendMessage,
   type ChatMessage,
 } from
@@ -38,26 +41,51 @@ import { BorderRadius } from
 export default function ChatScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { matchId, name } =
+  const { matchId, name, threadId } =
     useLocalSearchParams<{
       matchId: string;
       name: string;
+      // Passed from Matches (which already
+      // knows it) so the chat skips the
+      // thread lookup. Absent on deep links
+      // / brand-new matches → resolved in
+      // the fallback path.
+      threadId?: string;
     }>();
   const uid = useSelector(
     (s: RootState) => s.auth.user?.uid,
   );
 
   const insets = useSafeAreaInsets();
-  const { data: threadId, isLoading } =
-    useThread(matchId);
-  const { data: messages } =
-    useMessages(threadId ?? null);
+  const {
+    messages,
+    isLoading,
+    isError,
+    refetch,
+  } = useChat(matchId, threadId ?? null);
   const sendMessage =
     useSendMessage(matchId);
 
   const [text, setText] = useState('');
   const listRef =
     useRef<FlatList>(null);
+
+  // After a few seconds of loading, reassure the user the screen
+  // isn't frozen — a Supabase project waking from auto-pause can
+  // take 10-20s (V4). Resets whenever loading ends.
+  const [slowLoading, setSlowLoading] =
+    useState(false);
+  useEffect(() => {
+    if (!isLoading) {
+      setSlowLoading(false);
+      return;
+    }
+    const t = setTimeout(
+      () => setSlowLoading(true),
+      4500,
+    );
+    return () => clearTimeout(t);
+  }, [isLoading]);
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -174,6 +202,68 @@ export default function ChatScreen() {
             animating
             size="large"
           />
+          {slowLoading && (
+            <AppText
+              variant="body"
+              style={{
+                color:
+                  theme.colors
+                    .onSurfaceVariant,
+                textAlign: 'center',
+                marginTop:
+                  Spacing.SPACING_PADDING_16,
+              }}
+            >
+              Waking the server…
+            </AppText>
+          )}
+        </View>
+      ) : isError ? (
+        <View style={styles.center}>
+          <MaterialCommunityIcons
+            name="message-alert-outline"
+            size={40}
+            color={
+              theme.colors
+                .onSurfaceVariant
+            }
+          />
+          <AppText
+            variant="body"
+            style={{
+              color:
+                theme.colors
+                  .onSurfaceVariant,
+              textAlign: 'center',
+              marginTop:
+                Spacing.SPACING_PADDING_12,
+            }}
+          >
+            Couldn&apos;t load this
+            conversation.
+          </AppText>
+          <Pressable
+            onPress={() => refetch()}
+            hitSlop={8}
+            style={[
+              styles.retryBtn,
+              {
+                backgroundColor:
+                  theme.colors.primary,
+              },
+            ]}
+          >
+            <AppText
+              variant="body"
+              style={{
+                color:
+                  theme.colors.onPrimary,
+                fontWeight: '600',
+              }}
+            >
+              Retry
+            </AppText>
+          </Pressable>
         </View>
       ) : (
         <FlatList
@@ -287,6 +377,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal:
+      Spacing.SPACING_PADDING_24,
+  },
+  retryBtn: {
+    marginTop:
+      Spacing.SPACING_PADDING_16,
+    paddingHorizontal:
+      Spacing.SPACING_PADDING_24,
+    paddingVertical:
+      Spacing.SPACING_PADDING_8,
+    borderRadius: BorderRadius.pill,
   },
   list: {
     flexGrow: 1,

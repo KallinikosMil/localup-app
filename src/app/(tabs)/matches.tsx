@@ -60,8 +60,16 @@ export default function MatchesScreen() {
           pathname: '/chat/[matchId]',
           params: {
             matchId: item.id,
-            name:
-              item.display_name,
+            name: item.display_name,
+            // Hand the chat the thread it
+            // already knows → skips the
+            // thread lookup (§1b).
+            ...(item.thread_id
+              ? {
+                  threadId:
+                    item.thread_id,
+                }
+              : {}),
           },
         });
       }}
@@ -135,25 +143,6 @@ export default function MatchesScreen() {
     </Pressable>
   );
 
-  if (isLoading) {
-    return (
-      <View
-        style={[
-          styles.center,
-          {
-            backgroundColor:
-              theme.colors.background,
-          },
-        ]}
-      >
-        <ActivityIndicator
-          animating
-          size="large"
-        />
-      </View>
-    );
-  }
-
   return (
     <View
       style={[
@@ -176,7 +165,14 @@ export default function MatchesScreen() {
         </AppText>
       </View>
 
-      {!matches?.length ? (
+      {isLoading ? (
+        <View style={styles.center}>
+          <ActivityIndicator
+            animating
+            size="large"
+          />
+        </View>
+      ) : !matches?.length ? (
         <ScrollView
           contentContainerStyle={
             styles.empty
