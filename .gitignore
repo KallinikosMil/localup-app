@@ -51,6 +51,8 @@ tsconfig.json
 agents.md
 .mcp.json
 CLAUDE.md
+SUPABASE_SETUP.md
+.env.example
 
 # Internal planning docs & local overview (kept out of the public repo)
 docs/superpowers/

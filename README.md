@@ -59,53 +59,6 @@ Sensitive/multi-step operations (mutual-match resolution, onboarding, the matche
 overview) run as **Postgres functions**, so they're atomic and enforced at the
 database layer rather than composed on the client.
 
-## Getting started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org) 18+ and npm
-- The [Expo Go](https://expo.dev/go) app on your phone, or an iOS Simulator /
-  Android Emulator
-- A free [Supabase](https://supabase.com) project
-
-### 1. Clone & install
-
-```bash
-git clone https://github.com/KallinikosMil/localup-app.git
-cd localup-app
-npm install
-```
-
-### 2. Set up the backend
-
-Create a Supabase project, then run the SQL in [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md)
-against it (schema, RLS policies, storage buckets, and RPCs).
-
-### 3. Configure environment
-
-```bash
-cp .env.example .env
-```
-
-Fill in your project's values (Supabase dashboard → **Project Settings → API**):
-
-```
-EXPO_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
-```
-
-> The **anon** key is safe to ship in a client app — access is gated by
-> Row-Level Security, not by hiding the key. Never put the `service_role` key
-> here.
-
-### 4. Run
-
-```bash
-npx expo start
-```
-
-Scan the QR code with Expo Go, or press `i` / `a` to open a simulator.
-
 ## Project structure
 
 ```
