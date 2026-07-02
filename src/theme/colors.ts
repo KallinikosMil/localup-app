@@ -1,7 +1,4 @@
-// ─────────────────────────────────────────────────────────
-// themeColors — bmbcore-style convention (spec §2.3a, user
-// decision 2026-06-10, FINAL).
-//
+// themeColors
 // EVERY hex in the app lives in THIS file and only here.
 // `lightBase`/`darkBase` carry IDENTICAL literal keys; the
 // same key resolves to a different value per mode — the key

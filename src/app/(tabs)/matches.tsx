@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {
+  useState,
+  useEffect,
+} from 'react';
 import {
   StyleSheet,
   View,
@@ -37,9 +40,26 @@ export default function MatchesScreen() {
   const {
     data: matches,
     isLoading,
+    isError,
     isFetching,
     refetch,
   } = useMatches();
+
+  // After a few seconds of loading, reassure the user it isn't
+  // frozen — same as chat (U5). Resets when loading ends.
+  const [slowLoading, setSlowLoading] =
+    useState(false);
+  useEffect(() => {
+    if (!isLoading) {
+      setSlowLoading(false);
+      return;
+    }
+    const t = setTimeout(
+      () => setSlowLoading(true),
+      4500,
+    );
+    return () => clearTimeout(t);
+  }, [isLoading]);
 
   const renderItem = ({
     item,
@@ -171,6 +191,68 @@ export default function MatchesScreen() {
             animating
             size="large"
           />
+          {slowLoading && (
+            <AppText
+              variant="body"
+              style={{
+                color:
+                  theme.colors
+                    .onSurfaceVariant,
+                textAlign: 'center',
+                marginTop:
+                  Spacing.SPACING_PADDING_16,
+              }}
+            >
+              Waking the server…
+            </AppText>
+          )}
+        </View>
+      ) : isError ? (
+        <View style={styles.center}>
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={40}
+            color={
+              theme.colors
+                .onSurfaceVariant
+            }
+          />
+          <AppText
+            variant="body"
+            style={{
+              color:
+                theme.colors
+                  .onSurfaceVariant,
+              textAlign: 'center',
+              marginTop:
+                Spacing.SPACING_PADDING_12,
+            }}
+          >
+            Couldn&apos;t load your
+            matches.
+          </AppText>
+          <Pressable
+            onPress={() => refetch()}
+            hitSlop={8}
+            style={[
+              styles.retryBtn,
+              {
+                backgroundColor:
+                  theme.colors.primary,
+              },
+            ]}
+          >
+            <AppText
+              variant="body"
+              style={{
+                color:
+                  theme.colors.onPrimary,
+                fontWeight: '600',
+              }}
+            >
+              Retry
+            </AppText>
+          </Pressable>
         </View>
       ) : !matches?.length ? (
         <ScrollView
@@ -257,6 +339,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal:
+      Spacing.SPACING_PADDING_24,
+  },
+  retryBtn: {
+    marginTop:
+      Spacing.SPACING_PADDING_16,
+    paddingHorizontal:
+      Spacing.SPACING_PADDING_24,
+    paddingVertical:
+      Spacing.SPACING_PADDING_8,
+    borderRadius: BorderRadius.pill,
   },
   header: {
     paddingHorizontal:
