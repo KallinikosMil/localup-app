@@ -23,6 +23,12 @@ export type Match = {
   created_at: string;
 };
 
+// Mirror the chat fix (U5): a stalled request (network blip, slow
+// response, dropped socket) would otherwise leave isLoading true
+// forever → infinite spinner. Abort past this so the screen's
+// error+Retry branch shows instead of hanging.
+const MATCHES_FETCH_TIMEOUT_MS = 15_000;
+
 export const useMatches = () => {
   const uid = useSelector(
     (s: RootState) => s.auth.user?.uid,
@@ -33,153 +39,34 @@ export const useMatches = () => {
     queryKey: ['matches', uid],
     enabled: !!uid,
     queryFn: async () => {
-      // Get matches where user is
-      // either traveler or host
-      const { data, error } =
-        await supabase
-          .from('matches')
-          .select(
-            'id, traveler_id, host_id, status, created_at',
-          )
-          .or(
-            `traveler_id.eq.${uid},host_id.eq.${uid}`,
-          )
-          .eq('status', 'active')
-          .order('created_at', {
-            ascending: false,
-          });
-
-      if (error) throw error;
-
-      // Get the other user's profile
-      const otherIds = (data ?? []).map(
-        m =>
-          m.traveler_id === uid
-            ? m.host_id
-            : m.traveler_id,
+      const controller =
+        new AbortController();
+      const timeout = setTimeout(
+        () => controller.abort(),
+        MATCHES_FETCH_TIMEOUT_MS,
       );
-
-      if (otherIds.length === 0)
-        return [];
-
-      const { data: profiles, error: pErr } =
-        await supabase
-          .from('profiles')
-          .select(
-            'user_id, display_name, avatar_url, home_city',
-          )
-          .in('user_id', otherIds);
-
-      if (pErr) throw pErr;
-
-      const profileMap = new Map(
-        (profiles ?? []).map(p => [
-          p.user_id,
-          p,
-        ]),
-      );
-
-      // Fetch threads for these matches
-      const matchIds = (data ?? []).map(
-        m => m.id,
-      );
-
-      const { data: threads } =
-        await supabase
-          .from('chat_threads')
-          .select('id, match_id')
-          .in('match_id', matchIds);
-
-      const threadIdToMatchId = new Map(
-        (threads ?? []).map(t => [
-          t.id,
-          t.match_id,
-        ]),
-      );
-      const matchIdToThreadId = new Map(
-        (threads ?? []).map(t => [
-          t.match_id,
-          t.id,
-        ]),
-      );
-      const threadIds = (
-        threads ?? []
-      ).map(t => t.id);
-
-      // Fetch latest message per thread
-      let matchIdToLastMessage = new Map<
-        string,
-        { body: string; created_at: string }
-      >();
-
-      if (threadIds.length > 0) {
-        const { data: messages } =
+      try {
+        // One server-side JOIN instead of the old 4-RTT client
+        // waterfall (matches → profiles → threads → messages).
+        // INVOKER RPC → RLS still scopes rows to the caller; its
+        // columns map 1:1 onto Match, so no remapping here.
+        const { data, error } =
           await supabase
-            .from('chat_messages')
-            .select(
-              'thread_id, body, created_at',
-            )
-            .in('thread_id', threadIds)
-            .order('created_at', {
-              ascending: false,
-            });
-
-        for (const msg of messages ?? []) {
-          const matchId =
-            threadIdToMatchId.get(
-              msg.thread_id,
-            );
-          if (
-            matchId &&
-            !matchIdToLastMessage.has(
-              matchId,
-            )
-          ) {
-            matchIdToLastMessage.set(
-              matchId,
-              {
-                body: msg.body ?? '',
-                created_at: msg.created_at,
-              },
-            );
-          }
-        }
+            .rpc('get_matches_overview')
+            .abortSignal(controller.signal);
+        if (error) throw error;
+        return (data ?? []) as Match[];
+      } finally {
+        clearTimeout(timeout);
       }
-
-      return (data ?? []).map(m => {
-        const otherId =
-          m.traveler_id === uid
-            ? m.host_id
-            : m.traveler_id;
-        const profile =
-          profileMap.get(otherId);
-        const lastMsg =
-          matchIdToLastMessage.get(m.id);
-        return {
-          id: m.id,
-          user_id: otherId,
-          display_name:
-            profile?.display_name ??
-            'User',
-          avatar_url:
-            profile?.avatar_url ?? null,
-          home_city:
-            profile?.home_city ?? null,
-          thread_id:
-            matchIdToThreadId.get(m.id) ??
-            null,
-          last_message:
-            lastMsg?.body ?? null,
-          last_message_at:
-            lastMsg?.created_at ?? null,
-          created_at: m.created_at,
-        } as Match;
-      });
     },
     // Re-opening Matches renders instantly from cache; realtime
     // (below) keeps previews current, so no spinner-on-every-visit
     // (U4-a).
     staleTime: 30_000,
+    // A stalled request would otherwise spin forever; one retry
+    // covers a transient blip, then the error surfaces → Retry (U5).
+    retry: 1,
   });
 
   // Subscribe to new matches and new
