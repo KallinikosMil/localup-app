@@ -256,6 +256,7 @@ export const useSyncLocation = (
   const uid = useSelector(
     (s: RootState) => s.auth.user?.uid,
   );
+  const queryClient = useQueryClient();
   const lastSync = useRef<{
     lat: number;
     lng: number;
@@ -313,11 +314,32 @@ export const useSyncLocation = (
       if (error) {
         // Reset so we retry next change.
         lastSync.current = null;
+        return;
       }
+      // W6: the ['profile'] query still holds the pre-sync
+      // current_lat/lng, so computeMode keeps reporting the stale
+      // mode badge (e.g. 'local' after moving to another city) until a
+      // manual refresh. Patch the cache optimistically for an instant
+      // badge flip, then invalidate to reconcile with the DB — mirrors
+      // useUpdateProfile.
+      queryClient.setQueryData<Profile>(
+        ['profile', uid],
+        prev =>
+          prev
+            ? {
+                ...prev,
+                current_lat: lat,
+                current_lng: lng,
+              }
+            : prev,
+      );
+      queryClient.invalidateQueries({
+        queryKey: ['profile', uid],
+      });
     };
 
     syncLocation();
-  }, [uid, lat, lng]);
+  }, [uid, lat, lng, queryClient]);
 };
 
 export const haversineKm = (

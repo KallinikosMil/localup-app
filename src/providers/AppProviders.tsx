@@ -117,6 +117,15 @@ function AppGuard({
 
     if (inDev) return;
 
+    // W5: onboarding status for this user isn't known yet (the
+    // SIGNED_IN profile fetch is still in flight — onboardingComplete
+    // is null). Don't route in/out of onboarding on a null; wait for a
+    // real boolean. This closes the live-login window where the guard
+    // briefly saw `user && !onboardingComplete` and flashed onboarding.
+    if (user && onboardingComplete === null) {
+      return;
+    }
+
     if (!user && !inAuthGroup) {
       router.replace('/auth/login');
     } else if (user && inAuthGroup) {

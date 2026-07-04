@@ -164,22 +164,97 @@ export default function DiscoverScreen() {
       }
     }, [refreshLocation, refetch]);
 
-  if (isLoading || deckConsumed) {
-    return (
-      <View
-        style={[
-          styles.center,
+  // W7a: the match celebration must persist until the user explicitly
+  // dismisses it. It used to live only in the main return branch, so a
+  // deck refetch (e.g. useStaleLocationRefetch firing on GPS drift)
+  // that emptied/reindexed the deck would hit an early return
+  // (`!current` / `deckConsumed`) and UNMOUNT the Portal → the modal
+  // flashed and vanished. Rendering it here, in every branch, decouples
+  // it from deck state so nothing but dismissMatch can close it.
+  const celebration = (
+    <Portal>
+      <Modal
+        visible={!!matchedUser}
+        onDismiss={dismissMatch}
+        contentContainerStyle={[
+          styles.matchModal,
           {
             backgroundColor:
-              theme.colors.background,
+              theme.colors.surface,
           },
         ]}
       >
-        <ActivityIndicator
-          animating
-          size="large"
+        <MaterialCommunityIcons
+          name="party-popper"
+          size={56}
+          color={theme.colors.primary}
         />
-      </View>
+        <Spacer
+          spacing={
+            Spacing.SPACING_PADDING_16
+          }
+        />
+        <AppText
+          variant="h2"
+          style={{
+            color: theme.colors.primary,
+            textAlign: 'center',
+          }}
+        >
+          It&apos;s a Match!
+        </AppText>
+        <Spacer
+          spacing={
+            Spacing.SPACING_PADDING_8
+          }
+        />
+        <AppText
+          variant="body"
+          style={{
+            color:
+              theme.colors
+                .onSurfaceVariant,
+            textAlign: 'center',
+          }}
+        >
+          You and{' '}
+          {matchedUser?.display_name}{' '}
+          liked each other
+        </AppText>
+        <Spacer
+          spacing={
+            Spacing.SPACING_PADDING_24
+          }
+        />
+        <AppButton
+          variant="primary"
+          onPress={dismissMatch}
+        >
+          Keep Swiping
+        </AppButton>
+      </Modal>
+    </Portal>
+  );
+
+  if (isLoading || deckConsumed) {
+    return (
+      <>
+        <View
+          style={[
+            styles.center,
+            {
+              backgroundColor:
+                theme.colors.background,
+            },
+          ]}
+        >
+          <ActivityIndicator
+            animating
+            size="large"
+          />
+        </View>
+        {celebration}
+      </>
     );
   }
 
@@ -188,33 +263,36 @@ export default function DiscoverScreen() {
 
   if (!current) {
     return (
-      <ScrollView
-        style={{
-          backgroundColor:
-            theme.colors.background,
-        }}
-        contentContainerStyle={
-          styles.emptyScroll
-        }
-        refreshControl={
-          <RefreshControl
-            refreshing={
-              manualRefreshing
-            }
-            onRefresh={handleRefresh}
-          />
-        }
-      >
-        <EmptyState
-          icon="compass-off-outline"
-          title="No one nearby"
-          subtitle="Check back later for new people"
-          action={{
-            label: 'Refresh',
-            onPress: handleRefresh,
+      <>
+        <ScrollView
+          style={{
+            backgroundColor:
+              theme.colors.background,
           }}
-        />
-      </ScrollView>
+          contentContainerStyle={
+            styles.emptyScroll
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={
+                manualRefreshing
+              }
+              onRefresh={handleRefresh}
+            />
+          }
+        >
+          <EmptyState
+            icon="compass-off-outline"
+            title="No one nearby"
+            subtitle="Check back later for new people"
+            action={{
+              label: 'Refresh',
+              onPress: handleRefresh,
+            }}
+          />
+        </ScrollView>
+        {celebration}
+      </>
     );
   }
 
@@ -360,71 +438,7 @@ export default function DiscoverScreen() {
 
       </View>
 
-      <Portal>
-        <Modal
-          visible={!!matchedUser}
-          onDismiss={dismissMatch}
-          contentContainerStyle={[
-            styles.matchModal,
-            {
-              backgroundColor:
-                theme.colors.surface,
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name="party-popper"
-            size={56}
-            color={
-              theme.colors.primary
-            }
-          />
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_16
-            }
-          />
-          <AppText
-            variant="h2"
-            style={{
-              color:
-                theme.colors.primary,
-              textAlign: 'center',
-            }}
-          >
-            It&apos;s a Match!
-          </AppText>
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_8
-            }
-          />
-          <AppText
-            variant="body"
-            style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
-              textAlign: 'center',
-            }}
-          >
-            You and{' '}
-            {matchedUser?.display_name}{' '}
-            liked each other
-          </AppText>
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_24
-            }
-          />
-          <AppButton
-            variant="primary"
-            onPress={dismissMatch}
-          >
-            Keep Swiping
-          </AppButton>
-        </Modal>
-      </Portal>
+      {celebration}
 
       <Snackbar
         visible={swipe.isError}
