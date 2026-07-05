@@ -23,6 +23,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { RootState } from '@store';
 
 import AppText from
@@ -37,6 +38,8 @@ import { Spacing } from
   '@theme/constants/Spacing';
 import { BorderRadius } from
   '@theme/constants/BorderRadius';
+import { Translations } from
+  '@features/chat/i18n/translationKeys';
 
 export default function ChatScreen() {
   const theme = useTheme();
@@ -55,6 +58,7 @@ export default function ChatScreen() {
   const uid = useSelector(
     (s: RootState) => s.auth.user?.uid,
   );
+  const { t } = useTranslation();
 
   const insets = useSafeAreaInsets();
   const {
@@ -147,13 +151,24 @@ export default function ChatScreen() {
             theme.colors.background,
         },
       ]}
+      // W8: on Android `behavior` was undefined, relying on native
+      // window resize — but edgeToEdgeEnabled (Android 15) draws behind
+      // the IME and no longer auto-resizes, so the input sat under the
+      // keyboard. Give Android an explicit behavior. The KAV wraps the
+      // whole screen inside the app-level SafeAreaView, so its top sits
+      // at insets.top — pass that as keyboardVerticalOffset so the
+      // avoided region is measured from the right origin. (Dae tunes the
+      // exact value on the Redmi; flip to "padding" if "height" is
+      // jumpy.)
       behavior={
         Platform.OS === 'ios'
           ? 'padding'
-          : undefined
+          : 'height'
       }
       keyboardVerticalOffset={
-        Platform.OS === 'ios' ? 90 : 0
+        Platform.OS === 'ios'
+          ? 90
+          : insets.top
       }
     >
       {/* Header */}
@@ -191,7 +206,10 @@ export default function ChatScreen() {
               Spacing.SPACING_PADDING_16,
           }}
         >
-          {name ?? 'Chat'}
+          {name ??
+            t(
+              Translations.CHAT_TITLE_FALLBACK,
+            )}
         </AppText>
       </View>
 
@@ -202,7 +220,7 @@ export default function ChatScreen() {
             animating
             size="large"
           />
-          {slowLoading && (
+          {slowLoading ? (
             <AppText
               variant="body"
               style={{
@@ -214,9 +232,9 @@ export default function ChatScreen() {
                   Spacing.SPACING_PADDING_16,
               }}
             >
-              Waking the server…
+              {t(Translations.CHAT_WAKING)}
             </AppText>
-          )}
+          ) : null}
         </View>
       ) : isError ? (
         <View style={styles.center}>
@@ -239,8 +257,7 @@ export default function ChatScreen() {
                 Spacing.SPACING_PADDING_12,
             }}
           >
-            Couldn&apos;t load this
-            conversation.
+            {t(Translations.CHAT_ERROR)}
           </AppText>
           <Pressable
             onPress={() => refetch()}
@@ -261,7 +278,7 @@ export default function ChatScreen() {
                 fontWeight: '600',
               }}
             >
-              Retry
+              {t(Translations.CHAT_RETRY)}
             </AppText>
           </Pressable>
         </View>
@@ -290,8 +307,7 @@ export default function ChatScreen() {
                   textAlign: 'center',
                 }}
               >
-                No messages yet.{'\n'}
-                Say hello!
+                {t(Translations.CHAT_EMPTY)}
               </AppText>
             </View>
           }
@@ -319,7 +335,9 @@ export default function ChatScreen() {
                 theme.colors.onSurface,
             },
           ]}
-          placeholder="Type a message..."
+          placeholder={t(
+            Translations.CHAT_INPUT_PLACEHOLDER,
+          )}
           placeholderTextColor={
             theme.colors.onSurfaceVariant
           }

@@ -9,6 +9,8 @@ import enDiscover from '@features/discover/i18n/locales/en.js';
 import elDiscover from '@features/discover/i18n/locales/el.js';
 import enMatches from '@features/matches/i18n/locales/en.js';
 import elMatches from '@features/matches/i18n/locales/el.js';
+import enChat from '@features/chat/i18n/locales/en.js';
+import elChat from '@features/chat/i18n/locales/el.js';
 
 i18n
   .use(initReactI18next)
@@ -20,6 +22,7 @@ i18n
           ...enOnboarding,
           ...enDiscover,
           ...enMatches,
+          ...enChat,
         },
       },
       el: {
@@ -28,6 +31,7 @@ i18n
           ...elOnboarding,
           ...elDiscover,
           ...elMatches,
+          ...elChat,
         },
       },
     },
