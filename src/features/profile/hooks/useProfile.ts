@@ -316,12 +316,21 @@ export const useSyncLocation = (
         lastSync.current = null;
         return;
       }
-      // W6: the ['profile'] query still holds the pre-sync
-      // current_lat/lng, so computeMode keeps reporting the stale
-      // mode badge (e.g. 'local' after moving to another city) until a
-      // manual refresh. Patch the cache optimistically for an instant
-      // badge flip, then invalidate to reconcile with the DB — mirrors
-      // useUpdateProfile.
+      // W6 (reframed): a location write has to propagate through the
+      // WHOLE location-derived pipeline, not just the profile row.
+      // Three uid-scoped queries read the coords we just wrote:
+      //   ['profile']            — the mode badge (computeMode reads
+      //                            profiles.current_lat/lng)
+      //   ['discover-candidates']— the deck (distance_km +
+      //                            candidate_mode are computed
+      //                            server-side from the swiper coords)
+      //   ['match-preferences']  — gates/keys the deck query
+      // useSyncLocation wrote the coords but invalidated none, so all
+      // three served stale results until a manual refresh. Patch the
+      // profile optimistically for an INSTANT badge, then invalidate
+      // the three together so they refetch coherently. (This is
+      // throttled — see the guards above — and writes the DB before
+      // invalidating, so it doesn't loop with useStaleLocationRefetch.)
       queryClient.setQueryData<Profile>(
         ['profile', uid],
         prev =>
@@ -335,6 +344,18 @@ export const useSyncLocation = (
       );
       queryClient.invalidateQueries({
         queryKey: ['profile', uid],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'discover-candidates',
+          uid,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          'match-preferences',
+          uid,
+        ],
       });
     };
 
