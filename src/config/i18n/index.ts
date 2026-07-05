@@ -7,6 +7,8 @@ import enOnboarding from '@features/onboarding/i18n/locales/en.js';
 import elOnboarding from '@features/onboarding/i18n/locales/el.js';
 import enDiscover from '@features/discover/i18n/locales/en.js';
 import elDiscover from '@features/discover/i18n/locales/el.js';
+import enMatches from '@features/matches/i18n/locales/en.js';
+import elMatches from '@features/matches/i18n/locales/el.js';
 
 i18n
   .use(initReactI18next)
@@ -17,6 +19,7 @@ i18n
           ...enAuth,
           ...enOnboarding,
           ...enDiscover,
+          ...enMatches,
         },
       },
       el: {
@@ -24,6 +27,7 @@ i18n
           ...elAuth,
           ...elOnboarding,
           ...elDiscover,
+          ...elMatches,
         },
       },
     },

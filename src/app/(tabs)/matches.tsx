@@ -17,6 +17,7 @@ import {
 } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import AppText from
   '@shared/components/AppText';
@@ -31,12 +32,15 @@ import { Spacing } from
   '@theme/constants/Spacing';
 import { BorderRadius } from
   '@theme/constants/BorderRadius';
+import { Translations } from
+  '@features/matches/i18n/translationKeys';
 
 const AVATAR_SIZE = 60;
 
 export default function MatchesScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     data: matches,
     isLoading,
@@ -148,7 +152,7 @@ export default function MatchesScreen() {
           }}
         >
           {item.last_message ??
-            'Say hello'}
+            t(Translations.MATCHES_SAY_HELLO)}
         </AppText>
       </View>
 
@@ -181,7 +185,7 @@ export default function MatchesScreen() {
               theme.colors.onBackground,
           }}
         >
-          Matches
+          {t(Translations.MATCHES_TITLE)}
         </AppText>
       </View>
 
@@ -191,7 +195,7 @@ export default function MatchesScreen() {
             animating
             size="large"
           />
-          {slowLoading && (
+          {slowLoading ? (
             <AppText
               variant="body"
               style={{
@@ -203,9 +207,9 @@ export default function MatchesScreen() {
                   Spacing.SPACING_PADDING_16,
               }}
             >
-              Waking the server…
+              {t(Translations.MATCHES_WAKING)}
             </AppText>
-          )}
+          ) : null}
         </View>
       ) : isError ? (
         <View style={styles.center}>
@@ -228,8 +232,7 @@ export default function MatchesScreen() {
                 Spacing.SPACING_PADDING_12,
             }}
           >
-            Couldn&apos;t load your
-            matches.
+            {t(Translations.MATCHES_ERROR)}
           </AppText>
           <Pressable
             onPress={() => refetch()}
@@ -250,7 +253,7 @@ export default function MatchesScreen() {
                 fontWeight: '600',
               }}
             >
-              Retry
+              {t(Translations.MATCHES_RETRY)}
             </AppText>
           </Pressable>
         </View>
@@ -290,7 +293,7 @@ export default function MatchesScreen() {
                   .onBackground,
             }}
           >
-            No matches yet
+            {t(Translations.MATCHES_EMPTY_TITLE)}
           </AppText>
           <Spacer
             spacing={
@@ -306,9 +309,9 @@ export default function MatchesScreen() {
               textAlign: 'center',
             }}
           >
-            Start swiping to find
-            people who share your
-            interests
+            {t(
+              Translations.MATCHES_EMPTY_SUBTITLE,
+            )}
           </AppText>
         </ScrollView>
       ) : (
