@@ -317,20 +317,20 @@ export const useSyncLocation = (
         return;
       }
       // W6 (reframed): a location write has to propagate through the
-      // WHOLE location-derived pipeline, not just the profile row.
-      // Three uid-scoped queries read the coords we just wrote:
+      // location-derived pipeline, not just the profile row. Two
+      // uid-scoped queries actually change with the coords we wrote:
       //   ['profile']            — the mode badge (computeMode reads
       //                            profiles.current_lat/lng)
       //   ['discover-candidates']— the deck (distance_km +
       //                            candidate_mode are computed
       //                            server-side from the swiper coords)
-      //   ['match-preferences']  — gates/keys the deck query
-      // useSyncLocation wrote the coords but invalidated none, so all
-      // three served stale results until a manual refresh. Patch the
+      // useSyncLocation wrote the coords but invalidated neither, so
+      // both served stale results until a manual refresh. Patch the
       // profile optimistically for an INSTANT badge, then invalidate
-      // the three together so they refetch coherently. (This is
-      // throttled — see the guards above — and writes the DB before
-      // invalidating, so it doesn't loop with useStaleLocationRefetch.)
+      // both so they refetch coherently. (Throttled — see the guards
+      // above — and writes the DB before invalidating, so it doesn't
+      // loop with useStaleLocationRefetch.) Prefs aren't location-
+      // derived; the deck refetch re-reads the unchanged prefs anyway.
       queryClient.setQueryData<Profile>(
         ['profile', uid],
         prev =>
@@ -348,12 +348,6 @@ export const useSyncLocation = (
       queryClient.invalidateQueries({
         queryKey: [
           'discover-candidates',
-          uid,
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          'match-preferences',
           uid,
         ],
       });
