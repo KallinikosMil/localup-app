@@ -18,6 +18,7 @@ import {
   Snackbar,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import AppText from
   '@shared/components/AppText';
@@ -45,6 +46,8 @@ import { Spacing } from
   '@theme/constants/Spacing';
 import { BorderRadius } from
   '@theme/constants/BorderRadius';
+import { Translations } from
+  '@features/discover/i18n/translationKeys';
 
 // Placeholder for the sibling discovery-filters spec —
 // the header filter button renders only when this flips.
@@ -52,6 +55,7 @@ const FILTERS_ENABLED = false;
 
 export default function DiscoverScreen() {
   const theme = useAppTheme();
+  const { t } = useTranslation();
   // GPS is background refinement only — the deck is computed
   // from the swiper's persisted location server-side, and the
   // 5km-drift hook refetches if a fresh fix lands far away.
@@ -201,7 +205,7 @@ export default function DiscoverScreen() {
             textAlign: 'center',
           }}
         >
-          It&apos;s a Match!
+          {t(Translations.DISCOVER_MATCH_TITLE)}
         </AppText>
         <Spacer
           spacing={
@@ -217,9 +221,10 @@ export default function DiscoverScreen() {
             textAlign: 'center',
           }}
         >
-          You and{' '}
-          {matchedUser?.display_name}{' '}
-          liked each other
+          {t(Translations.DISCOVER_MATCH_BODY, {
+            name:
+              matchedUser?.display_name ?? '',
+          })}
         </AppText>
         <Spacer
           spacing={
@@ -230,7 +235,7 @@ export default function DiscoverScreen() {
           variant="primary"
           onPress={dismissMatch}
         >
-          Keep Swiping
+          {t(Translations.DISCOVER_MATCH_CTA)}
         </AppButton>
       </Modal>
     </Portal>
@@ -283,10 +288,16 @@ export default function DiscoverScreen() {
         >
           <EmptyState
             icon="compass-off-outline"
-            title="No one nearby"
-            subtitle="Check back later for new people"
+            title={t(
+              Translations.DISCOVER_EMPTY_TITLE,
+            )}
+            subtitle={t(
+              Translations.DISCOVER_EMPTY_SUBTITLE,
+            )}
             action={{
-              label: 'Refresh',
+              label: t(
+                Translations.DISCOVER_REFRESH,
+              ),
               onPress: handleRefresh,
             }}
           />
@@ -313,12 +324,12 @@ export default function DiscoverScreen() {
             color: theme.colors.primary,
           }}
         >
-          LocalUp
+          {t(Translations.DISCOVER_TITLE)}
         </AppText>
         <View
           style={styles.headerActions}
         >
-          {FILTERS_ENABLED && (
+          {FILTERS_ENABLED ? (
             <Pressable
               style={[
                 styles.headerBtn,
@@ -338,7 +349,7 @@ export default function DiscoverScreen() {
                 }
               />
             </Pressable>
-          )}
+          ) : null}
           <Pressable
             onPress={handleRefresh}
             disabled={manualRefreshing}
@@ -370,7 +381,7 @@ export default function DiscoverScreen() {
       </View>
 
       <View style={styles.cardStack}>
-        {next && (
+        {next ? (
           <View
             style={styles.backCard}
             key={next.user_id}
@@ -381,7 +392,7 @@ export default function DiscoverScreen() {
               onSwipeRight={() => {}}
             />
           </View>
-        )}
+        ) : null}
         <SwipeCard
           key={current.user_id}
           candidate={current}
@@ -445,8 +456,7 @@ export default function DiscoverScreen() {
         onDismiss={() => swipe.reset()}
         duration={3000}
       >
-        Swipe didn&apos;t go through —
-        check your connection
+        {t(Translations.DISCOVER_SWIPE_ERROR)}
       </Snackbar>
     </GestureHandlerRootView>
   );

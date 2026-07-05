@@ -19,6 +19,8 @@ import {
   Gesture,
   GestureDetector,
 } from 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 import AppText from
   '@shared/components/AppText';
@@ -34,14 +36,25 @@ import { BorderRadius } from
 import {
   type Candidate,
 } from '../hooks/useDiscover';
+import { Translations } from
+  '../i18n/translationKeys';
 
 const MAX_CHIPS = 3;
 
 // Distance display rule (UI-1 nit):
 // "0.0 km" reads broken — anything
 // under 1 km is just "nearby".
-const formatDistance = (km: number) =>
-  km < 1 ? 'nearby' : `${km.toFixed(1)} km`;
+const formatDistance = (
+  km: number,
+  t: TFunction,
+) =>
+  km < 1
+    ? t(
+        Translations.DISCOVER_DISTANCE_NEARBY,
+      )
+    : t(Translations.DISCOVER_DISTANCE_KM, {
+        km: km.toFixed(1),
+      });
 
 const { width: SCREEN_WIDTH } =
   Dimensions.get('window');
@@ -60,6 +73,7 @@ const SwipeCard = ({
   onSwipeRight,
 }: SwipeCardProps) => {
   const theme = useAppTheme();
+  const { t } = useTranslation();
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const overflow = Math.max(
@@ -220,6 +234,7 @@ const SwipeCard = ({
           >
             {formatDistance(
               candidate.distance_km,
+              t,
             )}
           </AppText>
         </View>
@@ -236,7 +251,7 @@ const SwipeCard = ({
           </AppText>
 
           <View style={styles.metaRow}>
-            {candidate.home_city && (
+            {candidate.home_city ? (
               <View
                 style={
                   styles.locationRow
@@ -260,7 +275,7 @@ const SwipeCard = ({
                   {candidate.home_city}
                 </AppText>
               </View>
-            )}
+            ) : null}
             <ModeBadge
               mode={
                 candidate.candidate_mode
@@ -268,7 +283,7 @@ const SwipeCard = ({
             />
           </View>
 
-          {candidate.bio && (
+          {candidate.bio ? (
             <AppText
               variant="body"
               style={[
@@ -283,10 +298,10 @@ const SwipeCard = ({
             >
               {candidate.bio}
             </AppText>
-          )}
+          ) : null}
 
           {candidate.interests.length >
-            0 && (
+          0 ? (
             <View
               style={styles.tagRow}
             >
@@ -299,14 +314,14 @@ const SwipeCard = ({
                     variant="frosted"
                   />
                 ))}
-              {overflow > 0 && (
+              {overflow > 0 ? (
                 <InterestChip
                   label={`+${overflow}`}
                   variant="frosted"
                 />
-              )}
+              ) : null}
             </View>
-          )}
+          ) : null}
         </View>
 
         <Animated.View
@@ -326,7 +341,7 @@ const SwipeCard = ({
               color: theme.colors.like,
             }}
           >
-            LIKE
+            {t(Translations.DISCOVER_STAMP_LIKE)}
           </AppText>
         </Animated.View>
 
@@ -347,7 +362,7 @@ const SwipeCard = ({
               color: theme.colors.pass,
             }}
           >
-            NOPE
+            {t(Translations.DISCOVER_STAMP_NOPE)}
           </AppText>
         </Animated.View>
       </Animated.View>

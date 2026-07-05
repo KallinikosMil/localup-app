@@ -5,6 +5,8 @@ import enAuth from '@features/auth/i18n/locales/en.js';
 import elAuth from '@features/auth/i18n/locales/el.js';
 import enOnboarding from '@features/onboarding/i18n/locales/en.js';
 import elOnboarding from '@features/onboarding/i18n/locales/el.js';
+import enDiscover from '@features/discover/i18n/locales/en.js';
+import elDiscover from '@features/discover/i18n/locales/el.js';
 
 i18n
   .use(initReactI18next)
@@ -14,12 +16,14 @@ i18n
         translation: {
           ...enAuth,
           ...enOnboarding,
+          ...enDiscover,
         },
       },
       el: {
         translation: {
           ...elAuth,
           ...elOnboarding,
+          ...elDiscover,
         },
       },
     },

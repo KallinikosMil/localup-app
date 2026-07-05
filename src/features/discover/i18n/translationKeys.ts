@@ -1,0 +1,16 @@
+export enum Translations {
+  DISCOVER_TITLE = 'discoverTitle',
+  DISCOVER_EMPTY_TITLE = 'discoverEmptyTitle',
+  DISCOVER_EMPTY_SUBTITLE =
+    'discoverEmptySubtitle',
+  DISCOVER_REFRESH = 'discoverRefresh',
+  DISCOVER_MATCH_TITLE = 'discoverMatchTitle',
+  DISCOVER_MATCH_BODY = 'discoverMatchBody',
+  DISCOVER_MATCH_CTA = 'discoverMatchCta',
+  DISCOVER_SWIPE_ERROR = 'discoverSwipeError',
+  DISCOVER_DISTANCE_NEARBY =
+    'discoverDistanceNearby',
+  DISCOVER_DISTANCE_KM = 'discoverDistanceKm',
+  DISCOVER_STAMP_LIKE = 'discoverStampLike',
+  DISCOVER_STAMP_NOPE = 'discoverStampNope',
+}
