@@ -171,7 +171,7 @@ const NameAgeScreen = () => {
           </AppText>
         ) : null}
 
-        {showPicker && (
+        {showPicker ? (
           <DateTimePicker
             value={dob ?? maxDate}
             mode="date"
@@ -179,15 +179,15 @@ const NameAgeScreen = () => {
             maximumDate={maxDate}
             onChange={onDateChange}
             positiveButton={{
-              label: 'OK',
+              label: t(Translations.ONBOARDING_PICKER_OK),
               textColor: theme.colors.primary,
             }}
             negativeButton={{
-              label: 'Cancel',
+              label: t(Translations.ONBOARDING_PICKER_CANCEL),
               textColor: theme.colors.primary,
             }}
           />
-        )}
+        ) : null}
 
         <View style={styles.bottomSection}>
           <AppButton variant="primary" onPress={onNext} disabled={!isValid}>

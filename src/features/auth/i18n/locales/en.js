@@ -17,6 +17,15 @@ export default {
   authHasAccount: 'Already have an account?',
   authLoginLink: 'Log in',
   authErrorFallback: 'Something went wrong. Please try again.',
+  authErrorInvalidCredentials: 'Wrong email or password.',
+  authErrorEmailNotConfirmed:
+    'Confirm your email first — check your inbox for the link.',
+  authErrorEmailTaken: 'That email is already registered. Try logging in.',
+  authErrorWeakPassword: 'That password is too weak. Pick a longer one.',
+  authErrorRateLimited: 'Too many attempts. Wait a moment and try again.',
+  authErrorNetwork: "Couldn't reach the server — check your connection.",
+  authErrorSignupUnverifiable:
+    "We couldn't confirm whether your account was created. Try logging in — if that doesn't work, sign up again.",
   authDismiss: 'Dismiss',
   authConfirmEmailSent: 'Confirmation mail sent, check your inbox!',
   authBootstrapErrorTitle: "Couldn't load your account",

@@ -13,7 +13,7 @@ import AppButton from '@shared/components/AppButton';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { useLogin } from '@features/auth/hooks/useAuth';
+import { useLogin, authErrorKey } from '@features/auth/hooks/useAuth';
 import useModal from '@shared/hooks/useModal';
 
 import Spacer from '@shared/components/Spacer';
@@ -59,12 +59,12 @@ const LoginScreen = () => {
     login.mutate(
       { email, password },
       {
+        // H5: this used to render `err.message` — Supabase's own English
+        // prose ("Invalid login credentials") — straight into the modal,
+        // bypassing i18n entirely. authErrorKey classifies the error on
+        // its structured fields and hands back a translation key.
         onError: err => {
-          setModalMessage(
-            err instanceof Error
-              ? err.message
-              : t(Translations.AUTH_ERROR_FALLBACK),
-          );
+          setModalMessage(t(authErrorKey(err)));
           openModal();
         },
       },

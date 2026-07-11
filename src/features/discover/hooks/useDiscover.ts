@@ -3,7 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store';
-import { haversineKm, useProfile } from '@features/profile/hooks/useProfile';
+import {
+  haversineKm,
+  interestNamesFrom,
+  useProfile,
+} from '@features/profile/hooks/useProfile';
 
 // If a fresh GPS fix drifts more than this from the
 // coords the deck was computed against, invalidate
@@ -109,11 +113,15 @@ export const useCandidates = () => {
         .in('user_id', ids);
       if (interestsError) throw interestsError;
 
+      // H5: this was `(row.interests as any)?.name` — see
+      // interestNamesFrom. PostgREST hands back a to-one embed as an
+      // object and a to-many as an ARRAY, and `as any` meant the array
+      // shape would read `undefined` and drop every interest from every
+      // card without a single error.
       const nameMap = new Map<string, string[]>();
       for (const row of ui ?? []) {
         const list = nameMap.get(row.user_id) ?? [];
-        const name = (row.interests as any)?.name ?? '';
-        if (name) list.push(name);
+        list.push(...interestNamesFrom(row.interests));
         nameMap.set(row.user_id, list);
       }
 
@@ -186,6 +194,46 @@ export const useStaleLocationRefetch = (
   }, [uid, swiper, freshLat, freshLng, queryClient]);
 };
 
+// handle_swipe RETURNS TABLE (matched boolean, match_id uuid), so
+// PostgREST sends back a one-row array. Accept a bare object too (that's
+// what a RETURNS record would give us) — but accept nothing else.
+type SwipeResult = {
+  matched: boolean;
+  matchId: string | null;
+};
+
+const parseSwipeResult = (data: unknown): SwipeResult => {
+  const row = Array.isArray(data) ? data[0] : data;
+
+  if (!row || typeof row !== 'object') {
+    throw new Error('handle_swipe returned no row');
+  }
+
+  const { matched, match_id: matchId } = row as {
+    matched?: unknown;
+    match_id?: unknown;
+  };
+
+  if (typeof matched !== 'boolean') {
+    throw new Error('handle_swipe: `matched` is missing or not a boolean');
+  }
+
+  // A mutual match with no id is a broken match: the celebration can't
+  // navigate to /chat/[matchId] and the thread is unreachable. Better a
+  // visible failure (the swipe is already persisted; onError resyncs the
+  // deck) than a silently half-created match.
+  if (matched && typeof matchId !== 'string') {
+    throw new Error('handle_swipe: matched with no match_id');
+  }
+
+  return {
+    matched,
+    // Pass-through for the match celebration → /chat/[matchId] nav
+    // (UI redesign spec).
+    matchId: typeof matchId === 'string' ? matchId : null,
+  };
+};
+
 export const useSwipe = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
@@ -210,21 +258,14 @@ export const useSwipe = () => {
       });
       if (error) throw error;
 
-      const row = (
-        data as
-          | {
-              matched: boolean;
-              match_id: string | null;
-            }[]
-          | null
-      )?.[0];
-
+      // H5: this used to be `(data as {...}[])?.[0]` followed by
+      // `matched: !!row?.matched`. A missing row or a drifted shape
+      // coerced straight to `false` — so a REAL mutual match would
+      // produce no celebration, no ['matches'] invalidation, and the
+      // match would simply never appear. `!!undefined` is not an answer,
+      // it's a guess. Validate, and throw if the RPC didn't tell us.
       return {
-        matched: !!row?.matched,
-        // Pass-through for the match
-        // celebration → /chat/[matchId] nav
-        // (UI redesign spec).
-        matchId: row?.match_id ?? null,
+        ...parseSwipeResult(data),
         targetId,
       };
     },

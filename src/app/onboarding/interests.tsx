@@ -189,7 +189,10 @@ const InterestsScreen = () => {
             color: theme.colors.onSurfaceVariant,
           }}
         >
-          {selectedIds.length}/{MAX_INTERESTS} selected
+          {t(Translations.ONBOARDING_INTERESTS_SELECTED, {
+            selected: selectedIds.length,
+            max: MAX_INTERESTS,
+          })}
         </AppText>
 
         <Spacer spacing={Spacing.SPACING_PADDING_8} />
@@ -238,7 +241,7 @@ const InterestsScreen = () => {
           ))
         )}
 
-        {!canFinish && selectedIds.length > 0 && (
+        {!canFinish && selectedIds.length > 0 ? (
           <>
             <Spacer spacing={Spacing.SPACING_PADDING_8} />
             <AppText
@@ -250,7 +253,7 @@ const InterestsScreen = () => {
               {t(Translations.ONBOARDING_INTERESTS_MIN)}
             </AppText>
           </>
-        )}
+        ) : null}
 
         <Spacer spacing={Spacing.SPACING_PADDING_24} />
 

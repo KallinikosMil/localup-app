@@ -17,6 +17,16 @@ export enum Translations {
   AUTH_HAS_ACCOUNT = 'authHasAccount',
   AUTH_LOGIN_LINK = 'authLoginLink',
   AUTH_ERROR_FALLBACK = 'authErrorFallback',
+  // The screens used to render Supabase's own `err.message` — raw
+  // provider prose, in English, straight into the UI. Every auth failure
+  // is now classified into one of these (see authErrorKey in useAuth).
+  AUTH_ERROR_INVALID_CREDENTIALS = 'authErrorInvalidCredentials',
+  AUTH_ERROR_EMAIL_NOT_CONFIRMED = 'authErrorEmailNotConfirmed',
+  AUTH_ERROR_EMAIL_TAKEN = 'authErrorEmailTaken',
+  AUTH_ERROR_WEAK_PASSWORD = 'authErrorWeakPassword',
+  AUTH_ERROR_RATE_LIMITED = 'authErrorRateLimited',
+  AUTH_ERROR_NETWORK = 'authErrorNetwork',
+  AUTH_ERROR_SIGNUP_UNVERIFIABLE = 'authErrorSignupUnverifiable',
   AUTH_DISMISS = 'authDismiss',
   AUTH_CONFIRM_EMAIL_SENT = 'authConfirmEmailSent',
   AUTH_BOOTSTRAP_ERROR_TITLE = 'authBootstrapErrorTitle',

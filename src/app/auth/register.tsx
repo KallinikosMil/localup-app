@@ -8,7 +8,7 @@ import AppButton from '@shared/components/AppButton';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { useRegister } from '@features/auth/hooks/useAuth';
+import { useRegister, authErrorKey } from '@features/auth/hooks/useAuth';
 import useModal from '@shared/hooks/useModal';
 
 import Spacer from '@shared/components/Spacer';
@@ -59,13 +59,12 @@ const RegisterScreen = () => {
           setModalMessage(t(Translations.AUTH_CONFIRM_EMAIL_SENT));
           openModal();
         },
+        // H5: `err.message` went straight to the user — raw provider
+        // prose, untranslated. The duplicate-email case also lived in a
+        // hand-thrown English Error. Both are classified codes now.
         onError: err => {
           setIsSuccess(false);
-          setModalMessage(
-            err instanceof Error
-              ? err.message
-              : t(Translations.AUTH_ERROR_FALLBACK),
-          );
+          setModalMessage(t(authErrorKey(err)));
           openModal();
         },
       },

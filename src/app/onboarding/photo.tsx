@@ -106,14 +106,14 @@ const PhotoScreen = () => {
           )}
         </View>
 
-        {data.photoUri && (
+        {data.photoUri ? (
           <>
             <Spacer spacing={Spacing.SPACING_PADDING_16} />
             <AppButton variant="link" onPress={pickImage}>
               {t(Translations.ONBOARDING_CHANGE_PHOTO)}
             </AppButton>
           </>
-        )}
+        ) : null}
 
         <View style={styles.bottomSection}>
           <AppButton

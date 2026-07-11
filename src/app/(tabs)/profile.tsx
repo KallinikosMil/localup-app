@@ -67,11 +67,25 @@ export default function ProfileScreen() {
     return () => clearTimeout(timer);
   }, [isPending]);
 
+  // null === "we can't tell yet" (no home and/or no current coords).
   const mode = computeMode(
     profile,
     profile?.current_lat ?? latitude,
     profile?.current_lng ?? longitude,
   );
+  const modeKnown = mode !== null;
+  const modeLabel =
+    mode === 'traveler'
+      ? Translations.PROFILE_BADGE_TRAVELER
+      : mode === 'local'
+        ? Translations.PROFILE_BADGE_LOCAL
+        : Translations.PROFILE_BADGE_LOCATING;
+  const modeIcon =
+    mode === 'traveler'
+      ? 'airplane'
+      : mode === 'local'
+        ? 'home-variant-outline'
+        : 'map-marker-question-outline';
 
   if (isPending) {
     return (
@@ -182,7 +196,7 @@ export default function ProfileScreen() {
             color: theme.colors.onBackground,
           }}
         >
-          Profile
+          {t(Translations.PROFILE_TITLE)}
         </AppText>
         <Pressable
           onPress={() => router.push('/profile/edit')}
@@ -207,7 +221,7 @@ export default function ProfileScreen() {
               marginLeft: 6,
             }}
           >
-            Edit
+            {t(Translations.PROFILE_EDIT_ACTION)}
           </AppText>
         </Pressable>
       </View>
@@ -246,9 +260,9 @@ export default function ProfileScreen() {
             textAlign: 'center',
           }}
         >
-          {profile?.display_name ?? '—'}
+          {profile?.display_name ?? t(Translations.PROFILE_NO_NAME)}
         </AppText>
-        {profile?.home_city && (
+        {profile?.home_city ? (
           <View style={styles.cityRow}>
             <MaterialCommunityIcons
               name="map-marker-outline"
@@ -265,32 +279,43 @@ export default function ProfileScreen() {
               {profile.home_city}
             </AppText>
           </View>
-        )}
+        ) : null}
         <Spacer spacing={Spacing.SPACING_PADDING_8} />
-        {/* Mode badge */}
+        {/* Mode badge. H5: `mode` is null while the coords are unknown —
+            it used to be 'local', so a traveler was badged LOCAL until
+            the location landed. A neutral badge says "we don't know
+            yet" instead of guessing. */}
         <View
           style={[
             styles.modeBadge,
             {
-              backgroundColor: theme.colors.primaryContainer,
+              backgroundColor: modeKnown
+                ? theme.colors.primaryContainer
+                : theme.colors.surfaceVariant,
             },
           ]}
         >
           <MaterialCommunityIcons
-            name={mode === 'traveler' ? 'airplane' : 'home-variant-outline'}
+            name={modeIcon}
             size={14}
-            color={theme.colors.onPrimaryContainer}
+            color={
+              modeKnown
+                ? theme.colors.onPrimaryContainer
+                : theme.colors.onSurfaceVariant
+            }
           />
           <AppText
             variant="caption"
             style={{
-              color: theme.colors.onPrimaryContainer,
+              color: modeKnown
+                ? theme.colors.onPrimaryContainer
+                : theme.colors.onSurfaceVariant,
               fontWeight: '700',
               marginLeft: 6,
               letterSpacing: 0.5,
             }}
           >
-            {mode === 'traveler' ? 'TRAVELER' : 'LOCAL'}
+            {t(modeLabel)}
           </AppText>
         </View>
       </View>
@@ -298,7 +323,10 @@ export default function ProfileScreen() {
       <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
       {/* About */}
-      <Section title="About" bg={theme.colors.surface}>
+      <Section
+        title={t(Translations.PROFILE_SECTION_ABOUT)}
+        bg={theme.colors.surface}
+      >
         <AppText
           variant="body"
           style={{
@@ -306,16 +334,18 @@ export default function ProfileScreen() {
             lineHeight: 22,
           }}
         >
-          {profile?.bio?.trim() ||
-            'Tell people a bit about yourself — tap Edit to add a bio.'}
+          {profile?.bio?.trim() || t(Translations.PROFILE_BIO_EMPTY)}
         </AppText>
       </Section>
 
       {/* Photos */}
-      {photos && photos.length > 0 && (
+      {photos && photos.length > 0 ? (
         <>
           <Spacer spacing={Spacing.SPACING_PADDING_16} />
-          <Section title="Gallery" bg={theme.colors.surface}>
+          <Section
+            title={t(Translations.PROFILE_SECTION_GALLERY)}
+            bg={theme.colors.surface}
+          >
             <View style={styles.photoGrid}>
               {photos.map(p => (
                 <View
@@ -333,13 +363,16 @@ export default function ProfileScreen() {
             </View>
           </Section>
         </>
-      )}
+      ) : null}
 
       {/* Interests */}
-      {profile?.interests && profile.interests.length > 0 && (
+      {profile?.interests && profile.interests.length > 0 ? (
         <>
           <Spacer spacing={Spacing.SPACING_PADDING_16} />
-          <Section title="Interests" bg={theme.colors.surface}>
+          <Section
+            title={t(Translations.PROFILE_SECTION_INTERESTS)}
+            bg={theme.colors.surface}
+          >
             <View style={styles.chips}>
               {profile.interests.map(interest => (
                 <Chip
@@ -360,7 +393,7 @@ export default function ProfileScreen() {
             </View>
           </Section>
         </>
-      )}
+      ) : null}
 
       <Spacer spacing={Spacing.SPACING_PADDING_32} />
 
@@ -370,7 +403,7 @@ export default function ProfileScreen() {
         loading={logout.isPending}
         disabled={logout.isPending}
       >
-        Logout
+        {t(Translations.PROFILE_LOGOUT)}
       </AppButton>
 
       <Spacer spacing={Spacing.SPACING_PADDING_32} />

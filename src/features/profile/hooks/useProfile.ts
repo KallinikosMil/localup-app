@@ -26,6 +26,37 @@ export type Photo = {
   is_primary: boolean;
 };
 
+// PostgREST returns an embedded relation as an OBJECT when it infers a
+// to-one relationship and as an ARRAY when it infers to-many — and which
+// one you get depends on the FK/constraint metadata, not on your query.
+// Both readers of `user_interests(interests(name))` used to do
+// `(row.interests as any)?.name`, which reads `undefined` from the array
+// shape: every interest would silently vanish from every card and every
+// profile, with the `as any` disabling the exact check that would have
+// caught it. Accept both shapes; refuse anything else loudly.
+export const interestNamesFrom = (embed: unknown): string[] => {
+  // A null embed means the joined row wasn't visible (RLS) — legitimately
+  // "no name", not a shape change.
+  if (embed == null) return [];
+
+  const rows = Array.isArray(embed) ? embed : [embed];
+
+  return rows
+    .map(row => {
+      if (typeof row !== 'object' || row === null || !('name' in row)) {
+        throw new Error(
+          'user_interests: unexpected embed shape for interests(name)',
+        );
+      }
+      const { name } = row as { name: unknown };
+      if (name != null && typeof name !== 'string') {
+        throw new Error('user_interests: interests.name is not a string');
+      }
+      return name ?? '';
+    })
+    .filter(Boolean);
+};
+
 export const useProfile = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
 
@@ -53,9 +84,9 @@ export const useProfile = () => {
 
       if (interestsError) throw interestsError;
 
-      const interests = (userInterests ?? [])
-        .map((ui: any) => ui.interests?.name ?? '')
-        .filter(Boolean);
+      const interests = (userInterests ?? []).flatMap(ui =>
+        interestNamesFrom(ui.interests),
+      );
 
       return {
         ...profile,
@@ -331,11 +362,18 @@ export const haversineKm = (
 
 export const LOCAL_RADIUS_KM = 50;
 
+// Returns null when the mode is genuinely UNKNOWN — i.e. we don't have
+// both a home and a current position to compare. It used to return
+// 'local' for that case, which is indistinguishable from a real local:
+// a traveler's badge read LOCAL for the first frames and then flipped,
+// and a user whose coords never arrive was told, confidently and
+// permanently, that they are a local. Missing data is not an answer;
+// the call sites render a neutral badge for null.
 export const computeMode = (
   profile: Profile | null | undefined,
   currentLat: number | null,
   currentLng: number | null,
-): ProfileMode => {
+): ProfileMode | null => {
   if (profile?.mode_override) {
     return profile.mode_override;
   }
@@ -345,7 +383,7 @@ export const computeMode = (
     currentLat == null ||
     currentLng == null
   ) {
-    return 'local';
+    return null;
   }
   const dist = haversineKm(
     currentLat,

@@ -151,7 +151,7 @@ const HomeCityScreen = () => {
           left={<TextInput.Icon icon="magnify" />}
         />
 
-        {results.length > 0 && (
+        {results.length > 0 ? (
           <View
             style={[
               styles.resultsList,
@@ -169,7 +169,7 @@ const HomeCityScreen = () => {
               scrollEnabled={false}
             />
           </View>
-        )}
+        ) : null}
 
         <Spacer spacing={Spacing.SPACING_PADDING_16} />
 

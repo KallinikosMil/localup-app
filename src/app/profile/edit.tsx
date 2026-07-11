@@ -72,11 +72,18 @@ export default function EditProfileScreen() {
     setBio(profile.bio ?? '');
   }, [profile]);
 
+  // null === "we can't tell yet" — see computeMode. The note under the
+  // mode pills gets its own sentence for that case instead of asserting
+  // "Local".
   const mode = computeMode(
     profile,
     profile?.current_lat ?? latitude,
     profile?.current_lng ?? longitude,
   );
+  const modeLabel =
+    mode === 'traveler'
+      ? t(Translations.PROFILE_MODE_TRAVELER)
+      : t(Translations.PROFILE_MODE_LOCAL);
 
   const handleSave = () => {
     updateProfile.mutate(
@@ -97,14 +104,21 @@ export default function EditProfileScreen() {
       router.back();
       return;
     }
-    Alert.alert('Discard changes?', 'Your edits will be lost.', [
-      { text: 'Keep editing', style: 'cancel' },
-      {
-        text: 'Discard',
-        style: 'destructive',
-        onPress: () => router.back(),
-      },
-    ]);
+    Alert.alert(
+      t(Translations.PROFILE_DISCARD_TITLE),
+      t(Translations.PROFILE_DISCARD_BODY),
+      [
+        {
+          text: t(Translations.PROFILE_DISCARD_KEEP),
+          style: 'cancel',
+        },
+        {
+          text: t(Translations.PROFILE_DISCARD_CONFIRM),
+          style: 'destructive',
+          onPress: () => router.back(),
+        },
+      ],
+    );
   };
 
   const markDirty = (setter: (v: string) => void) => (v: string) => {
@@ -126,8 +140,8 @@ export default function EditProfileScreen() {
   const setHomeHere = () => {
     if (latitude == null || longitude == null) {
       Alert.alert(
-        'Location unavailable',
-        'Enable location permission to set your home location.',
+        t(Translations.PROFILE_LOCATION_UNAVAILABLE_TITLE),
+        t(Translations.PROFILE_LOCATION_UNAVAILABLE_BODY),
       );
       return;
     }
@@ -146,8 +160,8 @@ export default function EditProfileScreen() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert(
-        'Permission needed',
-        'Allow photo library access to add photos.',
+        t(Translations.PROFILE_PHOTO_PERMISSION_TITLE),
+        t(Translations.PROFILE_PHOTO_PERMISSION_BODY),
       );
       return;
     }
@@ -171,18 +185,25 @@ export default function EditProfileScreen() {
   };
 
   const confirmDelete = (id: string) => {
-    Alert.alert('Delete photo?', 'This will permanently remove this photo.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () =>
-          deletePhoto.mutate(id, {
-            onError: () =>
-              setErrorMsg(t(Translations.PROFILE_PHOTO_DELETE_ERROR)),
-          }),
-      },
-    ]);
+    Alert.alert(
+      t(Translations.PROFILE_PHOTO_DELETE_TITLE),
+      t(Translations.PROFILE_PHOTO_DELETE_BODY),
+      [
+        {
+          text: t(Translations.PROFILE_CANCEL),
+          style: 'cancel',
+        },
+        {
+          text: t(Translations.PROFILE_PHOTO_DELETE_CONFIRM),
+          style: 'destructive',
+          onPress: () =>
+            deletePhoto.mutate(id, {
+              onError: () =>
+                setErrorMsg(t(Translations.PROFILE_PHOTO_DELETE_ERROR)),
+            }),
+        },
+      ],
+    );
   };
 
   const photoCount = photos?.length ?? 0;
@@ -333,7 +354,7 @@ export default function EditProfileScreen() {
               fontWeight: '500',
             }}
           >
-            Cancel
+            {t(Translations.PROFILE_CANCEL)}
           </AppText>
         </Pressable>
 
@@ -343,7 +364,7 @@ export default function EditProfileScreen() {
             color: theme.colors.onBackground,
           }}
         >
-          Edit Profile
+          {t(Translations.PROFILE_EDIT_TITLE)}
         </AppText>
 
         <Pressable
@@ -365,7 +386,9 @@ export default function EditProfileScreen() {
               fontWeight: '600',
             }}
           >
-            {updateProfile.isPending ? 'Saving…' : 'Save'}
+            {updateProfile.isPending
+              ? t(Translations.PROFILE_SAVING)
+              : t(Translations.PROFILE_SAVE)}
           </AppText>
         </Pressable>
       </View>
@@ -405,12 +428,15 @@ export default function EditProfileScreen() {
         <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
         {/* Basic info card */}
-        <Section title="Basics" bg={surfaceLowest}>
+        <Section
+          title={t(Translations.PROFILE_SECTION_BASICS)}
+          bg={surfaceLowest}
+        >
           <FieldRow
             icon="account-outline"
             value={name}
             onChange={markDirty(setName)}
-            placeholder="Name"
+            placeholder={t(Translations.PROFILE_NAME_PLACEHOLDER)}
             theme={theme}
           />
           <Divider />
@@ -418,7 +444,7 @@ export default function EditProfileScreen() {
             icon="map-marker-outline"
             value={city}
             onChange={markDirty(setCity)}
-            placeholder="Home city"
+            placeholder={t(Translations.PROFILE_CITY_PLACEHOLDER)}
             theme={theme}
           />
         </Section>
@@ -426,13 +452,16 @@ export default function EditProfileScreen() {
         <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         {/* About */}
-        <Section title="About you" bg={surfaceLowest}>
+        <Section
+          title={t(Translations.PROFILE_SECTION_ABOUT_YOU)}
+          bg={surfaceLowest}
+        >
           <RNTextInput
             value={bio}
             onChangeText={markDirty(setBio)}
             maxLength={BIO_LIMIT}
             multiline
-            placeholder="Share what makes you, you."
+            placeholder={t(Translations.PROFILE_BIO_PLACEHOLDER)}
             placeholderTextColor={theme.colors.onSurfaceVariant}
             style={[
               styles.bioInput,
@@ -455,7 +484,10 @@ export default function EditProfileScreen() {
         <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         {/* Photos */}
-        <Section title="Your gallery" bg={surfaceLowest}>
+        <Section
+          title={t(Translations.PROFILE_SECTION_YOUR_GALLERY)}
+          bg={surfaceLowest}
+        >
           <View style={styles.photoGrid}>
             {(photos ?? []).map(p => (
               <Pressable
@@ -471,7 +503,7 @@ export default function EditProfileScreen() {
                 <Image source={{ uri: p.url }} style={styles.photoImg} />
               </Pressable>
             ))}
-            {canAddPhoto && (
+            {canAddPhoto ? (
               <Pressable
                 onPress={pickPhoto}
                 disabled={uploadPhoto.isPending}
@@ -493,7 +525,7 @@ export default function EditProfileScreen() {
                   />
                 )}
               </Pressable>
-            )}
+            ) : null}
           </View>
           <Spacer spacing={Spacing.SPACING_PADDING_8} />
           <AppText
@@ -503,14 +535,17 @@ export default function EditProfileScreen() {
               fontStyle: 'italic',
             }}
           >
-            Long press to remove
+            {t(Translations.PROFILE_PHOTO_HINT)}
           </AppText>
         </Section>
 
         <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         {/* Home base */}
-        <Section title="Home base" bg={surfaceLowest}>
+        <Section
+          title={t(Translations.PROFILE_SECTION_HOME_BASE)}
+          bg={surfaceLowest}
+        >
           <View style={styles.homeBaseRow}>
             <View
               style={[
@@ -534,7 +569,7 @@ export default function EditProfileScreen() {
                   fontWeight: '600',
                 }}
               >
-                {profile.home_city ?? 'Not set'}
+                {profile.home_city ?? t(Translations.PROFILE_HOME_NOT_SET)}
               </AppText>
               <AppText
                 variant="caption"
@@ -544,7 +579,7 @@ export default function EditProfileScreen() {
               >
                 {profile.home_lat != null
                   ? `${profile.home_lat.toFixed(3)}, ${profile.home_lng?.toFixed(3)}`
-                  : 'No coordinates yet'}
+                  : t(Translations.PROFILE_HOME_NO_COORDS)}
               </AppText>
             </View>
           </View>
@@ -572,7 +607,7 @@ export default function EditProfileScreen() {
                 marginLeft: 6,
               }}
             >
-              Set this as my home
+              {t(Translations.PROFILE_SET_HOME)}
             </AppText>
           </Pressable>
         </Section>
@@ -580,24 +615,27 @@ export default function EditProfileScreen() {
         <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         {/* Mode */}
-        <Section title="Mode" bg={surfaceLowest}>
+        <Section
+          title={t(Translations.PROFILE_SECTION_MODE)}
+          bg={surfaceLowest}
+        >
           <View style={styles.modeRow}>
             <ModePill
-              label="Auto"
+              label={t(Translations.PROFILE_MODE_AUTO)}
               active={profile.mode_override === null}
               onPress={() => setMode(null)}
               theme={theme}
               surface={surfaceLow}
             />
             <ModePill
-              label="Local"
+              label={t(Translations.PROFILE_MODE_LOCAL)}
               active={profile.mode_override === 'local'}
               onPress={() => setMode('local')}
               theme={theme}
               surface={surfaceLow}
             />
             <ModePill
-              label="Traveler"
+              label={t(Translations.PROFILE_MODE_TRAVELER)}
               active={profile.mode_override === 'traveler'}
               onPress={() => setMode('traveler')}
               theme={theme}
@@ -605,25 +643,25 @@ export default function EditProfileScreen() {
             />
           </View>
           <Spacer spacing={Spacing.SPACING_PADDING_8} />
+          {/* Three sentences, not a concatenation: the mode name is
+              interpolated so translations can reorder it, and the
+              unknown case gets its own honest line instead of asserting
+              "Local" while we're still waiting for coordinates. */}
           <AppText
             variant="caption"
             style={{
               color: theme.colors.onSurface,
             }}
           >
-            Currently shown as{' '}
-            <AppText
-              variant="caption"
-              style={{
-                fontWeight: '700',
-                color: theme.colors.primary,
-              }}
-            >
-              {mode === 'traveler' ? 'Traveler' : 'Local'}
-            </AppText>
-            {profile.mode_override === null
-              ? ' — based on your home base.'
-              : ' — manual override active.'}
+            {mode === null
+              ? t(Translations.PROFILE_MODE_NOTE_UNKNOWN)
+              : profile.mode_override === null
+                ? t(Translations.PROFILE_MODE_NOTE_AUTO, {
+                    mode: modeLabel,
+                  })
+                : t(Translations.PROFILE_MODE_NOTE_MANUAL, {
+                    mode: modeLabel,
+                  })}
           </AppText>
         </Section>
 

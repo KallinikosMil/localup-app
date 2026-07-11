@@ -8,4 +8,56 @@ export default {
   profilePhotoUploadError: 'Η φωτογραφία δεν ανέβηκε — έλεγξε τη σύνδεσή σου',
   profilePhotoDeleteError:
     'Η φωτογραφία δεν διαγράφηκε — έλεγξε τη σύνδεσή σου',
+
+  profileTitle: 'Προφίλ',
+  profileEditAction: 'Επεξεργασία',
+  profileNoName: '—',
+  profileSectionAbout: 'Σχετικά',
+  profileBioEmpty:
+    'Πες λίγα λόγια για σένα — πάτα Επεξεργασία για να προσθέσεις βιογραφικό.',
+  profileSectionGallery: 'Συλλογή',
+  profileSectionInterests: 'Ενδιαφέροντα',
+  profileLogout: 'Αποσύνδεση',
+
+  profileBadgeTraveler: 'ΤΑΞΙΔΙΩΤΗΣ',
+  profileBadgeLocal: 'ΝΤΟΠΙΟΣ',
+  profileBadgeLocating: 'ΕΝΤΟΠΙΣΜΟΣ…',
+
+  profileEditTitle: 'Επεξεργασία προφίλ',
+  profileCancel: 'Άκυρο',
+  profileSave: 'Αποθήκευση',
+  profileSaving: 'Αποθήκευση…',
+  profileDiscardTitle: 'Απόρριψη αλλαγών;',
+  profileDiscardBody: 'Οι αλλαγές σου θα χαθούν.',
+  profileDiscardKeep: 'Συνέχισε την επεξεργασία',
+  profileDiscardConfirm: 'Απόρριψη',
+  profileSectionBasics: 'Βασικά',
+  profileNamePlaceholder: 'Όνομα',
+  profileCityPlaceholder: 'Πόλη βάσης',
+  profileSectionAboutYou: 'Σχετικά με σένα',
+  profileBioPlaceholder: 'Πες μας τι σε κάνει ξεχωριστό.',
+  profileSectionYourGallery: 'Η συλλογή σου',
+  profilePhotoHint: 'Παρατεταμένο πάτημα για αφαίρεση',
+  profilePhotoPermissionTitle: 'Απαιτείται άδεια',
+  profilePhotoPermissionBody:
+    'Δώσε πρόσβαση στη συλλογή φωτογραφιών για να προσθέσεις φωτογραφίες.',
+  profilePhotoDeleteTitle: 'Διαγραφή φωτογραφίας;',
+  profilePhotoDeleteBody: 'Η φωτογραφία θα αφαιρεθεί οριστικά.',
+  profilePhotoDeleteConfirm: 'Διαγραφή',
+  profileSectionHomeBase: 'Βάση',
+  profileHomeNotSet: 'Δεν έχει οριστεί',
+  profileHomeNoCoords: 'Δεν υπάρχουν ακόμη συντεταγμένες',
+  profileSetHome: 'Όρισε το ως βάση μου',
+  profileLocationUnavailableTitle: 'Η τοποθεσία δεν είναι διαθέσιμη',
+  profileLocationUnavailableBody:
+    'Ενεργοποίησε την άδεια τοποθεσίας για να ορίσεις τη βάση σου.',
+  profileSectionMode: 'Λειτουργία',
+  profileModeAuto: 'Αυτόματο',
+  profileModeLocal: 'Ντόπιος',
+  profileModeTraveler: 'Ταξιδιώτης',
+  profileModeNoteAuto: 'Εμφανίζεσαι ως {{mode}} — με βάση τη βάση σου.',
+  profileModeNoteManual:
+    'Εμφανίζεσαι ως {{mode}} — ενεργή χειροκίνητη επιλογή.',
+  profileModeNoteUnknown:
+    'Περιμένουμε την τοποθεσία σου — δεν μπορούμε ακόμη να βρούμε τη λειτουργία σου.',
 };
