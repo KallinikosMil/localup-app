@@ -24,4 +24,8 @@ export const Translations = {
   ONBOARDING_INTERESTS_ERROR: 'onboarding.interestsError',
   ONBOARDING_FINISH_ERROR: 'onboarding.finishError',
   ONBOARDING_RETRY: 'onboarding.retry',
+  ONBOARDING_MISSING_DOB: 'onboarding.missingDob',
+  ONBOARDING_MISSING_CITY: 'onboarding.missingCity',
+  ONBOARDING_MISSING_PHOTO: 'onboarding.missingPhoto',
+  ONBOARDING_GO_BACK: 'onboarding.goBack',
 } as const;

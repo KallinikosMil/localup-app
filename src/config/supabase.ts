@@ -17,6 +17,25 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 // auto-pause cold-starts in ~10-20s.
 const REQUEST_TIMEOUT_MS = 15_000;
 
+// H3 — but 15s is NOT enough for a storage upload. An onboarding avatar
+// is a ~2MB JPEG; on a weak mobile uplink that takes far longer than
+// any API round-trip, and the global timeout would abort it — making
+// onboarding fail on exactly the connections where it matters most.
+// Storage transfers get their own, much larger budget. Everything else
+// (queries, .rpc(), auth.*) stays on the tight 15s.
+const STORAGE_TIMEOUT_MS = 60_000;
+
+const STORAGE_PATH = '/storage/v1/';
+
+const urlOf = (input: RequestInfo | URL): string => {
+  if (typeof input === 'string') return input;
+  if (input instanceof URL) return input.toString();
+  return (input as Request).url ?? '';
+};
+
+const timeoutFor = (input: RequestInfo | URL): number =>
+  urlOf(input).includes(STORAGE_PATH) ? STORAGE_TIMEOUT_MS : REQUEST_TIMEOUT_MS;
+
 type MergedSignal = {
   signal: AbortSignal;
   cleanup: () => void;
@@ -28,7 +47,10 @@ type MergedSignal = {
 // back to a manual merge when it doesn't. Either way a caller-supplied
 // signal (useChat / useMatches call `.abortSignal()`) still aborts the
 // request — the timeout is an *additional* trigger, not a replacement.
-const withTimeout = (external?: AbortSignal | null): MergedSignal => {
+const withTimeout = (
+  timeoutMs: number,
+  external?: AbortSignal | null,
+): MergedSignal => {
   const timeoutOf = (
     AbortSignal as unknown as {
       timeout?: (ms: number) => AbortSignal;
@@ -41,7 +63,7 @@ const withTimeout = (external?: AbortSignal | null): MergedSignal => {
   ).any;
 
   if (typeof timeoutOf === 'function') {
-    const timeoutSignal = timeoutOf(REQUEST_TIMEOUT_MS);
+    const timeoutSignal = timeoutOf(timeoutMs);
     if (!external) {
       return {
         signal: timeoutSignal,
@@ -58,7 +80,7 @@ const withTimeout = (external?: AbortSignal | null): MergedSignal => {
 
   // Manual merge: one controller that fires on whichever comes first.
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   const onExternalAbort = () => controller.abort();
 
   if (external) {
@@ -79,7 +101,7 @@ const withTimeout = (external?: AbortSignal | null): MergedSignal => {
 };
 
 const fetchWithTimeout: typeof fetch = async (input, init) => {
-  const { signal, cleanup } = withTimeout(init?.signal);
+  const { signal, cleanup } = withTimeout(timeoutFor(input), init?.signal);
   try {
     return await fetch(input, {
       ...init,

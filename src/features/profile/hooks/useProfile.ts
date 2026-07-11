@@ -182,7 +182,16 @@ export const useDeletePhoto = () => {
         .single();
       if (fErr) throw fErr;
 
-      await supabase.storage.from('user-photos').remove([media.storage_path]);
+      // H3: this error was ignored and the DB row was deleted anyway —
+      // so a failed storage delete orphaned the file forever (still
+      // stored, still billed) while the app confidently believed it was
+      // gone, with no way to ever find it again. Delete the file FIRST
+      // and only drop the row once storage confirms; if storage fails we
+      // keep the row, surface the error, and the user can retry.
+      const { error: rmErr } = await supabase.storage
+        .from('user-photos')
+        .remove([media.storage_path]);
+      if (rmErr) throw rmErr;
 
       const { error: dErr } = await supabase
         .from('media')

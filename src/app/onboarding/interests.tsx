@@ -3,6 +3,7 @@ import { StyleSheet, View, ScrollView } from 'react-native';
 import { TextInput, ActivityIndicator, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { router } from 'expo-router';
 
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
@@ -26,6 +27,21 @@ type Interest = {
   is_active: boolean;
 };
 
+// Which earlier step the user has to return to, and what to tell them.
+type MissingField = 'dob' | 'city' | 'photo';
+
+const MISSING_MESSAGE: Record<MissingField, string> = {
+  dob: Translations.ONBOARDING_MISSING_DOB,
+  city: Translations.ONBOARDING_MISSING_CITY,
+  photo: Translations.ONBOARDING_MISSING_PHOTO,
+};
+
+const MISSING_ROUTE: Record<MissingField, string> = {
+  dob: '/onboarding/name-age',
+  city: '/onboarding/home-city',
+  photo: '/onboarding/photo',
+};
+
 const InterestsScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -35,6 +51,7 @@ const InterestsScreen = () => {
     onboardingData.interestIds,
   );
   const [bio, setBio] = useState(onboardingData.bio);
+  const [missing, setMissing] = useState<MissingField | null>(null);
 
   // H2: `isError` is the whole point here. The Finish mutation had no
   // onError and no error UI — on failure the spinner just stopped and
@@ -95,6 +112,30 @@ const InterestsScreen = () => {
     // Clear a previous failure so the error text disappears while the
     // retry is in flight.
     resetFinish();
+    setMissing(null);
+
+    // H3 — NULL ISLAND. This used to be `homeLat: ?? 0, homeLng: ?? 0,
+    // photoUri: ?? ''`: missing coordinates were silently written as
+    // (0, 0) — a real location in the Gulf of Guinea — which poisons
+    // every distance calculation the app makes, forever, with no error.
+    // A missing value is NOT a zero. Refuse, and tell the user exactly
+    // which step to go back to.
+    const dateOfBirth =
+      onboardingData.dateOfBirth?.toISOString().split('T')[0] ?? '';
+    const { homeLat, homeLng, photoUri } = onboardingData;
+
+    if (!dateOfBirth) {
+      setMissing('dob');
+      return;
+    }
+    if (homeLat == null || homeLng == null) {
+      setMissing('city');
+      return;
+    }
+    if (!photoUri) {
+      setMissing('photo');
+      return;
+    }
 
     update({
       interestIds: selectedIds,
@@ -103,12 +144,11 @@ const InterestsScreen = () => {
 
     mutate({
       displayName: onboardingData.displayName,
-      dateOfBirth:
-        onboardingData.dateOfBirth?.toISOString().split('T')[0] ?? '',
+      dateOfBirth,
       homeCity: onboardingData.homeCity,
-      homeLat: onboardingData.homeLat ?? 0,
-      homeLng: onboardingData.homeLng ?? 0,
-      photoUri: onboardingData.photoUri ?? '',
+      homeLat,
+      homeLng,
+      photoUri,
       interestIds: selectedIds,
       bio,
     });
@@ -226,6 +266,28 @@ const InterestsScreen = () => {
         />
 
         <View style={styles.bottomSection}>
+          {missing ? (
+            <>
+              <AppText
+                variant="body"
+                style={{
+                  color: theme.colors.error,
+                  textAlign: 'center',
+                }}
+              >
+                {t(MISSING_MESSAGE[missing])}
+              </AppText>
+              <Spacer spacing={Spacing.SPACING_PADDING_12} />
+              <AppButton
+                variant="outlined"
+                onPress={() => router.push(MISSING_ROUTE[missing])}
+              >
+                {t(Translations.ONBOARDING_GO_BACK)}
+              </AppButton>
+              <Spacer spacing={Spacing.SPACING_PADDING_12} />
+            </>
+          ) : null}
+
           {finishFailed ? (
             <>
               <AppText

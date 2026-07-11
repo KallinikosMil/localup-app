@@ -26,5 +26,9 @@ export default {
     interestsError: "Couldn't load interests.",
     finishError: "Couldn't finish setting up your profile.",
     retry: 'Try again',
+    missingDob: 'Your date of birth is missing.',
+    missingCity: 'Your home city is missing.',
+    missingPhoto: 'Your photo is missing.',
+    goBack: 'Go back and add it',
   },
 };
