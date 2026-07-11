@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 import { store } from '@store';
 import { setOnboardingComplete } from '@features/auth/slices/authSlice';
@@ -43,6 +43,8 @@ const buildPhotoPath = (userId: string, photoUri: string) => {
 };
 
 export function useCompleteOnboarding() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data: OnboardingData) => {
       const {
@@ -120,6 +122,28 @@ export function useCompleteOnboarding() {
 
       // 4. Only now is the user really onboarded.
       store.dispatch(setOnboardingComplete(true));
+
+      return { userId: user.id };
+    },
+    // H4 — this mutation writes profiles + media + user_interests and
+    // used to touch the query cache ZERO times (it didn't even import
+    // useQueryClient). Today AppGuard masks it: a non-onboarded user
+    // never mounts the tabs, so these queries have never been observed
+    // and there is nothing stale to serve. That is a coincidence, not a
+    // guarantee — with a 5-minute staleTime, the first time anything
+    // reads a profile before onboarding finishes (a re-run after a
+    // partial failure, a future "edit onboarding" entry point) the user
+    // lands in the app on pre-onboarding data. Invalidate what we wrote.
+    onSuccess: ({ userId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['profile', userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['photos', userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['discover-candidates', userId],
+      });
     },
   });
 }

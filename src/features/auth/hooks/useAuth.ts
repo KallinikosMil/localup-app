@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 
 export function useLogin() {
@@ -44,10 +44,21 @@ export function useRegister() {
 }
 
 export function useLogout() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async () => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+    },
+    // H4 — signOut() left the whole query cache in memory. Most keys are
+    // uid-scoped, so a cross-user render is unlikely, but ['chat',
+    // matchId] and ['interests'] are NOT scoped to a user, and every
+    // cached row (messages, matches, the deck) survives for gcTime after
+    // the session that was allowed to read it is gone. Log out means
+    // forget: drop everything, so the next user starts from the network.
+    onSuccess: () => {
+      queryClient.clear();
     },
   });
 }

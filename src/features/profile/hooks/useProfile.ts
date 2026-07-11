@@ -90,6 +90,19 @@ export const useUpdateProfile = () => {
       queryClient.invalidateQueries({
         queryKey: ['profile', uid],
       });
+      // H4 — this is the W6 bug again, one layer up. The callers of this
+      // mutation write MODE-DETERMINING fields: edit.tsx's setMode()
+      // writes `mode_override`, setHomeHere() writes home_lat/home_lng.
+      // The discover_candidates RPC derives the swiper's own mode
+      // SERVER-SIDE from exactly those columns, and the deck's query key
+      // doesn't embed mode — so invalidating only ['profile'] flipped the
+      // badge instantly while the deck kept serving the OLD audience, and
+      // the user could swipe and match on the wrong people. It never
+      // self-heals: refetchOnWindowFocus is off, edit is pushed OVER the
+      // still-mounted tabs (no remount), and staleTime is 5 minutes.
+      queryClient.invalidateQueries({
+        queryKey: ['discover-candidates', uid],
+      });
     },
   });
 };
