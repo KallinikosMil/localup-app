@@ -1,37 +1,19 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-} from 'react-native';
-import {
-  TextInput,
-  ActivityIndicator,
-  useTheme,
-} from 'react-native-paper';
+import { StyleSheet, View, ScrollView } from 'react-native';
+import { TextInput, ActivityIndicator, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
-import AppText from
-  '@shared/components/AppText';
-import AppButton from
-  '@shared/components/AppButton';
-import Spacer from
-  '@shared/components/Spacer';
-import InterestChip from
-  '@shared/components/InterestChip';
-import OnboardingProgress from
-  '@shared/components/OnboardingProgress';
-import { useOnboardingData } from
-  '@features/onboarding/context/OnboardingContext';
-import { useCompleteOnboarding } from
-  '@features/onboarding/hooks/useOnboarding';
-import { Translations } from
-  '@features/onboarding/i18n/translationKeys';
-import { supabase } from
-  '@config/supabase';
-import { Spacing } from
-  '@theme/constants/Spacing';
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import Spacer from '@shared/components/Spacer';
+import InterestChip from '@shared/components/InterestChip';
+import OnboardingProgress from '@shared/components/OnboardingProgress';
+import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
+import { useCompleteOnboarding } from '@features/onboarding/hooks/useOnboarding';
+import { Translations } from '@features/onboarding/i18n/translationKeys';
+import { supabase } from '@config/supabase';
+import { Spacing } from '@theme/constants/Spacing';
 
 const MIN_INTERESTS = 3;
 const MAX_INTERESTS = 5;
@@ -47,63 +29,50 @@ type Interest = {
 const InterestsScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { data: onboardingData, update } =
-    useOnboardingData();
+  const { data: onboardingData, update } = useOnboardingData();
 
-  const [selectedIds, setSelectedIds] =
-    useState<string[]>(
-      onboardingData.interestIds,
-    );
-  const [bio, setBio] = useState(
-    onboardingData.bio,
+  const [selectedIds, setSelectedIds] = useState<string[]>(
+    onboardingData.interestIds,
   );
+  const [bio, setBio] = useState(onboardingData.bio);
 
-  const { mutate, isPending } =
-    useCompleteOnboarding();
+  const { mutate, isPending } = useCompleteOnboarding();
 
-  const {
-    data: interests = [],
-    isLoading,
-  } = useQuery({
+  const { data: interests = [], isLoading } = useQuery({
     queryKey: ['interests'],
     queryFn: async () => {
-      const { data, error } =
-        await supabase
-          .from('interests')
-          .select('*')
-          .eq('is_active', true);
+      const { data, error } = await supabase
+        .from('interests')
+        .select('*')
+        .eq('is_active', true);
       if (error) throw error;
       return data as Interest[];
     },
   });
 
-  const grouped = interests.reduce<
-    Record<string, Interest[]>
-  >((acc, interest) => {
-    const cat = interest.category;
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(interest);
-    return acc;
-  }, {});
+  const grouped = interests.reduce<Record<string, Interest[]>>(
+    (acc, interest) => {
+      const cat = interest.category;
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(interest);
+      return acc;
+    },
+    {},
+  );
 
   const toggleInterest = (id: string) => {
     setSelectedIds(prev => {
       if (prev.includes(id)) {
-        return prev.filter(
-          i => i !== id,
-        );
+        return prev.filter(i => i !== id);
       }
-      if (
-        prev.length >= MAX_INTERESTS
-      ) {
+      if (prev.length >= MAX_INTERESTS) {
         return prev;
       }
       return [...prev, id];
     });
   };
 
-  const canFinish =
-    selectedIds.length >= MIN_INTERESTS;
+  const canFinish = selectedIds.length >= MIN_INTERESTS;
 
   const onFinish = () => {
     update({
@@ -112,19 +81,13 @@ const InterestsScreen = () => {
     });
 
     mutate({
-      displayName:
-        onboardingData.displayName,
+      displayName: onboardingData.displayName,
       dateOfBirth:
-        onboardingData.dateOfBirth
-          ?.toISOString()
-          .split('T')[0] ?? '',
+        onboardingData.dateOfBirth?.toISOString().split('T')[0] ?? '',
       homeCity: onboardingData.homeCity,
-      homeLat:
-        onboardingData.homeLat ?? 0,
-      homeLng:
-        onboardingData.homeLng ?? 0,
-      photoUri:
-        onboardingData.photoUri ?? '',
+      homeLat: onboardingData.homeLat ?? 0,
+      homeLng: onboardingData.homeLng ?? 0,
+      photoUri: onboardingData.photoUri ?? '',
       interestIds: selectedIds,
       bio,
     });
@@ -135,154 +98,88 @@ const InterestsScreen = () => {
       style={[
         styles.root,
         {
-          backgroundColor:
-            theme.colors.background,
+          backgroundColor: theme.colors.background,
         },
       ]}
     >
-      <ScrollView
-        contentContainerStyle={
-          styles.scrollContent
-        }
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <OnboardingProgress
           step={4}
           totalSteps={4}
-          title={t(
-            Translations.ONBOARDING_STEP_4_TITLE,
-          )}
+          title={t(Translations.ONBOARDING_STEP_4_TITLE)}
         />
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_8}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
 
         <AppText
           variant="body"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
           }}
         >
-          {t(
-            Translations.ONBOARDING_STEP_4_SUBTITLE,
-          )}
+          {t(Translations.ONBOARDING_STEP_4_SUBTITLE)}
         </AppText>
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_16
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         <AppText
           variant="caption"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
           }}
         >
-          {selectedIds.length}/
-          {MAX_INTERESTS} selected
+          {selectedIds.length}/{MAX_INTERESTS} selected
         </AppText>
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_8}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
 
         {isLoading ? (
-          <ActivityIndicator
-            style={styles.loader}
-          />
+          <ActivityIndicator style={styles.loader} />
         ) : (
-          Object.entries(grouped).map(
-            ([category, items]) => (
-              <View
-                key={category}
-                style={
-                  styles.categoryBlock
-                }
-              >
-                <AppText
-                  variant="label"
-                  style={{
-                    color:
-                      theme.colors
-                        .onSurfaceVariant,
-                  }}
-                >
-                  {category}
-                </AppText>
-                <View
-                  style={styles.chipRow}
-                >
-                  {items.map(
-                    interest => (
-                      <InterestChip
-                        key={
-                          interest.id
-                        }
-                        label={
-                          interest.name
-                        }
-                        icon={
-                          interest.icon ??
-                          undefined
-                        }
-                        selected={selectedIds.includes(
-                          interest.id,
-                        )}
-                        onPress={() =>
-                          toggleInterest(
-                            interest.id,
-                          )
-                        }
-                      />
-                    ),
-                  )}
-                </View>
-              </View>
-            ),
-          )
-        )}
-
-        {!canFinish &&
-          selectedIds.length > 0 && (
-            <>
-              <Spacer
-                spacing={
-                  Spacing.SPACING_PADDING_8
-                }
-              />
+          Object.entries(grouped).map(([category, items]) => (
+            <View key={category} style={styles.categoryBlock}>
               <AppText
-                variant="caption"
+                variant="label"
                 style={{
-                  color:
-                    theme.colors.error,
+                  color: theme.colors.onSurfaceVariant,
                 }}
               >
-                {t(
-                  Translations.ONBOARDING_INTERESTS_MIN,
-                )}
+                {category}
               </AppText>
-            </>
-          )}
+              <View style={styles.chipRow}>
+                {items.map(interest => (
+                  <InterestChip
+                    key={interest.id}
+                    label={interest.name}
+                    icon={interest.icon ?? undefined}
+                    selected={selectedIds.includes(interest.id)}
+                    onPress={() => toggleInterest(interest.id)}
+                  />
+                ))}
+              </View>
+            </View>
+          ))
+        )}
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_24
-          }
-        />
+        {!canFinish && selectedIds.length > 0 && (
+          <>
+            <Spacer spacing={Spacing.SPACING_PADDING_8} />
+            <AppText
+              variant="caption"
+              style={{
+                color: theme.colors.error,
+              }}
+            >
+              {t(Translations.ONBOARDING_INTERESTS_MIN)}
+            </AppText>
+          </>
+        )}
+
+        <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
         <TextInput
-          label={t(
-            Translations.ONBOARDING_BIO_LABEL,
-          )}
-          placeholder={t(
-            Translations.ONBOARDING_BIO_PLACEHOLDER,
-          )}
+          label={t(Translations.ONBOARDING_BIO_LABEL)}
+          placeholder={t(Translations.ONBOARDING_BIO_PLACEHOLDER)}
           value={bio}
           onChangeText={setBio}
           mode="outlined"
@@ -293,18 +190,14 @@ const InterestsScreen = () => {
 
         <View style={styles.bottomSection}>
           {isPending ? (
-            <ActivityIndicator
-              size="large"
-            />
+            <ActivityIndicator size="large" />
           ) : (
             <AppButton
               variant="primary"
               onPress={onFinish}
               disabled={!canFinish}
             >
-              {t(
-                Translations.ONBOARDING_FINISH,
-              )}
+              {t(Translations.ONBOARDING_FINISH)}
             </AppButton>
           )}
         </View>
@@ -321,16 +214,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingTop:
-      Spacing.SPACING_PADDING_24,
-    paddingBottom:
-      Spacing.SPACING_PADDING_32,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_24,
+    paddingBottom: Spacing.SPACING_PADDING_32,
   },
   categoryBlock: {
-    marginBottom:
-      Spacing.SPACING_PADDING_16,
+    marginBottom: Spacing.SPACING_PADDING_16,
   },
   chipRow: {
     flexDirection: 'row',
@@ -338,15 +227,13 @@ const styles = StyleSheet.create({
     marginTop: Spacing.SPACING_PADDING_8,
   },
   loader: {
-    marginVertical:
-      Spacing.SPACING_PADDING_32,
+    marginVertical: Spacing.SPACING_PADDING_32,
   },
   bioInput: {
     maxHeight: 120,
   },
   bottomSection: {
     marginTop: 'auto',
-    paddingTop:
-      Spacing.SPACING_PADDING_32,
+    paddingTop: Spacing.SPACING_PADDING_32,
   },
 });

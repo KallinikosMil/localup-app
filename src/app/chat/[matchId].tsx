@@ -1,8 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,82 +8,60 @@ import {
   Platform,
   Pressable,
 } from 'react-native';
-import {
-  useTheme,
-  ActivityIndicator,
-} from 'react-native-paper';
-import {
-  useLocalSearchParams,
-  useRouter,
-} from 'expo-router';
+import { useTheme, ActivityIndicator } from 'react-native-paper';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { RootState } from '@store';
 
-import AppText from
-  '@shared/components/AppText';
+import AppText from '@shared/components/AppText';
 import {
   useChat,
   useSendMessage,
   type ChatMessage,
-} from
-  '@features/chat/hooks/useChat';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
-import { Translations } from
-  '@features/chat/i18n/translationKeys';
+} from '@features/chat/hooks/useChat';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
+import { Translations } from '@features/chat/i18n/translationKeys';
 
 export default function ChatScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { matchId, name, threadId } =
-    useLocalSearchParams<{
-      matchId: string;
-      name: string;
-      // Passed from Matches (which already
-      // knows it) so the chat skips the
-      // thread lookup. Absent on deep links
-      // / brand-new matches → resolved in
-      // the fallback path.
-      threadId?: string;
-    }>();
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const { matchId, name, threadId } = useLocalSearchParams<{
+    matchId: string;
+    name: string;
+    // Passed from Matches (which already
+    // knows it) so the chat skips the
+    // thread lookup. Absent on deep links
+    // / brand-new matches → resolved in
+    // the fallback path.
+    threadId?: string;
+  }>();
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const { t } = useTranslation();
 
   const insets = useSafeAreaInsets();
-  const {
-    messages,
-    isLoading,
-    isError,
-    refetch,
-  } = useChat(matchId, threadId ?? null);
-  const sendMessage =
-    useSendMessage(matchId);
+  const { messages, isLoading, isError, refetch } = useChat(
+    matchId,
+    threadId ?? null,
+  );
+  const sendMessage = useSendMessage(matchId);
 
   const [text, setText] = useState('');
-  const listRef =
-    useRef<FlatList>(null);
+  const listRef = useRef<FlatList>(null);
 
   // After a few seconds of loading, reassure the user the screen
   // isn't frozen — a Supabase project waking from auto-pause can
   // take 10-20s (V4). Resets whenever loading ends.
-  const [slowLoading, setSlowLoading] =
-    useState(false);
+  const [slowLoading, setSlowLoading] = useState(false);
   useEffect(() => {
     if (!isLoading) {
       setSlowLoading(false);
       return;
     }
-    const t = setTimeout(
-      () => setSlowLoading(true),
-      4500,
-    );
+    const t = setTimeout(() => setSlowLoading(true), 4500);
     return () => clearTimeout(t);
   }, [isLoading]);
 
@@ -98,13 +72,8 @@ export default function ChatScreen() {
     sendMessage.mutate(trimmed);
   };
 
-  const renderMessage = ({
-    item,
-  }: {
-    item: ChatMessage;
-  }) => {
-    const isMine =
-      item.sender_id === uid;
+  const renderMessage = ({ item }: { item: ChatMessage }) => {
+    const isMine = item.sender_id === uid;
     return (
       <View
         style={[
@@ -113,16 +82,13 @@ export default function ChatScreen() {
             ? [
                 styles.bubbleMine,
                 {
-                  backgroundColor:
-                    theme.colors.primary,
+                  backgroundColor: theme.colors.primary,
                 },
               ]
             : [
                 styles.bubbleTheirs,
                 {
-                  backgroundColor:
-                    theme.colors
-                      .surfaceVariant,
+                  backgroundColor: theme.colors.surfaceVariant,
                 },
               ],
         ]}
@@ -130,10 +96,7 @@ export default function ChatScreen() {
         <AppText
           variant="body"
           style={{
-            color: isMine
-              ? theme.colors.onPrimary
-              : theme.colors
-                  .onSurface,
+            color: isMine ? theme.colors.onPrimary : theme.colors.onSurface,
           }}
         >
           {item.body}
@@ -147,8 +110,7 @@ export default function ChatScreen() {
       style={[
         styles.root,
         {
-          backgroundColor:
-            theme.colors.background,
+          backgroundColor: theme.colors.background,
         },
       ]}
       // W8: on Android `behavior` was undefined, relying on native
@@ -160,76 +122,48 @@ export default function ChatScreen() {
       // avoided region is measured from the right origin. (Dae tunes the
       // exact value on the Redmi; flip to "padding" if "height" is
       // jumpy.)
-      behavior={
-        Platform.OS === 'ios'
-          ? 'padding'
-          : 'height'
-      }
-      keyboardVerticalOffset={
-        Platform.OS === 'ios'
-          ? 90
-          : insets.top
-      }
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : insets.top}
     >
       {/* Header */}
       <View
         style={[
           styles.header,
           {
-            backgroundColor:
-              theme.colors
-                .surfaceVariant,
-            paddingTop:
-              insets.top +
-              Spacing.SPACING_PADDING_8,
+            backgroundColor: theme.colors.surfaceVariant,
+            paddingTop: insets.top + Spacing.SPACING_PADDING_8,
           },
         ]}
       >
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-        >
+        <Pressable onPress={() => router.back()} hitSlop={12}>
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
-            color={
-              theme.colors.onBackground
-            }
+            color={theme.colors.onBackground}
           />
         </Pressable>
         <AppText
           variant="h3"
           style={{
-            color:
-              theme.colors.onBackground,
-            marginLeft:
-              Spacing.SPACING_PADDING_16,
+            color: theme.colors.onBackground,
+            marginLeft: Spacing.SPACING_PADDING_16,
           }}
         >
-          {name ??
-            t(
-              Translations.CHAT_TITLE_FALLBACK,
-            )}
+          {name ?? t(Translations.CHAT_TITLE_FALLBACK)}
         </AppText>
       </View>
 
       {/* Messages */}
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator
-            animating
-            size="large"
-          />
+          <ActivityIndicator animating size="large" />
           {slowLoading ? (
             <AppText
               variant="body"
               style={{
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
+                color: theme.colors.onSurfaceVariant,
                 textAlign: 'center',
-                marginTop:
-                  Spacing.SPACING_PADDING_16,
+                marginTop: Spacing.SPACING_PADDING_16,
               }}
             >
               {t(Translations.CHAT_WAKING)}
@@ -241,20 +175,14 @@ export default function ChatScreen() {
           <MaterialCommunityIcons
             name="message-alert-outline"
             size={40}
-            color={
-              theme.colors
-                .onSurfaceVariant
-            }
+            color={theme.colors.onSurfaceVariant}
           />
           <AppText
             variant="body"
             style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
+              color: theme.colors.onSurfaceVariant,
               textAlign: 'center',
-              marginTop:
-                Spacing.SPACING_PADDING_12,
+              marginTop: Spacing.SPACING_PADDING_12,
             }}
           >
             {t(Translations.CHAT_ERROR)}
@@ -265,16 +193,14 @@ export default function ChatScreen() {
             style={[
               styles.retryBtn,
               {
-                backgroundColor:
-                  theme.colors.primary,
+                backgroundColor: theme.colors.primary,
               },
             ]}
           >
             <AppText
               variant="body"
               style={{
-                color:
-                  theme.colors.onPrimary,
+                color: theme.colors.onPrimary,
                 fontWeight: '600',
               }}
             >
@@ -288,9 +214,7 @@ export default function ChatScreen() {
           data={messages ?? []}
           keyExtractor={item => item.id}
           renderItem={renderMessage}
-          contentContainerStyle={
-            styles.list
-          }
+          contentContainerStyle={styles.list}
           onContentSizeChange={() =>
             listRef.current?.scrollToEnd({
               animated: false,
@@ -301,9 +225,7 @@ export default function ChatScreen() {
               <AppText
                 variant="body"
                 style={{
-                  color:
-                    theme.colors
-                      .onSurfaceVariant,
+                  color: theme.colors.onSurfaceVariant,
                   textAlign: 'center',
                 }}
               >
@@ -319,9 +241,7 @@ export default function ChatScreen() {
         style={[
           styles.inputRow,
           {
-            backgroundColor:
-              theme.colors
-                .surfaceVariant,
+            backgroundColor: theme.colors.surfaceVariant,
           },
         ]}
       >
@@ -329,18 +249,12 @@ export default function ChatScreen() {
           style={[
             styles.input,
             {
-              backgroundColor:
-                theme.colors.surface,
-              color:
-                theme.colors.onSurface,
+              backgroundColor: theme.colors.surface,
+              color: theme.colors.onSurface,
             },
           ]}
-          placeholder={t(
-            Translations.CHAT_INPUT_PLACEHOLDER,
-          )}
-          placeholderTextColor={
-            theme.colors.onSurfaceVariant
-          }
+          placeholder={t(Translations.CHAT_INPUT_PLACEHOLDER)}
+          placeholderTextColor={theme.colors.onSurfaceVariant}
           value={text}
           onChangeText={setText}
           multiline
@@ -348,18 +262,13 @@ export default function ChatScreen() {
         />
         <Pressable
           onPress={handleSend}
-          disabled={
-            !text.trim() ||
-            sendMessage.isPending
-          }
+          disabled={!text.trim() || sendMessage.isPending}
           style={[
             styles.sendBtn,
             {
-              backgroundColor:
-                text.trim()
-                  ? theme.colors.primary
-                  : theme.colors
-                      .surfaceVariant,
+              backgroundColor: text.trim()
+                ? theme.colors.primary
+                : theme.colors.surfaceVariant,
             },
           ]}
         >
@@ -369,8 +278,7 @@ export default function ChatScreen() {
             color={
               text.trim()
                 ? theme.colors.onPrimary
-                : theme.colors
-                    .onSurfaceVariant
+                : theme.colors.onSurfaceVariant
             }
           />
         </Pressable>
@@ -386,40 +294,30 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_16,
-    paddingBottom:
-      Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_16,
+    paddingBottom: Spacing.SPACING_PADDING_16,
   },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
   },
   retryBtn: {
-    marginTop:
-      Spacing.SPACING_PADDING_16,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingVertical:
-      Spacing.SPACING_PADDING_8,
+    marginTop: Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingVertical: Spacing.SPACING_PADDING_8,
     borderRadius: BorderRadius.pill,
   },
   list: {
     flexGrow: 1,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_16,
-    paddingVertical:
-      Spacing.SPACING_PADDING_8,
+    paddingHorizontal: Spacing.SPACING_PADDING_16,
+    paddingVertical: Spacing.SPACING_PADDING_8,
   },
   bubble: {
     maxWidth: '78%',
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_16,
-    paddingVertical:
-      Spacing.SPACING_PADDING_8,
+    paddingHorizontal: Spacing.SPACING_PADDING_16,
+    paddingVertical: Spacing.SPACING_PADDING_8,
     borderRadius: BorderRadius.lg,
     marginVertical: 4,
   },
@@ -439,10 +337,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderRadius: BorderRadius.lg,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_16,
-    paddingVertical:
-      Spacing.SPACING_PADDING_8,
+    paddingHorizontal: Spacing.SPACING_PADDING_16,
+    paddingVertical: Spacing.SPACING_PADDING_8,
     maxHeight: 100,
     fontSize: 16,
   },
@@ -452,7 +348,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft:
-      Spacing.SPACING_PADDING_8,
+    marginLeft: Spacing.SPACING_PADDING_8,
   },
 });

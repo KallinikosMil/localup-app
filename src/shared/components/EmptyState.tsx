@@ -11,9 +11,7 @@ import { Spacing } from '@theme/constants/Spacing';
 // Standard empty state — "No one nearby" pattern for
 // Discover/Matches/Photos (UI redesign spec §3.5).
 type EmptyStateProps = {
-  icon: React.ComponentProps<
-    typeof MaterialCommunityIcons
-  >['name'];
+  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
   title: string;
   subtitle?: string;
   action?: {
@@ -22,12 +20,7 @@ type EmptyStateProps = {
   };
 };
 
-const EmptyState = ({
-  icon,
-  title,
-  subtitle,
-  action,
-}: EmptyStateProps) => {
+const EmptyState = ({ icon, title, subtitle, action }: EmptyStateProps) => {
   const theme = useAppTheme();
 
   return (
@@ -54,9 +47,7 @@ const EmptyState = ({
             style={[
               styles.subtitle,
               {
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
+                color: theme.colors.onSurfaceVariant,
               },
             ]}
           >
@@ -67,10 +58,7 @@ const EmptyState = ({
       {action ? (
         <>
           <Spacer spacing={Spacing.xl} />
-          <AppButton
-            variant="outlined"
-            onPress={action.onPress}
-          >
+          <AppButton variant="outlined" onPress={action.onPress}>
             {action.label}
           </AppButton>
         </>

@@ -38,8 +38,7 @@ const InterestChip = ({
           {
             backgroundColor: frosted
               ? theme.colors.WHITE_A20
-              : theme.colors
-                  .secondaryContainer,
+              : theme.colors.secondaryContainer,
           },
         ]}
       >
@@ -48,8 +47,7 @@ const InterestChip = ({
           style={{
             color: frosted
               ? theme.colors.ON_PHOTO
-              : theme.colors
-                  .onSecondaryContainer,
+              : theme.colors.onSecondaryContainer,
           }}
         >
           {label}

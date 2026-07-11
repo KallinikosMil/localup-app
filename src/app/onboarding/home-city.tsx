@@ -1,8 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useRef,
-} from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,29 +6,18 @@ import {
   FlatList,
   Pressable,
 } from 'react-native';
-import {
-  TextInput,
-  useTheme,
-} from 'react-native-paper';
+import { TextInput, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
-import AppText from
-  '@shared/components/AppText';
-import AppButton from
-  '@shared/components/AppButton';
-import Spacer from
-  '@shared/components/Spacer';
-import OnboardingProgress from
-  '@shared/components/OnboardingProgress';
-import { useOnboardingData } from
-  '@features/onboarding/context/OnboardingContext';
-import { Translations } from
-  '@features/onboarding/i18n/translationKeys';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import Spacer from '@shared/components/Spacer';
+import OnboardingProgress from '@shared/components/OnboardingProgress';
+import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
+import { Translations } from '@features/onboarding/i18n/translationKeys';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
 
 type CityResult = {
   place_id: number;
@@ -46,43 +31,31 @@ const DEBOUNCE_MS = 300;
 const HomeCityScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { data, update } =
-    useOnboardingData();
+  const { data, update } = useOnboardingData();
 
-  const [query, setQuery] = useState(
-    data.homeCity,
-  );
-  const [results, setResults] = useState<
-    CityResult[]
-  >([]);
-  const [selectedCity, setSelectedCity] =
-    useState(data.homeCity);
-  const timerRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const [query, setQuery] = useState(data.homeCity);
+  const [results, setResults] = useState<CityResult[]>([]);
+  const [selectedCity, setSelectedCity] = useState(data.homeCity);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const searchCities = useCallback(
-    async (text: string) => {
-      if (text.length < 2) {
-        setResults([]);
-        return;
-      }
-      try {
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&limit=5&addressdetails=1&featuretype=city`;
-        const res = await fetch(url, {
-          headers: {
-            'User-Agent': 'LocalUp/1.0',
-          },
-        });
-        const json: CityResult[] =
-          await res.json();
-        setResults(json);
-      } catch {
-        setResults([]);
-      }
-    },
-    [],
-  );
+  const searchCities = useCallback(async (text: string) => {
+    if (text.length < 2) {
+      setResults([]);
+      return;
+    }
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&limit=5&addressdetails=1&featuretype=city`;
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent': 'LocalUp/1.0',
+        },
+      });
+      const json: CityResult[] = await res.json();
+      setResults(json);
+    } catch {
+      setResults([]);
+    }
+  }, []);
 
   const onChangeText = useCallback(
     (text: string) => {
@@ -91,12 +64,9 @@ const HomeCityScreen = () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
-      timerRef.current = setTimeout(
-        () => {
-          searchCities(text);
-        },
-        DEBOUNCE_MS,
-      );
+      timerRef.current = setTimeout(() => {
+        searchCities(text);
+      }, DEBOUNCE_MS);
     },
     [searchCities],
   );
@@ -120,26 +90,20 @@ const HomeCityScreen = () => {
     router.push('/onboarding/photo');
   };
 
-  const renderItem = ({
-    item,
-  }: {
-    item: CityResult;
-  }) => (
+  const renderItem = ({ item }: { item: CityResult }) => (
     <Pressable
       onPress={() => onSelectCity(item)}
       style={[
         styles.resultItem,
         {
-          borderBottomColor:
-            theme.colors.outlineVariant,
+          borderBottomColor: theme.colors.outlineVariant,
         },
       ]}
     >
       <AppText
         variant="body"
         style={{
-          color:
-            theme.colors.onSurface,
+          color: theme.colors.onSurface,
         }}
       >
         {item.display_name}
@@ -152,60 +116,39 @@ const HomeCityScreen = () => {
       style={[
         styles.root,
         {
-          backgroundColor:
-            theme.colors.background,
+          backgroundColor: theme.colors.background,
         },
       ]}
     >
       <ScrollView
-        contentContainerStyle={
-          styles.scrollContent
-        }
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
         <OnboardingProgress
           step={2}
           totalSteps={4}
-          title={t(
-            Translations.ONBOARDING_STEP_2_TITLE,
-          )}
+          title={t(Translations.ONBOARDING_STEP_2_TITLE)}
         />
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_8}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
 
         <AppText
           variant="body"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
           }}
         >
-          {t(
-            Translations.ONBOARDING_STEP_2_SUBTITLE,
-          )}
+          {t(Translations.ONBOARDING_STEP_2_SUBTITLE)}
         </AppText>
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_32
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_32} />
 
         <TextInput
-          label={t(
-            Translations.ONBOARDING_CITY_LABEL,
-          )}
+          label={t(Translations.ONBOARDING_CITY_LABEL)}
           value={query}
           onChangeText={onChangeText}
           mode="outlined"
-          left={
-            <TextInput.Icon
-              icon="magnify"
-            />
-          }
+          left={<TextInput.Icon icon="magnify" />}
         />
 
         {results.length > 0 && (
@@ -213,18 +156,14 @@ const HomeCityScreen = () => {
             style={[
               styles.resultsList,
               {
-                backgroundColor:
-                  theme.colors.surface,
-                borderColor:
-                  theme.colors.outline,
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outline,
               },
             ]}
           >
             <FlatList
               data={results}
-              keyExtractor={item =>
-                String(item.place_id)
-              }
+              keyExtractor={item => String(item.place_id)}
               renderItem={renderItem}
               keyboardShouldPersistTaps="handled"
               scrollEnabled={false}
@@ -232,23 +171,15 @@ const HomeCityScreen = () => {
           </View>
         )}
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_16
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         <AppText
           variant="caption"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
           }}
         >
-          {t(
-            Translations.ONBOARDING_CITY_EXPLANATION,
-          )}
+          {t(Translations.ONBOARDING_CITY_EXPLANATION)}
         </AppText>
 
         <View style={styles.bottomSection}>
@@ -257,9 +188,7 @@ const HomeCityScreen = () => {
             onPress={onNext}
             disabled={!selectedCity}
           >
-            {t(
-              Translations.ONBOARDING_NEXT,
-            )}
+            {t(Translations.ONBOARDING_NEXT)}
           </AppButton>
         </View>
       </ScrollView>
@@ -275,12 +204,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingTop:
-      Spacing.SPACING_PADDING_24,
-    paddingBottom:
-      Spacing.SPACING_PADDING_32,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_24,
+    paddingBottom: Spacing.SPACING_PADDING_32,
   },
   resultsList: {
     borderWidth: 1,
@@ -288,16 +214,12 @@ const styles = StyleSheet.create({
     marginTop: Spacing.SPACING_PADDING_8,
   },
   resultItem: {
-    paddingVertical:
-      Spacing.SPACING_PADDING_16,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_16,
-    borderBottomWidth:
-      StyleSheet.hairlineWidth,
+    paddingVertical: Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   bottomSection: {
     marginTop: 'auto',
-    paddingTop:
-      Spacing.SPACING_PADDING_32,
+    paddingTop: Spacing.SPACING_PADDING_32,
   },
 });

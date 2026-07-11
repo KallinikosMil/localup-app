@@ -1,24 +1,13 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-  Pressable,
-} from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { router } from 'expo-router';
-import {
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import AppText from
-  '@shared/components/AppText';
-import Spacer from
-  '@shared/components/Spacer';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
+import AppText from '@shared/components/AppText';
+import Spacer from '@shared/components/Spacer';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
 
 const SCREENS = [
   {
@@ -56,17 +45,12 @@ const DevGallery = () => {
       style={[
         styles.root,
         {
-          backgroundColor:
-            theme.colors.background,
+          backgroundColor: theme.colors.background,
           paddingBottom: insets.bottom,
         },
       ]}
     >
-      <ScrollView
-        contentContainerStyle={
-          styles.scrollContent
-        }
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <AppText
           variant="h1"
           style={{
@@ -76,35 +60,24 @@ const DevGallery = () => {
           Dev Gallery
         </AppText>
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_8}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
 
         <AppText
           variant="body"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
           }}
         >
           Tap any screen to preview it
         </AppText>
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_32
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_32} />
 
         <AppText
           variant="label"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
-            marginBottom:
-              Spacing.SPACING_PADDING_8,
+            color: theme.colors.onSurfaceVariant,
+            marginBottom: Spacing.SPACING_PADDING_8,
           }}
         >
           Auth Screens
@@ -114,28 +87,17 @@ const DevGallery = () => {
           <ScreenLink
             key={s.route}
             label={s.label}
-            onPress={() =>
-              router.push(
-                s.route as string,
-              )
-            }
+            onPress={() => router.push(s.route as string)}
           />
         ))}
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_24
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
         <AppText
           variant="label"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
-            marginBottom:
-              Spacing.SPACING_PADDING_8,
+            color: theme.colors.onSurfaceVariant,
+            marginBottom: Spacing.SPACING_PADDING_8,
           }}
         >
           Onboarding Screens
@@ -145,11 +107,7 @@ const DevGallery = () => {
           <ScreenLink
             key={s.route}
             label={s.label}
-            onPress={() =>
-              router.push(
-                s.route as string,
-              )
-            }
+            onPress={() => router.push(s.route as string)}
           />
         ))}
       </ScrollView>
@@ -172,18 +130,15 @@ const ScreenLink = ({
       style={[
         styles.card,
         {
-          backgroundColor:
-            theme.colors.surface,
-          borderColor:
-            theme.colors.outlineVariant,
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.outlineVariant,
         },
       ]}
     >
       <AppText
         variant="body"
         style={{
-          color:
-            theme.colors.onSurface,
+          color: theme.colors.onSurface,
         }}
       >
         {label}
@@ -191,8 +146,7 @@ const ScreenLink = ({
       <AppText
         variant="body"
         style={{
-          color:
-            theme.colors.primary,
+          color: theme.colors.primary,
         }}
       >
         &rarr;
@@ -209,24 +163,18 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingTop:
-      Spacing.SPACING_PADDING_60,
-    paddingBottom:
-      Spacing.SPACING_PADDING_32,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_60,
+    paddingBottom: Spacing.SPACING_PADDING_32,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical:
-      Spacing.SPACING_PADDING_16,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_16,
+    paddingVertical: Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_16,
     borderWidth: 1,
     borderRadius: BorderRadius.lg,
-    marginBottom:
-      Spacing.SPACING_PADDING_8,
+    marginBottom: Spacing.SPACING_PADDING_8,
   },
 });

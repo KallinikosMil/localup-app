@@ -1,7 +1,4 @@
-import {
-  createSlice,
-  PayloadAction,
-} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface AuthState {
   user: {
@@ -25,10 +22,7 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setInitialized: (
-      state,
-      action: PayloadAction<boolean>,
-    ) => {
+    setInitialized: (state, action: PayloadAction<boolean>) => {
       state.initialized = action.payload;
     },
     setUser: (
@@ -45,19 +39,12 @@ const authSlice = createSlice({
       // value can't leak and the guard doesn't flash onboarding (W5).
       state.onboardingComplete = null;
     },
-    setOnboardingComplete: (
-      state,
-      action: PayloadAction<boolean | null>,
-    ) => {
-      state.onboardingComplete =
-        action.payload;
+    setOnboardingComplete: (state, action: PayloadAction<boolean | null>) => {
+      state.onboardingComplete = action.payload;
     },
   },
 });
 
-export const {
-  setInitialized,
-  setUser,
-  setOnboardingComplete,
-} = authSlice.actions;
+export const { setInitialized, setUser, setOnboardingComplete } =
+  authSlice.actions;
 export default authSlice.reducer;

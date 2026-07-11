@@ -2,19 +2,11 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
+import { BorderRadius } from '@theme/constants/BorderRadius';
 
-type AppButtonVariant =
-  | 'primary'
-  | 'outlined'
-  | 'link'
-  | 'google';
+type AppButtonVariant = 'primary' | 'outlined' | 'link' | 'google';
 
-type AppButtonProps = Omit<
-  React.ComponentProps<typeof Button>,
-  'mode'
-> & {
+type AppButtonProps = Omit<React.ComponentProps<typeof Button>, 'mode'> & {
   variant: AppButtonVariant;
 };
 
@@ -27,29 +19,16 @@ const AppButton = ({
 }: AppButtonProps) => {
   const theme = useTheme();
 
-  const config = getVariantConfig(
-    variant,
-    theme,
-  );
+  const config = getVariantConfig(variant, theme);
 
   return (
     <Button
       mode={config.mode}
       buttonColor={config.buttonColor}
       textColor={config.textColor}
-      contentStyle={[
-        styles.content,
-        contentStyle,
-      ]}
-      labelStyle={[
-        config.labelStyle,
-        labelStyle,
-      ]}
-      style={[
-        styles.pill,
-        config.style,
-        style,
-      ]}
+      contentStyle={[styles.content, contentStyle]}
+      labelStyle={[config.labelStyle, labelStyle]}
+      style={[styles.pill, config.style, style]}
       {...rest}
     />
   );
@@ -94,8 +73,7 @@ const getVariantConfig = (
         labelStyle: undefined,
         style: {
           borderWidth: 1,
-          borderColor:
-            theme.colors.outlineVariant,
+          borderColor: theme.colors.outlineVariant,
           elevation: 0,
         },
       };

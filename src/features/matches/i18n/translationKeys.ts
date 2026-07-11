@@ -4,7 +4,6 @@ export enum Translations {
   MATCHES_ERROR = 'matchesError',
   MATCHES_RETRY = 'matchesRetry',
   MATCHES_EMPTY_TITLE = 'matchesEmptyTitle',
-  MATCHES_EMPTY_SUBTITLE =
-    'matchesEmptySubtitle',
+  MATCHES_EMPTY_SUBTITLE = 'matchesEmptySubtitle',
   MATCHES_SAY_HELLO = 'matchesSayHello',
 }

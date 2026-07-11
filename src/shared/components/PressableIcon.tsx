@@ -6,12 +6,8 @@ type Props = {
   name?: React.ComponentProps<typeof Ionicons>['name'];
   size?: number;
   color?: string;
-  containerStyle?: React.ComponentProps<
-    typeof Pressable
-  >['style'];
-  iconStyle?: React.ComponentProps<
-    typeof Ionicons
-  >['style'];
+  containerStyle?: React.ComponentProps<typeof Pressable>['style'];
+  iconStyle?: React.ComponentProps<typeof Ionicons>['style'];
   onPress: () => void;
 };
 

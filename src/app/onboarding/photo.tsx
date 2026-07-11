@@ -1,67 +1,43 @@
 import React, { useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-  Image,
-  Pressable,
-} from 'react-native';
+import { StyleSheet, View, ScrollView, Image, Pressable } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import AppText from
-  '@shared/components/AppText';
-import AppButton from
-  '@shared/components/AppButton';
-import Spacer from
-  '@shared/components/Spacer';
-import OnboardingProgress from
-  '@shared/components/OnboardingProgress';
-import { useOnboardingData } from
-  '@features/onboarding/context/OnboardingContext';
-import { Translations } from
-  '@features/onboarding/i18n/translationKeys';
-import { Spacing } from
-  '@theme/constants/Spacing';
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import Spacer from '@shared/components/Spacer';
+import OnboardingProgress from '@shared/components/OnboardingProgress';
+import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
+import { Translations } from '@features/onboarding/i18n/translationKeys';
+import { Spacing } from '@theme/constants/Spacing';
 
 const PHOTO_SIZE = 200;
 
 const PhotoScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { data, update } =
-    useOnboardingData();
+  const { data, update } = useOnboardingData();
 
-  const pickImage =
-    useCallback(async () => {
-      const result =
-        await ImagePicker.launchImageLibraryAsync(
-          {
-            mediaTypes: 'images',
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-          },
-        );
+  const pickImage = useCallback(async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images',
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
 
-      if (
-        !result.canceled &&
-        result.assets.length > 0
-      ) {
-        update({
-          photoUri:
-            result.assets[0].uri,
-        });
-      }
-    }, [update]);
+    if (!result.canceled && result.assets.length > 0) {
+      update({
+        photoUri: result.assets[0].uri,
+      });
+    }
+  }, [update]);
 
   const onNext = () => {
-    router.push(
-      '/onboarding/interests',
-    );
+    router.push('/onboarding/interests');
   };
 
   return (
@@ -69,50 +45,31 @@ const PhotoScreen = () => {
       style={[
         styles.root,
         {
-          backgroundColor:
-            theme.colors.background,
+          backgroundColor: theme.colors.background,
         },
       ]}
     >
-      <ScrollView
-        contentContainerStyle={
-          styles.scrollContent
-        }
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <OnboardingProgress
           step={3}
           totalSteps={4}
-          title={t(
-            Translations.ONBOARDING_STEP_3_TITLE,
-          )}
+          title={t(Translations.ONBOARDING_STEP_3_TITLE)}
         />
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_8}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
 
         <AppText
           variant="body"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
           }}
         >
-          {t(
-            Translations.ONBOARDING_STEP_3_SUBTITLE,
-          )}
+          {t(Translations.ONBOARDING_STEP_3_SUBTITLE)}
         </AppText>
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_32
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_32} />
 
-        <View
-          style={styles.photoContainer}
-        >
+        <View style={styles.photoContainer}>
           {data.photoUri ? (
             <Image
               source={{
@@ -126,38 +83,24 @@ const PhotoScreen = () => {
               style={[
                 styles.uploadArea,
                 {
-                  borderColor:
-                    theme.colors.outline,
-                  backgroundColor:
-                    theme.colors
-                      .surfaceVariant,
+                  borderColor: theme.colors.outline,
+                  backgroundColor: theme.colors.surfaceVariant,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name="camera-plus-outline"
                 size={48}
-                color={
-                  theme.colors
-                    .onSurfaceVariant
-                }
+                color={theme.colors.onSurfaceVariant}
               />
-              <Spacer
-                spacing={
-                  Spacing.SPACING_PADDING_8
-                }
-              />
+              <Spacer spacing={Spacing.SPACING_PADDING_8} />
               <AppText
                 variant="body"
                 style={{
-                  color:
-                    theme.colors
-                      .onSurfaceVariant,
+                  color: theme.colors.onSurfaceVariant,
                 }}
               >
-                {t(
-                  Translations.ONBOARDING_UPLOAD_PHOTO,
-                )}
+                {t(Translations.ONBOARDING_UPLOAD_PHOTO)}
               </AppText>
             </Pressable>
           )}
@@ -165,18 +108,9 @@ const PhotoScreen = () => {
 
         {data.photoUri && (
           <>
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_16
-              }
-            />
-            <AppButton
-              variant="link"
-              onPress={pickImage}
-            >
-              {t(
-                Translations.ONBOARDING_CHANGE_PHOTO,
-              )}
+            <Spacer spacing={Spacing.SPACING_PADDING_16} />
+            <AppButton variant="link" onPress={pickImage}>
+              {t(Translations.ONBOARDING_CHANGE_PHOTO)}
             </AppButton>
           </>
         )}
@@ -187,9 +121,7 @@ const PhotoScreen = () => {
             onPress={onNext}
             disabled={!data.photoUri}
           >
-            {t(
-              Translations.ONBOARDING_NEXT,
-            )}
+            {t(Translations.ONBOARDING_NEXT)}
           </AppButton>
         </View>
       </ScrollView>
@@ -205,12 +137,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingTop:
-      Spacing.SPACING_PADDING_24,
-    paddingBottom:
-      Spacing.SPACING_PADDING_32,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_24,
+    paddingBottom: Spacing.SPACING_PADDING_32,
   },
   photoContainer: {
     alignItems: 'center',
@@ -231,7 +160,6 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     marginTop: 'auto',
-    paddingTop:
-      Spacing.SPACING_PADDING_32,
+    paddingTop: Spacing.SPACING_PADDING_32,
   },
 });

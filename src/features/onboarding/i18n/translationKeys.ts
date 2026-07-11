@@ -1,44 +1,24 @@
 export const Translations = {
-  ONBOARDING_STEP_1_TITLE:
-    'onboarding.step1Title',
-  ONBOARDING_STEP_1_SUBTITLE:
-    'onboarding.step1Subtitle',
-  ONBOARDING_NAME_LABEL:
-    'onboarding.nameLabel',
-  ONBOARDING_NAME_REQUIRED:
-    'onboarding.nameRequired',
-  ONBOARDING_DOB_LABEL:
-    'onboarding.dobLabel',
-  ONBOARDING_DOB_REQUIRED:
-    'onboarding.dobRequired',
+  ONBOARDING_STEP_1_TITLE: 'onboarding.step1Title',
+  ONBOARDING_STEP_1_SUBTITLE: 'onboarding.step1Subtitle',
+  ONBOARDING_NAME_LABEL: 'onboarding.nameLabel',
+  ONBOARDING_NAME_REQUIRED: 'onboarding.nameRequired',
+  ONBOARDING_DOB_LABEL: 'onboarding.dobLabel',
+  ONBOARDING_DOB_REQUIRED: 'onboarding.dobRequired',
   ONBOARDING_NEXT: 'onboarding.next',
-  ONBOARDING_STEP_2_TITLE:
-    'onboarding.step2Title',
-  ONBOARDING_STEP_2_SUBTITLE:
-    'onboarding.step2Subtitle',
-  ONBOARDING_CITY_LABEL:
-    'onboarding.cityLabel',
-  ONBOARDING_CITY_REQUIRED:
-    'onboarding.cityRequired',
-  ONBOARDING_CITY_EXPLANATION:
-    'onboarding.cityExplanation',
-  ONBOARDING_STEP_3_TITLE:
-    'onboarding.step3Title',
-  ONBOARDING_STEP_3_SUBTITLE:
-    'onboarding.step3Subtitle',
-  ONBOARDING_UPLOAD_PHOTO:
-    'onboarding.uploadPhoto',
-  ONBOARDING_CHANGE_PHOTO:
-    'onboarding.changePhoto',
-  ONBOARDING_STEP_4_TITLE:
-    'onboarding.step4Title',
-  ONBOARDING_STEP_4_SUBTITLE:
-    'onboarding.step4Subtitle',
-  ONBOARDING_BIO_LABEL:
-    'onboarding.bioLabel',
-  ONBOARDING_BIO_PLACEHOLDER:
-    'onboarding.bioPlaceholder',
-  ONBOARDING_INTERESTS_MIN:
-    'onboarding.interestsMin',
+  ONBOARDING_STEP_2_TITLE: 'onboarding.step2Title',
+  ONBOARDING_STEP_2_SUBTITLE: 'onboarding.step2Subtitle',
+  ONBOARDING_CITY_LABEL: 'onboarding.cityLabel',
+  ONBOARDING_CITY_REQUIRED: 'onboarding.cityRequired',
+  ONBOARDING_CITY_EXPLANATION: 'onboarding.cityExplanation',
+  ONBOARDING_STEP_3_TITLE: 'onboarding.step3Title',
+  ONBOARDING_STEP_3_SUBTITLE: 'onboarding.step3Subtitle',
+  ONBOARDING_UPLOAD_PHOTO: 'onboarding.uploadPhoto',
+  ONBOARDING_CHANGE_PHOTO: 'onboarding.changePhoto',
+  ONBOARDING_STEP_4_TITLE: 'onboarding.step4Title',
+  ONBOARDING_STEP_4_SUBTITLE: 'onboarding.step4Subtitle',
+  ONBOARDING_BIO_LABEL: 'onboarding.bioLabel',
+  ONBOARDING_BIO_PLACEHOLDER: 'onboarding.bioPlaceholder',
+  ONBOARDING_INTERESTS_MIN: 'onboarding.interestsMin',
   ONBOARDING_FINISH: 'onboarding.finish',
 } as const;

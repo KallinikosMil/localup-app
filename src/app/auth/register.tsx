@@ -1,42 +1,22 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-} from 'react-native';
-import {
-  ActivityIndicator,
-  Text,
-  Divider,
-} from 'react-native-paper';
+import { StyleSheet, View, ScrollView } from 'react-native';
+import { ActivityIndicator, Text, Divider } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
-import {
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-import AppText from
-  '@shared/components/AppText';
-import AppButton from
-  '@shared/components/AppButton';
-import {
-  FormProvider,
-  useForm,
-} from 'react-hook-form';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { useRegister } from
-  '@features/auth/hooks/useAuth';
+import { useRegister } from '@features/auth/hooks/useAuth';
 import useModal from '@shared/hooks/useModal';
 
 import Spacer from '@shared/components/Spacer';
-import InputField from
-  '@shared/components/InputField';
-import CustomModal from
-  '@shared/components/CustomModal';
+import InputField from '@shared/components/InputField';
+import CustomModal from '@shared/components/CustomModal';
 
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { Translations } from
-  '@features/auth/i18n/translationKeys';
+import { Spacing } from '@theme/constants/Spacing';
+import { Translations } from '@features/auth/i18n/translationKeys';
 
 type RegisterFormData = {
   email: string;
@@ -49,12 +29,9 @@ const RegisterScreen = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const register = useRegister();
-  const { modalProps, openModal, closeModal } =
-    useModal();
-  const [modalMessage, setModalMessage] =
-    useState('');
-  const [isSuccess, setIsSuccess] =
-    useState(false);
+  const { modalProps, openModal, closeModal } = useModal();
+  const [modalMessage, setModalMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<RegisterFormData>({
     defaultValues: {
@@ -79,11 +56,7 @@ const RegisterScreen = () => {
       {
         onSuccess: () => {
           setIsSuccess(true);
-          setModalMessage(
-            t(
-              Translations.AUTH_CONFIRM_EMAIL_SENT,
-            ),
-          );
+          setModalMessage(t(Translations.AUTH_CONFIRM_EMAIL_SENT));
           openModal();
         },
         onError: err => {
@@ -91,9 +64,7 @@ const RegisterScreen = () => {
           setModalMessage(
             err instanceof Error
               ? err.message
-              : t(
-                  Translations.AUTH_ERROR_FALLBACK,
-                ),
+              : t(Translations.AUTH_ERROR_FALLBACK),
           );
           openModal();
         },
@@ -116,15 +87,11 @@ const RegisterScreen = () => {
         style={[
           styles.loaderWrap,
           {
-            backgroundColor:
-              theme.colors.background,
+            backgroundColor: theme.colors.background,
           },
         ]}
       >
-        <ActivityIndicator
-          animating
-          size="large"
-        />
+        <ActivityIndicator animating size="large" />
       </View>
     );
   }
@@ -135,90 +102,60 @@ const RegisterScreen = () => {
         style={[
           styles.root,
           {
-            backgroundColor:
-              theme.colors.background,
+            backgroundColor: theme.colors.background,
             paddingBottom: insets.bottom,
           },
         ]}
       >
         <ScrollView
-          contentContainerStyle={
-            styles.scrollContent
-          }
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.heroSection}>
             <AppText
               variant="h1"
               style={{
-                color:
-                  theme.colors.primary,
+                color: theme.colors.primary,
               }}
             >
-              {t(
-                Translations.AUTH_HEADER_TEXT,
-              )}
+              {t(Translations.AUTH_HEADER_TEXT)}
             </AppText>
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_8
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_8} />
             <AppText
               variant="h3"
               style={{
-                color:
-                  theme.colors.onBackground,
+                color: theme.colors.onBackground,
               }}
             >
-              {t(
-                Translations.AUTH_CREATE_ACCOUNT_TITLE,
-              )}
+              {t(Translations.AUTH_CREATE_ACCOUNT_TITLE)}
             </AppText>
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_8
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_8} />
             <AppText
               variant="body"
               style={{
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
+                color: theme.colors.onSurfaceVariant,
                 textAlign: 'center',
               }}
             >
-              {t(
-                Translations.AUTH_CREATE_ACCOUNT_SUBTITLE,
-              )}
+              {t(Translations.AUTH_CREATE_ACCOUNT_SUBTITLE)}
             </AppText>
           </View>
 
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_32
-            }
-          />
+          <Spacer spacing={Spacing.SPACING_PADDING_32} />
 
           <View style={styles.formSection}>
             <FormProvider {...form}>
               <InputField
                 name="email"
-                label={t(
-                  Translations.AUTH_EMAIL_LABEL,
-                )}
+                label={t(Translations.AUTH_EMAIL_LABEL)}
                 rules={{
                   required: {
                     value: true,
-                    message:
-                      'Please enter your email',
+                    message: 'Please enter your email',
                   },
                   pattern: {
-                    value:
-                      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message:
-                      'Please enter a valid email',
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Please enter a valid email',
                   },
                 }}
                 dense
@@ -226,53 +163,35 @@ const RegisterScreen = () => {
                 keyboardType="email-address"
                 returnKeyType="next"
               />
-              <Spacer
-                spacing={
-                  Spacing.SPACING_PADDING_16
-                }
-              />
+              <Spacer spacing={Spacing.SPACING_PADDING_16} />
               <InputField
                 name="password"
-                label={t(
-                  Translations.AUTH_PASSWORD_LABEL,
-                )}
+                label={t(Translations.AUTH_PASSWORD_LABEL)}
                 rules={{
                   required: {
                     value: true,
-                    message:
-                      'Please enter your password',
+                    message: 'Please enter your password',
                   },
                   minLength: {
                     value: 8,
-                    message:
-                      'Password must be at least 8 characters',
+                    message: 'Password must be at least 8 characters',
                   },
                 }}
                 dense
                 secureTextEntry
                 returnKeyType="next"
               />
-              <Spacer
-                spacing={
-                  Spacing.SPACING_PADDING_16
-                }
-              />
+              <Spacer spacing={Spacing.SPACING_PADDING_16} />
               <InputField
                 name="confirmPassword"
-                label={t(
-                  Translations.AUTH_CONFIRM_PASSWORD_LABEL,
-                )}
+                label={t(Translations.AUTH_CONFIRM_PASSWORD_LABEL)}
                 rules={{
                   required: {
                     value: true,
-                    message:
-                      'Please confirm your password',
+                    message: 'Please confirm your password',
                   },
                   validate: value =>
-                    value ===
-                      form.getValues(
-                        'password',
-                      ) ||
+                    value === form.getValues('password') ||
                     'Passwords do not match',
                   deps: ['password'],
                 }}
@@ -282,82 +201,50 @@ const RegisterScreen = () => {
               />
             </FormProvider>
 
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_24
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
             <AppButton
               variant="primary"
               onPress={onSubmit}
-              disabled={
-                register.isPending ||
-                !isValid
-              }
+              disabled={register.isPending || !isValid}
             >
-              {t(
-                Translations.AUTH_CREATE_ACCOUNT_BUTTON,
-              )}
+              {t(Translations.AUTH_CREATE_ACCOUNT_BUTTON)}
             </AppButton>
 
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_24
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
             <View style={styles.dividerRow}>
               <Divider
                 style={[
                   styles.dividerLine,
                   {
-                    backgroundColor:
-                      theme.colors
-                        .outlineVariant,
+                    backgroundColor: theme.colors.outlineVariant,
                   },
                 ]}
               />
               <AppText
                 variant="caption"
                 style={{
-                  color:
-                    theme.colors
-                      .onSurfaceVariant,
-                  paddingHorizontal:
-                    Spacing.SPACING_PADDING_16,
+                  color: theme.colors.onSurfaceVariant,
+                  paddingHorizontal: Spacing.SPACING_PADDING_16,
                 }}
               >
-                {t(
-                  Translations.AUTH_OR_DIVIDER,
-                )}
+                {t(Translations.AUTH_OR_DIVIDER)}
               </AppText>
               <Divider
                 style={[
                   styles.dividerLine,
                   {
-                    backgroundColor:
-                      theme.colors
-                        .outlineVariant,
+                    backgroundColor: theme.colors.outlineVariant,
                   },
                 ]}
               />
             </View>
 
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_24
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
-            <AppButton
-              variant="google"
-              icon="google"
-              onPress={() => {}}
-            >
-              {t(
-                Translations.AUTH_GOOGLE_SIGN_IN,
-              )}
+            <AppButton variant="google" icon="google" onPress={() => {}}>
+              {t(Translations.AUTH_GOOGLE_SIGN_IN)}
             </AppButton>
           </View>
 
@@ -365,14 +252,10 @@ const RegisterScreen = () => {
             <AppText
               variant="bodySmall"
               style={{
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
+                color: theme.colors.onSurfaceVariant,
               }}
             >
-              {t(
-                Translations.AUTH_HAS_ACCOUNT,
-              )}
+              {t(Translations.AUTH_HAS_ACCOUNT)}
             </AppText>
             <AppText
               variant="bodySmall"
@@ -380,46 +263,28 @@ const RegisterScreen = () => {
               style={[
                 styles.authLink,
                 {
-                  color:
-                    theme.colors.primary,
+                  color: theme.colors.primary,
                 },
               ]}
             >
-              {t(
-                Translations.AUTH_LOGIN_LINK,
-              )}
+              {t(Translations.AUTH_LOGIN_LINK)}
             </AppText>
           </View>
         </ScrollView>
       </View>
 
-      <CustomModal
-        {...modalProps}
-        onDismiss={handleDismiss}
-      >
+      <CustomModal {...modalProps} onDismiss={handleDismiss}>
         <View style={styles.modalContent}>
           <Text
             variant="bodyMedium"
             style={{
-              color: isSuccess
-                ? theme.colors.primary
-                : theme.colors.error,
+              color: isSuccess ? theme.colors.primary : theme.colors.error,
             }}
           >
-            {modalMessage ||
-              t(
-                Translations.AUTH_ERROR_FALLBACK,
-              )}
+            {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
           </Text>
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_16
-            }
-          />
-          <AppButton
-            variant="primary"
-            onPress={handleDismiss}
-          >
+          <Spacer spacing={Spacing.SPACING_PADDING_16} />
+          <AppButton variant="primary" onPress={handleDismiss}>
             {t(Translations.AUTH_DISMISS)}
           </AppButton>
         </View>
@@ -441,8 +306,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
     paddingTop: Spacing.SPACING_PADDING_60,
   },
   heroSection: {
@@ -466,8 +330,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical:
-      Spacing.SPACING_PADDING_16,
+    paddingVertical: Spacing.SPACING_PADDING_16,
   },
   authLink: {
     marginLeft: Spacing.SPACING_PADDING_8 / 2,

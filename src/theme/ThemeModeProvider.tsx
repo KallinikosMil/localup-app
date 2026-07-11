@@ -28,7 +28,8 @@ export function ThemeModeProvider({ children }: { children: React.ReactNode }) {
   const effective: 'light' | 'dark' =
     mode === 'system' ? (system ?? 'light') : mode; // fallback to 'light' if null
 
-  const resolvedMode: 'light' | 'dark' = effective === 'dark' ? 'dark' : 'light';
+  const resolvedMode: 'light' | 'dark' =
+    effective === 'dark' ? 'dark' : 'light';
 
   // W1: under Android edge-to-edge (edgeToEdgeEnabled) the transparent
   // system nav bar reveals the ROOT WINDOW background, which defaults
@@ -40,19 +41,14 @@ export function ThemeModeProvider({ children }: { children: React.ReactNode }) {
   // mode change. No-op-safe on iOS. expo-system-ui is a bundled Expo
   // module, so this works in Expo Go with no dev build.
   useEffect(() => {
-    const bg = (
-      resolvedMode === 'dark'
-        ? PaperDark
-        : PaperLight
-    ).colors.background;
-    SystemUI.setBackgroundColorAsync(bg).catch(
-      () => {},
-    );
+    const bg = (resolvedMode === 'dark' ? PaperDark : PaperLight).colors
+      .background;
+    SystemUI.setBackgroundColorAsync(bg).catch(() => {});
   }, [resolvedMode]);
 
   const value = useMemo<Ctx>(
     () => ({ mode, setMode, resolvedMode }),
-    [mode, resolvedMode]
+    [mode, resolvedMode],
   );
 
   return <ThemeCtx.Provider value={value}>{children}</ThemeCtx.Provider>;

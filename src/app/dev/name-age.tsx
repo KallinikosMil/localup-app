@@ -1,2 +1,1 @@
-export { default } from
-  '@app/onboarding/name-age';
+export { default } from '@app/onboarding/name-age';

@@ -6,9 +6,9 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage,        // ✅ κρατάει session σε RN
+    storage: AsyncStorage, // ✅ κρατάει session σε RN
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,    // RN δεν έχει URL callbacks
+    detectSessionInUrl: false, // RN δεν έχει URL callbacks
   },
 });

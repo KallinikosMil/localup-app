@@ -19,9 +19,7 @@ export type OnboardingData = {
 
 type OnboardingContextValue = {
   data: OnboardingData;
-  update: (
-    partial: Partial<OnboardingData>,
-  ) => void;
+  update: (partial: Partial<OnboardingData>) => void;
 };
 
 const initialData: OnboardingData = {
@@ -35,33 +33,23 @@ const initialData: OnboardingData = {
   bio: '',
 };
 
-const OnboardingContext =
-  createContext<OnboardingContextValue | null>(
-    null,
-  );
+const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
 export const OnboardingProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [data, setData] =
-    useState<OnboardingData>(initialData);
+  const [data, setData] = useState<OnboardingData>(initialData);
 
-  const update = useCallback(
-    (partial: Partial<OnboardingData>) => {
-      setData(prev => ({
-        ...prev,
-        ...partial,
-      }));
-    },
-    [],
-  );
+  const update = useCallback((partial: Partial<OnboardingData>) => {
+    setData(prev => ({
+      ...prev,
+      ...partial,
+    }));
+  }, []);
 
-  const value = useMemo(
-    () => ({ data, update }),
-    [data, update],
-  );
+  const value = useMemo(() => ({ data, update }), [data, update]);
 
   return (
     <OnboardingContext.Provider value={value}>
@@ -70,13 +58,10 @@ export const OnboardingProvider = ({
   );
 };
 
-export const useOnboardingData =
-  (): OnboardingContextValue => {
-    const ctx = useContext(OnboardingContext);
-    if (!ctx) {
-      throw new Error(
-        'useOnboardingData must be used within OnboardingProvider',
-      );
-    }
-    return ctx;
-  };
+export const useOnboardingData = (): OnboardingContextValue => {
+  const ctx = useContext(OnboardingContext);
+  if (!ctx) {
+    throw new Error('useOnboardingData must be used within OnboardingProvider');
+  }
+  return ctx;
+};

@@ -1,16 +1,10 @@
 import { useEffect, useRef } from 'react';
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store';
 
-export type ProfileMode =
-  | 'traveler'
-  | 'local';
+export type ProfileMode = 'traveler' | 'local';
 
 export type Profile = {
   user_id: string;
@@ -33,41 +27,29 @@ export type Photo = {
 };
 
 export const useProfile = () => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
 
   return useQuery({
     queryKey: ['profile', uid],
     enabled: !!uid,
     queryFn: async () => {
-      const { data: profile, error } =
-        await supabase
-          .from('profiles')
-          .select(
-            'user_id, display_name, home_city, home_lat, home_lng, current_lat, current_lng, bio, avatar_url, mode_override',
-          )
-          .eq('user_id', uid!)
-          .single();
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select(
+          'user_id, display_name, home_city, home_lat, home_lng, current_lat, current_lng, bio, avatar_url, mode_override',
+        )
+        .eq('user_id', uid!)
+        .single();
 
       if (error) throw error;
 
-      const {
-        data: userInterests,
-      } = await supabase
+      const { data: userInterests } = await supabase
         .from('user_interests')
-        .select(
-          'interest_id, interests(name)',
-        )
+        .select('interest_id, interests(name)')
         .eq('user_id', uid!);
 
-      const interests = (
-        userInterests ?? []
-      )
-        .map(
-          (ui: any) =>
-            ui.interests?.name ?? '',
-        )
+      const interests = (userInterests ?? [])
+        .map((ui: any) => ui.interests?.name ?? '')
         .filter(Boolean);
 
       return {
@@ -88,15 +70,11 @@ export type ProfileUpdate = Partial<{
 }>;
 
 export const useUpdateProfile = () => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (
-      patch: ProfileUpdate,
-    ) => {
+    mutationFn: async (patch: ProfileUpdate) => {
       const { error } = await supabase
         .from('profiles')
         .update(patch)
@@ -111,39 +89,30 @@ export const useUpdateProfile = () => {
   });
 };
 
-export const usePhotos = (
-  userId: string | null | undefined,
-) => {
+export const usePhotos = (userId: string | null | undefined) => {
   return useQuery({
     queryKey: ['photos', userId],
     enabled: !!userId,
     queryFn: async () => {
-      const { data, error } =
-        await supabase
-          .from('media')
-          .select(
-            'id, storage_path, is_primary',
-          )
-          .eq('user_id', userId!)
-          .eq('type', 'photo')
-          .order('created_at', {
-            ascending: true,
-          });
+      const { data, error } = await supabase
+        .from('media')
+        .select('id, storage_path, is_primary')
+        .eq('user_id', userId!)
+        .eq('type', 'photo')
+        .order('created_at', {
+          ascending: true,
+        });
 
       if (error) throw error;
 
       return (data ?? []).map(m => {
-        const { data: urlData } =
-          supabase.storage
-            .from('user-photos')
-            .getPublicUrl(
-              m.storage_path,
-            );
+        const { data: urlData } = supabase.storage
+          .from('user-photos')
+          .getPublicUrl(m.storage_path);
         return {
           id: m.id,
           url: urlData.publicUrl,
-          is_primary:
-            m.is_primary ?? false,
+          is_primary: m.is_primary ?? false,
         } as Photo;
       });
     },
@@ -151,9 +120,7 @@ export const usePhotos = (
 };
 
 export const useUploadPhoto = () => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -164,36 +131,28 @@ export const useUploadPhoto = () => {
       uri: string;
       mimeType: string;
     }) => {
-      const ext =
-        mimeType.split('/')[1] ?? 'jpg';
+      const ext = mimeType.split('/')[1] ?? 'jpg';
       const fileName = `${Date.now()}.${ext}`;
       const path = `${uid}/${fileName}`;
 
       const response = await fetch(uri);
       const blob = await response.blob();
-      const arrayBuffer =
-        await new Response(
-          blob,
-        ).arrayBuffer();
+      const arrayBuffer = await new Response(blob).arrayBuffer();
 
-      const { error: upErr } =
-        await supabase.storage
-          .from('user-photos')
-          .upload(path, arrayBuffer, {
-            contentType: mimeType,
-            upsert: false,
-          });
+      const { error: upErr } = await supabase.storage
+        .from('user-photos')
+        .upload(path, arrayBuffer, {
+          contentType: mimeType,
+          upsert: false,
+        });
 
       if (upErr) throw upErr;
 
-      const { error: dbErr } =
-        await supabase
-          .from('media')
-          .insert({
-            user_id: uid,
-            type: 'photo',
-            storage_path: path,
-          });
+      const { error: dbErr } = await supabase.from('media').insert({
+        user_id: uid,
+        type: 'photo',
+        storage_path: path,
+      });
 
       if (dbErr) throw dbErr;
     },
@@ -206,30 +165,24 @@ export const useUploadPhoto = () => {
 };
 
 export const useDeletePhoto = () => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (photoId: string) => {
-      const { data: media, error: fErr } =
-        await supabase
-          .from('media')
-          .select('storage_path')
-          .eq('id', photoId)
-          .single();
+      const { data: media, error: fErr } = await supabase
+        .from('media')
+        .select('storage_path')
+        .eq('id', photoId)
+        .single();
       if (fErr) throw fErr;
 
-      await supabase.storage
-        .from('user-photos')
-        .remove([media.storage_path]);
+      await supabase.storage.from('user-photos').remove([media.storage_path]);
 
-      const { error: dErr } =
-        await supabase
-          .from('media')
-          .delete()
-          .eq('id', photoId);
+      const { error: dErr } = await supabase
+        .from('media')
+        .delete()
+        .eq('id', photoId);
       if (dErr) throw dErr;
     },
     onSuccess: () => {
@@ -246,16 +199,10 @@ export const useDeletePhoto = () => {
 // client) see fresh coordinates. Throttled
 // so we don't write on every GPS twitch.
 const LOCATION_MIN_MOVE_KM = 0.5;
-const LOCATION_MIN_INTERVAL_MS =
-  5 * 60 * 1000;
+const LOCATION_MIN_INTERVAL_MS = 5 * 60 * 1000;
 
-export const useSyncLocation = (
-  lat: number | null,
-  lng: number | null,
-) => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+export const useSyncLocation = (lat: number | null, lng: number | null) => {
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
   const lastSync = useRef<{
     lat: number;
@@ -264,35 +211,22 @@ export const useSyncLocation = (
   } | null>(null);
 
   useEffect(() => {
-    if (!uid || lat == null || lng == null)
-      return;
+    if (!uid || lat == null || lng == null) return;
 
     // Skip the well-known Android emulator
     // default (Mountain View, CA) so it
     // doesn't overwrite real persisted coords
     // during local dev. Matches to ~50m.
     const isEmulatorDefault =
-      Math.abs(lat - 37.4219983) < 0.0005 &&
-      Math.abs(lng - -122.084) < 0.0005;
+      Math.abs(lat - 37.4219983) < 0.0005 && Math.abs(lng - -122.084) < 0.0005;
     if (isEmulatorDefault) return;
 
     const prev = lastSync.current;
     const now = Date.now();
     if (prev) {
-      const moved = haversineKm(
-        prev.lat,
-        prev.lng,
-        lat,
-        lng,
-      );
-      const tooSoon =
-        now - prev.at <
-        LOCATION_MIN_INTERVAL_MS;
-      if (
-        moved < LOCATION_MIN_MOVE_KM &&
-        tooSoon
-      )
-        return;
+      const moved = haversineKm(prev.lat, prev.lng, lat, lng);
+      const tooSoon = now - prev.at < LOCATION_MIN_INTERVAL_MS;
+      if (moved < LOCATION_MIN_MOVE_KM && tooSoon) return;
     }
 
     lastSync.current = {
@@ -307,8 +241,7 @@ export const useSyncLocation = (
         .update({
           current_lat: lat,
           current_lng: lng,
-          last_location_at:
-            new Date().toISOString(),
+          last_location_at: new Date().toISOString(),
         })
         .eq('user_id', uid);
       if (error) {
@@ -331,25 +264,20 @@ export const useSyncLocation = (
       // above — and writes the DB before invalidating, so it doesn't
       // loop with useStaleLocationRefetch.) Prefs aren't location-
       // derived; the deck refetch re-reads the unchanged prefs anyway.
-      queryClient.setQueryData<Profile>(
-        ['profile', uid],
-        prev =>
-          prev
-            ? {
-                ...prev,
-                current_lat: lat,
-                current_lng: lng,
-              }
-            : prev,
+      queryClient.setQueryData<Profile>(['profile', uid], prev =>
+        prev
+          ? {
+              ...prev,
+              current_lat: lat,
+              current_lng: lng,
+            }
+          : prev,
       );
       queryClient.invalidateQueries({
         queryKey: ['profile', uid],
       });
       queryClient.invalidateQueries({
-        queryKey: [
-          'discover-candidates',
-          uid,
-        ],
+        queryKey: ['discover-candidates', uid],
       });
     };
 
@@ -364,20 +292,14 @@ export const haversineKm = (
   lng2: number,
 ): number => {
   const R = 6371;
-  const dLat =
-    ((lat2 - lat1) * Math.PI) / 180;
-  const dLng =
-    ((lng2 - lng1) * Math.PI) / 180;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos((lat1 * Math.PI) / 180) *
       Math.cos((lat2 * Math.PI) / 180) *
       Math.sin(dLng / 2) ** 2;
-  return (
-    2 *
-    R *
-    Math.asin(Math.min(1, Math.sqrt(a)))
-  );
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
 };
 
 export const LOCAL_RADIUS_KM = 50;
@@ -404,7 +326,5 @@ export const computeMode = (
     profile.home_lat,
     profile.home_lng,
   );
-  return dist > LOCAL_RADIUS_KM
-    ? 'traveler'
-    : 'local';
+  return dist > LOCAL_RADIUS_KM ? 'traveler' : 'local';
 };

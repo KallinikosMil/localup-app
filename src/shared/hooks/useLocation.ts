@@ -1,7 +1,4 @@
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 
 type Coords = {
@@ -32,16 +29,10 @@ type LocationState = {
 let cachedCoords: Coords | null = null;
 let inFlight: Promise<void> | null = null;
 
-type Listener = (
-  coords: Coords | null,
-  error: string | null,
-) => void;
+type Listener = (coords: Coords | null, error: string | null) => void;
 const listeners = new Set<Listener>();
 
-const notify = (
-  coords: Coords | null,
-  error: string | null,
-) => {
+const notify = (coords: Coords | null, error: string | null) => {
   if (coords) {
     cachedCoords = coords;
   }
@@ -49,26 +40,20 @@ const notify = (
 };
 
 const acquire = async (): Promise<void> => {
-  const { status } =
-    await Location.requestForegroundPermissionsAsync();
+  const { status } = await Location.requestForegroundPermissionsAsync();
 
   if (status !== 'granted') {
-    notify(
-      null,
-      'Location permission denied',
-    );
+    notify(null, 'Location permission denied');
     return;
   }
 
   try {
-    const last =
-      await Location.getLastKnownPositionAsync();
+    const last = await Location.getLastKnownPositionAsync();
     if (last) {
       notify(
         {
           latitude: last.coords.latitude,
-          longitude:
-            last.coords.longitude,
+          longitude: last.coords.longitude,
         },
         null,
       );
@@ -78,13 +63,9 @@ const acquire = async (): Promise<void> => {
   }
 
   try {
-    const loc =
-      await Location.getCurrentPositionAsync(
-        {
-          accuracy:
-            Location.Accuracy.Balanced,
-        },
-      );
+    const loc = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    });
     notify(
       {
         latitude: loc.coords.latitude,
@@ -94,10 +75,7 @@ const acquire = async (): Promise<void> => {
     );
   } catch {
     if (!cachedCoords) {
-      notify(
-        null,
-        'Could not get location',
-      );
+      notify(null, 'Could not get location');
     }
   }
 };
@@ -112,15 +90,9 @@ const ensure = (): Promise<void> => {
 };
 
 const useLocation = (): LocationState => {
-  const [coords, setCoords] = useState<
-    Coords | null
-  >(cachedCoords);
-  const [loading, setLoading] = useState(
-    cachedCoords == null,
-  );
-  const [error, setError] = useState<
-    string | null
-  >(null);
+  const [coords, setCoords] = useState<Coords | null>(cachedCoords);
+  const [loading, setLoading] = useState(cachedCoords == null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const listener: Listener = (c, e) => {

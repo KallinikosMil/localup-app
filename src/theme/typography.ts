@@ -41,10 +41,7 @@ type TypographyDef = {
   style: TextStyle;
 };
 
-export const Typography: Record<
-  TypographyVariant,
-  TypographyDef
-> = {
+export const Typography: Record<TypographyVariant, TypographyDef> = {
   display: {
     paperVariant: 'displayMedium',
     style: {

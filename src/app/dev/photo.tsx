@@ -1,2 +1,1 @@
-export { default } from
-  '@app/onboarding/photo';
+export { default } from '@app/onboarding/photo';

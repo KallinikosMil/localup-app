@@ -10,12 +10,7 @@ type Props = {
   contentStyle?: ViewStyle;
 };
 
-const CustomModal = ({
-  visible,
-  onDismiss,
-  children,
-  contentStyle,
-}: Props) => {
+const CustomModal = ({ visible, onDismiss, children, contentStyle }: Props) => {
   const theme = useTheme();
 
   return (
@@ -43,7 +38,6 @@ const styles = StyleSheet.create({
     padding: Spacing.SPACING_PADDING_24,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius:16
+    borderRadius: 16,
   },
-  
 });

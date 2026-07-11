@@ -1,7 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,29 +8,17 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-import {
-  ActivityIndicator,
-  useTheme,
-} from 'react-native-paper';
+import { ActivityIndicator, useTheme } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import AppText from
-  '@shared/components/AppText';
-import Spacer from
-  '@shared/components/Spacer';
-import {
-  useMatches,
-  type Match,
-} from
-  '@features/matches/hooks/useMatches';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
-import { Translations } from
-  '@features/matches/i18n/translationKeys';
+import AppText from '@shared/components/AppText';
+import Spacer from '@shared/components/Spacer';
+import { useMatches, type Match } from '@features/matches/hooks/useMatches';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
+import { Translations } from '@features/matches/i18n/translationKeys';
 
 const AVATAR_SIZE = 60;
 
@@ -51,32 +36,22 @@ export default function MatchesScreen() {
 
   // After a few seconds of loading, reassure the user it isn't
   // frozen — same as chat (U5). Resets when loading ends.
-  const [slowLoading, setSlowLoading] =
-    useState(false);
+  const [slowLoading, setSlowLoading] = useState(false);
   useEffect(() => {
     if (!isLoading) {
       setSlowLoading(false);
       return;
     }
-    const t = setTimeout(
-      () => setSlowLoading(true),
-      4500,
-    );
+    const t = setTimeout(() => setSlowLoading(true), 4500);
     return () => clearTimeout(t);
   }, [isLoading]);
 
-  const renderItem = ({
-    item,
-  }: {
-    item: Match;
-  }) => (
+  const renderItem = ({ item }: { item: Match }) => (
     <Pressable
       style={[
         styles.card,
         {
-          backgroundColor:
-            theme.colors
-              .surfaceVariant,
+          backgroundColor: theme.colors.surfaceVariant,
         },
       ]}
       onPress={() => {
@@ -90,8 +65,7 @@ export default function MatchesScreen() {
             // thread lookup (§1b).
             ...(item.thread_id
               ? {
-                  threadId:
-                    item.thread_id,
+                  threadId: item.thread_id,
                 }
               : {}),
           },
@@ -111,19 +85,14 @@ export default function MatchesScreen() {
             styles.avatar,
             styles.avatarPlaceholder,
             {
-              backgroundColor:
-                theme.colors
-                  .surfaceVariant,
+              backgroundColor: theme.colors.surfaceVariant,
             },
           ]}
         >
           <MaterialCommunityIcons
             name="account"
             size={28}
-            color={
-              theme.colors
-                .onSurfaceVariant
-            }
+            color={theme.colors.onSurfaceVariant}
           />
         </View>
       )}
@@ -132,8 +101,7 @@ export default function MatchesScreen() {
         <AppText
           variant="body"
           style={{
-            color:
-              theme.colors.onSurface,
+            color: theme.colors.onSurface,
             fontWeight: '600',
           }}
         >
@@ -143,26 +111,18 @@ export default function MatchesScreen() {
           variant="caption"
           numberOfLines={1}
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
-            fontStyle: item.last_message
-              ? 'normal'
-              : 'italic',
+            color: theme.colors.onSurfaceVariant,
+            fontStyle: item.last_message ? 'normal' : 'italic',
           }}
         >
-          {item.last_message ??
-            t(Translations.MATCHES_SAY_HELLO)}
+          {item.last_message ?? t(Translations.MATCHES_SAY_HELLO)}
         </AppText>
       </View>
 
       <MaterialCommunityIcons
         name="chevron-right"
         size={24}
-        color={
-          theme.colors
-            .onSurfaceVariant
-        }
+        color={theme.colors.onSurfaceVariant}
       />
     </Pressable>
   );
@@ -172,8 +132,7 @@ export default function MatchesScreen() {
       style={[
         styles.root,
         {
-          backgroundColor:
-            theme.colors.background,
+          backgroundColor: theme.colors.background,
         },
       ]}
     >
@@ -181,8 +140,7 @@ export default function MatchesScreen() {
         <AppText
           variant="h2"
           style={{
-            color:
-              theme.colors.onBackground,
+            color: theme.colors.onBackground,
           }}
         >
           {t(Translations.MATCHES_TITLE)}
@@ -191,20 +149,14 @@ export default function MatchesScreen() {
 
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator
-            animating
-            size="large"
-          />
+          <ActivityIndicator animating size="large" />
           {slowLoading ? (
             <AppText
               variant="body"
               style={{
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
+                color: theme.colors.onSurfaceVariant,
                 textAlign: 'center',
-                marginTop:
-                  Spacing.SPACING_PADDING_16,
+                marginTop: Spacing.SPACING_PADDING_16,
               }}
             >
               {t(Translations.MATCHES_WAKING)}
@@ -216,20 +168,14 @@ export default function MatchesScreen() {
           <MaterialCommunityIcons
             name="alert-circle-outline"
             size={40}
-            color={
-              theme.colors
-                .onSurfaceVariant
-            }
+            color={theme.colors.onSurfaceVariant}
           />
           <AppText
             variant="body"
             style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
+              color: theme.colors.onSurfaceVariant,
               textAlign: 'center',
-              marginTop:
-                Spacing.SPACING_PADDING_12,
+              marginTop: Spacing.SPACING_PADDING_12,
             }}
           >
             {t(Translations.MATCHES_ERROR)}
@@ -240,16 +186,14 @@ export default function MatchesScreen() {
             style={[
               styles.retryBtn,
               {
-                backgroundColor:
-                  theme.colors.primary,
+                backgroundColor: theme.colors.primary,
               },
             ]}
           >
             <AppText
               variant="body"
               style={{
-                color:
-                  theme.colors.onPrimary,
+                color: theme.colors.onPrimary,
                 fontWeight: '600',
               }}
             >
@@ -259,15 +203,10 @@ export default function MatchesScreen() {
         </View>
       ) : !matches?.length ? (
         <ScrollView
-          contentContainerStyle={
-            styles.empty
-          }
+          contentContainerStyle={styles.empty}
           refreshControl={
             <RefreshControl
-              refreshing={
-                isFetching &&
-                !isLoading
-              }
+              refreshing={isFetching && !isLoading}
               onRefresh={refetch}
             />
           }
@@ -275,59 +214,36 @@ export default function MatchesScreen() {
           <MaterialCommunityIcons
             name="heart-outline"
             size={48}
-            color={
-              theme.colors
-                .onSurfaceVariant
-            }
+            color={theme.colors.onSurfaceVariant}
           />
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_16
-            }
-          />
+          <Spacer spacing={Spacing.SPACING_PADDING_16} />
           <AppText
             variant="h3"
             style={{
-              color:
-                theme.colors
-                  .onBackground,
+              color: theme.colors.onBackground,
             }}
           >
             {t(Translations.MATCHES_EMPTY_TITLE)}
           </AppText>
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_8
-            }
-          />
+          <Spacer spacing={Spacing.SPACING_PADDING_8} />
           <AppText
             variant="body"
             style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
+              color: theme.colors.onSurfaceVariant,
               textAlign: 'center',
             }}
           >
-            {t(
-              Translations.MATCHES_EMPTY_SUBTITLE,
-            )}
+            {t(Translations.MATCHES_EMPTY_SUBTITLE)}
           </AppText>
         </ScrollView>
       ) : (
         <FlatList
           data={matches}
-          keyExtractor={item =>
-            item.id
-          }
+          keyExtractor={item => item.id}
           renderItem={renderItem}
-          contentContainerStyle={
-            styles.list
-          }
+          contentContainerStyle={styles.list}
           onRefresh={refetch}
-          refreshing={
-            isFetching && !isLoading
-          }
+          refreshing={isFetching && !isLoading}
         />
       )}
     </View>
@@ -342,47 +258,35 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
   },
   retryBtn: {
-    marginTop:
-      Spacing.SPACING_PADDING_16,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingVertical:
-      Spacing.SPACING_PADDING_8,
+    marginTop: Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingVertical: Spacing.SPACING_PADDING_8,
     borderRadius: BorderRadius.pill,
   },
   header: {
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingTop:
-      Spacing.SPACING_PADDING_24,
-    paddingBottom:
-      Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_24,
+    paddingBottom: Spacing.SPACING_PADDING_16,
   },
   list: {
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingBottom:
-      Spacing.SPACING_PADDING_32,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingBottom: Spacing.SPACING_PADDING_32,
   },
   empty: {
     flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding:
-      Spacing.SPACING_PADDING_16,
+    padding: Spacing.SPACING_PADDING_16,
     borderRadius: BorderRadius.xl,
-    marginBottom:
-      Spacing.SPACING_PADDING_16,
+    marginBottom: Spacing.SPACING_PADDING_16,
   },
   avatar: {
     width: AVATAR_SIZE,
@@ -395,7 +299,6 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
-    marginLeft:
-      Spacing.SPACING_PADDING_16,
+    marginLeft: Spacing.SPACING_PADDING_16,
   },
 });

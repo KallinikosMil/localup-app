@@ -1,37 +1,20 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-  Pressable,
-} from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {
-  FormProvider,
-  useForm,
-} from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
-import AppText from
-  '@shared/components/AppText';
-import AppButton from
-  '@shared/components/AppButton';
-import Spacer from
-  '@shared/components/Spacer';
-import InputField from
-  '@shared/components/InputField';
-import OnboardingProgress from
-  '@shared/components/OnboardingProgress';
-import { useOnboardingData } from
-  '@features/onboarding/context/OnboardingContext';
-import { Translations } from
-  '@features/onboarding/i18n/translationKeys';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import Spacer from '@shared/components/Spacer';
+import InputField from '@shared/components/InputField';
+import OnboardingProgress from '@shared/components/OnboardingProgress';
+import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
+import { Translations } from '@features/onboarding/i18n/translationKeys';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
 
 type NameAgeForm = {
   displayName: string;
@@ -53,17 +36,13 @@ const formatDate = (date: Date) =>
 const NameAgeScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { data, update } =
-    useOnboardingData();
+  const { data, update } = useOnboardingData();
 
   const maxDate = getMaxDate();
 
-  const [dob, setDob] =
-    useState<Date | null>(data.dateOfBirth);
-  const [showPicker, setShowPicker] =
-    useState(false);
-  const [dobError, setDobError] =
-    useState('');
+  const [dob, setDob] = useState<Date | null>(data.dateOfBirth);
+  const [showPicker, setShowPicker] = useState(false);
+  const [dobError, setDobError] = useState('');
 
   const form = useForm<NameAgeForm>({
     defaultValues: {
@@ -78,10 +57,7 @@ const NameAgeScreen = () => {
     formState: { isValid },
   } = form;
 
-  const onDateChange = (
-    _event: unknown,
-    selected?: Date,
-  ) => {
+  const onDateChange = (_event: unknown, selected?: Date) => {
     setShowPicker(false);
     if (selected) {
       setDob(selected);
@@ -89,84 +65,59 @@ const NameAgeScreen = () => {
     }
   };
 
-  const onNext = handleSubmit(
-    ({ displayName }) => {
-      if (!dob) {
-        setDobError(
-          t(
-            Translations.ONBOARDING_DOB_REQUIRED,
-          ),
-        );
-        return;
-      }
-      update({
-        displayName,
-        dateOfBirth: dob,
-      });
-      router.push('/onboarding/home-city');
-    },
-  );
+  const onNext = handleSubmit(({ displayName }) => {
+    if (!dob) {
+      setDobError(t(Translations.ONBOARDING_DOB_REQUIRED));
+      return;
+    }
+    update({
+      displayName,
+      dateOfBirth: dob,
+    });
+    router.push('/onboarding/home-city');
+  });
 
   return (
     <View
       style={[
         styles.root,
         {
-          backgroundColor:
-            theme.colors.background,
+          backgroundColor: theme.colors.background,
         },
       ]}
     >
       <ScrollView
-        contentContainerStyle={
-          styles.scrollContent
-        }
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
         <OnboardingProgress
           step={1}
           totalSteps={4}
-          title={t(
-            Translations.ONBOARDING_STEP_1_TITLE,
-          )}
+          title={t(Translations.ONBOARDING_STEP_1_TITLE)}
           showBack={false}
         />
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_8}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
 
         <AppText
           variant="body"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
           }}
         >
-          {t(
-            Translations.ONBOARDING_STEP_1_SUBTITLE,
-          )}
+          {t(Translations.ONBOARDING_STEP_1_SUBTITLE)}
         </AppText>
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_32
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_32} />
 
         <FormProvider {...form}>
           <InputField
             name="displayName"
-            label={t(
-              Translations.ONBOARDING_NAME_LABEL,
-            )}
+            label={t(Translations.ONBOARDING_NAME_LABEL)}
             rules={{
               required: {
                 value: true,
-                message: t(
-                  Translations.ONBOARDING_NAME_REQUIRED,
-                ),
+                message: t(Translations.ONBOARDING_NAME_REQUIRED),
               },
             }}
             autoCapitalize="words"
@@ -174,38 +125,25 @@ const NameAgeScreen = () => {
           />
         </FormProvider>
 
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_24
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
         <AppText
           variant="label"
           style={{
-            color:
-              theme.colors.onBackground,
-            marginBottom:
-              Spacing.SPACING_PADDING_8,
+            color: theme.colors.onBackground,
+            marginBottom: Spacing.SPACING_PADDING_8,
           }}
         >
-          {t(
-            Translations.ONBOARDING_DOB_LABEL,
-          )}
+          {t(Translations.ONBOARDING_DOB_LABEL)}
         </AppText>
 
         <Pressable
-          onPress={() =>
-            setShowPicker(true)
-          }
+          onPress={() => setShowPicker(true)}
           style={[
             styles.dobButton,
             {
-              borderColor: dobError
-                ? theme.colors.error
-                : theme.colors.outline,
-              backgroundColor:
-                theme.colors.surface,
+              borderColor: dobError ? theme.colors.error : theme.colors.outline,
+              backgroundColor: theme.colors.surface,
             },
           ]}
         >
@@ -214,15 +152,10 @@ const NameAgeScreen = () => {
             style={{
               color: dob
                 ? theme.colors.onSurface
-                : theme.colors
-                    .onSurfaceVariant,
+                : theme.colors.onSurfaceVariant,
             }}
           >
-            {dob
-              ? formatDate(dob)
-              : t(
-                  Translations.ONBOARDING_DOB_LABEL,
-                )}
+            {dob ? formatDate(dob) : t(Translations.ONBOARDING_DOB_LABEL)}
           </AppText>
         </Pressable>
 
@@ -247,26 +180,18 @@ const NameAgeScreen = () => {
             onChange={onDateChange}
             positiveButton={{
               label: 'OK',
-              textColor:
-                theme.colors.primary,
+              textColor: theme.colors.primary,
             }}
             negativeButton={{
               label: 'Cancel',
-              textColor:
-                theme.colors.primary,
+              textColor: theme.colors.primary,
             }}
           />
         )}
 
         <View style={styles.bottomSection}>
-          <AppButton
-            variant="primary"
-            onPress={onNext}
-            disabled={!isValid}
-          >
-            {t(
-              Translations.ONBOARDING_NEXT,
-            )}
+          <AppButton variant="primary" onPress={onNext} disabled={!isValid}>
+            {t(Translations.ONBOARDING_NEXT)}
           </AppButton>
         </View>
       </ScrollView>
@@ -282,24 +207,18 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingTop:
-      Spacing.SPACING_PADDING_24,
-    paddingBottom:
-      Spacing.SPACING_PADDING_32,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_24,
+    paddingBottom: Spacing.SPACING_PADDING_32,
   },
   dobButton: {
     borderWidth: 1,
     borderRadius: BorderRadius.lg,
-    paddingVertical:
-      Spacing.SPACING_PADDING_16,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_16,
+    paddingVertical: Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_16,
   },
   bottomSection: {
     marginTop: 'auto',
-    paddingTop:
-      Spacing.SPACING_PADDING_32,
+    paddingTop: Spacing.SPACING_PADDING_32,
   },
 });

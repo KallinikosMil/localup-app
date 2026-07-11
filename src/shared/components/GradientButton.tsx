@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
+import { Pressable, StyleSheet, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -62,22 +58,12 @@ const GradientButton = ({
       }}
       // 44px minimum hit area regardless of visual size
       hitSlop={
-        circleSize && circleSize < 44
-          ? (44 - circleSize) / 2
-          : undefined
+        circleSize && circleSize < 44 ? (44 - circleSize) / 2 : undefined
       }
     >
-      <Animated.View
-        style={[
-          animatedStyle,
-          disabled && styles.disabled,
-        ]}
-      >
+      <Animated.View style={[animatedStyle, disabled && styles.disabled]}>
         <LinearGradient
-          colors={[
-            theme.colors.gradientStart,
-            theme.colors.gradientEnd,
-          ]}
+          colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[

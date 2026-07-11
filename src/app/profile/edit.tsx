@@ -1,8 +1,4 @@
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,22 +8,14 @@ import {
   Alert,
   TextInput as RNTextInput,
 } from 'react-native';
-import {
-  useTheme,
-  ActivityIndicator,
-} from 'react-native-paper';
-import { MaterialCommunityIcons } from
-  '@expo/vector-icons';
+import { useTheme, ActivityIndicator } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as ImagePicker from
-  'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 
-import AppText from
-  '@shared/components/AppText';
-import Spacer from
-  '@shared/components/Spacer';
-import useLocation from
-  '@shared/hooks/useLocation';
+import AppText from '@shared/components/AppText';
+import Spacer from '@shared/components/Spacer';
+import useLocation from '@shared/hooks/useLocation';
 import {
   useProfile,
   useUpdateProfile,
@@ -36,12 +24,9 @@ import {
   useDeletePhoto,
   computeMode,
   type ProfileMode,
-} from
-  '@features/profile/hooks/useProfile';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
+} from '@features/profile/hooks/useProfile';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
 
 const AVATAR_SIZE = 112;
 const PHOTO_SIZE = 100;
@@ -51,16 +36,12 @@ const BIO_LIMIT = 240;
 export default function EditProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { data: profile, isLoading } =
-    useProfile();
-  const { data: photos } = usePhotos(
-    profile?.user_id,
-  );
+  const { data: profile, isLoading } = useProfile();
+  const { data: photos } = usePhotos(profile?.user_id);
   const updateProfile = useUpdateProfile();
   const uploadPhoto = useUploadPhoto();
   const deletePhoto = useDeletePhoto();
-  const { latitude, longitude } =
-    useLocation();
+  const { latitude, longitude } = useLocation();
 
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
@@ -98,39 +79,29 @@ export default function EditProfileScreen() {
       router.back();
       return;
     }
-    Alert.alert(
-      'Discard changes?',
-      'Your edits will be lost.',
-      [
-        { text: 'Keep editing', style: 'cancel' },
-        {
-          text: 'Discard',
-          style: 'destructive',
-          onPress: () => router.back(),
-        },
-      ],
-    );
+    Alert.alert('Discard changes?', 'Your edits will be lost.', [
+      { text: 'Keep editing', style: 'cancel' },
+      {
+        text: 'Discard',
+        style: 'destructive',
+        onPress: () => router.back(),
+      },
+    ]);
   };
 
-  const markDirty = (setter: (v: string) => void) =>
-    (v: string) => {
-      setter(v);
-      setDirty(true);
-    };
+  const markDirty = (setter: (v: string) => void) => (v: string) => {
+    setter(v);
+    setDirty(true);
+  };
 
-  const setMode = (
-    next: ProfileMode | null,
-  ) => {
+  const setMode = (next: ProfileMode | null) => {
     updateProfile.mutate({
       mode_override: next,
     });
   };
 
   const setHomeHere = () => {
-    if (
-      latitude == null ||
-      longitude == null
-    ) {
+    if (latitude == null || longitude == null) {
       Alert.alert(
         'Location unavailable',
         'Enable location permission to set your home location.',
@@ -144,8 +115,7 @@ export default function EditProfileScreen() {
   };
 
   const pickPhoto = async () => {
-    const perm =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert(
         'Permission needed',
@@ -153,44 +123,29 @@ export default function EditProfileScreen() {
       );
       return;
     }
-    const result =
-      await ImagePicker.launchImageLibraryAsync(
-        {
-          mediaTypes:
-            ImagePicker.MediaTypeOptions
-              .Images,
-          quality: 0.8,
-          allowsEditing: false,
-        },
-      );
-    if (
-      result.canceled ||
-      !result.assets[0]
-    )
-      return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+      allowsEditing: false,
+    });
+    if (result.canceled || !result.assets[0]) return;
 
     const asset = result.assets[0];
     uploadPhoto.mutate({
       uri: asset.uri,
-      mimeType:
-        asset.mimeType ?? 'image/jpeg',
+      mimeType: asset.mimeType ?? 'image/jpeg',
     });
   };
 
   const confirmDelete = (id: string) => {
-    Alert.alert(
-      'Delete photo?',
-      'This will permanently remove this photo.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () =>
-            deletePhoto.mutate(id),
-        },
-      ],
-    );
+    Alert.alert('Delete photo?', 'This will permanently remove this photo.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => deletePhoto.mutate(id),
+      },
+    ]);
   };
 
   const photoCount = photos?.length ?? 0;
@@ -202,8 +157,7 @@ export default function EditProfileScreen() {
         style={[
           styles.center,
           {
-            backgroundColor:
-              theme.colors.background,
+            backgroundColor: theme.colors.background,
           },
         ]}
       >
@@ -223,8 +177,7 @@ export default function EditProfileScreen() {
     <View
       style={{
         flex: 1,
-        backgroundColor:
-          theme.colors.background,
+        backgroundColor: theme.colors.background,
       }}
     >
       {/* Glass-style top bar */}
@@ -232,10 +185,8 @@ export default function EditProfileScreen() {
         style={[
           styles.appBar,
           {
-            backgroundColor:
-              theme.colors.background,
-            borderBottomColor:
-              surfaceLow,
+            backgroundColor: theme.colors.background,
+            borderBottomColor: surfaceLow,
           },
         ]}
       >
@@ -245,16 +196,14 @@ export default function EditProfileScreen() {
           style={[
             styles.pillGhost,
             {
-              backgroundColor:
-                surfaceLow,
+              backgroundColor: surfaceLow,
             },
           ]}
         >
           <AppText
             variant="body"
             style={{
-              color:
-                theme.colors.onSurface,
+              color: theme.colors.onSurface,
               fontWeight: '500',
             }}
           >
@@ -265,8 +214,7 @@ export default function EditProfileScreen() {
         <AppText
           variant="h3"
           style={{
-            color:
-              theme.colors.onBackground,
+            color: theme.colors.onBackground,
           }}
         >
           Edit Profile
@@ -274,41 +222,30 @@ export default function EditProfileScreen() {
 
         <Pressable
           onPress={handleSave}
-          disabled={
-            updateProfile.isPending
-          }
+          disabled={updateProfile.isPending}
           hitSlop={12}
           style={[
             styles.pillPrimary,
             {
-              backgroundColor:
-                theme.colors.primary,
-              opacity:
-                updateProfile.isPending
-                  ? 0.5
-                  : 1,
+              backgroundColor: theme.colors.primary,
+              opacity: updateProfile.isPending ? 0.5 : 1,
             },
           ]}
         >
           <AppText
             variant="body"
             style={{
-              color:
-                theme.colors.onPrimary,
+              color: theme.colors.onPrimary,
               fontWeight: '600',
             }}
           >
-            {updateProfile.isPending
-              ? 'Saving…'
-              : 'Save'}
+            {updateProfile.isPending ? 'Saving…' : 'Save'}
           </AppText>
         </Pressable>
       </View>
 
       <ScrollView
-        contentContainerStyle={
-          styles.content
-        }
+        contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
         {/* Avatar */}
@@ -326,32 +263,23 @@ export default function EditProfileScreen() {
                 styles.avatar,
                 styles.avatarPlaceholder,
                 {
-                  backgroundColor:
-                    surfaceLow,
+                  backgroundColor: surfaceLow,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name="account"
                 size={56}
-                color={
-                  theme.colors
-                    .onSurfaceVariant
-                }
+                color={theme.colors.onSurfaceVariant}
               />
             </View>
           )}
         </View>
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_24}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
         {/* Basic info card */}
-        <Section
-          title="Basics"
-          bg={surfaceLowest}
-        >
+        <Section title="Basics" bg={surfaceLowest}>
           <FieldRow
             icon="account-outline"
             value={name}
@@ -369,31 +297,21 @@ export default function EditProfileScreen() {
           />
         </Section>
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         {/* About */}
-        <Section
-          title="About you"
-          bg={surfaceLowest}
-        >
+        <Section title="About you" bg={surfaceLowest}>
           <RNTextInput
             value={bio}
             onChangeText={markDirty(setBio)}
             maxLength={BIO_LIMIT}
             multiline
             placeholder="Share what makes you, you."
-            placeholderTextColor={
-              theme.colors
-                .onSurfaceVariant
-            }
+            placeholderTextColor={theme.colors.onSurfaceVariant}
             style={[
               styles.bioInput,
               {
-                color:
-                  theme.colors
-                    .onSurface,
+                color: theme.colors.onSurface,
               },
             ]}
           />
@@ -401,86 +319,61 @@ export default function EditProfileScreen() {
             variant="caption"
             style={{
               alignSelf: 'flex-end',
-              color:
-                theme.colors
-                  .onSurfaceVariant,
+              color: theme.colors.onSurfaceVariant,
             }}
           >
             {bio.length} / {BIO_LIMIT}
           </AppText>
         </Section>
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         {/* Photos */}
-        <Section
-          title="Your gallery"
-          bg={surfaceLowest}
-        >
+        <Section title="Your gallery" bg={surfaceLowest}>
           <View style={styles.photoGrid}>
             {(photos ?? []).map(p => (
               <Pressable
                 key={p.id}
-                onLongPress={() =>
-                  confirmDelete(p.id)
-                }
+                onLongPress={() => confirmDelete(p.id)}
                 style={[
                   styles.photoCell,
                   {
-                    backgroundColor:
-                      surfaceLow,
+                    backgroundColor: surfaceLow,
                   },
                 ]}
               >
-                <Image
-                  source={{ uri: p.url }}
-                  style={styles.photoImg}
-                />
+                <Image source={{ uri: p.url }} style={styles.photoImg} />
               </Pressable>
             ))}
             {canAddPhoto && (
               <Pressable
                 onPress={pickPhoto}
-                disabled={
-                  uploadPhoto.isPending
-                }
+                disabled={uploadPhoto.isPending}
                 style={[
                   styles.photoCell,
                   styles.photoAdd,
                   {
-                    borderColor:
-                      theme.colors.primary,
+                    borderColor: theme.colors.primary,
                   },
                 ]}
               >
                 {uploadPhoto.isPending ? (
-                  <ActivityIndicator
-                    animating
-                    size="small"
-                  />
+                  <ActivityIndicator animating size="small" />
                 ) : (
                   <MaterialCommunityIcons
                     name="plus"
                     size={32}
-                    color={
-                      theme.colors.primary
-                    }
+                    color={theme.colors.primary}
                   />
                 )}
               </Pressable>
             )}
           </View>
-          <Spacer
-            spacing={Spacing.SPACING_PADDING_8}
-          />
+          <Spacer spacing={Spacing.SPACING_PADDING_8} />
           <AppText
             variant="caption"
             style={{
-              color:
-                theme.colors
-                  .onSurfaceVariant,
+              color: theme.colors.onSurfaceVariant,
               fontStyle: 'italic',
             }}
           >
@@ -488,54 +381,39 @@ export default function EditProfileScreen() {
           </AppText>
         </Section>
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         {/* Home base */}
-        <Section
-          title="Home base"
-          bg={surfaceLowest}
-        >
-          <View
-            style={styles.homeBaseRow}
-          >
+        <Section title="Home base" bg={surfaceLowest}>
+          <View style={styles.homeBaseRow}>
             <View
               style={[
                 styles.mapThumb,
                 {
-                  backgroundColor:
-                    surfaceLow,
+                  backgroundColor: surfaceLow,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name="map-marker"
                 size={28}
-                color={
-                  theme.colors.primary
-                }
+                color={theme.colors.primary}
               />
             </View>
             <View style={{ flex: 1 }}>
               <AppText
                 variant="body"
                 style={{
-                  color:
-                    theme.colors
-                      .onSurface,
+                  color: theme.colors.onSurface,
                   fontWeight: '600',
                 }}
               >
-                {profile.home_city ??
-                  'Not set'}
+                {profile.home_city ?? 'Not set'}
               </AppText>
               <AppText
                 variant="caption"
                 style={{
-                  color:
-                    theme.colors
-                      .onSurfaceVariant,
+                  color: theme.colors.onSurfaceVariant,
                 }}
               >
                 {profile.home_lat != null
@@ -544,16 +422,13 @@ export default function EditProfileScreen() {
               </AppText>
             </View>
           </View>
-          <Spacer
-            spacing={Spacing.SPACING_PADDING_12}
-          />
+          <Spacer spacing={Spacing.SPACING_PADDING_12} />
           <Pressable
             onPress={setHomeHere}
             style={[
               styles.pillPrimary,
               {
-                backgroundColor:
-                  theme.colors.primary,
+                backgroundColor: theme.colors.primary,
                 alignSelf: 'flex-start',
               },
             ]}
@@ -561,15 +436,12 @@ export default function EditProfileScreen() {
             <MaterialCommunityIcons
               name="home-map-marker"
               size={16}
-              color={
-                theme.colors.onPrimary
-              }
+              color={theme.colors.onPrimary}
             />
             <AppText
               variant="caption"
               style={{
-                color:
-                  theme.colors.onPrimary,
+                color: theme.colors.onPrimary,
                 fontWeight: '600',
                 marginLeft: 6,
               }}
@@ -579,59 +451,38 @@ export default function EditProfileScreen() {
           </Pressable>
         </Section>
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_16}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
         {/* Mode */}
-        <Section
-          title="Mode"
-          bg={surfaceLowest}
-        >
+        <Section title="Mode" bg={surfaceLowest}>
           <View style={styles.modeRow}>
             <ModePill
               label="Auto"
-              active={
-                profile.mode_override ===
-                null
-              }
+              active={profile.mode_override === null}
               onPress={() => setMode(null)}
               theme={theme}
               surface={surfaceLow}
             />
             <ModePill
               label="Local"
-              active={
-                profile.mode_override ===
-                'local'
-              }
-              onPress={() =>
-                setMode('local')
-              }
+              active={profile.mode_override === 'local'}
+              onPress={() => setMode('local')}
               theme={theme}
               surface={surfaceLow}
             />
             <ModePill
               label="Traveler"
-              active={
-                profile.mode_override ===
-                'traveler'
-              }
-              onPress={() =>
-                setMode('traveler')
-              }
+              active={profile.mode_override === 'traveler'}
+              onPress={() => setMode('traveler')}
               theme={theme}
               surface={surfaceLow}
             />
           </View>
-          <Spacer
-            spacing={Spacing.SPACING_PADDING_8}
-          />
+          <Spacer spacing={Spacing.SPACING_PADDING_8} />
           <AppText
             variant="caption"
             style={{
-              color:
-                theme.colors.onSurface,
+              color: theme.colors.onSurface,
             }}
           >
             Currently shown as{' '}
@@ -639,13 +490,10 @@ export default function EditProfileScreen() {
               variant="caption"
               style={{
                 fontWeight: '700',
-                color:
-                  theme.colors.primary,
+                color: theme.colors.primary,
               }}
             >
-              {mode === 'traveler'
-                ? 'Traveler'
-                : 'Local'}
+              {mode === 'traveler' ? 'Traveler' : 'Local'}
             </AppText>
             {profile.mode_override === null
               ? ' — based on your home base.'
@@ -653,9 +501,7 @@ export default function EditProfileScreen() {
           </AppText>
         </Section>
 
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_32}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_32} />
       </ScrollView>
     </View>
   );
@@ -678,8 +524,7 @@ const Section = ({
       <AppText
         variant="caption"
         style={{
-          color:
-            theme.colors.onSurfaceVariant,
+          color: theme.colors.onSurfaceVariant,
           letterSpacing: 1.2,
           textTransform: 'uppercase',
           fontSize: 11,
@@ -690,12 +535,7 @@ const Section = ({
       >
         {title}
       </AppText>
-      <View
-        style={[
-          styles.sectionCard,
-          { backgroundColor: bg },
-        ]}
-      >
+      <View style={[styles.sectionCard, { backgroundColor: bg }]}>
         {children}
       </View>
     </View>
@@ -725,13 +565,8 @@ const FieldRow = ({
       value={value}
       onChangeText={onChange}
       placeholder={placeholder}
-      placeholderTextColor={
-        theme.colors.onSurfaceVariant
-      }
-      style={[
-        styles.fieldInput,
-        { color: theme.colors.onSurface },
-      ]}
+      placeholderTextColor={theme.colors.onSurfaceVariant}
+      style={[styles.fieldInput, { color: theme.colors.onSurface }]}
     />
   </View>
 );
@@ -742,9 +577,7 @@ const Divider = () => {
     <View
       style={{
         height: 1,
-        backgroundColor:
-          theme.colors.outlineVariant ??
-          'rgba(0,0,0,0.05)',
+        backgroundColor: theme.colors.outlineVariant ?? 'rgba(0,0,0,0.05)',
         marginLeft: 36,
         opacity: 0.4,
       }}
@@ -770,18 +603,14 @@ const ModePill = ({
     style={[
       styles.modePill,
       {
-        backgroundColor: active
-          ? theme.colors.primary
-          : surface,
+        backgroundColor: active ? theme.colors.primary : surface,
       },
     ]}
   >
     <AppText
       variant="caption"
       style={{
-        color: active
-          ? theme.colors.onPrimary
-          : theme.colors.onSurface,
+        color: active ? theme.colors.onPrimary : theme.colors.onSurface,
         fontWeight: active ? '700' : '500',
       }}
     >
@@ -792,29 +621,18 @@ const ModePill = ({
 
 // Lerp between two hex colors. Used to
 // derive surface tiers from the theme.
-const blendSurface = (
-  base: string,
-  tint: string,
-  t: number,
-) => {
+const blendSurface = (base: string, tint: string, t: number) => {
   const b = hexToRgb(base);
   const tt = hexToRgb(tint);
   if (!b || !tt) return base;
-  const r = Math.round(
-    b.r + (tt.r - b.r) * t,
-  );
-  const g = Math.round(
-    b.g + (tt.g - b.g) * t,
-  );
-  const bl = Math.round(
-    b.b + (tt.b - b.b) * t,
-  );
+  const r = Math.round(b.r + (tt.r - b.r) * t);
+  const g = Math.round(b.g + (tt.g - b.g) * t);
+  const bl = Math.round(b.b + (tt.b - b.b) * t);
   return `rgb(${r}, ${g}, ${bl})`;
 };
 
 const hexToRgb = (hex: string) => {
-  const m =
-    /^#?([a-f0-9]{6})$/i.exec(hex);
+  const m = /^#?([a-f0-9]{6})$/i.exec(hex);
   if (!m) return null;
   const n = parseInt(m[1], 16);
   return {
@@ -834,8 +652,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_16,
     paddingTop: 56,
     paddingBottom: 12,
     borderBottomWidth: 1,
@@ -853,11 +670,9 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
   },
   content: {
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
     paddingTop: Spacing.SPACING_PADDING_24,
-    paddingBottom:
-      Spacing.SPACING_PADDING_32,
+    paddingBottom: Spacing.SPACING_PADDING_32,
   },
   avatarWrap: {
     alignItems: 'center',
@@ -872,8 +687,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionCard: {
-    padding:
-      Spacing.SPACING_PADDING_16,
+    padding: Spacing.SPACING_PADDING_16,
     borderRadius: BorderRadius.xxl,
   },
   fieldRow: {

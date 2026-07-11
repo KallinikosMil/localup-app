@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Image,
-  Dimensions,
-} from 'react-native';
+import { StyleSheet, View, Image, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, {
@@ -15,51 +10,33 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import {
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 
-import AppText from
-  '@shared/components/AppText';
-import ModeBadge from
-  '@shared/components/ModeBadge';
-import InterestChip from
-  '@shared/components/InterestChip';
+import AppText from '@shared/components/AppText';
+import ModeBadge from '@shared/components/ModeBadge';
+import InterestChip from '@shared/components/InterestChip';
 import { useAppTheme } from '@theme/paper';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
-import {
-  type Candidate,
-} from '../hooks/useDiscover';
-import { Translations } from
-  '../i18n/translationKeys';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
+import { type Candidate } from '../hooks/useDiscover';
+import { Translations } from '../i18n/translationKeys';
 
 const MAX_CHIPS = 3;
 
 // Distance display rule (UI-1 nit):
 // "0.0 km" reads broken — anything
 // under 1 km is just "nearby".
-const formatDistance = (
-  km: number,
-  t: TFunction,
-) =>
+const formatDistance = (km: number, t: TFunction) =>
   km < 1
-    ? t(
-        Translations.DISCOVER_DISTANCE_NEARBY,
-      )
+    ? t(Translations.DISCOVER_DISTANCE_NEARBY)
     : t(Translations.DISCOVER_DISTANCE_KM, {
         km: km.toFixed(1),
       });
 
-const { width: SCREEN_WIDTH } =
-  Dimensions.get('window');
-const SWIPE_THRESHOLD =
-  SCREEN_WIDTH * 0.3;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 
 type SwipeCardProps = {
   candidate: Candidate;
@@ -76,99 +53,66 @@ const SwipeCard = ({
   const { t } = useTranslation();
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const overflow = Math.max(
-    candidate.interests.length - MAX_CHIPS,
-    0,
-  );
+  const overflow = Math.max(candidate.interests.length - MAX_CHIPS, 0);
 
   const pan = Gesture.Pan()
     .onUpdate(e => {
-      translateX.value =
-        e.translationX;
-      translateY.value =
-        e.translationY * 0.3;
+      translateX.value = e.translationX;
+      translateY.value = e.translationY * 0.3;
     })
     .onEnd(e => {
-      if (
-        e.translationX >
-        SWIPE_THRESHOLD
-      ) {
-        translateX.value = withSpring(
-          SCREEN_WIDTH * 1.5,
-          { damping: 15 },
-        );
+      if (e.translationX > SWIPE_THRESHOLD) {
+        translateX.value = withSpring(SCREEN_WIDTH * 1.5, { damping: 15 });
         runOnJS(onSwipeRight)();
-      } else if (
-        e.translationX <
-        -SWIPE_THRESHOLD
-      ) {
-        translateX.value = withSpring(
-          -SCREEN_WIDTH * 1.5,
-          { damping: 15 },
-        );
+      } else if (e.translationX < -SWIPE_THRESHOLD) {
+        translateX.value = withSpring(-SCREEN_WIDTH * 1.5, { damping: 15 });
         runOnJS(onSwipeLeft)();
       } else {
-        translateX.value =
-          withSpring(0);
-        translateY.value =
-          withSpring(0);
+        translateX.value = withSpring(0);
+        translateY.value = withSpring(0);
       }
     });
 
-  const cardStyle =
-    useAnimatedStyle(() => ({
-      transform: [
-        {
-          translateX:
-            translateX.value,
-        },
-        {
-          translateY:
-            translateY.value,
-        },
-        {
-          rotate: `${interpolate(
-            translateX.value,
-            [
-              -SCREEN_WIDTH,
-              0,
-              SCREEN_WIDTH,
-            ],
-            [-15, 0, 15],
-            Extrapolation.CLAMP,
-          )}deg`,
-        },
-      ],
-    }));
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateX: translateX.value,
+      },
+      {
+        translateY: translateY.value,
+      },
+      {
+        rotate: `${interpolate(
+          translateX.value,
+          [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
+          [-15, 0, 15],
+          Extrapolation.CLAMP,
+        )}deg`,
+      },
+    ],
+  }));
 
-  const likeOpacity =
-    useAnimatedStyle(() => ({
-      opacity: interpolate(
-        translateX.value,
-        [0, SWIPE_THRESHOLD],
-        [0, 1],
-        Extrapolation.CLAMP,
-      ),
-    }));
+  const likeOpacity = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      translateX.value,
+      [0, SWIPE_THRESHOLD],
+      [0, 1],
+      Extrapolation.CLAMP,
+    ),
+  }));
 
-  const nopeOpacity =
-    useAnimatedStyle(() => ({
-      opacity: interpolate(
-        translateX.value,
-        [-SWIPE_THRESHOLD, 0],
-        [1, 0],
-        Extrapolation.CLAMP,
-      ),
-    }));
+  const nopeOpacity = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      translateX.value,
+      [-SWIPE_THRESHOLD, 0],
+      [1, 0],
+      Extrapolation.CLAMP,
+    ),
+  }));
 
   return (
     <GestureDetector gesture={pan}>
-      <Animated.View
-        style={[
-          styles.card,
-          cardStyle,
-        ]}
-      >
+      <Animated.View style={[styles.card, cardStyle]}>
         {candidate.avatar_url ? (
           <Image
             source={{
@@ -182,19 +126,14 @@ const SwipeCard = ({
               styles.image,
               styles.placeholder,
               {
-                backgroundColor:
-                  theme.colors
-                    .surfaceVariant,
+                backgroundColor: theme.colors.surfaceVariant,
               },
             ]}
           >
             <MaterialCommunityIcons
               name="account"
               size={80}
-              color={
-                theme.colors
-                  .onSurfaceVariant
-              }
+              color={theme.colors.onSurfaceVariant}
             />
           </View>
         )}
@@ -212,8 +151,7 @@ const SwipeCard = ({
           style={[
             styles.distancePill,
             {
-              backgroundColor:
-                theme.colors.BLACK_A35,
+              backgroundColor: theme.colors.BLACK_A35,
             },
           ]}
         >
@@ -227,15 +165,11 @@ const SwipeCard = ({
             style={[
               styles.distanceText,
               {
-                color:
-                  theme.colors.ON_PHOTO,
+                color: theme.colors.ON_PHOTO,
               },
             ]}
           >
-            {formatDistance(
-              candidate.distance_km,
-              t,
-            )}
+            {formatDistance(candidate.distance_km, t)}
           </AppText>
         </View>
 
@@ -243,8 +177,7 @@ const SwipeCard = ({
           <AppText
             variant="h1"
             style={{
-              color:
-                theme.colors.ON_PHOTO,
+              color: theme.colors.ON_PHOTO,
             }}
           >
             {candidate.display_name}
@@ -252,35 +185,23 @@ const SwipeCard = ({
 
           <View style={styles.metaRow}>
             {candidate.home_city ? (
-              <View
-                style={
-                  styles.locationRow
-                }
-              >
+              <View style={styles.locationRow}>
                 <MaterialCommunityIcons
                   name="home-outline"
                   size={14}
-                  color={
-                    theme.colors.ON_PHOTO
-                  }
+                  color={theme.colors.ON_PHOTO}
                 />
                 <AppText
                   variant="caption"
                   style={{
-                    color:
-                      theme.colors
-                        .WHITE_A85,
+                    color: theme.colors.WHITE_A85,
                   }}
                 >
                   {candidate.home_city}
                 </AppText>
               </View>
             ) : null}
-            <ModeBadge
-              mode={
-                candidate.candidate_mode
-              }
-            />
+            <ModeBadge mode={candidate.candidate_mode} />
           </View>
 
           {candidate.bio ? (
@@ -289,9 +210,7 @@ const SwipeCard = ({
               style={[
                 styles.bio,
                 {
-                  color:
-                    theme.colors
-                      .WHITE_A85,
+                  color: theme.colors.WHITE_A85,
                 },
               ]}
               numberOfLines={2}
@@ -300,25 +219,13 @@ const SwipeCard = ({
             </AppText>
           ) : null}
 
-          {candidate.interests.length >
-          0 ? (
-            <View
-              style={styles.tagRow}
-            >
-              {candidate.interests
-                .slice(0, MAX_CHIPS)
-                .map(tag => (
-                  <InterestChip
-                    key={tag}
-                    label={tag}
-                    variant="frosted"
-                  />
-                ))}
+          {candidate.interests.length > 0 ? (
+            <View style={styles.tagRow}>
+              {candidate.interests.slice(0, MAX_CHIPS).map(tag => (
+                <InterestChip key={tag} label={tag} variant="frosted" />
+              ))}
               {overflow > 0 ? (
-                <InterestChip
-                  label={`+${overflow}`}
-                  variant="frosted"
-                />
+                <InterestChip label={`+${overflow}`} variant="frosted" />
               ) : null}
             </View>
           ) : null}
@@ -329,8 +236,7 @@ const SwipeCard = ({
             styles.stamp,
             styles.likeStamp,
             {
-              borderColor:
-                theme.colors.like,
+              borderColor: theme.colors.like,
             },
             likeOpacity,
           ]}
@@ -350,8 +256,7 @@ const SwipeCard = ({
             styles.stamp,
             styles.nopeStamp,
             {
-              borderColor:
-                theme.colors.pass,
+              borderColor: theme.colors.pass,
             },
             nopeOpacity,
           ]}
@@ -447,14 +352,10 @@ const styles = StyleSheet.create({
   },
   likeStamp: {
     left: 24,
-    transform: [
-      { rotate: '-20deg' },
-    ],
+    transform: [{ rotate: '-20deg' }],
   },
   nopeStamp: {
     right: 24,
-    transform: [
-      { rotate: '20deg' },
-    ],
+    transform: [{ rotate: '20deg' }],
   },
 });

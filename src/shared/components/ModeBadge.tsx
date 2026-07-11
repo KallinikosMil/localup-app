@@ -14,22 +14,15 @@ type ModeBadgeProps = {
   size?: 'sm' | 'md';
 };
 
-const ModeBadge = ({
-  mode,
-  size = 'md',
-}: ModeBadgeProps) => {
+const ModeBadge = ({ mode, size = 'md' }: ModeBadgeProps) => {
   const theme = useAppTheme();
   const isTraveler = mode === 'traveler';
-  const bg = isTraveler
-    ? theme.colors.modeTraveler
-    : theme.colors.modeLocal;
+  const bg = isTraveler ? theme.colors.modeTraveler : theme.colors.modeLocal;
   // In dark mode the mode pills flip to light
   // tints (VIOLET_500/GREEN_700 dark values) —
   // white text would fall under the 4.5:1
   // contrast floor there, so fg flips too.
-  const fg = theme.dark
-    ? theme.colors.background
-    : theme.colors.ON_PHOTO;
+  const fg = theme.dark ? theme.colors.background : theme.colors.ON_PHOTO;
   const sm = size === 'sm';
 
   return (
@@ -41,18 +34,11 @@ const ModeBadge = ({
       ]}
     >
       <MaterialCommunityIcons
-        name={
-          isTraveler
-            ? 'airplane'
-            : 'home-variant-outline'
-        }
+        name={isTraveler ? 'airplane' : 'home-variant-outline'}
         size={sm ? 10 : 12}
         color={fg}
       />
-      <AppText
-        variant="overline"
-        style={{ color: fg }}
-      >
+      <AppText variant="overline" style={{ color: fg }}>
         {isTraveler ? 'Traveler' : 'Local'}
       </AppText>
     </View>

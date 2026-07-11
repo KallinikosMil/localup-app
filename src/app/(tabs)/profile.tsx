@@ -7,35 +7,22 @@ import {
   Pressable,
   RefreshControl,
 } from 'react-native';
-import {
-  useTheme,
-  ActivityIndicator,
-  Chip,
-} from 'react-native-paper';
-import { MaterialCommunityIcons } from
-  '@expo/vector-icons';
+import { useTheme, ActivityIndicator, Chip } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-import AppText from
-  '@shared/components/AppText';
-import AppButton from
-  '@shared/components/AppButton';
-import Spacer from
-  '@shared/components/Spacer';
-import useLocation from
-  '@shared/hooks/useLocation';
-import { useLogout } from
-  '@features/auth/hooks/useAuth';
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import Spacer from '@shared/components/Spacer';
+import useLocation from '@shared/hooks/useLocation';
+import { useLogout } from '@features/auth/hooks/useAuth';
 import {
   useProfile,
   usePhotos,
   computeMode,
-} from
-  '@features/profile/hooks/useProfile';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
+} from '@features/profile/hooks/useProfile';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
 
 const AVATAR_SIZE = 112;
 const PHOTO_SIZE = 96;
@@ -57,13 +44,9 @@ export default function ProfileScreen() {
   } = usePhotos(profile?.user_id);
 
   const handleRefresh = async () => {
-    await Promise.all([
-      refetchProfile(),
-      refetchPhotos(),
-    ]);
+    await Promise.all([refetchProfile(), refetchPhotos()]);
   };
-  const { latitude, longitude } =
-    useLocation();
+  const { latitude, longitude } = useLocation();
 
   const mode = computeMode(
     profile,
@@ -77,15 +60,11 @@ export default function ProfileScreen() {
         style={[
           styles.center,
           {
-            backgroundColor:
-              theme.colors.background,
+            backgroundColor: theme.colors.background,
           },
         ]}
       >
-        <ActivityIndicator
-          animating
-          size="large"
-        />
+        <ActivityIndicator animating size="large" />
       </View>
     );
   }
@@ -100,18 +79,12 @@ export default function ProfileScreen() {
     <ScrollView
       style={{
         flex: 1,
-        backgroundColor:
-          theme.colors.background,
+        backgroundColor: theme.colors.background,
       }}
-      contentContainerStyle={
-        styles.content
-      }
+      contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl
-          refreshing={
-            profileRefetching ||
-            photosRefetching
-          }
+          refreshing={profileRefetching || photosRefetching}
           onRefresh={handleRefresh}
         />
       }
@@ -121,37 +94,30 @@ export default function ProfileScreen() {
         <AppText
           variant="h2"
           style={{
-            color:
-              theme.colors.onBackground,
+            color: theme.colors.onBackground,
           }}
         >
           Profile
         </AppText>
         <Pressable
-          onPress={() =>
-            router.push('/profile/edit')
-          }
+          onPress={() => router.push('/profile/edit')}
           hitSlop={12}
           style={[
             styles.editPill,
             {
-              backgroundColor:
-                theme.colors.primary,
+              backgroundColor: theme.colors.primary,
             },
           ]}
         >
           <MaterialCommunityIcons
             name="pencil-outline"
             size={14}
-            color={
-              theme.colors.onPrimary
-            }
+            color={theme.colors.onPrimary}
           />
           <AppText
             variant="caption"
             style={{
-              color:
-                theme.colors.onPrimary,
+              color: theme.colors.onPrimary,
               fontWeight: '700',
               marginLeft: 6,
             }}
@@ -176,29 +142,22 @@ export default function ProfileScreen() {
               styles.avatar,
               styles.avatarPlaceholder,
               {
-                backgroundColor:
-                  surfaceLow,
+                backgroundColor: surfaceLow,
               },
             ]}
           >
             <MaterialCommunityIcons
               name="account"
               size={56}
-              color={
-                theme.colors
-                  .onSurfaceVariant
-              }
+              color={theme.colors.onSurfaceVariant}
             />
           </View>
         )}
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_12}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_12} />
         <AppText
           variant="h2"
           style={{
-            color:
-              theme.colors.onBackground,
+            color: theme.colors.onBackground,
             textAlign: 'center',
           }}
         >
@@ -209,17 +168,12 @@ export default function ProfileScreen() {
             <MaterialCommunityIcons
               name="map-marker-outline"
               size={14}
-              color={
-                theme.colors
-                  .onSurfaceVariant
-              }
+              color={theme.colors.onSurfaceVariant}
             />
             <AppText
               variant="caption"
               style={{
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
+                color: theme.colors.onSurfaceVariant,
                 marginLeft: 4,
               }}
             >
@@ -227,59 +181,39 @@ export default function ProfileScreen() {
             </AppText>
           </View>
         )}
-        <Spacer
-          spacing={Spacing.SPACING_PADDING_8}
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
         {/* Mode badge */}
         <View
           style={[
             styles.modeBadge,
             {
-              backgroundColor:
-                theme.colors
-                  .primaryContainer,
+              backgroundColor: theme.colors.primaryContainer,
             },
           ]}
         >
           <MaterialCommunityIcons
-            name={
-              mode === 'traveler'
-                ? 'airplane'
-                : 'home-variant-outline'
-            }
+            name={mode === 'traveler' ? 'airplane' : 'home-variant-outline'}
             size={14}
-            color={
-              theme.colors
-                .onPrimaryContainer
-            }
+            color={theme.colors.onPrimaryContainer}
           />
           <AppText
             variant="caption"
             style={{
-              color:
-                theme.colors
-                  .onPrimaryContainer,
+              color: theme.colors.onPrimaryContainer,
               fontWeight: '700',
               marginLeft: 6,
               letterSpacing: 0.5,
             }}
           >
-            {mode === 'traveler'
-              ? 'TRAVELER'
-              : 'LOCAL'}
+            {mode === 'traveler' ? 'TRAVELER' : 'LOCAL'}
           </AppText>
         </View>
       </View>
 
-      <Spacer
-        spacing={Spacing.SPACING_PADDING_24}
-      />
+      <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
       {/* About */}
-      <Section
-        title="About"
-        bg={theme.colors.surface}
-      >
+      <Section title="About" bg={theme.colors.surface}>
         <AppText
           variant="body"
           style={{
@@ -295,33 +229,20 @@ export default function ProfileScreen() {
       {/* Photos */}
       {photos && photos.length > 0 && (
         <>
-          <Spacer
-            spacing={Spacing.SPACING_PADDING_16}
-          />
-          <Section
-            title="Gallery"
-            bg={theme.colors.surface}
-          >
-            <View
-              style={styles.photoGrid}
-            >
+          <Spacer spacing={Spacing.SPACING_PADDING_16} />
+          <Section title="Gallery" bg={theme.colors.surface}>
+            <View style={styles.photoGrid}>
               {photos.map(p => (
                 <View
                   key={p.id}
                   style={[
                     styles.photoCell,
                     {
-                      backgroundColor:
-                        surfaceLow,
+                      backgroundColor: surfaceLow,
                     },
                   ]}
                 >
-                  <Image
-                    source={{ uri: p.url }}
-                    style={
-                      styles.photoImg
-                    }
-                  />
+                  <Image source={{ uri: p.url }} style={styles.photoImg} />
                 </View>
               ))}
             </View>
@@ -330,46 +251,33 @@ export default function ProfileScreen() {
       )}
 
       {/* Interests */}
-      {profile?.interests &&
-        profile.interests.length > 0 && (
-          <>
-            <Spacer
-              spacing={Spacing.SPACING_PADDING_16}
-            />
-            <Section
-              title="Interests"
-              bg={theme.colors.surface}
-            >
-              <View style={styles.chips}>
-                {profile.interests.map(
-                  interest => (
-                    <Chip
-                      key={interest}
-                      style={[
-                        styles.chip,
-                        {
-                          backgroundColor:
-                            surfaceLow,
-                        },
-                      ]}
-                      textStyle={{
-                        color:
-                          theme.colors
-                            .onSurface,
-                      }}
-                    >
-                      {interest}
-                    </Chip>
-                  ),
-                )}
-              </View>
-            </Section>
-          </>
-        )}
+      {profile?.interests && profile.interests.length > 0 && (
+        <>
+          <Spacer spacing={Spacing.SPACING_PADDING_16} />
+          <Section title="Interests" bg={theme.colors.surface}>
+            <View style={styles.chips}>
+              {profile.interests.map(interest => (
+                <Chip
+                  key={interest}
+                  style={[
+                    styles.chip,
+                    {
+                      backgroundColor: surfaceLow,
+                    },
+                  ]}
+                  textStyle={{
+                    color: theme.colors.onSurface,
+                  }}
+                >
+                  {interest}
+                </Chip>
+              ))}
+            </View>
+          </Section>
+        </>
+      )}
 
-      <Spacer
-        spacing={Spacing.SPACING_PADDING_32}
-      />
+      <Spacer spacing={Spacing.SPACING_PADDING_32} />
 
       <AppButton
         variant="outlined"
@@ -380,9 +288,7 @@ export default function ProfileScreen() {
         Logout
       </AppButton>
 
-      <Spacer
-        spacing={Spacing.SPACING_PADDING_32}
-      />
+      <Spacer spacing={Spacing.SPACING_PADDING_32} />
     </ScrollView>
   );
 }
@@ -402,8 +308,7 @@ const Section = ({
       <AppText
         variant="caption"
         style={{
-          color:
-            theme.colors.onSurfaceVariant,
+          color: theme.colors.onSurfaceVariant,
           letterSpacing: 1.2,
           textTransform: 'uppercase',
           fontSize: 11,
@@ -414,35 +319,20 @@ const Section = ({
       >
         {title}
       </AppText>
-      <View
-        style={[
-          styles.sectionCard,
-          { backgroundColor: bg },
-        ]}
-      >
+      <View style={[styles.sectionCard, { backgroundColor: bg }]}>
         {children}
       </View>
     </View>
   );
 };
 
-const blendSurface = (
-  base: string,
-  tint: string,
-  t: number,
-) => {
+const blendSurface = (base: string, tint: string, t: number) => {
   const b = hexToRgb(base);
   const tt = hexToRgb(tint);
   if (!b || !tt) return base;
-  const r = Math.round(
-    b.r + (tt.r - b.r) * t,
-  );
-  const g = Math.round(
-    b.g + (tt.g - b.g) * t,
-  );
-  const bl = Math.round(
-    b.b + (tt.b - b.b) * t,
-  );
+  const r = Math.round(b.r + (tt.r - b.r) * t);
+  const g = Math.round(b.g + (tt.g - b.g) * t);
+  const bl = Math.round(b.b + (tt.b - b.b) * t);
   return `rgb(${r}, ${g}, ${bl})`;
 };
 
@@ -464,12 +354,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: {
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
-    paddingTop:
-      Spacing.SPACING_PADDING_24,
-    paddingBottom:
-      Spacing.SPACING_PADDING_32,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_24,
+    paddingBottom: Spacing.SPACING_PADDING_32,
   },
   header: {
     flexDirection: 'row',
@@ -509,8 +396,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
   },
   sectionCard: {
-    padding:
-      Spacing.SPACING_PADDING_16,
+    padding: Spacing.SPACING_PADDING_16,
     borderRadius: BorderRadius.xxl,
   },
   photoGrid: {

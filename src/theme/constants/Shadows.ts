@@ -1,9 +1,6 @@
 import { ViewStyle } from 'react-native';
 
-export const Shadows: Record<
-  'sm' | 'md' | 'lg',
-  ViewStyle
-> = {
+export const Shadows: Record<'sm' | 'md' | 'lg', ViewStyle> = {
   sm: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

@@ -1,2 +1,1 @@
-export { default } from
-  '@app/onboarding/home-city';
+export { default } from '@app/onboarding/home-city';

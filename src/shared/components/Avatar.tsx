@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import AppText from '@shared/components/AppText';
@@ -23,20 +19,11 @@ type AvatarProps = {
 const RING_WIDTH = 2;
 const RING_GAP = 2;
 
-const Avatar = ({
-  uri,
-  size,
-  ring = false,
-  fallbackLabel,
-}: AvatarProps) => {
+const Avatar = ({ uri, size, ring = false, fallbackLabel }: AvatarProps) => {
   const theme = useAppTheme();
-  const initial = (fallbackLabel ?? '?')
-    .trim()
-    .charAt(0)
-    .toUpperCase();
+  const initial = (fallbackLabel ?? '?').trim().charAt(0).toUpperCase();
 
-  const insetBorder =
-    theme.colors.imageInset;
+  const insetBorder = theme.colors.imageInset;
 
   const face = uri ? (
     <Image
@@ -59,16 +46,14 @@ const Avatar = ({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor:
-            theme.colors.primaryContainer,
+          backgroundColor: theme.colors.primaryContainer,
         },
       ]}
     >
       <AppText
         variant={size >= 64 ? 'h1' : 'h3'}
         style={{
-          color:
-            theme.colors.onPrimaryContainer,
+          color: theme.colors.onPrimaryContainer,
         }}
       >
         {initial}
@@ -78,15 +63,11 @@ const Avatar = ({
 
   if (!ring) return face;
 
-  const outer =
-    size + 2 * (RING_WIDTH + RING_GAP);
+  const outer = size + 2 * (RING_WIDTH + RING_GAP);
 
   return (
     <LinearGradient
-      colors={[
-        theme.colors.gradientStart,
-        theme.colors.gradientEnd,
-      ]}
+      colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{
@@ -101,10 +82,8 @@ const Avatar = ({
         style={{
           width: size + 2 * RING_GAP,
           height: size + 2 * RING_GAP,
-          borderRadius:
-            (size + 2 * RING_GAP) / 2,
-          backgroundColor:
-            theme.colors.background,
+          borderRadius: (size + 2 * RING_GAP) / 2,
+          backgroundColor: theme.colors.background,
           alignItems: 'center',
           justifyContent: 'center',
         }}

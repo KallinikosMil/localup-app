@@ -1,8 +1,5 @@
 import { useEffect } from 'react';
-import {
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store';
@@ -30,17 +27,14 @@ export type Match = {
 const MATCHES_FETCH_TIMEOUT_MS = 15_000;
 
 export const useMatches = () => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: ['matches', uid],
     enabled: !!uid,
     queryFn: async () => {
-      const controller =
-        new AbortController();
+      const controller = new AbortController();
       const timeout = setTimeout(
         () => controller.abort(),
         MATCHES_FETCH_TIMEOUT_MS,
@@ -50,10 +44,9 @@ export const useMatches = () => {
         // waterfall (matches → profiles → threads → messages).
         // INVOKER RPC → RLS still scopes rows to the caller; its
         // columns map 1:1 onto Match, so no remapping here.
-        const { data, error } =
-          await supabase
-            .rpc('get_matches_overview')
-            .abortSignal(controller.signal);
+        const { data, error } = await supabase
+          .rpc('get_matches_overview')
+          .abortSignal(controller.signal);
         if (error) throw error;
         return (data ?? []) as Match[];
       } finally {
@@ -104,15 +97,8 @@ export const useMatches = () => {
             body: string | null;
             created_at: string;
           };
-          const cached =
-            queryClient.getQueryData<
-              Match[]
-            >(['matches', uid]);
-          const known = cached?.some(
-            m =>
-              m.thread_id ===
-              msg.thread_id,
-          );
+          const cached = queryClient.getQueryData<Match[]>(['matches', uid]);
+          const known = cached?.some(m => m.thread_id === msg.thread_id);
           if (!known) {
             // New thread we don't have yet (e.g. first message
             // of a fresh match) — fall back to a refetch.
@@ -121,18 +107,13 @@ export const useMatches = () => {
             });
             return;
           }
-          queryClient.setQueryData<
-            Match[]
-          >(['matches', uid], old =>
+          queryClient.setQueryData<Match[]>(['matches', uid], old =>
             (old ?? []).map(m =>
-              m.thread_id ===
-              msg.thread_id
+              m.thread_id === msg.thread_id
                 ? {
                     ...m,
-                    last_message:
-                      msg.body ?? '',
-                    last_message_at:
-                      msg.created_at,
+                    last_message: msg.body ?? '',
+                    last_message_at: msg.created_at,
                   }
                 : m,
             ),

@@ -3,7 +3,6 @@ export enum Translations {
   CHAT_WAKING = 'chatWaking',
   CHAT_ERROR = 'chatError',
   CHAT_RETRY = 'chatRetry',
-  CHAT_INPUT_PLACEHOLDER =
-    'chatInputPlaceholder',
+  CHAT_INPUT_PLACEHOLDER = 'chatInputPlaceholder',
   CHAT_EMPTY = 'chatEmpty',
 }

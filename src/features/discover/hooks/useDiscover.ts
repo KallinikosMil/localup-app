@@ -1,19 +1,9 @@
-import {
-  useEffect,
-  useRef,
-} from 'react';
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store';
-import {
-  haversineKm,
-  useProfile,
-} from '@features/profile/hooks/useProfile';
+import { haversineKm, useProfile } from '@features/profile/hooks/useProfile';
 
 // If a fresh GPS fix drifts more than this from the
 // coords the deck was computed against, invalidate
@@ -69,9 +59,7 @@ const useMatchPreferences = (uid: string | undefined) =>
   });
 
 export const useCandidates = () => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const { data: prefs } = useMatchPreferences(uid);
 
   return useQuery({
@@ -79,15 +67,9 @@ export const useCandidates = () => {
       'discover-candidates',
       uid,
       {
-        maxDist:
-          prefs?.max_distance_km ??
-          PREFS_FALLBACK.max_distance_km,
-        minAge:
-          prefs?.min_age ??
-          PREFS_FALLBACK.min_age,
-        maxAge:
-          prefs?.max_age ??
-          PREFS_FALLBACK.max_age,
+        maxDist: prefs?.max_distance_km ?? PREFS_FALLBACK.max_distance_km,
+        minAge: prefs?.min_age ?? PREFS_FALLBACK.min_age,
+        maxAge: prefs?.max_age ?? PREFS_FALLBACK.max_age,
       },
     ],
     enabled: !!uid && !!prefs,
@@ -95,17 +77,13 @@ export const useCandidates = () => {
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
     queryFn: async (): Promise<Candidate[]> => {
-      const { data, error } =
-        await supabase.rpc('discover_candidates', {
-          p_swiper_id: uid!,
-          p_limit: 20,
-        });
+      const { data, error } = await supabase.rpc('discover_candidates', {
+        p_swiper_id: uid!,
+        p_limit: 20,
+      });
       if (error) throw error;
 
-      const rows = (data ?? []) as Omit<
-        Candidate,
-        'interests'
-      >[];
+      const rows = (data ?? []) as Omit<Candidate, 'interests'>[];
       if (rows.length === 0) return [];
 
       // Enrich with interest names in one batch
@@ -118,10 +96,8 @@ export const useCandidates = () => {
 
       const nameMap = new Map<string, string[]>();
       for (const row of ui ?? []) {
-        const list =
-          nameMap.get(row.user_id) ?? [];
-        const name =
-          (row.interests as any)?.name ?? '';
+        const list = nameMap.get(row.user_id) ?? [];
+        const name = (row.interests as any)?.name ?? '';
         if (name) list.push(name);
         nameMap.set(row.user_id, list);
       }
@@ -142,9 +118,7 @@ export const useStaleLocationRefetch = (
   freshLat: number | null,
   freshLng: number | null,
 ) => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const { data: swiper } = useProfile();
   const queryClient = useQueryClient();
   // Coords of the last invalidation. Until
@@ -180,12 +154,8 @@ export const useStaleLocationRefetch = (
     const last = lastInvalidated.current;
     if (
       last &&
-      haversineKm(
-        last.lat,
-        last.lng,
-        freshLat,
-        freshLng,
-      ) <= STALE_GPS_KM_THRESHOLD
+      haversineKm(last.lat, last.lng, freshLat, freshLng) <=
+        STALE_GPS_KM_THRESHOLD
     ) {
       // Already refetched for (near) these
       // coords — wait for real movement.
@@ -198,19 +168,11 @@ export const useStaleLocationRefetch = (
     queryClient.invalidateQueries({
       queryKey: ['discover-candidates', uid],
     });
-  }, [
-    uid,
-    swiper,
-    freshLat,
-    freshLng,
-    queryClient,
-  ]);
+  }, [uid, swiper, freshLat, freshLng, queryClient]);
 };
 
 export const useSwipe = () => {
-  const uid = useSelector(
-    (s: RootState) => s.auth.user?.uid,
-  );
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
 
   const swipeMutation = useMutation({
@@ -227,11 +189,10 @@ export const useSwipe = () => {
       // (handle_swipe RPC, SECURITY DEFINER —
       // PR #2 spec). Swiper identity comes
       // from the JWT, not a parameter.
-      const { data, error } =
-        await supabase.rpc('handle_swipe', {
-          p_swiped_id: targetId,
-          p_action: action,
-        });
+      const { data, error } = await supabase.rpc('handle_swipe', {
+        p_swiped_id: targetId,
+        p_action: action,
+      });
       if (error) throw error;
 
       const row = (
@@ -273,10 +234,7 @@ export const useSwipe = () => {
       // the candidate the failed swipe
       // skipped comes back.
       queryClient.invalidateQueries({
-        queryKey: [
-          'discover-candidates',
-          uid,
-        ],
+        queryKey: ['discover-candidates', uid],
       });
     },
   });

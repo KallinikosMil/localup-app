@@ -1,31 +1,14 @@
 import React, { useEffect } from 'react';
-import {
-  Provider,
-  useSelector,
-} from 'react-redux';
-import {
-  useRouter,
-  useSegments,
-} from 'expo-router';
-import {
-  QueryClientProvider,
-} from '@tanstack/react-query';
+import { Provider, useSelector } from 'react-redux';
+import { useRouter, useSegments } from 'expo-router';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { store, RootState } from '@store';
 import { queryClient } from '@config/queryClient';
-import {
-  ThemeModeProvider,
-  useThemeMode,
-} from '@theme/ThemeModeProvider';
+import { ThemeModeProvider, useThemeMode } from '@theme/ThemeModeProvider';
 import { PaperProvider } from 'react-native-paper';
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-} from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
-import {
-  PaperLight,
-  PaperDark,
-} from '@theme/paper';
+import { PaperLight, PaperDark } from '@theme/paper';
 import { supabase } from '@config/supabase';
 import {
   setInitialized,
@@ -52,35 +35,22 @@ import {
 // they load falls back to system fonts for a frame.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-function Shell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function Shell({ children }: { children: React.ReactNode }) {
   const { resolvedMode } = useThemeMode();
-  const paper =
-    resolvedMode === 'dark'
-      ? PaperDark
-      : PaperLight;
-  const barStyle =
-    resolvedMode === 'dark'
-      ? 'light-content'
-      : 'dark-content';
+  const paper = resolvedMode === 'dark' ? PaperDark : PaperLight;
+  const barStyle = resolvedMode === 'dark' ? 'light-content' : 'dark-content';
 
   return (
     <PaperProvider theme={paper}>
       <SafeAreaProvider>
         <StatusBar
           barStyle={barStyle}
-          backgroundColor={
-            paper.colors.background
-          }
+          backgroundColor={paper.colors.background}
         />
         <SafeAreaView
           style={{
             flex: 1,
-            backgroundColor:
-              paper.colors.background,
+            backgroundColor: paper.colors.background,
           }}
         >
           {children}
@@ -90,30 +60,19 @@ function Shell({
   );
 }
 
-function AppGuard({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function AppGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();
-  const {
-    user,
-    initialized,
-    onboardingComplete,
-  } = useSelector(
+  const { user, initialized, onboardingComplete } = useSelector(
     (s: RootState) => s.auth,
   );
 
   useEffect(() => {
     if (!initialized) return;
 
-    const inAuthGroup =
-      segments[0] === 'auth';
-    const inOnboarding =
-      segments[0] === 'onboarding';
-    const inDev =
-      __DEV__ && segments[0] === 'dev';
+    const inAuthGroup = segments[0] === 'auth';
+    const inOnboarding = segments[0] === 'onboarding';
+    const inDev = __DEV__ && segments[0] === 'dev';
 
     if (inDev) return;
 
@@ -132,31 +91,14 @@ function AppGuard({
       if (onboardingComplete) {
         router.replace('/(tabs)/discover');
       } else {
-        router.replace(
-          '/onboarding/name-age',
-        );
+        router.replace('/onboarding/name-age');
       }
-    } else if (
-      user &&
-      !onboardingComplete &&
-      !inOnboarding
-    ) {
-      router.replace(
-        '/onboarding/name-age',
-      );
-    } else if (
-      user &&
-      onboardingComplete &&
-      inOnboarding
-    ) {
+    } else if (user && !onboardingComplete && !inOnboarding) {
+      router.replace('/onboarding/name-age');
+    } else if (user && onboardingComplete && inOnboarding) {
       router.replace('/(tabs)/discover');
     }
-  }, [
-    initialized,
-    user,
-    onboardingComplete,
-    segments,
-  ]);
+  }, [initialized, user, onboardingComplete, segments]);
 
   return <>{children}</>;
 }
@@ -178,21 +120,15 @@ export default function AppProviders({
 
   useEffect(() => {
     if (fontsLoaded) {
-      SplashScreen.hideAsync().catch(
-        () => {},
-      );
+      SplashScreen.hideAsync().catch(() => {});
     }
   }, [fontsLoaded]);
 
   useEffect(() => {
     const initSession = async () => {
-      const { data, error } =
-        await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.getSession();
 
-      if (
-        error &&
-        /refresh token/i.test(error.message)
-      ) {
+      if (error && /refresh token/i.test(error.message)) {
         // Stale persisted session: the stored
         // refresh token was already rotated
         // (single-use). Clear it locally so the
@@ -212,25 +148,20 @@ export default function AppProviders({
       const user = session?.user
         ? {
             uid: session.user.id,
-            email:
-              session.user.email ?? null,
+            email: session.user.email ?? null,
           }
         : null;
       store.dispatch(setUser(user));
 
       if (session?.user) {
-        const { data: profile } =
-          await supabase
-            .from('profiles')
-            .select('onboarding_complete')
-            .eq('user_id', session.user.id)
-            .single();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_complete')
+          .eq('user_id', session.user.id)
+          .single();
 
         store.dispatch(
-          setOnboardingComplete(
-            profile?.onboarding_complete ??
-              false,
-          ),
+          setOnboardingComplete(profile?.onboarding_complete ?? false),
         );
       }
 
@@ -239,41 +170,31 @@ export default function AppProviders({
 
     initSession();
 
-    const { data: sub } =
-      supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-          const user = session?.user
-            ? {
-                uid: session.user.id,
-                email:
-                  session.user.email ?? null,
-              }
-            : null;
-          store.dispatch(setUser(user));
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        const user = session?.user
+          ? {
+              uid: session.user.id,
+              email: session.user.email ?? null,
+            }
+          : null;
+        store.dispatch(setUser(user));
 
-          if (session?.user) {
-            const { data: profile } =
-              await supabase
-                .from('profiles')
-                .select(
-                  'onboarding_complete',
-                )
-                .eq('user_id', session.user.id)
-                .single();
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('onboarding_complete')
+            .eq('user_id', session.user.id)
+            .single();
 
-            store.dispatch(
-              setOnboardingComplete(
-                profile?.onboarding_complete ??
-                  false,
-              ),
-            );
-          } else {
-            store.dispatch(
-              setOnboardingComplete(false),
-            );
-          }
-        },
-      );
+          store.dispatch(
+            setOnboardingComplete(profile?.onboarding_complete ?? false),
+          );
+        } else {
+          store.dispatch(setOnboardingComplete(false));
+        }
+      },
+    );
 
     return () => {
       sub?.subscription.unsubscribe();
@@ -285,15 +206,11 @@ export default function AppProviders({
   }
 
   return (
-    <QueryClientProvider
-      client={queryClient}
-    >
+    <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <ThemeModeProvider>
           <Shell>
-            <AppGuard>
-              {children}
-            </AppGuard>
+            <AppGuard>{children}</AppGuard>
           </Shell>
         </ThemeModeProvider>
       </Provider>

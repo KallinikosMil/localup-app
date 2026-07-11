@@ -1,16 +1,11 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Pressable,
-} from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import AppText from './AppText';
-import { Spacing } from
-  '@theme/constants/Spacing';
+import { Spacing } from '@theme/constants/Spacing';
 
 type OnboardingProgressProps = {
   step: number;
@@ -26,25 +21,17 @@ const OnboardingProgress = ({
   showBack = true,
 }: OnboardingProgressProps) => {
   const theme = useTheme();
-  const segments = Array.from(
-    { length: totalSteps },
-    (_, i) => i + 1,
-  );
+  const segments = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
         {showBack ? (
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={12}
-          >
+          <Pressable onPress={() => router.back()} hitSlop={12}>
             <MaterialCommunityIcons
               name="arrow-left"
               size={24}
-              color={
-                theme.colors.onBackground
-              }
+              color={theme.colors.onBackground}
             />
           </Pressable>
         ) : (
@@ -53,9 +40,7 @@ const OnboardingProgress = ({
         <AppText
           variant="caption"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
           }}
         >
           {step} / {totalSteps}
@@ -64,10 +49,8 @@ const OnboardingProgress = ({
       <AppText
         variant="h3"
         style={{
-          color:
-            theme.colors.onBackground,
-          marginTop:
-            Spacing.SPACING_PADDING_8,
+          color: theme.colors.onBackground,
+          marginTop: Spacing.SPACING_PADDING_8,
         }}
       >
         {title}
@@ -82,8 +65,7 @@ const OnboardingProgress = ({
                 backgroundColor:
                   i <= step
                     ? theme.colors.primary
-                    : theme.colors
-                        .surfaceVariant,
+                    : theme.colors.surfaceVariant,
               },
             ]}
           />

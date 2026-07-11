@@ -12,33 +12,31 @@ import elMatches from '@features/matches/i18n/locales/el.js';
 import enChat from '@features/chat/i18n/locales/en.js';
 import elChat from '@features/chat/i18n/locales/el.js';
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: {
-        translation: {
-          ...enAuth,
-          ...enOnboarding,
-          ...enDiscover,
-          ...enMatches,
-          ...enChat,
-        },
-      },
-      el: {
-        translation: {
-          ...elAuth,
-          ...elOnboarding,
-          ...elDiscover,
-          ...elMatches,
-          ...elChat,
-        },
+i18n.use(initReactI18next).init({
+  resources: {
+    en: {
+      translation: {
+        ...enAuth,
+        ...enOnboarding,
+        ...enDiscover,
+        ...enMatches,
+        ...enChat,
       },
     },
-    lng: 'en',            
-    fallbackLng: 'en',
-    interpolation: { escapeValue: false },
-    react: { useSuspense: false },
-  });
+    el: {
+      translation: {
+        ...elAuth,
+        ...elOnboarding,
+        ...elDiscover,
+        ...elMatches,
+        ...elChat,
+      },
+    },
+  },
+  lng: 'en',
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+  react: { useSuspense: false },
+});
 
 export default i18n;

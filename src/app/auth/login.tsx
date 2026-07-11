@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import {
   ActivityIndicator,
   Text,
@@ -11,35 +7,22 @@ import {
   Divider,
 } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
-import {
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-import AppText from
-  '@shared/components/AppText';
-import AppButton from
-  '@shared/components/AppButton';
-import {
-  FormProvider,
-  useForm,
-} from 'react-hook-form';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { useLogin } from
-  '@features/auth/hooks/useAuth';
+import { useLogin } from '@features/auth/hooks/useAuth';
 import useModal from '@shared/hooks/useModal';
 
 import Spacer from '@shared/components/Spacer';
-import InputField from
-  '@shared/components/InputField';
-import CustomModal from
-  '@shared/components/CustomModal';
+import InputField from '@shared/components/InputField';
+import CustomModal from '@shared/components/CustomModal';
 
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { Translations } from
-  '@features/auth/i18n/translationKeys';
-import { useThemeMode } from
-  '@theme/ThemeModeProvider';
+import { Spacing } from '@theme/constants/Spacing';
+import { Translations } from '@features/auth/i18n/translationKeys';
+import { useThemeMode } from '@theme/ThemeModeProvider';
 
 type LoginFormData = {
   email: string;
@@ -50,18 +33,13 @@ const LoginScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { setMode, resolvedMode } =
-    useThemeMode();
+  const { setMode, resolvedMode } = useThemeMode();
   const login = useLogin();
-  const { modalProps, openModal, closeModal } =
-    useModal();
-  const [modalMessage, setModalMessage] =
-    useState('');
+  const { modalProps, openModal, closeModal } = useModal();
+  const [modalMessage, setModalMessage] = useState('');
 
   const toggleTheme = () => {
-    setMode(prev =>
-      prev === 'light' ? 'dark' : 'light',
-    );
+    setMode(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   const form = useForm<LoginFormData>({
@@ -77,25 +55,21 @@ const LoginScreen = () => {
     formState: { isValid },
   } = form;
 
-  const onSubmit = handleSubmit(
-    ({ email, password }) => {
-      login.mutate(
-        { email, password },
-        {
-          onError: err => {
-            setModalMessage(
-              err instanceof Error
-                ? err.message
-                : t(
-                    Translations.AUTH_ERROR_FALLBACK,
-                  ),
-            );
-            openModal();
-          },
+  const onSubmit = handleSubmit(({ email, password }) => {
+    login.mutate(
+      { email, password },
+      {
+        onError: err => {
+          setModalMessage(
+            err instanceof Error
+              ? err.message
+              : t(Translations.AUTH_ERROR_FALLBACK),
+          );
+          openModal();
         },
-      );
-    },
-  );
+      },
+    );
+  });
 
   const handleDismiss = () => {
     login.reset();
@@ -112,15 +86,11 @@ const LoginScreen = () => {
         style={[
           styles.loaderWrap,
           {
-            backgroundColor:
-              theme.colors.background,
+            backgroundColor: theme.colors.background,
           },
         ]}
       >
-        <ActivityIndicator
-          animating
-          size="large"
-        />
+        <ActivityIndicator animating size="large" />
       </View>
     );
   }
@@ -131,16 +101,13 @@ const LoginScreen = () => {
         style={[
           styles.root,
           {
-            backgroundColor:
-              theme.colors.background,
+            backgroundColor: theme.colors.background,
             paddingBottom: insets.bottom,
           },
         ]}
       >
         <ScrollView
-          contentContainerStyle={
-            styles.scrollContent
-          }
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.themeRow}>
@@ -159,74 +126,47 @@ const LoginScreen = () => {
             <AppText
               variant="h1"
               style={{
-                color:
-                  theme.colors.primary,
+                color: theme.colors.primary,
               }}
             >
-              {t(
-                Translations.AUTH_HEADER_TEXT,
-              )}
+              {t(Translations.AUTH_HEADER_TEXT)}
             </AppText>
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_8
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_8} />
             <AppText
               variant="h3"
               style={{
-                color:
-                  theme.colors.onBackground,
+                color: theme.colors.onBackground,
               }}
             >
-              {t(
-                Translations.AUTH_WELCOME_TEXT,
-              )}
+              {t(Translations.AUTH_WELCOME_TEXT)}
             </AppText>
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_8
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_8} />
             <AppText
               variant="body"
               style={{
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
+                color: theme.colors.onSurfaceVariant,
                 textAlign: 'center',
               }}
             >
-              {t(
-                Translations.AUTH_SUBTITLE_TEXT,
-              )}
+              {t(Translations.AUTH_SUBTITLE_TEXT)}
             </AppText>
           </View>
 
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_32
-            }
-          />
+          <Spacer spacing={Spacing.SPACING_PADDING_32} />
 
           <View style={styles.formSection}>
             <FormProvider {...form}>
               <InputField
                 name="email"
-                label={t(
-                  Translations.AUTH_EMAIL_LABEL,
-                )}
+                label={t(Translations.AUTH_EMAIL_LABEL)}
                 rules={{
                   required: {
                     value: true,
-                    message:
-                      'Please enter your email',
+                    message: 'Please enter your email',
                   },
                   pattern: {
-                    value:
-                      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message:
-                      'Please enter a valid email',
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Please enter a valid email',
                   },
                 }}
                 dense
@@ -234,21 +174,14 @@ const LoginScreen = () => {
                 keyboardType="email-address"
                 returnKeyType="next"
               />
-              <Spacer
-                spacing={
-                  Spacing.SPACING_PADDING_16
-                }
-              />
+              <Spacer spacing={Spacing.SPACING_PADDING_16} />
               <InputField
                 name="password"
-                label={t(
-                  Translations.AUTH_PASSWORD_LABEL,
-                )}
+                label={t(Translations.AUTH_PASSWORD_LABEL)}
                 rules={{
                   required: {
                     value: true,
-                    message:
-                      'Please enter your password',
+                    message: 'Please enter your password',
                   },
                 }}
                 dense
@@ -263,91 +196,56 @@ const LoginScreen = () => {
                 compact
                 onPress={() => {}}
                 contentStyle={null}
-                labelStyle={
-                  styles.forgotLabel
-                }
+                labelStyle={styles.forgotLabel}
               >
-                {t(
-                  Translations.AUTH_FORGOT_PASSWORD,
-                )}
+                {t(Translations.AUTH_FORGOT_PASSWORD)}
               </AppButton>
             </View>
 
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_24
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
             <AppButton
               variant="primary"
               onPress={onSubmit}
-              disabled={
-                login.isPending || !isValid
-              }
+              disabled={login.isPending || !isValid}
             >
-              {t(
-                Translations.AUTH_LOGIN_BUTTON,
-              )}
+              {t(Translations.AUTH_LOGIN_BUTTON)}
             </AppButton>
 
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_24
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
             <View style={styles.dividerRow}>
               <Divider
                 style={[
                   styles.dividerLine,
                   {
-                    backgroundColor:
-                      theme.colors
-                        .outlineVariant,
+                    backgroundColor: theme.colors.outlineVariant,
                   },
                 ]}
               />
               <AppText
                 variant="caption"
                 style={{
-                  color:
-                    theme.colors
-                      .onSurfaceVariant,
-                  paddingHorizontal:
-                    Spacing.SPACING_PADDING_16,
+                  color: theme.colors.onSurfaceVariant,
+                  paddingHorizontal: Spacing.SPACING_PADDING_16,
                 }}
               >
-                {t(
-                  Translations.AUTH_OR_DIVIDER,
-                )}
+                {t(Translations.AUTH_OR_DIVIDER)}
               </AppText>
               <Divider
                 style={[
                   styles.dividerLine,
                   {
-                    backgroundColor:
-                      theme.colors
-                        .outlineVariant,
+                    backgroundColor: theme.colors.outlineVariant,
                   },
                 ]}
               />
             </View>
 
-            <Spacer
-              spacing={
-                Spacing.SPACING_PADDING_24
-              }
-            />
+            <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
-            <AppButton
-              variant="google"
-              icon="google"
-              onPress={() => {}}
-            >
-              {t(
-                Translations.AUTH_GOOGLE_SIGN_IN,
-              )}
+            <AppButton variant="google" icon="google" onPress={() => {}}>
+              {t(Translations.AUTH_GOOGLE_SIGN_IN)}
             </AppButton>
           </View>
 
@@ -355,14 +253,10 @@ const LoginScreen = () => {
             <AppText
               variant="bodySmall"
               style={{
-                color:
-                  theme.colors
-                    .onSurfaceVariant,
+                color: theme.colors.onSurfaceVariant,
               }}
             >
-              {t(
-                Translations.AUTH_NO_ACCOUNT,
-              )}
+              {t(Translations.AUTH_NO_ACCOUNT)}
             </AppText>
             <AppText
               variant="bodySmall"
@@ -370,8 +264,7 @@ const LoginScreen = () => {
               style={[
                 styles.authLink,
                 {
-                  color:
-                    theme.colors.primary,
+                  color: theme.colors.primary,
                 },
               ]}
             >
@@ -381,10 +274,7 @@ const LoginScreen = () => {
         </ScrollView>
       </View>
 
-      <CustomModal
-        {...modalProps}
-        onDismiss={handleDismiss}
-      >
+      <CustomModal {...modalProps} onDismiss={handleDismiss}>
         <View style={styles.modalContent}>
           <Text
             variant="bodyMedium"
@@ -392,20 +282,10 @@ const LoginScreen = () => {
               color: theme.colors.error,
             }}
           >
-            {modalMessage ||
-              t(
-                Translations.AUTH_ERROR_FALLBACK,
-              )}
+            {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
           </Text>
-          <Spacer
-            spacing={
-              Spacing.SPACING_PADDING_16
-            }
-          />
-          <AppButton
-            variant="primary"
-            onPress={handleDismiss}
-          >
+          <Spacer spacing={Spacing.SPACING_PADDING_16} />
+          <AppButton variant="primary" onPress={handleDismiss}>
             {t(Translations.AUTH_DISMISS)}
           </AppButton>
         </View>
@@ -427,8 +307,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal:
-      Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
   },
   themeRow: {
     width: '100%',
@@ -463,8 +342,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical:
-      Spacing.SPACING_PADDING_16,
+    paddingVertical: Spacing.SPACING_PADDING_16,
   },
   authLink: {
     marginLeft: Spacing.SPACING_PADDING_8 / 2,

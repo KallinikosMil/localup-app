@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  type DimensionValue,
-} from 'react-native';
+import { View, StyleSheet, type DimensionValue } from 'react-native';
 import { Button } from 'react-native-paper';
 
 type BottomButtonProps = {

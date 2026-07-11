@@ -1,8 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-} from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,43 +7,27 @@ import {
   RefreshControl,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import {
-  ActivityIndicator,
-  Portal,
-  Modal,
-  Snackbar,
-} from 'react-native-paper';
+import { ActivityIndicator, Portal, Modal, Snackbar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import AppText from
-  '@shared/components/AppText';
-import AppButton from
-  '@shared/components/AppButton';
-import EmptyState from
-  '@shared/components/EmptyState';
-import GradientButton from
-  '@shared/components/GradientButton';
-import Spacer from
-  '@shared/components/Spacer';
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import EmptyState from '@shared/components/EmptyState';
+import GradientButton from '@shared/components/GradientButton';
+import Spacer from '@shared/components/Spacer';
 import { useAppTheme } from '@theme/paper';
-import useLocation from
-  '@shared/hooks/useLocation';
-import SwipeCard from
-  '@features/discover/components/SwipeCard';
+import useLocation from '@shared/hooks/useLocation';
+import SwipeCard from '@features/discover/components/SwipeCard';
 import {
   useCandidates,
   useStaleLocationRefetch,
   useSwipe,
   type Candidate,
-} from
-  '@features/discover/hooks/useDiscover';
-import { Spacing } from
-  '@theme/constants/Spacing';
-import { BorderRadius } from
-  '@theme/constants/BorderRadius';
-import { Translations } from
-  '@features/discover/i18n/translationKeys';
+} from '@features/discover/hooks/useDiscover';
+import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
+import { Translations } from '@features/discover/i18n/translationKeys';
 
 // Placeholder for the sibling discovery-filters spec —
 // the header filter button renders only when this flips.
@@ -60,11 +40,7 @@ export default function DiscoverScreen() {
   // from the swiper's persisted location server-side, and the
   // 5km-drift hook refetches if a fresh fix lands far away.
   // Never gate the render on it (P0 fix 2026-06-10).
-  const {
-    latitude,
-    longitude,
-    refresh: refreshLocation,
-  } = useLocation();
+  const { latitude, longitude, refresh: refreshLocation } = useLocation();
   useStaleLocationRefetch(latitude, longitude);
   const {
     data: candidates,
@@ -75,10 +51,8 @@ export default function DiscoverScreen() {
   } = useCandidates();
   const swipe = useSwipe();
 
-  const [currentIndex, setCurrentIndex] =
-    useState(0);
-  const [matchedUser, setMatchedUser] =
-    useState<Candidate | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [matchedUser, setMatchedUser] = useState<Candidate | null>(null);
 
   // Every fresh deck is re-packed from
   // position 0 (the RPC excludes already-
@@ -93,9 +67,7 @@ export default function DiscoverScreen() {
   // when it's consumed. Swipe-exclusion
   // in the RPC is the pagination.
   const deckConsumed =
-    !!candidates &&
-    candidates.length > 0 &&
-    currentIndex >= candidates.length;
+    !!candidates && candidates.length > 0 && currentIndex >= candidates.length;
 
   useEffect(() => {
     if (deckConsumed && !isFetching) {
@@ -103,11 +75,8 @@ export default function DiscoverScreen() {
     }
   }, [deckConsumed, isFetching, refetch]);
 
-  const current =
-    candidates?.[currentIndex] ?? null;
-  const next =
-    candidates?.[currentIndex + 1] ??
-    null;
+  const current = candidates?.[currentIndex] ?? null;
+  const next = candidates?.[currentIndex + 1] ?? null;
 
   const handleSwipe = useCallback(
     (action: 'liked' | 'passed') => {
@@ -132,15 +101,13 @@ export default function DiscoverScreen() {
     [current, swipe],
   );
 
-  const handleSwipeRight =
-    useCallback(() => {
-      handleSwipe('liked');
-    }, [handleSwipe]);
+  const handleSwipeRight = useCallback(() => {
+    handleSwipe('liked');
+  }, [handleSwipe]);
 
-  const handleSwipeLeft =
-    useCallback(() => {
-      handleSwipe('passed');
-    }, [handleSwipe]);
+  const handleSwipeLeft = useCallback(() => {
+    handleSwipe('passed');
+  }, [handleSwipe]);
 
   const dismissMatch = () => {
     setMatchedUser(null);
@@ -151,22 +118,18 @@ export default function DiscoverScreen() {
   // the deck. No pull-to-refresh on the deck
   // itself — it conflicts with the card pan
   // gesture.
-  const [
-    manualRefreshing,
-    setManualRefreshing,
-  ] = useState(false);
+  const [manualRefreshing, setManualRefreshing] = useState(false);
 
-  const handleRefresh =
-    useCallback(async () => {
-      setManualRefreshing(true);
-      try {
-        await refreshLocation();
-        setCurrentIndex(0);
-        await refetch();
-      } finally {
-        setManualRefreshing(false);
-      }
-    }, [refreshLocation, refetch]);
+  const handleRefresh = useCallback(async () => {
+    setManualRefreshing(true);
+    try {
+      await refreshLocation();
+      setCurrentIndex(0);
+      await refetch();
+    } finally {
+      setManualRefreshing(false);
+    }
+  }, [refreshLocation, refetch]);
 
   // W7a: the match celebration must persist until the user explicitly
   // dismisses it. It used to live only in the main return branch, so a
@@ -183,8 +146,7 @@ export default function DiscoverScreen() {
         contentContainerStyle={[
           styles.matchModal,
           {
-            backgroundColor:
-              theme.colors.surface,
+            backgroundColor: theme.colors.surface,
           },
         ]}
       >
@@ -193,11 +155,7 @@ export default function DiscoverScreen() {
           size={56}
           color={theme.colors.primary}
         />
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_16
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
         <AppText
           variant="h2"
           style={{
@@ -207,34 +165,20 @@ export default function DiscoverScreen() {
         >
           {t(Translations.DISCOVER_MATCH_TITLE)}
         </AppText>
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_8
-          }
-        />
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
         <AppText
           variant="body"
           style={{
-            color:
-              theme.colors
-                .onSurfaceVariant,
+            color: theme.colors.onSurfaceVariant,
             textAlign: 'center',
           }}
         >
           {t(Translations.DISCOVER_MATCH_BODY, {
-            name:
-              matchedUser?.display_name ?? '',
+            name: matchedUser?.display_name ?? '',
           })}
         </AppText>
-        <Spacer
-          spacing={
-            Spacing.SPACING_PADDING_24
-          }
-        />
-        <AppButton
-          variant="primary"
-          onPress={dismissMatch}
-        >
+        <Spacer spacing={Spacing.SPACING_PADDING_24} />
+        <AppButton variant="primary" onPress={dismissMatch}>
           {t(Translations.DISCOVER_MATCH_CTA)}
         </AppButton>
       </Modal>
@@ -248,15 +192,11 @@ export default function DiscoverScreen() {
           style={[
             styles.center,
             {
-              backgroundColor:
-                theme.colors.background,
+              backgroundColor: theme.colors.background,
             },
           ]}
         >
-          <ActivityIndicator
-            animating
-            size="large"
-          />
+          <ActivityIndicator animating size="large" />
         </View>
         {celebration}
       </>
@@ -271,33 +211,22 @@ export default function DiscoverScreen() {
       <>
         <ScrollView
           style={{
-            backgroundColor:
-              theme.colors.background,
+            backgroundColor: theme.colors.background,
           }}
-          contentContainerStyle={
-            styles.emptyScroll
-          }
+          contentContainerStyle={styles.emptyScroll}
           refreshControl={
             <RefreshControl
-              refreshing={
-                manualRefreshing
-              }
+              refreshing={manualRefreshing}
               onRefresh={handleRefresh}
             />
           }
         >
           <EmptyState
             icon="compass-off-outline"
-            title={t(
-              Translations.DISCOVER_EMPTY_TITLE,
-            )}
-            subtitle={t(
-              Translations.DISCOVER_EMPTY_SUBTITLE,
-            )}
+            title={t(Translations.DISCOVER_EMPTY_TITLE)}
+            subtitle={t(Translations.DISCOVER_EMPTY_SUBTITLE)}
             action={{
-              label: t(
-                Translations.DISCOVER_REFRESH,
-              ),
+              label: t(Translations.DISCOVER_REFRESH),
               onPress: handleRefresh,
             }}
           />
@@ -312,8 +241,7 @@ export default function DiscoverScreen() {
       style={[
         styles.root,
         {
-          backgroundColor:
-            theme.colors.background,
+          backgroundColor: theme.colors.background,
         },
       ]}
     >
@@ -326,27 +254,20 @@ export default function DiscoverScreen() {
         >
           {t(Translations.DISCOVER_TITLE)}
         </AppText>
-        <View
-          style={styles.headerActions}
-        >
+        <View style={styles.headerActions}>
           {FILTERS_ENABLED ? (
             <Pressable
               style={[
                 styles.headerBtn,
                 {
-                  borderColor:
-                    theme.colors
-                      .outline,
+                  borderColor: theme.colors.outline,
                 },
               ]}
             >
               <MaterialCommunityIcons
                 name="tune-variant"
                 size={20}
-                color={
-                  theme.colors
-                    .onSurface
-                }
+                color={theme.colors.onSurface}
               />
             </Pressable>
           ) : null}
@@ -356,24 +277,17 @@ export default function DiscoverScreen() {
             style={[
               styles.headerBtn,
               {
-                borderColor:
-                  theme.colors.outline,
+                borderColor: theme.colors.outline,
               },
             ]}
           >
             {manualRefreshing ? (
-              <ActivityIndicator
-                animating
-                size={20}
-              />
+              <ActivityIndicator animating size={20} />
             ) : (
               <MaterialCommunityIcons
                 name="refresh"
                 size={20}
-                color={
-                  theme.colors
-                    .onSurface
-                }
+                color={theme.colors.onSurface}
               />
             )}
           </Pressable>
@@ -382,10 +296,7 @@ export default function DiscoverScreen() {
 
       <View style={styles.cardStack}>
         {next ? (
-          <View
-            style={styles.backCard}
-            key={next.user_id}
-          >
+          <View style={styles.backCard} key={next.user_id}>
             <SwipeCard
               candidate={next}
               onSwipeLeft={() => {}}
@@ -397,29 +308,21 @@ export default function DiscoverScreen() {
           key={current.user_id}
           candidate={current}
           onSwipeLeft={handleSwipeLeft}
-          onSwipeRight={
-            handleSwipeRight
-          }
+          onSwipeRight={handleSwipeRight}
         />
       </View>
 
-      <View
-        style={styles.actionRow}
-      >
+      <View style={styles.actionRow}>
         <Pressable
           onPress={handleSwipeLeft}
           style={({ pressed }) => [
             styles.actionBtn,
             styles.actionBtnSmall,
             {
-              backgroundColor:
-                theme.colors
-                  .surfaceElevated,
+              backgroundColor: theme.colors.surfaceElevated,
             },
             pressed && {
-              transform: [
-                { scale: 0.96 },
-              ],
+              transform: [{ scale: 0.96 }],
             },
           ]}
         >
@@ -430,23 +333,17 @@ export default function DiscoverScreen() {
           />
         </Pressable>
 
-        <GradientButton
-          onPress={handleSwipeRight}
-          circleSize={68}
-        >
+        <GradientButton onPress={handleSwipeRight} circleSize={68}>
           <MaterialCommunityIcons
             name="heart"
             size={32}
-            color={
-              theme.colors.onPrimary
-            }
+            color={theme.colors.onPrimary}
             // optical centering — the
             // heart glyph sits high in
             // its em box
             style={{ marginTop: 2 }}
           />
         </GradientButton>
-
       </View>
 
       {celebration}

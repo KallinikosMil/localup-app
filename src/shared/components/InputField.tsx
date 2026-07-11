@@ -15,9 +15,12 @@ export type InputFieldProps<T extends FieldValues> = {
   label?: string;
   rules?: RegisterOptions<T, FieldPath<T>>;
   validateOnBlur?: boolean;
-} & Omit<PaperInputProps, 'value' | 'onChangeText' | 'onBlur' | 'error' | 'label' | 'mode'>;
+} & Omit<
+  PaperInputProps,
+  'value' | 'onChangeText' | 'onBlur' | 'error' | 'label' | 'mode'
+>;
 
-const InputField = <T extends FieldValues> ({
+const InputField = <T extends FieldValues>({
   name,
   label,
   rules,
@@ -33,8 +36,7 @@ const InputField = <T extends FieldValues> ({
     fieldState: { error },
   } = useController({ name, control, rules });
 
-  const [isVisible, setIsVisible] =
-    React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(false);
 
   const handleBlur = React.useCallback(() => {
     onBlur();
@@ -45,9 +47,7 @@ const InputField = <T extends FieldValues> ({
     secureTextEntry && !right ? (
       <TextInput.Icon
         icon={isVisible ? 'eye-off' : 'eye'}
-        onPress={() =>
-          setIsVisible(v => !v)
-        }
+        onPress={() => setIsVisible(v => !v)}
         forceTextInputFocus={false}
       />
     ) : (
@@ -65,18 +65,12 @@ const InputField = <T extends FieldValues> ({
         onBlur={handleBlur}
         style={{ width: '100%' }}
         error={!!error}
-        secureTextEntry={
-          secureTextEntry && !isVisible
-        }
+        secureTextEntry={secureTextEntry && !isVisible}
         right={passwordToggle}
         {...rest}
       />
       {!!error?.message ? (
-        <HelperText
-          type="error"
-          visible
-          padding="none"
-        >
+        <HelperText type="error" visible padding="none">
           {error.message}
         </HelperText>
       ) : null}
