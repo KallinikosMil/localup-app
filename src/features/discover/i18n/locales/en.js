@@ -1,15 +1,15 @@
 export default {
   discoverTitle: 'LocalUp',
   discoverEmptyTitle: 'No one nearby',
-  discoverEmptySubtitle:
-    'Check back later for new people',
+  discoverEmptySubtitle: 'Check back later for new people',
   discoverRefresh: 'Refresh',
+  discoverWaking: 'Waking the server…',
+  discoverError: "Couldn't load people near you.",
+  discoverRetry: 'Retry',
   discoverMatchTitle: "It's a Match!",
-  discoverMatchBody:
-    'You and {{name}} liked each other',
+  discoverMatchBody: 'You and {{name}} liked each other',
   discoverMatchCta: 'Keep Swiping',
-  discoverSwipeError:
-    "Swipe didn't go through — check your connection",
+  discoverSwipeError: "Swipe didn't go through — check your connection",
   discoverDistanceNearby: 'nearby',
   discoverDistanceKm: '{{km}} km',
   discoverStampLike: 'LIKE',

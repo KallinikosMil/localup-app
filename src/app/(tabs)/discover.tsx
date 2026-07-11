@@ -44,7 +44,12 @@ export default function DiscoverScreen() {
   useStaleLocationRefetch(latitude, longitude);
   const {
     data: candidates,
-    isLoading,
+    // RQ v5: `isLoading === isPending && isFetching`, so a query that
+    // is still DISABLED (prefs in flight) reports isLoading === false →
+    // the empty state flashed on every cold open. `isPending` is true
+    // while disabled, so gate the spinner on that instead (H2).
+    isPending,
+    isError,
     isFetching,
     refetch,
     dataUpdatedAt,
@@ -53,6 +58,19 @@ export default function DiscoverScreen() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [matchedUser, setMatchedUser] = useState<Candidate | null>(null);
+
+  // Reassure the user after a few seconds of loading — a Supabase
+  // project waking from auto-pause can take 10-20s. Same hint as
+  // Matches/Chat.
+  const [slowLoading, setSlowLoading] = useState(false);
+  useEffect(() => {
+    if (!isPending) {
+      setSlowLoading(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlowLoading(true), 4500);
+    return () => clearTimeout(timer);
+  }, [isPending]);
 
   // Every fresh deck is re-packed from
   // position 0 (the RPC excludes already-
@@ -69,11 +87,16 @@ export default function DiscoverScreen() {
   const deckConsumed =
     !!candidates && candidates.length > 0 && currentIndex >= candidates.length;
 
+  // H2: `!isError` is load-bearing. RQ keeps the previous data on a
+  // failed refetch, so `deckConsumed` stays true — without this gate a
+  // failing refetch flipped `isFetching`, changed the deps, and fired
+  // another refetch, unbounded, pinned on the spinner branch with no
+  // way out. On error we stop and hand the user the Retry branch.
   useEffect(() => {
-    if (deckConsumed && !isFetching) {
+    if (deckConsumed && !isFetching && !isError) {
       refetch();
     }
-  }, [deckConsumed, isFetching, refetch]);
+  }, [deckConsumed, isFetching, isError, refetch]);
 
   const current = candidates?.[currentIndex] ?? null;
   const next = candidates?.[currentIndex + 1] ?? null;
@@ -185,7 +208,65 @@ export default function DiscoverScreen() {
     </Portal>
   );
 
-  if (isLoading || deckConsumed) {
+  // H2: a backend failure must never present as "No one nearby" — the
+  // single worst lie in this app. This branch sits BEFORE the empty
+  // state, and before the spinner (which `deckConsumed` would otherwise
+  // pin forever once a refetch starts failing). Gating on `!current`
+  // keeps a failed background refetch from yanking a deck the user is
+  // mid-way through; the error surfaces the moment no card is left.
+  if (isError && !current) {
+    return (
+      <>
+        <View
+          style={[
+            styles.center,
+            {
+              backgroundColor: theme.colors.background,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={40}
+            color={theme.colors.onSurfaceVariant}
+          />
+          <AppText
+            variant="body"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              textAlign: 'center',
+              marginTop: Spacing.sm,
+            }}
+          >
+            {t(Translations.DISCOVER_ERROR)}
+          </AppText>
+          <Pressable
+            onPress={() => refetch()}
+            hitSlop={8}
+            style={[
+              styles.retryBtn,
+              {
+                backgroundColor: theme.colors.primary,
+              },
+            ]}
+          >
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.onPrimary,
+                fontWeight: '600',
+              }}
+            >
+              {t(Translations.DISCOVER_RETRY)}
+            </AppText>
+          </Pressable>
+        </View>
+        {celebration}
+      </>
+    );
+  }
+
+  if (isPending || deckConsumed) {
     return (
       <>
         <View
@@ -197,6 +278,18 @@ export default function DiscoverScreen() {
           ]}
         >
           <ActivityIndicator animating size="large" />
+          {slowLoading ? (
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                textAlign: 'center',
+                marginTop: Spacing.lg,
+              }}
+            >
+              {t(Translations.DISCOVER_WAKING)}
+            </AppText>
+          ) : null}
         </View>
         {celebration}
       </>
@@ -368,6 +461,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.xl,
+  },
+  retryBtn: {
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.pill,
   },
   header: {
     flexDirection: 'row',

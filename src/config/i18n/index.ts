@@ -11,6 +11,8 @@ import enMatches from '@features/matches/i18n/locales/en.js';
 import elMatches from '@features/matches/i18n/locales/el.js';
 import enChat from '@features/chat/i18n/locales/en.js';
 import elChat from '@features/chat/i18n/locales/el.js';
+import enProfile from '@features/profile/i18n/locales/en.js';
+import elProfile from '@features/profile/i18n/locales/el.js';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -21,6 +23,7 @@ i18n.use(initReactI18next).init({
         ...enDiscover,
         ...enMatches,
         ...enChat,
+        ...enProfile,
       },
     },
     el: {
@@ -30,6 +33,7 @@ i18n.use(initReactI18next).init({
         ...elDiscover,
         ...elMatches,
         ...elChat,
+        ...elProfile,
       },
     },
   },

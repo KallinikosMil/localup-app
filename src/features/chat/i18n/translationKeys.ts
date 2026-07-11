@@ -5,4 +5,5 @@ export enum Translations {
   CHAT_RETRY = 'chatRetry',
   CHAT_INPUT_PLACEHOLDER = 'chatInputPlaceholder',
   CHAT_EMPTY = 'chatEmpty',
+  CHAT_SEND_ERROR = 'chatSendError',
 }

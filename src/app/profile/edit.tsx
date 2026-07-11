@@ -8,9 +8,10 @@ import {
   Alert,
   TextInput as RNTextInput,
 } from 'react-native';
-import { useTheme, ActivityIndicator } from 'react-native-paper';
+import { useTheme, ActivityIndicator, Snackbar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 
 import AppText from '@shared/components/AppText';
@@ -25,6 +26,7 @@ import {
   computeMode,
   type ProfileMode,
 } from '@features/profile/hooks/useProfile';
+import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
@@ -36,7 +38,16 @@ const BIO_LIMIT = 240;
 export default function EditProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { data: profile, isLoading } = useProfile();
+  const { t } = useTranslation();
+  const {
+    data: profile,
+    // isPending, not isLoading — true while the query is still
+    // disabled (no uid yet), so we never fall through to the form
+    // with an undefined profile.
+    isPending,
+    isError,
+    refetch,
+  } = useProfile();
   const { data: photos } = usePhotos(profile?.user_id);
   const updateProfile = useUpdateProfile();
   const uploadPhoto = useUploadPhoto();
@@ -47,6 +58,12 @@ export default function EditProfileScreen() {
   const [city, setCity] = useState('');
   const [bio, setBio] = useState('');
   const [dirty, setDirty] = useState(false);
+
+  // H2: every mutation on this screen used to fail SILENTLY — no
+  // onError anywhere, so a failed save just un-spun the button and a
+  // failed photo upload/delete did nothing at all. One Snackbar,
+  // shared by all five.
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -70,6 +87,7 @@ export default function EditProfileScreen() {
       },
       {
         onSuccess: () => router.back(),
+        onError: () => setErrorMsg(t(Translations.PROFILE_SAVE_ERROR)),
       },
     );
   };
@@ -95,9 +113,14 @@ export default function EditProfileScreen() {
   };
 
   const setMode = (next: ProfileMode | null) => {
-    updateProfile.mutate({
-      mode_override: next,
-    });
+    updateProfile.mutate(
+      {
+        mode_override: next,
+      },
+      {
+        onError: () => setErrorMsg(t(Translations.PROFILE_SAVE_ERROR)),
+      },
+    );
   };
 
   const setHomeHere = () => {
@@ -108,10 +131,15 @@ export default function EditProfileScreen() {
       );
       return;
     }
-    updateProfile.mutate({
-      home_lat: latitude,
-      home_lng: longitude,
-    });
+    updateProfile.mutate(
+      {
+        home_lat: latitude,
+        home_lng: longitude,
+      },
+      {
+        onError: () => setErrorMsg(t(Translations.PROFILE_SAVE_ERROR)),
+      },
+    );
   };
 
   const pickPhoto = async () => {
@@ -131,10 +159,15 @@ export default function EditProfileScreen() {
     if (result.canceled || !result.assets[0]) return;
 
     const asset = result.assets[0];
-    uploadPhoto.mutate({
-      uri: asset.uri,
-      mimeType: asset.mimeType ?? 'image/jpeg',
-    });
+    uploadPhoto.mutate(
+      {
+        uri: asset.uri,
+        mimeType: asset.mimeType ?? 'image/jpeg',
+      },
+      {
+        onError: () => setErrorMsg(t(Translations.PROFILE_PHOTO_UPLOAD_ERROR)),
+      },
+    );
   };
 
   const confirmDelete = (id: string) => {
@@ -143,7 +176,11 @@ export default function EditProfileScreen() {
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => deletePhoto.mutate(id),
+        onPress: () =>
+          deletePhoto.mutate(id, {
+            onError: () =>
+              setErrorMsg(t(Translations.PROFILE_PHOTO_DELETE_ERROR)),
+          }),
       },
     ]);
   };
@@ -151,17 +188,106 @@ export default function EditProfileScreen() {
   const photoCount = photos?.length ?? 0;
   const canAddPhoto = photoCount < MAX_PHOTOS;
 
-  if (isLoading || !profile) {
-    return (
-      <View
+  // H2: both of these branches used to be one `if (isLoading ||
+  // !profile)` that rendered a bare spinner with NO app bar and NO
+  // Cancel — on an error (profile stays undefined) the user was
+  // trapped on a permanent spinner with no way back and nothing to
+  // retry. Every non-form state now keeps a back affordance.
+  const backBar = (
+    <View
+      style={[
+        styles.appBar,
+        {
+          backgroundColor: theme.colors.background,
+          borderBottomColor: theme.colors.surfaceVariant,
+        },
+      ]}
+    >
+      <Pressable
+        onPress={() => router.back()}
+        hitSlop={12}
         style={[
-          styles.center,
+          styles.pillGhost,
           {
-            backgroundColor: theme.colors.background,
+            backgroundColor: theme.colors.surfaceVariant,
           },
         ]}
       >
-        <ActivityIndicator animating size="large" />
+        <AppText
+          variant="body"
+          style={{
+            color: theme.colors.onSurface,
+            fontWeight: '500',
+          }}
+        >
+          {t(Translations.PROFILE_EDIT_BACK)}
+        </AppText>
+      </Pressable>
+    </View>
+  );
+
+  if (isPending) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.colors.background,
+        }}
+      >
+        {backBar}
+        <View style={styles.center}>
+          <ActivityIndicator animating size="large" />
+        </View>
+      </View>
+    );
+  }
+
+  if (isError || !profile) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.colors.background,
+        }}
+      >
+        {backBar}
+        <View style={styles.center}>
+          <MaterialCommunityIcons
+            name="account-alert-outline"
+            size={40}
+            color={theme.colors.onSurfaceVariant}
+          />
+          <AppText
+            variant="body"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              textAlign: 'center',
+              marginTop: Spacing.SPACING_PADDING_12,
+            }}
+          >
+            {t(Translations.PROFILE_EDIT_ERROR)}
+          </AppText>
+          <Pressable
+            onPress={() => refetch()}
+            hitSlop={8}
+            style={[
+              styles.retryBtn,
+              {
+                backgroundColor: theme.colors.primary,
+              },
+            ]}
+          >
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.onPrimary,
+                fontWeight: '600',
+              }}
+            >
+              {t(Translations.PROFILE_RETRY)}
+            </AppText>
+          </Pressable>
+        </View>
       </View>
     );
   }
@@ -503,6 +629,14 @@ export default function EditProfileScreen() {
 
         <Spacer spacing={Spacing.SPACING_PADDING_32} />
       </ScrollView>
+
+      <Snackbar
+        visible={!!errorMsg}
+        onDismiss={() => setErrorMsg(null)}
+        duration={4000}
+      >
+        {errorMsg ?? ''}
+      </Snackbar>
     </View>
   );
 }
@@ -647,6 +781,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+  },
+  retryBtn: {
+    marginTop: Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingVertical: Spacing.SPACING_PADDING_8,
+    borderRadius: BorderRadius.pill,
   },
   appBar: {
     flexDirection: 'row',

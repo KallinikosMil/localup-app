@@ -3,8 +3,7 @@ export default {
   chatWaking: 'Ξυπνάει ο διακομιστής…',
   chatError: 'Δεν φορτώθηκε η συνομιλία.',
   chatRetry: 'Δοκίμασε ξανά',
-  chatInputPlaceholder:
-    'Γράψε ένα μήνυμα...',
-  chatEmpty:
-    'Δεν υπάρχουν μηνύματα ακόμα.\nΠες ένα γεια!',
+  chatInputPlaceholder: 'Γράψε ένα μήνυμα...',
+  chatEmpty: 'Δεν υπάρχουν μηνύματα ακόμα.\nΠες ένα γεια!',
+  chatSendError: 'Το μήνυμα δεν στάλθηκε — έλεγξε τη σύνδεσή σου',
 };

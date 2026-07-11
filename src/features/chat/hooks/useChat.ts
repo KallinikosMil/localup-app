@@ -177,7 +177,14 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
   return {
     threadId,
     messages: query.data?.messages ?? [],
-    isLoading: query.isLoading,
+    // H2: `isPending`, not `isLoading`. RQ v5 computes
+    // `isLoading = isPending && isFetching`, so while the query is
+    // DISABLED (`enabled: !!uid && !!matchId` — a deep link renders
+    // before uid/matchId settle) isLoading is false and the screen
+    // showed the "say hi" empty list instead of a spinner. isPending
+    // is true for a disabled query, so the shell shows loading until
+    // real data (or an error) arrives.
+    isLoading: query.isPending,
     isError: query.isError,
     refetch: query.refetch,
   };

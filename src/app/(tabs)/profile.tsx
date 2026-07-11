@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,6 +10,7 @@ import {
 import { useTheme, ActivityIndicator, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
@@ -21,6 +22,7 @@ import {
   usePhotos,
   computeMode,
 } from '@features/profile/hooks/useProfile';
+import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
@@ -30,10 +32,15 @@ const PHOTO_SIZE = 96;
 export default function ProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const { t } = useTranslation();
   const logout = useLogout();
   const {
     data: profile,
-    isLoading,
+    // isPending (not isLoading): true while the query is still
+    // disabled (uid not in the store yet) — otherwise the ghost
+    // profile below would render for those frames.
+    isPending,
+    isError,
     refetch: refetchProfile,
     isRefetching: profileRefetching,
   } = useProfile();
@@ -48,13 +55,25 @@ export default function ProfileScreen() {
   };
   const { latitude, longitude } = useLocation();
 
+  // Reassure the user after a few seconds of loading (matches/chat
+  // pattern) — a Supabase project waking from auto-pause is slow.
+  const [slowLoading, setSlowLoading] = useState(false);
+  useEffect(() => {
+    if (!isPending) {
+      setSlowLoading(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlowLoading(true), 4500);
+    return () => clearTimeout(timer);
+  }, [isPending]);
+
   const mode = computeMode(
     profile,
     profile?.current_lat ?? latitude,
     profile?.current_lng ?? longitude,
   );
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <View
         style={[
@@ -65,6 +84,72 @@ export default function ProfileScreen() {
         ]}
       >
         <ActivityIndicator animating size="large" />
+        {slowLoading ? (
+          <AppText
+            variant="body"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              textAlign: 'center',
+              marginTop: Spacing.SPACING_PADDING_16,
+            }}
+          >
+            {t(Translations.PROFILE_WAKING)}
+          </AppText>
+        ) : null}
+      </View>
+    );
+  }
+
+  // H2: a failed profile read used to render a GHOST profile — name
+  // "—", "add a bio", badge LOCAL, no photos — which reads as an empty
+  // account, not a failure. And pull-to-refresh lives inside the
+  // ScrollView below, which never rendered on a hang, so there was no
+  // way to retry at all. Say what happened; give them the button.
+  if (isError) {
+    return (
+      <View
+        style={[
+          styles.center,
+          {
+            backgroundColor: theme.colors.background,
+          },
+        ]}
+      >
+        <MaterialCommunityIcons
+          name="account-alert-outline"
+          size={40}
+          color={theme.colors.onSurfaceVariant}
+        />
+        <AppText
+          variant="body"
+          style={{
+            color: theme.colors.onSurfaceVariant,
+            textAlign: 'center',
+            marginTop: Spacing.SPACING_PADDING_12,
+          }}
+        >
+          {t(Translations.PROFILE_ERROR)}
+        </AppText>
+        <Pressable
+          onPress={() => refetchProfile()}
+          hitSlop={8}
+          style={[
+            styles.retryBtn,
+            {
+              backgroundColor: theme.colors.primary,
+            },
+          ]}
+        >
+          <AppText
+            variant="body"
+            style={{
+              color: theme.colors.onPrimary,
+              fontWeight: '600',
+            }}
+          >
+            {t(Translations.PROFILE_RETRY)}
+          </AppText>
+        </Pressable>
       </View>
     );
   }
@@ -352,6 +437,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+  },
+  retryBtn: {
+    marginTop: Spacing.SPACING_PADDING_16,
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingVertical: Spacing.SPACING_PADDING_8,
+    borderRadius: BorderRadius.pill,
   },
   content: {
     paddingHorizontal: Spacing.SPACING_PADDING_24,

@@ -1,15 +1,15 @@
 export default {
   discoverTitle: 'LocalUp',
   discoverEmptyTitle: 'Κανείς κοντά σου',
-  discoverEmptySubtitle:
-    'Έλεγξε ξανά αργότερα για νέα άτομα',
+  discoverEmptySubtitle: 'Έλεγξε ξανά αργότερα για νέα άτομα',
   discoverRefresh: 'Ανανέωση',
+  discoverWaking: 'Ξυπνάει ο διακομιστής…',
+  discoverError: 'Δεν φορτώθηκαν άτομα κοντά σου.',
+  discoverRetry: 'Δοκίμασε ξανά',
   discoverMatchTitle: 'Ταιριάξατε!',
-  discoverMatchBody:
-    'Εσύ και {{name}} κάνατε like ο ένας στον άλλο',
+  discoverMatchBody: 'Εσύ και {{name}} κάνατε like ο ένας στον άλλο',
   discoverMatchCta: 'Συνέχισε',
-  discoverSwipeError:
-    'Το swipe δεν ολοκληρώθηκε — έλεγξε τη σύνδεσή σου',
+  discoverSwipeError: 'Το swipe δεν ολοκληρώθηκε — έλεγξε τη σύνδεσή σου',
   discoverDistanceNearby: 'κοντά',
   discoverDistanceKm: '{{km}} χλμ',
   discoverStampLike: 'LIKE',

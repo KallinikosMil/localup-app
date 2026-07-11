@@ -8,7 +8,7 @@ import {
   Platform,
   Pressable,
 } from 'react-native';
-import { useTheme, ActivityIndicator } from 'react-native-paper';
+import { useTheme, ActivityIndicator, Snackbar } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -68,8 +68,18 @@ export default function ChatScreen() {
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
+    // Clear optimistically so the box feels instant — but if the send
+    // fails, put the text BACK. It used to be destroyed: setText('')
+    // ran before mutate, there was no onError, and isError was never
+    // read, so a failed send silently ate the message and the user
+    // assumed it had gone (H2). Only restore if the box is still
+    // empty — never clobber something typed in the meantime.
     setText('');
-    sendMessage.mutate(trimmed);
+    sendMessage.mutate(trimmed, {
+      onError: () => {
+        setText(prev => (prev.trim() ? prev : trimmed));
+      },
+    });
   };
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
@@ -283,6 +293,14 @@ export default function ChatScreen() {
           />
         </Pressable>
       </View>
+
+      <Snackbar
+        visible={sendMessage.isError}
+        onDismiss={() => sendMessage.reset()}
+        duration={4000}
+      >
+        {t(Translations.CHAT_SEND_ERROR)}
+      </Snackbar>
     </KeyboardAvoidingView>
   );
 }

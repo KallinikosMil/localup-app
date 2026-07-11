@@ -60,19 +60,30 @@ const useMatchPreferences = (uid: string | undefined) =>
 
 export const useCandidates = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
-  const { data: prefs } = useMatchPreferences(uid);
+  const { data: prefs, isError: prefsError } = useMatchPreferences(uid);
+
+  // H2: a failed prefs read must NOT disable the deck. It used to —
+  // `enabled: !!uid && !!prefs` meant a prefs error/hang left `prefs`
+  // undefined forever, the deck query never ran, and RQ v5 reports
+  // `isLoading === false` for a disabled query → Discover rendered
+  // "No one nearby" permanently, with no spinner and nothing to retry.
+  // Prefs are only a filter; degrade to the defaults and still show a
+  // deck. (Failing loudly here would be worse than serving the same
+  // defaults the query itself falls back to when the row is missing.)
+  const effectivePrefs = prefs ?? (prefsError ? PREFS_FALLBACK : undefined);
 
   return useQuery({
     queryKey: [
       'discover-candidates',
       uid,
       {
-        maxDist: prefs?.max_distance_km ?? PREFS_FALLBACK.max_distance_km,
-        minAge: prefs?.min_age ?? PREFS_FALLBACK.min_age,
-        maxAge: prefs?.max_age ?? PREFS_FALLBACK.max_age,
+        maxDist:
+          effectivePrefs?.max_distance_km ?? PREFS_FALLBACK.max_distance_km,
+        minAge: effectivePrefs?.min_age ?? PREFS_FALLBACK.min_age,
+        maxAge: effectivePrefs?.max_age ?? PREFS_FALLBACK.max_age,
       },
     ],
-    enabled: !!uid && !!prefs,
+    enabled: !!uid && !!effectivePrefs,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,

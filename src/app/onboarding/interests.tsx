@@ -36,9 +36,26 @@ const InterestsScreen = () => {
   );
   const [bio, setBio] = useState(onboardingData.bio);
 
-  const { mutate, isPending } = useCompleteOnboarding();
+  // H2: `isError` is the whole point here. The Finish mutation had no
+  // onError and no error UI — on failure the spinner just stopped and
+  // NOTHING happened, so a user could never leave onboarding and never
+  // know why.
+  const {
+    mutate,
+    isPending,
+    isError: finishFailed,
+    reset: resetFinish,
+  } = useCompleteOnboarding();
 
-  const { data: interests = [], isLoading } = useQuery({
+  const {
+    data: interests = [],
+    isLoading,
+    // H2: with no error branch a failed list rendered ZERO categories,
+    // and since Finish needs >= 3 selections the user was permanently
+    // stuck in onboarding with no explanation.
+    isError: interestsFailed,
+    refetch: refetchInterests,
+  } = useQuery({
     queryKey: ['interests'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -75,6 +92,10 @@ const InterestsScreen = () => {
   const canFinish = selectedIds.length >= MIN_INTERESTS;
 
   const onFinish = () => {
+    // Clear a previous failure so the error text disappears while the
+    // retry is in flight.
+    resetFinish();
+
     update({
       interestIds: selectedIds,
       bio,
@@ -135,6 +156,22 @@ const InterestsScreen = () => {
 
         {isLoading ? (
           <ActivityIndicator style={styles.loader} />
+        ) : interestsFailed ? (
+          <View style={styles.errorBlock}>
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.error,
+                textAlign: 'center',
+              }}
+            >
+              {t(Translations.ONBOARDING_INTERESTS_ERROR)}
+            </AppText>
+            <Spacer spacing={Spacing.SPACING_PADDING_12} />
+            <AppButton variant="outlined" onPress={() => refetchInterests()}>
+              {t(Translations.ONBOARDING_RETRY)}
+            </AppButton>
+          </View>
         ) : (
           Object.entries(grouped).map(([category, items]) => (
             <View key={category} style={styles.categoryBlock}>
@@ -189,6 +226,21 @@ const InterestsScreen = () => {
         />
 
         <View style={styles.bottomSection}>
+          {finishFailed ? (
+            <>
+              <AppText
+                variant="body"
+                style={{
+                  color: theme.colors.error,
+                  textAlign: 'center',
+                }}
+              >
+                {t(Translations.ONBOARDING_FINISH_ERROR)}
+              </AppText>
+              <Spacer spacing={Spacing.SPACING_PADDING_12} />
+            </>
+          ) : null}
+
           {isPending ? (
             <ActivityIndicator size="large" />
           ) : (
@@ -197,7 +249,9 @@ const InterestsScreen = () => {
               onPress={onFinish}
               disabled={!canFinish}
             >
-              {t(Translations.ONBOARDING_FINISH)}
+              {finishFailed
+                ? t(Translations.ONBOARDING_RETRY)
+                : t(Translations.ONBOARDING_FINISH)}
             </AppButton>
           )}
         </View>
@@ -227,6 +281,10 @@ const styles = StyleSheet.create({
     marginTop: Spacing.SPACING_PADDING_8,
   },
   loader: {
+    marginVertical: Spacing.SPACING_PADDING_32,
+  },
+  errorBlock: {
+    alignItems: 'center',
     marginVertical: Spacing.SPACING_PADDING_32,
   },
   bioInput: {

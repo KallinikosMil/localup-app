@@ -21,4 +21,7 @@ export const Translations = {
   ONBOARDING_BIO_PLACEHOLDER: 'onboarding.bioPlaceholder',
   ONBOARDING_INTERESTS_MIN: 'onboarding.interestsMin',
   ONBOARDING_FINISH: 'onboarding.finish',
+  ONBOARDING_INTERESTS_ERROR: 'onboarding.interestsError',
+  ONBOARDING_FINISH_ERROR: 'onboarding.finishError',
+  ONBOARDING_RETRY: 'onboarding.retry',
 } as const;
