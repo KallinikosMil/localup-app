@@ -55,7 +55,16 @@ const SwipeCard = ({
   const translateY = useSharedValue(0);
   const overflow = Math.max(candidate.interests.length - MAX_CHIPS, 0);
 
+  // V16. The deck now lives inside a ScrollView so it can carry a
+  // RefreshControl, and an unconstrained Pan claims every drag —
+  // including the downward one that pull-to-refresh needs. `activeOffsetX`
+  // says: only take over once the finger has moved 12px HORIZONTALLY.
+  // A vertical drag never activates this gesture, so the ScrollView keeps
+  // it and the pull works; a swipe is horizontal by definition, so the
+  // card loses nothing. (translateY still tracks the finger once the
+  // gesture is active — the diagonal lift on a real swipe is intact.)
   const pan = Gesture.Pan()
+    .activeOffsetX([-12, 12])
     .onUpdate(e => {
       translateX.value = e.translationX;
       translateY.value = e.translationY * 0.3;

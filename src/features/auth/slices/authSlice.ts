@@ -19,6 +19,12 @@ export interface AuthState {
   // where finishing it OVERWRITES their profile. A failure must
   // never select a branch; it gets its own state + a Retry screen.
   authError: boolean;
+  // V10: WHY it failed — was the request unable to leave the device, or
+  // did the server answer badly? The error object itself dies with the
+  // dispatch, so the verdict (isNetworkError, structured fields only) is
+  // carried here for AuthErrorScreen to render the right sentence.
+  // Meaningless unless authError is true.
+  authErrorOffline: boolean;
 }
 
 const initialState: AuthState = {
@@ -26,6 +32,7 @@ const initialState: AuthState = {
   initialized: false,
   onboardingComplete: null,
   authError: false,
+  authErrorOffline: false,
 };
 
 const authSlice = createSlice({
@@ -53,13 +60,23 @@ const authSlice = createSlice({
       if (changed) {
         state.onboardingComplete = null;
         state.authError = false;
+        state.authErrorOffline = false;
       }
     },
     setOnboardingComplete: (state, action: PayloadAction<boolean | null>) => {
       state.onboardingComplete = action.payload;
     },
-    setAuthError: (state, action: PayloadAction<boolean>) => {
-      state.authError = action.payload;
+    setAuthError: (
+      state,
+      action: PayloadAction<{
+        failed: boolean;
+        offline?: boolean;
+      }>,
+    ) => {
+      state.authError = action.payload.failed;
+      state.authErrorOffline = action.payload.failed
+        ? (action.payload.offline ?? false)
+        : false;
     },
   },
 });

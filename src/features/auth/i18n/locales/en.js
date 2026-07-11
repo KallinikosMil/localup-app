@@ -29,6 +29,5 @@ export default {
   authDismiss: 'Dismiss',
   authConfirmEmailSent: 'Confirmation mail sent, check your inbox!',
   authBootstrapErrorTitle: "Couldn't load your account",
-  authBootstrapErrorBody: 'Check your connection and try again.',
   authBootstrapRetry: 'Retry',
 };

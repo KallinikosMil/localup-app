@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -17,6 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
 import useLocation from '@shared/hooks/useLocation';
+import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import {
   useProfile,
   useUpdateProfile,
@@ -39,13 +40,14 @@ export default function EditProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const {
     data: profile,
     // isPending, not isLoading — true while the query is still
     // disabled (no uid yet), so we never fall through to the form
     // with an undefined profile.
     isPending,
-    isError,
+    error,
     refetch,
   } = useProfile();
   const { data: photos } = usePhotos(profile?.user_id);
@@ -63,10 +65,29 @@ export default function EditProfileScreen() {
   // onError anywhere, so a failed save just un-spun the button and a
   // failed photo upload/delete did nothing at all. One Snackbar,
   // shared by all five.
+  //
+  // V10: and each of them said "— check your connection", which is a
+  // guess. `errorMessage` reads the error's structured fields and picks
+  // the offline sentence only when the request genuinely never landed.
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // V14 — THE FLICKER.
+  //
+  // This effect used to run on every new `profile` OBJECT, not on every
+  // new profile. React Query hands back a fresh object on each refetch
+  // and on every `setQueryData` — and `useSyncLocation` patches
+  // ['profile', uid] from the still-mounted tabs underneath this screen
+  // whenever a GPS fix lands. So the effect re-fired mid-edit and
+  // BLEW AWAY the three inputs, resetting them to the server's values in
+  // front of the user. That's the visible flicker: the fields snap back.
+  //
+  // Hydrate once per user instead. The form is the source of truth from
+  // the first render on; a background refetch may not reach in and
+  // rewrite what the user is typing.
+  const hydratedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (!profile) return;
+    if (!profile || hydratedFor.current === profile.user_id) return;
+    hydratedFor.current = profile.user_id;
     setName(profile.display_name ?? '');
     setCity(profile.home_city ?? '');
     setBio(profile.bio ?? '');
@@ -94,7 +115,8 @@ export default function EditProfileScreen() {
       },
       {
         onSuccess: () => router.back(),
-        onError: () => setErrorMsg(t(Translations.PROFILE_SAVE_ERROR)),
+        onError: err =>
+          setErrorMsg(errorMessage(err, Translations.PROFILE_SAVE_ERROR)),
       },
     );
   };
@@ -132,7 +154,8 @@ export default function EditProfileScreen() {
         mode_override: next,
       },
       {
-        onError: () => setErrorMsg(t(Translations.PROFILE_SAVE_ERROR)),
+        onError: err =>
+          setErrorMsg(errorMessage(err, Translations.PROFILE_SAVE_ERROR)),
       },
     );
   };
@@ -151,7 +174,8 @@ export default function EditProfileScreen() {
         home_lng: longitude,
       },
       {
-        onError: () => setErrorMsg(t(Translations.PROFILE_SAVE_ERROR)),
+        onError: err =>
+          setErrorMsg(errorMessage(err, Translations.PROFILE_SAVE_ERROR)),
       },
     );
   };
@@ -179,7 +203,10 @@ export default function EditProfileScreen() {
         mimeType: asset.mimeType ?? 'image/jpeg',
       },
       {
-        onError: () => setErrorMsg(t(Translations.PROFILE_PHOTO_UPLOAD_ERROR)),
+        onError: err =>
+          setErrorMsg(
+            errorMessage(err, Translations.PROFILE_PHOTO_UPLOAD_ERROR),
+          ),
       },
     );
   };
@@ -198,8 +225,10 @@ export default function EditProfileScreen() {
           style: 'destructive',
           onPress: () =>
             deletePhoto.mutate(id, {
-              onError: () =>
-                setErrorMsg(t(Translations.PROFILE_PHOTO_DELETE_ERROR)),
+              onError: err =>
+                setErrorMsg(
+                  errorMessage(err, Translations.PROFILE_PHOTO_DELETE_ERROR),
+                ),
             }),
         },
       ],
@@ -263,7 +292,19 @@ export default function EditProfileScreen() {
     );
   }
 
-  if (isError || !profile) {
+  // V14, second half. This was `isError || !profile` — so a FAILED
+  // BACKGROUND REFETCH (the profile query is shared with the tabs
+  // underneath and gets invalidated by useSyncLocation) tore the form
+  // off the screen and replaced it with the error state, even though RQ
+  // still held the cached profile that the form was rendering from
+  // perfectly well a frame earlier. Then the next successful fetch put
+  // it back. Branch-swap, and with it the user's unsaved edits, gone.
+  //
+  // The only state we genuinely cannot render a form for is "no profile
+  // at all". Gate on exactly that (same shape as Discover's
+  // `isError && !current`) and let a stale-but-usable profile keep the
+  // screen; the Snackbar already reports write failures.
+  if (!profile) {
     return (
       <View
         style={{
@@ -274,7 +315,7 @@ export default function EditProfileScreen() {
         {backBar}
         <View style={styles.center}>
           <MaterialCommunityIcons
-            name="account-alert-outline"
+            name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
           />
@@ -286,7 +327,7 @@ export default function EditProfileScreen() {
               marginTop: Spacing.SPACING_PADDING_12,
             }}
           >
-            {t(Translations.PROFILE_EDIT_ERROR)}
+            {errorMessage(error, Translations.PROFILE_EDIT_ERROR)}
           </AppText>
           <Pressable
             onPress={() => refetch()}
@@ -367,15 +408,28 @@ export default function EditProfileScreen() {
           {t(Translations.PROFILE_EDIT_TITLE)}
         </AppText>
 
+        {/* V14, third half. This used to swap the LABEL — "Save" →
+            "Saving…" → "Save" — and the label is what sizes the pill,
+            which is the last item in a space-between row. An offline
+            save fails in tens of milliseconds, so the app bar reflowed
+            out and straight back: a flick, right before the Snackbar.
+            (A minWidth wouldn't fix it — in Greek both labels are wider
+            than any floor we'd pick.) The label now never changes; the
+            spinner sits ON it, so the pending state costs zero layout in
+            every language. */}
         <Pressable
           onPress={handleSave}
           disabled={updateProfile.isPending}
           hitSlop={12}
+          accessibilityLabel={
+            updateProfile.isPending
+              ? t(Translations.PROFILE_SAVING)
+              : t(Translations.PROFILE_SAVE)
+          }
           style={[
             styles.pillPrimary,
             {
               backgroundColor: theme.colors.primary,
-              opacity: updateProfile.isPending ? 0.5 : 1,
             },
           ]}
         >
@@ -384,12 +438,20 @@ export default function EditProfileScreen() {
             style={{
               color: theme.colors.onPrimary,
               fontWeight: '600',
+              opacity: updateProfile.isPending ? 0 : 1,
             }}
           >
-            {updateProfile.isPending
-              ? t(Translations.PROFILE_SAVING)
-              : t(Translations.PROFILE_SAVE)}
+            {t(Translations.PROFILE_SAVE)}
           </AppText>
+          {updateProfile.isPending ? (
+            <View style={styles.pillSpinner} pointerEvents="none">
+              <ActivityIndicator
+                animating
+                size="small"
+                color={theme.colors.onPrimary}
+              />
+            </View>
+          ) : null}
         </Pressable>
       </View>
 
@@ -847,6 +909,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: BorderRadius.pill,
+  },
+  // Sits on top of the (transparent) Save label while the write is in
+  // flight, so the pill keeps the exact width it had (V14).
+  pillSpinner: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   content: {
     paddingHorizontal: Spacing.SPACING_PADDING_24,

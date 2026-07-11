@@ -4,10 +4,9 @@ export default {
   profileRetry: 'Δοκίμασε ξανά',
   profileEditError: 'Δεν φορτώθηκε το προφίλ σου για επεξεργασία.',
   profileEditBack: 'Πίσω',
-  profileSaveError: 'Οι αλλαγές δεν αποθηκεύτηκαν — έλεγξε τη σύνδεσή σου',
-  profilePhotoUploadError: 'Η φωτογραφία δεν ανέβηκε — έλεγξε τη σύνδεσή σου',
-  profilePhotoDeleteError:
-    'Η φωτογραφία δεν διαγράφηκε — έλεγξε τη σύνδεσή σου',
+  profileSaveError: 'Οι αλλαγές δεν αποθηκεύτηκαν. Δοκίμασε ξανά.',
+  profilePhotoUploadError: 'Η φωτογραφία δεν ανέβηκε. Δοκίμασε ξανά.',
+  profilePhotoDeleteError: 'Η φωτογραφία δεν διαγράφηκε. Δοκίμασε ξανά.',
 
   profileTitle: 'Προφίλ',
   profileEditAction: 'Επεξεργασία',

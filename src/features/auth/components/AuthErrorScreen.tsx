@@ -3,9 +3,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
+import { Translations as Common } from '@shared/i18n/translationKeys';
+import { RootState } from '@store';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/auth/i18n/translationKeys';
@@ -18,6 +21,12 @@ import { retryAuthBootstrap } from '@features/auth/hooks/useAuthSession';
 export default function AuthErrorScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
+  // V10: the body used to be a flat "Check your connection and try
+  // again." for EVERY bootstrap failure — including a 500, where the
+  // user's connection is fine and we've just sent them to reboot their
+  // router. useAuthSession classified the failure on structured fields;
+  // we render its verdict.
+  const offline = useSelector((s: RootState) => s.auth.authErrorOffline);
   const [retrying, setRetrying] = useState(false);
 
   const onRetry = async () => {
@@ -66,7 +75,9 @@ export default function AuthErrorScreen() {
           },
         ]}
       >
-        {t(Translations.AUTH_BOOTSTRAP_ERROR_BODY)}
+        {offline
+          ? t(Common.COMMON_ERROR_OFFLINE)
+          : t(Common.COMMON_ERROR_GENERIC)}
       </AppText>
       <Pressable
         onPress={onRetry}

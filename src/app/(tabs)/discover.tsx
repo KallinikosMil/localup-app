@@ -18,6 +18,7 @@ import GradientButton from '@shared/components/GradientButton';
 import Spacer from '@shared/components/Spacer';
 import { useAppTheme } from '@theme/paper';
 import useLocation from '@shared/hooks/useLocation';
+import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import SwipeCard from '@features/discover/components/SwipeCard';
 import {
   useCandidates,
@@ -50,11 +51,13 @@ export default function DiscoverScreen() {
     // while disabled, so gate the spinner on that instead (H2).
     isPending,
     isError,
+    error,
     isFetching,
     refetch,
     dataUpdatedAt,
   } = useCandidates();
   const swipe = useSwipe();
+  const errorMessage = useErrorMessage();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [matchedUser, setMatchedUser] = useState<Candidate | null>(null);
@@ -136,11 +139,15 @@ export default function DiscoverScreen() {
     setMatchedUser(null);
   };
 
-  // Manual refresh (header icon / empty-state
-  // pull): force a fresh GPS fix, then re-pack
-  // the deck. No pull-to-refresh on the deck
-  // itself — it conflicts with the card pan
-  // gesture.
+  // Manual refresh: force a fresh GPS fix, then re-pack the deck.
+  //
+  // V16: this used to be driven by a refresh icon in the header, because
+  // pull-to-refresh "conflicts with the card pan gesture". It doesn't
+  // have to — the conflict was that SwipeCard's Pan had no activation
+  // criteria, so it swallowed vertical drags too. Constraining it to
+  // horizontal movement (`activeOffsetX`, see SwipeCard) leaves the
+  // vertical drag to the ScrollView, so the deck itself pulls to refresh
+  // and the header icon is gone.
   const [manualRefreshing, setManualRefreshing] = useState(false);
 
   const handleRefresh = useCallback(async () => {
@@ -238,7 +245,7 @@ export default function DiscoverScreen() {
               marginTop: Spacing.sm,
             }}
           >
-            {t(Translations.DISCOVER_ERROR)}
+            {errorMessage(error, Translations.DISCOVER_ERROR)}
           </AppText>
           <Pressable
             onPress={() => refetch()}
@@ -347,6 +354,8 @@ export default function DiscoverScreen() {
         >
           {t(Translations.DISCOVER_TITLE)}
         </AppText>
+        {/* V16: the refresh icon that used to live here is gone —
+            refreshing the deck is pull-to-refresh now, below. */}
         <View style={styles.headerActions}>
           {FILTERS_ENABLED ? (
             <Pressable
@@ -364,46 +373,43 @@ export default function DiscoverScreen() {
               />
             </Pressable>
           ) : null}
-          <Pressable
-            onPress={handleRefresh}
-            disabled={manualRefreshing}
-            style={[
-              styles.headerBtn,
-              {
-                borderColor: theme.colors.outline,
-              },
-            ]}
-          >
-            {manualRefreshing ? (
-              <ActivityIndicator animating size={20} />
-            ) : (
-              <MaterialCommunityIcons
-                name="refresh"
-                size={20}
-                color={theme.colors.onSurface}
-              />
-            )}
-          </Pressable>
         </View>
       </View>
 
-      <View style={styles.cardStack}>
-        {next ? (
-          <View style={styles.backCard} key={next.user_id}>
-            <SwipeCard
-              candidate={next}
-              onSwipeLeft={() => {}}
-              onSwipeRight={() => {}}
-            />
-          </View>
-        ) : null}
-        <SwipeCard
-          key={current.user_id}
-          candidate={current}
-          onSwipeLeft={handleSwipeLeft}
-          onSwipeRight={handleSwipeRight}
-        />
-      </View>
+      {/* The deck rides in a ScrollView purely to carry the
+          RefreshControl — the content is exactly one screen tall
+          (flexGrow, no overflow), so it never actually scrolls. The pull
+          gesture and the card's pan gesture no longer fight: the card
+          only claims a drag once it's 12px HORIZONTAL (activeOffsetX in
+          SwipeCard), which a downward pull never is. */}
+      <ScrollView
+        style={styles.deckScroll}
+        contentContainerStyle={styles.deckContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={manualRefreshing}
+            onRefresh={handleRefresh}
+          />
+        }
+      >
+        <View style={styles.cardStack}>
+          {next ? (
+            <View style={styles.backCard} key={next.user_id}>
+              <SwipeCard
+                candidate={next}
+                onSwipeLeft={() => {}}
+                onSwipeRight={() => {}}
+              />
+            </View>
+          ) : null}
+          <SwipeCard
+            key={current.user_id}
+            candidate={current}
+            onSwipeLeft={handleSwipeLeft}
+            onSwipeRight={handleSwipeRight}
+          />
+        </View>
+      </ScrollView>
 
       <View style={styles.actionRow}>
         <Pressable
@@ -446,7 +452,7 @@ export default function DiscoverScreen() {
         onDismiss={() => swipe.reset()}
         duration={3000}
       >
-        {t(Translations.DISCOVER_SWIPE_ERROR)}
+        {errorMessage(swipe.error, Translations.DISCOVER_SWIPE_ERROR)}
       </Snackbar>
     </GestureHandlerRootView>
   );
@@ -491,6 +497,14 @@ const styles = StyleSheet.create({
   emptyScroll: {
     flexGrow: 1,
     justifyContent: 'center',
+  },
+  deckScroll: {
+    flex: 1,
+  },
+  // flexGrow (not flex) so the deck fills the viewport exactly: no
+  // overflow to scroll, but still a scroll container for the pull (V16).
+  deckContent: {
+    flexGrow: 1,
   },
   cardStack: {
     flex: 1,

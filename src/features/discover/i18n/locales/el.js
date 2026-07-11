@@ -9,7 +9,7 @@ export default {
   discoverMatchTitle: 'Ταιριάξατε!',
   discoverMatchBody: 'Εσύ και {{name}} κάνατε like ο ένας στον άλλο',
   discoverMatchCta: 'Συνέχισε',
-  discoverSwipeError: 'Το swipe δεν ολοκληρώθηκε — έλεγξε τη σύνδεσή σου',
+  discoverSwipeError: 'Το swipe δεν ολοκληρώθηκε. Δοκίμασε ξανά.',
   discoverDistanceNearby: 'κοντά',
   discoverDistanceKm: '{{km}} χλμ',
   discoverStampLike: 'LIKE',

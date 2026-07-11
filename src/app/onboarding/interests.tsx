@@ -10,6 +10,7 @@ import AppButton from '@shared/components/AppButton';
 import Spacer from '@shared/components/Spacer';
 import InterestChip from '@shared/components/InterestChip';
 import OnboardingProgress from '@shared/components/OnboardingProgress';
+import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { useCompleteOnboarding } from '@features/onboarding/hooks/useOnboarding';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
@@ -45,6 +46,7 @@ const MISSING_ROUTE: Record<MissingField, string> = {
 const InterestsScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
+  const errorMessage = useErrorMessage();
   const { data: onboardingData, update } = useOnboardingData();
 
   const [selectedIds, setSelectedIds] = useState<string[]>(
@@ -61,6 +63,7 @@ const InterestsScreen = () => {
     mutate,
     isPending,
     isError: finishFailed,
+    error: finishError,
     reset: resetFinish,
   } = useCompleteOnboarding();
 
@@ -71,6 +74,7 @@ const InterestsScreen = () => {
     // and since Finish needs >= 3 selections the user was permanently
     // stuck in onboarding with no explanation.
     isError: interestsFailed,
+    error: interestsError,
     refetch: refetchInterests,
   } = useQuery({
     queryKey: ['interests'],
@@ -208,7 +212,10 @@ const InterestsScreen = () => {
                 textAlign: 'center',
               }}
             >
-              {t(Translations.ONBOARDING_INTERESTS_ERROR)}
+              {errorMessage(
+                interestsError,
+                Translations.ONBOARDING_INTERESTS_ERROR,
+              )}
             </AppText>
             <Spacer spacing={Spacing.SPACING_PADDING_12} />
             <AppButton variant="outlined" onPress={() => refetchInterests()}>
@@ -300,7 +307,10 @@ const InterestsScreen = () => {
                   textAlign: 'center',
                 }}
               >
-                {t(Translations.ONBOARDING_FINISH_ERROR)}
+                {errorMessage(
+                  finishError,
+                  Translations.ONBOARDING_FINISH_ERROR,
+                )}
               </AppText>
               <Spacer spacing={Spacing.SPACING_PADDING_12} />
             </>

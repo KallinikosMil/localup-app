@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
+import { toNetworkError } from '@shared/utils/networkError';
+
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -100,6 +102,22 @@ const withTimeout = (
   };
 };
 
+// V10 — the transport boundary is the ONLY place that still knows a
+// failure was a transport failure.
+//
+// postgrest-js does not rethrow a fetch rejection: it catches it and
+// returns `{ error: { message, details, hint, code }, status: 0 }`, and
+// every queryFn in this app throws that plain object. By the time a
+// screen sees it, the TypeError is gone — `message` is the only trace
+// left, and branching on message text is precisely what we banned.
+//
+// `code`, however, postgrest copies verbatim off the rejected error. So
+// stamp the rejection here, with a code, and the screens can read it
+// back as a structured field (see @shared/utils/networkError).
+//
+// auth-js is unaffected: it catches ANY rejection from this fetch and
+// re-wraps it as AuthRetryableFetchError, and NetworkError preserves
+// `name: 'AbortError'` so its own abort handling is unchanged.
 const fetchWithTimeout: typeof fetch = async (input, init) => {
   const { signal, cleanup } = withTimeout(timeoutFor(input), init?.signal);
   try {
@@ -107,6 +125,8 @@ const fetchWithTimeout: typeof fetch = async (input, init) => {
       ...init,
       signal,
     });
+  } catch (err) {
+    throw toNetworkError(err);
   } finally {
     // The response has fully arrived (RN's fetch buffers the body), so
     // disarming the timer here can't abort an in-flight read — it only

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { supabase } from '@config/supabase';
+import { isNetworkError } from '@shared/utils/networkError';
 import { store } from '@store';
 import {
   setAuthError,
@@ -65,7 +66,7 @@ const syncOnboardingStatus = async (session: Session | null) => {
     if (isStale(userId)) return;
 
     if (!error) {
-      store.dispatch(setAuthError(false));
+      store.dispatch(setAuthError({ failed: false }));
       store.dispatch(
         setOnboardingComplete(profile?.onboarding_complete ?? false),
       );
@@ -75,7 +76,14 @@ const syncOnboardingStatus = async (session: Session | null) => {
     if (attempt >= PROFILE_READ_BACKOFF_MS.length) {
       // Out of retries. Explicit error state → AppGuard shows Retry.
       // onboardingComplete stays null; we still do not know.
-      store.dispatch(setAuthError(true));
+      // V10: pass on WHICH kind of failure, so the retry screen can say
+      // "no connection" instead of guessing it at the user.
+      store.dispatch(
+        setAuthError({
+          failed: true,
+          offline: isNetworkError(error),
+        }),
+      );
       return;
     }
 
@@ -139,7 +147,13 @@ const bootstrapAuth = async () => {
     let session = data?.session ?? null;
     if (error) {
       if (isTransportFailure(error)) {
-        store.dispatch(setAuthError(true));
+        // Transport failure by construction → the offline copy.
+        store.dispatch(
+          setAuthError({
+            failed: true,
+            offline: true,
+          }),
+        );
         return;
       }
 
@@ -153,12 +167,17 @@ const bootstrapAuth = async () => {
 
     store.dispatch(setUser(toAuthUser(session)));
     await syncOnboardingStatus(session);
-  } catch {
+  } catch (err) {
     // getSession itself threw rather than returning an error. auth-js
     // only re-throws what it could NOT classify as an auth failure, so
     // this is by construction the "we know nothing" branch: never sign
     // out here either — just surface it as retryable.
-    store.dispatch(setAuthError(true));
+    store.dispatch(
+      setAuthError({
+        failed: true,
+        offline: isNetworkError(err),
+      }),
+    );
   } finally {
     // Whatever happened above, AppGuard must be allowed to route. A throw
     // before this line used to leave `initialized: false` FOREVER → the
@@ -172,7 +191,7 @@ const bootstrapAuth = async () => {
 // because the whole session layer talks to the store directly — it lives
 // above the Redux Provider.
 export const retryAuthBootstrap = async () => {
-  store.dispatch(setAuthError(false));
+  store.dispatch(setAuthError({ failed: false }));
   await bootstrapAuth();
 };
 

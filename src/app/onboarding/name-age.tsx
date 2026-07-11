@@ -44,12 +44,18 @@ const NameAgeScreen = () => {
   const [showPicker, setShowPicker] = useState(false);
   const [dobError, setDobError] = useState('');
 
+  // V2: this was mode/reValidateMode 'onBlur'. `isValid` only recomputed
+  // when the field lost focus, so Next stayed disabled — with a filled-in
+  // name and a picked date sitting right there — until the user thought
+  // to dismiss the keyboard. Validate as they type: the button's enabled
+  // state has to track what's on screen, not what was on screen the last
+  // time focus moved.
   const form = useForm<NameAgeForm>({
     defaultValues: {
       displayName: data.displayName,
     },
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   });
 
   const {

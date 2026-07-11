@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
+import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useMatches, type Match } from '@features/matches/hooks/useMatches';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
@@ -26,10 +27,12 @@ export default function MatchesScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const {
     data: matches,
     isLoading,
     isError,
+    error,
     isFetching,
     refetch,
   } = useMatches();
@@ -178,7 +181,7 @@ export default function MatchesScreen() {
               marginTop: Spacing.SPACING_PADDING_12,
             }}
           >
-            {t(Translations.MATCHES_ERROR)}
+            {errorMessage(error, Translations.MATCHES_ERROR)}
           </AppText>
           <Pressable
             onPress={() => refetch()}

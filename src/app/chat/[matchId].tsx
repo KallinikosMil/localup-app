@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { RootState } from '@store';
 
 import AppText from '@shared/components/AppText';
+import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import {
   useChat,
   useSendMessage,
@@ -43,7 +44,8 @@ export default function ChatScreen() {
   const { t } = useTranslation();
 
   const insets = useSafeAreaInsets();
-  const { messages, isLoading, isError, refetch } = useChat(
+  const errorMessage = useErrorMessage();
+  const { messages, isLoading, isError, error, refetch } = useChat(
     matchId,
     threadId ?? null,
   );
@@ -195,7 +197,7 @@ export default function ChatScreen() {
               marginTop: Spacing.SPACING_PADDING_12,
             }}
           >
-            {t(Translations.CHAT_ERROR)}
+            {errorMessage(error, Translations.CHAT_ERROR)}
           </AppText>
           <Pressable
             onPress={() => refetch()}
@@ -299,7 +301,7 @@ export default function ChatScreen() {
         onDismiss={() => sendMessage.reset()}
         duration={4000}
       >
-        {t(Translations.CHAT_SEND_ERROR)}
+        {errorMessage(sendMessage.error, Translations.CHAT_SEND_ERROR)}
       </Snackbar>
     </KeyboardAvoidingView>
   );

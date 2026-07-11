@@ -13,11 +13,14 @@ import enChat from '@features/chat/i18n/locales/en.js';
 import elChat from '@features/chat/i18n/locales/el.js';
 import enProfile from '@features/profile/i18n/locales/en.js';
 import elProfile from '@features/profile/i18n/locales/el.js';
+import enShared from '@shared/i18n/locales/en.js';
+import elShared from '@shared/i18n/locales/el.js';
 
 i18n.use(initReactI18next).init({
   resources: {
     en: {
       translation: {
+        ...enShared,
         ...enAuth,
         ...enOnboarding,
         ...enDiscover,
@@ -28,6 +31,7 @@ i18n.use(initReactI18next).init({
     },
     el: {
       translation: {
+        ...elShared,
         ...elAuth,
         ...elOnboarding,
         ...elDiscover,

@@ -186,6 +186,9 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
     // real data (or an error) arrives.
     isLoading: query.isPending,
     isError: query.isError,
+    // V10: the screen has to see the ERROR, not just the flag, to tell
+    // "you're offline" from "something went wrong".
+    error: query.error,
     refetch: query.refetch,
   };
 };

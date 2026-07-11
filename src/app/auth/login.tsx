@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import {
-  ActivityIndicator,
-  Text,
-  IconButton,
-  Divider,
-} from 'react-native-paper';
+import { Text, IconButton, Divider } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
+import FullScreenLoader from '@shared/components/FullScreenLoader';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -80,19 +76,12 @@ const LoginScreen = () => {
     router.push('/auth/register');
   };
 
+  // V1: the SAME component AppGuard renders while it resolves the
+  // onboarding status. sign-in resolves → this screen unmounts →
+  // AppGuard takes the frame; identical pixels on both sides of that
+  // handoff, so it reads as one continuous loader instead of two.
   if (login.isPending) {
-    return (
-      <View
-        style={[
-          styles.loaderWrap,
-          {
-            backgroundColor: theme.colors.background,
-          },
-        ]}
-      >
-        <ActivityIndicator animating size="large" />
-      </View>
-    );
+    return <FullScreenLoader />;
   }
 
   return (
@@ -299,11 +288,6 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  loaderWrap: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   scrollContent: {
     flexGrow: 1,

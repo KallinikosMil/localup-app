@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useRouter, useSegments } from 'expo-router';
 import { RootState } from '@store';
 import AuthErrorScreen from '@features/auth/components/AuthErrorScreen';
+import FullScreenLoader from '@shared/components/FullScreenLoader';
 
 // Auth-based routing: keeps unauthenticated users in /auth, routes
 // authenticated ones to onboarding or the tabs depending on their
@@ -51,14 +52,24 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
     }
   }, [initialized, authError, user, onboardingComplete, segments]);
 
-  // Render NOTHING until we know where this user belongs. `app/index.ts`
-  // redirects `/` → `/(tabs)/discover` unconditionally, so anything we
-  // render before the session is resolved mounts the authed tabs — the
-  // tab bar + Discover flash on every cold start, before login.
+  // Render NO CHILDREN until we know where this user belongs.
+  // `app/index.ts` redirects `/` → `/(tabs)/discover` unconditionally, so
+  // anything we render before the session is resolved mounts the authed
+  // tabs — the tab bar + Discover flash on every cold start, before
+  // login. The gates themselves are untouched (W5/W13): we still never
+  // route on an unknown onboarding status, and authError still owns the
+  // frame.
+  //
+  // V1: what changed is only the PIXELS. These two branches used to
+  // render `null` — a blank frame wedged between the login screen's
+  // spinner and the destination screen's spinner, so signing in looked
+  // like two loaders with a flash of nothing in between. Same spinner in
+  // every frame now (login.tsx renders the identical component), so the
+  // handoff is seamless.
   // Order matters: not-initialised → unknown-account → unknown-status.
-  if (!initialized) return null;
+  if (!initialized) return <FullScreenLoader />;
   if (authError) return <AuthErrorScreen />;
-  if (user && onboardingComplete === null) return null;
+  if (user && onboardingComplete === null) return <FullScreenLoader />;
 
   return <>{children}</>;
 }

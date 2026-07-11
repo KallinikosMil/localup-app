@@ -16,6 +16,7 @@ import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
 import Spacer from '@shared/components/Spacer';
 import useLocation from '@shared/hooks/useLocation';
+import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useLogout } from '@features/auth/hooks/useAuth';
 import {
   useProfile,
@@ -33,6 +34,7 @@ export default function ProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useTranslation();
+  const errorMessage = useErrorMessage();
   const logout = useLogout();
   const {
     data: profile,
@@ -41,6 +43,7 @@ export default function ProfileScreen() {
     // profile below would render for those frames.
     isPending,
     isError,
+    error,
     refetch: refetchProfile,
     isRefetching: profileRefetching,
   } = useProfile();
@@ -119,7 +122,24 @@ export default function ProfileScreen() {
   // account, not a failure. And pull-to-refresh lives inside the
   // ScrollView below, which never rendered on a hang, so there was no
   // way to retry at all. Say what happened; give them the button.
-  if (isError) {
+  //
+  // V13 — two fixes, both about the error state being EXCLUSIVE:
+  //
+  //  1. The icon was `account-alert-outline`. That glyph is an avatar
+  //     WITH an exclamation mark welded to it, so the failure screen
+  //     rendered a profile icon and an error icon side by side and read
+  //     as "here is your profile, and also something is broken". It's
+  //     `alert-circle-outline` now — the same icon Matches uses, which
+  //     says one thing: this failed.
+  //
+  //  2. `isError` alone yanked the whole screen away even when RQ still
+  //     held a perfectly good cached profile (a failed pull-to-refresh
+  //     kept the data but flipped the flag). Gate on `!profile` too, so
+  //     the error branch takes the frame only when there is genuinely
+  //     nothing to show — mirroring Discover's `isError && !current`.
+  //     When we DO show it, it owns the frame: no header, no avatar, no
+  //     content above or below it.
+  if (isError && !profile) {
     return (
       <View
         style={[
@@ -130,7 +150,7 @@ export default function ProfileScreen() {
         ]}
       >
         <MaterialCommunityIcons
-          name="account-alert-outline"
+          name="alert-circle-outline"
           size={40}
           color={theme.colors.onSurfaceVariant}
         />
@@ -142,7 +162,7 @@ export default function ProfileScreen() {
             marginTop: Spacing.SPACING_PADDING_12,
           }}
         >
-          {t(Translations.PROFILE_ERROR)}
+          {errorMessage(error, Translations.PROFILE_ERROR)}
         </AppText>
         <Pressable
           onPress={() => refetchProfile()}

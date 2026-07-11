@@ -9,7 +9,9 @@ export default {
   discoverMatchTitle: "It's a Match!",
   discoverMatchBody: 'You and {{name}} liked each other',
   discoverMatchCta: 'Keep Swiping',
-  discoverSwipeError: "Swipe didn't go through — check your connection",
+  // V10: "— check your connection" is commonErrorOffline's job now, and
+  // it's only shown when the error actually says so.
+  discoverSwipeError: "Swipe didn't go through. Please try again.",
   discoverDistanceNearby: 'nearby',
   discoverDistanceKm: '{{km}} km',
   discoverStampLike: 'LIKE',

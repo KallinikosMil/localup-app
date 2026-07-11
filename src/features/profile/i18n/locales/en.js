@@ -4,9 +4,13 @@ export default {
   profileRetry: 'Retry',
   profileEditError: "Couldn't load your profile to edit.",
   profileEditBack: 'Back',
-  profileSaveError: "Couldn't save your changes — check your connection",
-  profilePhotoUploadError: "Photo didn't upload — check your connection",
-  profilePhotoDeleteError: "Photo couldn't be deleted — check your connection",
+  // V10: these three used to end in "— check your connection", which is
+  // a claim we had not earned: the same string showed on a 500, a
+  // permission failure and a genuinely offline device. The offline case
+  // now gets commonErrorOffline; these are the "the server said no" copy.
+  profileSaveError: "Couldn't save your changes. Please try again.",
+  profilePhotoUploadError: "Photo didn't upload. Please try again.",
+  profilePhotoDeleteError: "Couldn't delete the photo. Please try again.",
 
   profileTitle: 'Profile',
   profileEditAction: 'Edit',

@@ -32,6 +32,5 @@ export default {
   authConfirmEmailSent:
     'Στάλθηκε email επιβεβαίωσης, έλεγξε τα εισερχόμενά σου!',
   authBootstrapErrorTitle: 'Δεν ήταν δυνατή η φόρτωση του λογαριασμού σου',
-  authBootstrapErrorBody: 'Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.',
   authBootstrapRetry: 'Δοκίμασε ξανά',
 };
