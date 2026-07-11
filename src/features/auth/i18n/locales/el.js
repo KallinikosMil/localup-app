@@ -10,18 +10,17 @@ export default {
   authGoogleSignIn: 'Σύνδεση με Google',
   authNoAccount: 'Δεν έχεις λογαριασμό;',
   authRegister: 'Εγγραφή',
-  authCreateAccountTitle:
-    'Δημιούργησε λογαριασμό',
-  authCreateAccountSubtitle:
-    'Γίνε μέλος της κοινότητας',
-  authCreateAccountButton:
-    'Δημιουργία Λογαριασμού',
+  authCreateAccountTitle: 'Δημιούργησε λογαριασμό',
+  authCreateAccountSubtitle: 'Γίνε μέλος της κοινότητας',
+  authCreateAccountButton: 'Δημιουργία Λογαριασμού',
   authConfirmPasswordLabel: 'Επιβεβαίωση Κωδικού',
   authHasAccount: 'Έχεις ήδη λογαριασμό;',
   authLoginLink: 'Σύνδεση',
-  authErrorFallback:
-    'Κάτι πήγε στραβά. Δοκίμασε ξανά.',
+  authErrorFallback: 'Κάτι πήγε στραβά. Δοκίμασε ξανά.',
   authDismiss: 'Κλείσιμο',
   authConfirmEmailSent:
     'Στάλθηκε email επιβεβαίωσης, έλεγξε τα εισερχόμενά σου!',
+  authBootstrapErrorTitle: 'Δεν ήταν δυνατή η φόρτωση του λογαριασμού σου',
+  authBootstrapErrorBody: 'Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.',
+  authBootstrapRetry: 'Δοκίμασε ξανά',
 };

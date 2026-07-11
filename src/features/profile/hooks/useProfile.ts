@@ -43,10 +43,15 @@ export const useProfile = () => {
 
       if (error) throw error;
 
-      const { data: userInterests } = await supabase
+      // W12: swallowing this error rendered the profile with NO
+      // interests — indistinguishable from a user who picked none.
+      // A failure must not present as data.
+      const { data: userInterests, error: interestsError } = await supabase
         .from('user_interests')
         .select('interest_id, interests(name)')
         .eq('user_id', uid!);
+
+      if (interestsError) throw interestsError;
 
       const interests = (userInterests ?? [])
         .map((ui: any) => ui.interests?.name ?? '')

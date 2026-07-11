@@ -11,15 +11,15 @@ export default {
   authNoAccount: "Don't have an account?",
   authRegister: 'Register',
   authCreateAccountTitle: 'Create your account',
-  authCreateAccountSubtitle:
-    'Join the community',
+  authCreateAccountSubtitle: 'Join the community',
   authCreateAccountButton: 'Create Account',
   authConfirmPasswordLabel: 'Confirm Password',
   authHasAccount: 'Already have an account?',
   authLoginLink: 'Log in',
-  authErrorFallback:
-    'Something went wrong. Please try again.',
+  authErrorFallback: 'Something went wrong. Please try again.',
   authDismiss: 'Dismiss',
-  authConfirmEmailSent:
-    'Confirmation mail sent, check your inbox!',
+  authConfirmEmailSent: 'Confirmation mail sent, check your inbox!',
+  authBootstrapErrorTitle: "Couldn't load your account",
+  authBootstrapErrorBody: 'Check your connection and try again.',
+  authBootstrapRetry: 'Retry',
 };

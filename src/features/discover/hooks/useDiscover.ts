@@ -89,10 +89,14 @@ export const useCandidates = () => {
       // Enrich with interest names in one batch
       // (RPC only returns the shared count).
       const ids = rows.map(r => r.user_id);
-      const { data: ui } = await supabase
+      // W12: swallowing this error made every candidate silently show
+      // ZERO interests — the deck looked fine, it just lied. Fail loudly
+      // so the screen's error branch can offer a retry.
+      const { data: ui, error: interestsError } = await supabase
         .from('user_interests')
         .select('user_id, interests(name)')
         .in('user_id', ids);
+      if (interestsError) throw interestsError;
 
       const nameMap = new Map<string, string[]>();
       for (const row of ui ?? []) {

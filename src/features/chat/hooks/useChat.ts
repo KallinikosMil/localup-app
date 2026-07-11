@@ -189,22 +189,33 @@ export const useSendMessage = (matchId: string) => {
 
   return useMutation({
     mutationFn: async (body: string) => {
-      // Get or create thread
-      let { data: thread } = await supabase
+      // Get or create thread.
+      //
+      // W12: the error USED to be discarded here. A failed *read* then
+      // looked exactly like "no thread exists" — and the code below
+      // reacts to that by INSERTING one. `chat_threads.match_id` has no
+      // unique constraint, so the duplicate lands; from then on the read
+      // path's .maybeSingle() errors on multiple rows and the chat is
+      // permanently broken, with the two users writing into different
+      // threads. A failed read must fail, not become a fact.
+      let { data: thread, error: threadErr } = await supabase
         .from('chat_threads')
         .select('id')
         .eq('match_id', matchId)
         .maybeSingle();
 
+      if (threadErr) throw threadErr;
+
       if (!thread) {
         // Look up the match to get
         // traveler/host ids
-        const { data: match } = await supabase
+        const { data: match, error: matchErr } = await supabase
           .from('matches')
           .select('traveler_id, host_id')
           .eq('id', matchId)
           .single();
 
+        if (matchErr) throw matchErr;
         if (!match) throw new Error('Match not found');
 
         const { data: newThread, error } = await supabase

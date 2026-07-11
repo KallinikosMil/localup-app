@@ -68,12 +68,16 @@ export function useCompleteOnboarding() {
       if (profileError) throw profileError;
 
       // 4. Insert media row
-      await supabase.from('media').insert({
+      // W12: this was the only step whose result was discarded — a
+      // failure left avatar_url set but no `media` row, so the photo
+      // was missing from the grid forever, with no error anywhere.
+      const { error: mediaError } = await supabase.from('media').insert({
         user_id: user.id,
         type: 'avatar',
         storage_path: filePath,
         is_primary: true,
       });
+      if (mediaError) throw mediaError;
 
       // 5. Save interests
       const interestRows = data.interestIds.map(id => ({

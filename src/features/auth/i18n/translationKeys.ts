@@ -19,4 +19,7 @@ export enum Translations {
   AUTH_ERROR_FALLBACK = 'authErrorFallback',
   AUTH_DISMISS = 'authDismiss',
   AUTH_CONFIRM_EMAIL_SENT = 'authConfirmEmailSent',
+  AUTH_BOOTSTRAP_ERROR_TITLE = 'authBootstrapErrorTitle',
+  AUTH_BOOTSTRAP_ERROR_BODY = 'authBootstrapErrorBody',
+  AUTH_BOOTSTRAP_RETRY = 'authBootstrapRetry',
 }

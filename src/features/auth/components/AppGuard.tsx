@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter, useSegments } from 'expo-router';
 import { RootState } from '@store';
+import AuthErrorScreen from '@features/auth/components/AuthErrorScreen';
 
 // Auth-based routing: keeps unauthenticated users in /auth, routes
 // authenticated ones to onboarding or the tabs depending on their
@@ -9,12 +10,16 @@ import { RootState } from '@store';
 export default function AppGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();
-  const { user, initialized, onboardingComplete } = useSelector(
+  const { user, initialized, onboardingComplete, authError } = useSelector(
     (s: RootState) => s.auth,
   );
 
   useEffect(() => {
     if (!initialized) return;
+
+    // We don't know the account state (W13). Don't route on a guess —
+    // the error screen below owns the frame until Retry resolves it.
+    if (authError) return;
 
     const inAuthGroup = segments[0] === 'auth';
     const inOnboarding = segments[0] === 'onboarding';
@@ -44,7 +49,16 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
     } else if (user && onboardingComplete && inOnboarding) {
       router.replace('/(tabs)/discover');
     }
-  }, [initialized, user, onboardingComplete, segments]);
+  }, [initialized, authError, user, onboardingComplete, segments]);
+
+  // Render NOTHING until we know where this user belongs. `app/index.ts`
+  // redirects `/` → `/(tabs)/discover` unconditionally, so anything we
+  // render before the session is resolved mounts the authed tabs — the
+  // tab bar + Discover flash on every cold start, before login.
+  // Order matters: not-initialised → unknown-account → unknown-status.
+  if (!initialized) return null;
+  if (authError) return <AuthErrorScreen />;
+  if (user && onboardingComplete === null) return null;
 
   return <>{children}</>;
 }
