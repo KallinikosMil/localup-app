@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { supabase } from '@config/supabase';
 import { store } from '@store';
 import {
@@ -83,22 +84,65 @@ const syncOnboardingStatus = async (session: Session | null) => {
   }
 };
 
+// TRANSPORT failure ≠ AUTH failure.
+//
+// "I couldn't reach the auth server" says NOTHING about whether the
+// session is valid — it says we don't know. "The server answered and
+// rejected the token" says the session is dead. Only the second one may
+// destroy state.
+//
+// auth-js draws exactly this line for itself: `_callRefreshToken` calls
+// `_removeSession()` on an auth error but deliberately SKIPS it when
+// `isAuthRetryableFetchError(error)` is true. We reuse its own predicate
+// so our verdict can't drift from the library's.
+//
+// It covers every fetch rejection (offline, DNS, dead socket — and our
+// own 15s timeout abort, which `_handleRequest` catches and re-wraps as
+// AuthRetryableFetchError) plus 502/503/504. `isAuthRetryableFetchError`
+// is a documented export of @supabase/auth-js and is re-exported by
+// @supabase/supabase-js (`export * from '@supabase/auth-js'`).
+const isTransportFailure = (error: unknown) => {
+  if (isAuthRetryableFetchError(error)) return true;
+
+  // Belt and braces, for an abort that escapes before auth-js can wrap
+  // it. `name` is a structured field, not prose — we still never branch
+  // on error message text (that was the W12 bug).
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as { name?: unknown }).name === 'AbortError'
+  );
+};
+
 // Cold-start (and Retry) bootstrap: restore the persisted session and
 // resolve the onboarding status for it.
 const bootstrapAuth = async () => {
   try {
     const { data, error } = await supabase.auth.getSession();
 
-    // W12: ANY getSession error means the persisted session is unusable
-    // (most often a rotated single-use refresh token). We used to branch
-    // on the error *text* (/refresh token/i) — error messages are not an
-    // API contract, so that silently missed every other failure — and,
-    // worse, we then read `data.session` anyway, so a stale session could
-    // still be adopted and the auto-refresh loop kept retrying a dead
-    // token. Treat any error as "no session": clear it locally and null
-    // it out so it cannot be read below. The user lands on login.
+    // W12: an AUTH error from getSession means the persisted session is
+    // unusable (most often a rotated single-use refresh token). We used
+    // to branch on the error *text* (/refresh token/i) — error messages
+    // are not an API contract — and we then read `data.session` anyway,
+    // so a dead session could still be adopted. So: clear it locally and
+    // null it out. The user lands on login. That much still holds.
+    //
+    // H1b: but "any error" was too wide. Adding the global 15s fetch
+    // timeout made a *transport* failure surface as an error too, so an
+    // offline-but-perfectly-valid user was getting force-signed-out and
+    // dumped on the login screen. Inferring dead-session from an
+    // unreachable server is the exact anti-pattern W13 banned. On a
+    // transport failure we now change NOTHING: no signOut, no session
+    // wipe, no `user` write. Just say we don't know — AppGuard shows the
+    // retryable error screen and holds the frame until Retry (or the
+    // network) resolves it.
     let session = data?.session ?? null;
     if (error) {
+      if (isTransportFailure(error)) {
+        store.dispatch(setAuthError(true));
+        return;
+      }
+
       try {
         await supabase.auth.signOut({ scope: 'local' });
       } catch {
@@ -110,8 +154,10 @@ const bootstrapAuth = async () => {
     store.dispatch(setUser(toAuthUser(session)));
     await syncOnboardingStatus(session);
   } catch {
-    // getSession itself threw (the global fetch timeout now turns a hang
-    // into a throw). We know nothing — say so, don't guess.
+    // getSession itself threw rather than returning an error. auth-js
+    // only re-throws what it could NOT classify as an auth failure, so
+    // this is by construction the "we know nothing" branch: never sign
+    // out here either — just surface it as retryable.
     store.dispatch(setAuthError(true));
   } finally {
     // Whatever happened above, AppGuard must be allowed to route. A throw
