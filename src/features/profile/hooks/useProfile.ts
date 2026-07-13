@@ -307,21 +307,44 @@ export const useSyncLocation = (lat: number | null, lng: number | null) => {
         lastSync.current = null;
         return;
       }
-      // W6 (reframed): a location write has to propagate through the
-      // location-derived pipeline, not just the profile row. Two
-      // uid-scoped queries actually change with the coords we wrote:
-      //   ['profile']            — the mode badge (computeMode reads
-      //                            profiles.current_lat/lng)
-      //   ['discover-candidates']— the deck (distance_km +
-      //                            candidate_mode are computed
-      //                            server-side from the swiper coords)
-      // useSyncLocation wrote the coords but invalidated neither, so
-      // both served stale results until a manual refresh. Patch the
-      // profile optimistically for an INSTANT badge, then invalidate
-      // both so they refetch coherently. (Throttled — see the guards
-      // above — and writes the DB before invalidating, so it doesn't
-      // loop with useStaleLocationRefetch.) Prefs aren't location-
-      // derived; the deck refetch re-reads the unchanged prefs anyway.
+      // Fix-B / V6 — THE RACE. We just wrote the coords; now they have to
+      // reach ['profile'] (the badge) and ['discover-candidates'] (the
+      // deck). Two previous fixes added exactly the two lines below and
+      // BOTH failed on device, because on a cold open both are no-ops:
+      //
+      // This hook is mounted in the tabs layout, and the tabs' first
+      // screen (Discover → useStaleLocationRefetch → useProfile) kicks
+      // off the profile query's FIRST fetch on the same mount. That read
+      // needs two sequential Supabase round trips (profiles, then
+      // user_interests). Meanwhile useLocation resolves its first fix from
+      // getLastKnownPositionAsync — an OS-cached value, no GPS wait, no
+      // network — so our single-round-trip UPDATE lands while the profile
+      // query is still in flight with `data === undefined`. In that exact
+      // window, query-core degrades both cache primitives to no-ops:
+      //
+      //   • setQueryData bails when the updater returns undefined
+      //     ("if (data === void 0) return"), and an updater that can only
+      //     spread an existing `prev` returns undefined when there is none.
+      //   • invalidate → refetch only CANCELS-AND-RESTARTS an in-flight
+      //     fetch when the query already has data
+      //     ("state.data !== void 0 && cancelRefetch"); otherwise it JOINS
+      //     the in-flight promise and returns it.
+      //
+      // So the pre-write read lands last, wins, installs the OLD coords as
+      // fresh data (staleTime 5min) and clears isInvalidated. Nothing
+      // self-heals afterwards: the throttle above suppresses the next fix,
+      // there is no focusManager/AppState wiring so refetchOnWindowFocus
+      // can never fire, and Tabs keep the screen mounted so refetchOnMount
+      // never runs. The badge stays LOCAL until the user pull-to-refreshes
+      // — which works only because by then the query HAS data.
+      //
+      // Cancel the stale read FIRST (revert:true rejects its retryer, so
+      // its late response is discarded and cannot land), and only then
+      // patch and refetch. This is the standard optimistic-update ordering
+      // and it is what makes the two lines below actually do something.
+      await queryClient.cancelQueries({
+        queryKey: ['profile', uid],
+      });
       queryClient.setQueryData<Profile>(['profile', uid], prev =>
         prev
           ? {
