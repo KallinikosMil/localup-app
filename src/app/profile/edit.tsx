@@ -8,7 +8,8 @@ import {
   Alert,
   TextInput as RNTextInput,
 } from 'react-native';
-import { useTheme, ActivityIndicator, Snackbar } from 'react-native-paper';
+import { ActivityIndicator, Snackbar } from 'react-native-paper';
+import { useAppTheme, AppTheme } from '@theme/paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -37,7 +38,7 @@ const MAX_PHOTOS = 6;
 const BIO_LIMIT = 240;
 
 export default function EditProfileScreen() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const router = useRouter();
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -752,7 +753,7 @@ const Section = ({
   bg: string;
   children: React.ReactNode;
 }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   return (
     <View>
       <AppText
@@ -787,7 +788,7 @@ const FieldRow = ({
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
-  theme: ReturnType<typeof useTheme>;
+  theme: AppTheme;
 }) => (
   <View style={styles.fieldRow}>
     <MaterialCommunityIcons
@@ -806,7 +807,7 @@ const FieldRow = ({
 );
 
 const Divider = () => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   return (
     <View
       style={{
@@ -829,7 +830,7 @@ const ModePill = ({
   label: string;
   active: boolean;
   onPress: () => void;
-  theme: ReturnType<typeof useTheme>;
+  theme: AppTheme;
   surface: string;
 }) => (
   <Pressable

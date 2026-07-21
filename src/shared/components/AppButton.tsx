@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
-import { useTheme } from 'react-native-paper';
+import { useAppTheme, AppTheme } from '@theme/paper';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
 type AppButtonVariant = 'primary' | 'outlined' | 'link' | 'google';
@@ -17,7 +17,7 @@ const AppButton = ({
   labelStyle,
   ...rest
 }: AppButtonProps) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   const config = getVariantConfig(variant, theme);
 
@@ -34,10 +34,7 @@ const AppButton = ({
   );
 };
 
-const getVariantConfig = (
-  variant: AppButtonVariant,
-  theme: ReturnType<typeof useTheme>,
-) => {
+const getVariantConfig = (variant: AppButtonVariant, theme: AppTheme) => {
   switch (variant) {
     case 'primary':
       return {
