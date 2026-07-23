@@ -124,8 +124,17 @@ const InterestsScreen = () => {
     // every distance calculation the app makes, forever, with no error.
     // A missing value is NOT a zero. Refuse, and tell the user exactly
     // which step to go back to.
-    const dateOfBirth =
-      onboardingData.dateOfBirth?.toISOString().split('T')[0] ?? '';
+    // A birthdate is a CALENDAR date, not an instant. toISOString()
+    // converts to UTC first, so a date the picker stored at local
+    // midnight rolls back a full day for anyone east of UTC — i.e. every
+    // user in Greece. And there is no date-of-birth field on
+    // profile/edit, so a wrong value written here can never be corrected
+    // from inside the app. Read the local calendar fields directly.
+    const dob = onboardingData.dateOfBirth;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const dateOfBirth = dob
+      ? `${dob.getFullYear()}-${pad(dob.getMonth() + 1)}-${pad(dob.getDate())}`
+      : '';
     const { homeLat, homeLng, photoUri } = onboardingData;
 
     if (!dateOfBirth) {

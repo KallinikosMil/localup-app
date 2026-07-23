@@ -20,7 +20,13 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
 
     // We don't know the account state (W13). Don't route on a guess —
     // the error screen below owns the frame until Retry resolves it.
-    if (authError) return;
+    //
+    // Only when the status is genuinely UNKNOWN, though. A failed read
+    // that happened while we already hold a boolean status (e.g. a blip
+    // during a mid-session refresh) tells us nothing new: we still know
+    // where this user belongs, so keep routing normally rather than
+    // freezing a working session.
+    if (authError && onboardingComplete === null) return;
 
     const inAuthGroup = segments[0] === 'auth';
     const inOnboarding = segments[0] === 'onboarding';
@@ -68,7 +74,11 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
   // handoff is seamless.
   // Order matters: not-initialised → unknown-account → unknown-status.
   if (!initialized) return <FullScreenLoader />;
-  if (authError) return <AuthErrorScreen />;
+  // Same tightening as the routing effect: the error screen may only
+  // take the frame when we genuinely do not know the account state.
+  // Unconditionally, it meant one failed profile read mid-session
+  // unmounted the entire running app.
+  if (authError && onboardingComplete === null) return <AuthErrorScreen />;
   if (user && onboardingComplete === null) return <FullScreenLoader />;
 
   return <>{children}</>;

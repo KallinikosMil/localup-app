@@ -345,6 +345,14 @@ export const useSyncLocation = (lat: number | null, lng: number | null) => {
       await queryClient.cancelQueries({
         queryKey: ['profile', uid],
       });
+      // The deck is subject to the exact same race: its first fetch can
+      // already be in flight with the pre-write location, and it would
+      // settle AFTER the invalidate below and win. Cancelling only
+      // ['profile'] left this half of Fix-B open, so a cold open that
+      // raced the location write still showed a stale deck.
+      await queryClient.cancelQueries({
+        queryKey: ['discover-candidates', uid],
+      });
       queryClient.setQueryData<Profile>(['profile', uid], prev =>
         prev
           ? {

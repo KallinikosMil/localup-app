@@ -191,8 +191,22 @@ const bootstrapAuth = async () => {
 // because the whole session layer talks to the store directly — it lives
 // above the Redux Provider.
 export const retryAuthBootstrap = async () => {
+  // Hold the frame for the WHOLE retry. Clearing the error first while
+  // `initialized` is still true un-gates AppGuard instantly — and since
+  // the failed bootstrap returned before ever dispatching a user, the
+  // routing effect then sees `!user` and lands a signed-in user on
+  // /auth/login for the entire retry (up to the full 15s fetch timeout).
+  // Going back to "not initialised" makes AppGuard hold the loader,
+  // exactly as it does on cold start.
+  store.dispatch(setInitialized(false));
   store.dispatch(setAuthError({ failed: false }));
-  await bootstrapAuth();
+  try {
+    await bootstrapAuth();
+  } finally {
+    // bootstrapAuth's own `finally` already does this; repeated here so
+    // a throw before it can't strand the app on the loader forever.
+    store.dispatch(setInitialized(true));
+  }
 };
 
 // Owns the Supabase auth session: restores it on cold start and keeps the
@@ -207,10 +221,27 @@ export const useAuthSession = () => {
       // INITIAL_SESSION is exactly what bootstrapAuth already did.
       if (event === 'INITIAL_SESSION') return;
 
+      // Snapshot BEFORE setUser — that dispatch overwrites the very uid
+      // we need to compare the incoming session against.
+      const prev = store.getState().auth;
+      const nextUser = toAuthUser(session);
+      const sameUser =
+        prev.user?.uid != null && prev.user.uid === nextUser?.uid;
+      const statusKnown = typeof prev.onboardingComplete === 'boolean';
+
       // The session Supabase hands us IS the source of truth (null on
       // sign-out), so there's nothing to error-check here. setUser is
       // synchronous and touches no network — safe inside the callback.
-      store.dispatch(setUser(toAuthUser(session)));
+      store.dispatch(setUser(nextUser));
+
+      // TOKEN_REFRESHED fires ~hourly, and on every app resume, with the
+      // SAME uid. setUser above already keeps a known status across
+      // those, so re-reading the profile buys nothing — but it can cost
+      // everything: one transient PostgREST blip on that read sets
+      // authError, which swapped the whole running app for the
+      // full-screen error screen, mid-session, for a healthy user. Same
+      // user + status already known ⇒ there is nothing to sync.
+      if (sameUser && statusKnown) return;
 
       // Supabase holds the auth lock while this callback runs, and
       // `supabase.from(...)` re-enters it — awaiting Supabase calls in
