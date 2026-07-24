@@ -19,6 +19,23 @@ const toAuthUser = (session: Session | null) =>
       }
     : null;
 
+// DEV-ONLY breadcrumbs for "why am I suddenly on the login screen?".
+//
+// Every branch below has a different cause and a different fix, but they
+// all look identical from the outside — you just end up on login. When it
+// happened in the wild the logcat buffer had already rotated, so there
+// was nothing left to read and the cause stayed a guess. These make the
+// branch self-reporting.
+//
+// Never logs tokens or emails — booleans, event names and a short uid
+// prefix only (enough to tell "same user" from "different user").
+const authLog = (branch: string, extra?: Record<string, unknown>) => {
+  if (!__DEV__) return;
+  console.log(`[auth] ${branch}`, extra ?? '');
+};
+
+const uidTag = (id?: string | null) => (id ? `${id.slice(0, 8)}…` : null);
+
 // The profile read is the one thing standing between the user and the
 // app, so give a transient blip a couple of chances before we surface
 // the error screen.
@@ -78,6 +95,10 @@ const syncOnboardingStatus = async (session: Session | null) => {
       // onboardingComplete stays null; we still do not know.
       // V10: pass on WHICH kind of failure, so the retry screen can say
       // "no connection" instead of guessing it at the user.
+      authLog('profile read failed after retries → authError (NOT a logout)', {
+        offline: isNetworkError(error),
+        code: (error as { code?: unknown }).code,
+      });
       store.dispatch(
         setAuthError({
           failed: true,
@@ -148,6 +169,7 @@ const bootstrapAuth = async () => {
     if (error) {
       if (isTransportFailure(error)) {
         // Transport failure by construction → the offline copy.
+        authLog('getSession TRANSPORT failure → session kept, retry screen');
         store.dispatch(
           setAuthError({
             failed: true,
@@ -157,12 +179,33 @@ const bootstrapAuth = async () => {
         return;
       }
 
+      // THE EJECTION BRANCH. If you landed on login unexpectedly and this
+      // line is in the log, the server rejected the persisted session
+      // (usually a rotated single-use refresh token) and we dropped it on
+      // purpose. `name` only — error messages are not an API contract.
+      authLog('getSession AUTH error → signOut(local), EJECTING to login', {
+        name: (error as { name?: unknown }).name,
+        status: (error as { status?: unknown }).status,
+      });
       try {
         await supabase.auth.signOut({ scope: 'local' });
       } catch {
         // best-effort cleanup
       }
       session = null;
+    }
+
+    if (!error) {
+      // No error at all, but also no session = auth-js already dropped it
+      // in the background (it calls _removeSession() when a refresh is
+      // rejected). Same visible outcome as the branch above, completely
+      // different cause — which is exactly why both are logged.
+      authLog(
+        session
+          ? 'bootstrap OK → session restored'
+          : 'bootstrap OK but NO persisted session → login',
+        { uid: uidTag(session?.user?.id) },
+      );
     }
 
     store.dispatch(setUser(toAuthUser(session)));
@@ -172,6 +215,9 @@ const bootstrapAuth = async () => {
     // only re-throws what it could NOT classify as an auth failure, so
     // this is by construction the "we know nothing" branch: never sign
     // out here either — just surface it as retryable.
+    authLog('getSession THREW → retry screen (session untouched)', {
+      offline: isNetworkError(err),
+    });
     store.dispatch(
       setAuthError({
         failed: true,
@@ -228,6 +274,19 @@ export const useAuthSession = () => {
       const sameUser =
         prev.user?.uid != null && prev.user.uid === nextUser?.uid;
       const statusKnown = typeof prev.onboardingComplete === 'boolean';
+
+      // The single most useful line when a session disappears: it shows
+      // WHICH event arrived. A SIGNED_OUT here that nobody asked for means
+      // auth-js dropped the session itself (rejected refresh) — that is a
+      // very different bug from our own code ejecting the user.
+      authLog(`event ${event}`, {
+        hasSession: !!session,
+        sameUser,
+        statusKnown,
+        willSkipProfileRead: sameUser && statusKnown,
+        from: uidTag(prev.user?.uid),
+        to: uidTag(nextUser?.uid),
+      });
 
       // The session Supabase hands us IS the source of truth (null on
       // sign-out), so there's nothing to error-check here. setUser is
