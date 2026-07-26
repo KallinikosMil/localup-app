@@ -7,18 +7,15 @@ import {
   Pressable,
   RefreshControl,
 } from 'react-native';
-import {
-  useTheme,
-  ActivityIndicator,
-  Chip,
-  Snackbar,
-} from 'react-native-paper';
+import { ActivityIndicator, Chip, Snackbar } from 'react-native-paper';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAppTheme, AppTheme } from '@theme/paper';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
-import AppButton from '@shared/components/AppButton';
 import Spacer from '@shared/components/Spacer';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
@@ -32,12 +29,12 @@ import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
-const AVATAR_SIZE = 112;
 const PHOTO_SIZE = 96;
 
 export default function ProfileScreen() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const logout = useLogout();
@@ -86,7 +83,6 @@ export default function ProfileScreen() {
     profile?.current_lat ?? latitude,
     profile?.current_lng ?? longitude,
   );
-  const modeKnown = mode !== null;
   const modeLabel =
     mode === 'traveler'
       ? Translations.PROFILE_BADGE_TRAVELER
@@ -219,35 +215,56 @@ export default function ProfileScreen() {
           />
         }
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <AppText
-            variant="h2"
-            style={{
-              color: theme.colors.onBackground,
-            }}
-          >
-            {t(Translations.PROFILE_TITLE)}
-          </AppText>
+        {/* Hero: full-bleed photo (or a tonal fallback) with a bottom
+            scrim, the identity overlaid, and a floating Edit pill — the
+            same visual language as the Discover card, so a profile reads
+            as "your own card". */}
+        <View style={styles.hero}>
+          {profile?.avatar_url ? (
+            <Image
+              source={{ uri: profile.avatar_url }}
+              style={styles.heroImage}
+            />
+          ) : (
+            <LinearGradient
+              colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
+              style={[styles.heroImage, styles.heroFallback]}
+            >
+              <MaterialCommunityIcons
+                name="account"
+                size={96}
+                color={theme.colors.ON_PHOTO}
+                style={{ opacity: 0.9 }}
+              />
+            </LinearGradient>
+          )}
+
+          <LinearGradient
+            colors={[
+              'transparent',
+              theme.colors.BLACK_A35,
+              theme.colors.BLACK_A75,
+            ]}
+            style={styles.heroScrim}
+          />
+
           <Pressable
             onPress={() => router.push('/profile/edit')}
             hitSlop={12}
             style={[
               styles.editPill,
-              {
-                backgroundColor: theme.colors.primary,
-              },
+              { backgroundColor: theme.colors.BLACK_A35, top: insets.top + 8 },
             ]}
           >
             <MaterialCommunityIcons
               name="pencil-outline"
               size={14}
-              color={theme.colors.onPrimary}
+              color={theme.colors.ON_PHOTO}
             />
             <AppText
               variant="caption"
               style={{
-                color: theme.colors.onPrimary,
+                color: theme.colors.ON_PHOTO,
                 fontWeight: '700',
                 marginLeft: 6,
               }}
@@ -255,214 +272,195 @@ export default function ProfileScreen() {
               {t(Translations.PROFILE_EDIT_ACTION)}
             </AppText>
           </Pressable>
-        </View>
 
-        {/* Avatar + identity */}
-        <View style={styles.identity}>
-          {profile?.avatar_url ? (
-            <Image
-              source={{
-                uri: profile.avatar_url,
-              }}
-              style={styles.avatar}
-            />
-          ) : (
-            <View
-              style={[
-                styles.avatar,
-                styles.avatarPlaceholder,
-                {
-                  backgroundColor: surfaceLow,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="account"
-                size={56}
-                color={theme.colors.onSurfaceVariant}
-              />
-            </View>
-          )}
-          <Spacer spacing={Spacing.SPACING_PADDING_12} />
-          <AppText
-            variant="h2"
-            style={{
-              color: theme.colors.onBackground,
-              textAlign: 'center',
-            }}
-          >
-            {profile?.display_name ?? t(Translations.PROFILE_NO_NAME)}
-          </AppText>
-          {profile?.home_city ? (
-            <View style={styles.cityRow}>
-              <MaterialCommunityIcons
-                name="map-marker-outline"
-                size={14}
-                color={theme.colors.onSurfaceVariant}
-              />
-              <AppText
-                variant="caption"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  marginLeft: 4,
-                }}
-              >
-                {profile.home_city}
-              </AppText>
-            </View>
-          ) : null}
-          <Spacer spacing={Spacing.SPACING_PADDING_8} />
-          {/* Mode badge. H5: `mode` is null while the coords are unknown —
-            it used to be 'local', so a traveler was badged LOCAL until
-            the location landed. A neutral badge says "we don't know
-            yet" instead of guessing. */}
-          <View
-            style={[
-              styles.modeBadge,
-              {
-                backgroundColor: modeKnown
-                  ? theme.colors.primaryContainer
-                  : theme.colors.surfaceVariant,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name={modeIcon}
-              size={14}
-              color={
-                modeKnown
-                  ? theme.colors.onPrimaryContainer
-                  : theme.colors.onSurfaceVariant
-              }
-            />
-            <AppText
-              variant="caption"
-              style={{
-                color: modeKnown
-                  ? theme.colors.onPrimaryContainer
-                  : theme.colors.onSurfaceVariant,
-                fontWeight: '700',
-                marginLeft: 6,
-                letterSpacing: 0.5,
-              }}
-            >
-              {t(modeLabel)}
+          <View style={styles.heroInfo}>
+            <AppText variant="h1" style={{ color: theme.colors.ON_PHOTO }}>
+              {profile?.display_name ?? t(Translations.PROFILE_NO_NAME)}
             </AppText>
+            <View style={styles.heroMeta}>
+              {profile?.home_city ? (
+                <View style={styles.cityRow}>
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={14}
+                    color={theme.colors.ON_PHOTO}
+                  />
+                  <AppText
+                    variant="caption"
+                    style={{ color: theme.colors.ON_PHOTO, marginLeft: 4 }}
+                  >
+                    {profile.home_city}
+                  </AppText>
+                </View>
+              ) : null}
+              {/* Mode badge. H5: `mode` is null until coords land — a
+                  neutral badge says "we don't know yet" instead of
+                  guessing LOCAL. */}
+              <View
+                style={[
+                  styles.modeBadge,
+                  {
+                    backgroundColor:
+                      mode === 'traveler'
+                        ? theme.colors.modeTraveler
+                        : mode === 'local'
+                          ? theme.colors.modeLocal
+                          : theme.colors.BLACK_A35,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name={modeIcon}
+                  size={13}
+                  color={theme.colors.ON_PHOTO}
+                />
+                <AppText
+                  variant="caption"
+                  style={{
+                    color: theme.colors.ON_PHOTO,
+                    fontWeight: '700',
+                    marginLeft: 6,
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {t(modeLabel)}
+                </AppText>
+              </View>
+            </View>
           </View>
         </View>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_24} />
-
-        {/* About */}
-        <Section
-          title={t(Translations.PROFILE_SECTION_ABOUT)}
-          bg={theme.colors.surface}
-        >
-          <AppText
-            variant="body"
-            style={{
-              color: theme.colors.onSurface,
-              lineHeight: 22,
-            }}
+        {/* Body */}
+        <View style={styles.body}>
+          {/* About */}
+          <Section
+            title={t(Translations.PROFILE_SECTION_ABOUT)}
+            bg={theme.colors.surface}
           >
-            {profile?.bio?.trim() || t(Translations.PROFILE_BIO_EMPTY)}
-          </AppText>
-        </Section>
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.onSurface,
+                lineHeight: 22,
+              }}
+            >
+              {profile?.bio?.trim() || t(Translations.PROFILE_BIO_EMPTY)}
+            </AppText>
+          </Section>
 
-        {/* Photos. A failed read must not masquerade as an empty gallery
+          {/* Photos. A failed read must not masquerade as an empty gallery
           (the PR-H2 rule): show it only as empty when the read actually
           succeeded with zero photos; surface an error otherwise. A
           stale-but-usable list keeps rendering even if a refetch errors. */}
-        {photos && photos.length > 0 ? (
-          <>
-            <Spacer spacing={Spacing.SPACING_PADDING_16} />
-            <Section
-              title={t(Translations.PROFILE_SECTION_GALLERY)}
-              bg={theme.colors.surface}
-            >
-              <View style={styles.photoGrid}>
-                {photos.map(p => (
-                  <View
-                    key={p.id}
-                    style={[
-                      styles.photoCell,
-                      {
-                        backgroundColor: surfaceLow,
-                      },
-                    ]}
-                  >
-                    <Image source={{ uri: p.url }} style={styles.photoImg} />
-                  </View>
-                ))}
-              </View>
-            </Section>
-          </>
-        ) : photosError ? (
-          <>
-            <Spacer spacing={Spacing.SPACING_PADDING_16} />
-            <Section
-              title={t(Translations.PROFILE_SECTION_GALLERY)}
-              bg={theme.colors.surface}
-            >
-              <AppText
-                variant="body"
-                style={{ color: theme.colors.onSurfaceVariant }}
+          {photos && photos.length > 0 ? (
+            <>
+              <Spacer spacing={Spacing.SPACING_PADDING_16} />
+              <Section
+                title={t(Translations.PROFILE_SECTION_GALLERY)}
+                bg={theme.colors.surface}
               >
-                {t(Translations.PROFILE_GALLERY_ERROR)}
-              </AppText>
-            </Section>
-          </>
-        ) : null}
+                <View style={styles.photoGrid}>
+                  {photos.map(p => (
+                    <View
+                      key={p.id}
+                      style={[
+                        styles.photoCell,
+                        {
+                          backgroundColor: surfaceLow,
+                        },
+                      ]}
+                    >
+                      <Image source={{ uri: p.url }} style={styles.photoImg} />
+                    </View>
+                  ))}
+                </View>
+              </Section>
+            </>
+          ) : photosError ? (
+            <>
+              <Spacer spacing={Spacing.SPACING_PADDING_16} />
+              <Section
+                title={t(Translations.PROFILE_SECTION_GALLERY)}
+                bg={theme.colors.surface}
+              >
+                <AppText
+                  variant="body"
+                  style={{ color: theme.colors.onSurfaceVariant }}
+                >
+                  {t(Translations.PROFILE_GALLERY_ERROR)}
+                </AppText>
+              </Section>
+            </>
+          ) : null}
 
-        {/* Interests */}
-        {profile?.interests && profile.interests.length > 0 ? (
-          <>
-            <Spacer spacing={Spacing.SPACING_PADDING_16} />
-            <Section
-              title={t(Translations.PROFILE_SECTION_INTERESTS)}
-              bg={theme.colors.surface}
+          {/* Interests */}
+          {profile?.interests && profile.interests.length > 0 ? (
+            <>
+              <Spacer spacing={Spacing.SPACING_PADDING_16} />
+              <Section
+                title={t(Translations.PROFILE_SECTION_INTERESTS)}
+                bg={theme.colors.surface}
+              >
+                <View style={styles.chips}>
+                  {profile.interests.map(interest => (
+                    <Chip
+                      key={interest}
+                      style={[
+                        styles.chip,
+                        {
+                          backgroundColor: surfaceLow,
+                        },
+                      ]}
+                      textStyle={{
+                        color: theme.colors.onSurface,
+                      }}
+                    >
+                      {interest}
+                    </Chip>
+                  ))}
+                </View>
+              </Section>
+            </>
+          ) : null}
+
+          <Spacer spacing={Spacing.SPACING_PADDING_32} />
+
+          {/* Quiet, low-emphasis log out — deliberately not a primary
+              button (it competed with Edit before). */}
+          <Pressable
+            onPress={() =>
+              logout.mutate(undefined, {
+                onError: err =>
+                  setLogoutError(
+                    errorMessage(err, Translations.PROFILE_LOGOUT_ERROR),
+                  ),
+              })
+            }
+            hitSlop={8}
+            disabled={logout.isPending}
+            style={styles.logout}
+          >
+            {logout.isPending ? (
+              <ActivityIndicator size={16} />
+            ) : (
+              <MaterialCommunityIcons
+                name="logout"
+                size={16}
+                color={theme.colors.onSurfaceVariant}
+              />
+            )}
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                fontWeight: '600',
+                marginLeft: 6,
+              }}
             >
-              <View style={styles.chips}>
-                {profile.interests.map(interest => (
-                  <Chip
-                    key={interest}
-                    style={[
-                      styles.chip,
-                      {
-                        backgroundColor: surfaceLow,
-                      },
-                    ]}
-                    textStyle={{
-                      color: theme.colors.onSurface,
-                    }}
-                  >
-                    {interest}
-                  </Chip>
-                ))}
-              </View>
-            </Section>
-          </>
-        ) : null}
-
-        <Spacer spacing={Spacing.SPACING_PADDING_32} />
-
-        <AppButton
-          variant="outlined"
-          onPress={() =>
-            logout.mutate(undefined, {
-              onError: err =>
-                setLogoutError(
-                  errorMessage(err, Translations.PROFILE_LOGOUT_ERROR),
-                ),
-            })
-          }
-          loading={logout.isPending}
-          disabled={logout.isPending}
-        >
-          {t(Translations.PROFILE_LOGOUT)}
-        </AppButton>
-
-        <Spacer spacing={Spacing.SPACING_PADDING_32} />
+              {t(Translations.PROFILE_LOGOUT)}
+            </AppText>
+          </Pressable>
+        </View>
       </ScrollView>
       <Snackbar
         visible={!!logoutError}
@@ -484,7 +482,7 @@ const Section = ({
   bg: string;
   children: React.ReactNode;
 }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   return (
     <View>
       <AppText
@@ -543,39 +541,52 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
   },
   content: {
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_24,
     paddingBottom: Spacing.SPACING_PADDING_32,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  hero: {
+    height: 460,
+    width: '100%',
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  heroImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  heroFallback: {
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroScrim: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '65%',
   },
   editPill: {
+    position: 'absolute',
+    right: Spacing.SPACING_PADDING_16,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: BorderRadius.pill,
   },
-  identity: {
-    alignItems: 'center',
-    marginTop: Spacing.SPACING_PADDING_16,
+  heroInfo: {
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingBottom: Spacing.SPACING_PADDING_24,
   },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-  },
-  avatarPlaceholder: {
+  heroMeta: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 8,
+    marginTop: Spacing.SPACING_PADDING_8,
   },
   cityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
   },
   modeBadge: {
     flexDirection: 'row',
@@ -583,6 +594,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: BorderRadius.pill,
+  },
+  body: {
+    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingTop: Spacing.SPACING_PADDING_24,
+  },
+  logout: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.SPACING_PADDING_12,
   },
   sectionCard: {
     padding: Spacing.SPACING_PADDING_16,
