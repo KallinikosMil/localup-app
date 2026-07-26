@@ -7,7 +7,12 @@ import {
   Pressable,
   RefreshControl,
 } from 'react-native';
-import { useTheme, ActivityIndicator, Chip } from 'react-native-paper';
+import {
+  useTheme,
+  ActivityIndicator,
+  Chip,
+  Snackbar,
+} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -49,9 +54,14 @@ export default function ProfileScreen() {
   } = useProfile();
   const {
     data: photos,
+    isError: photosError,
     refetch: refetchPhotos,
     isRefetching: photosRefetching,
   } = usePhotos(profile?.user_id);
+
+  // Logout can fail (offline, server). Without this the button just
+  // un-spun and the user stayed silently signed in, thinking they'd left.
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   const handleRefresh = async () => {
     await Promise.all([refetchProfile(), refetchPhotos()]);
@@ -195,239 +205,273 @@ export default function ProfileScreen() {
   );
 
   return (
-    <ScrollView
-      style={{
-        flex: 1,
-        backgroundColor: theme.colors.background,
-      }}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={profileRefetching || photosRefetching}
-          onRefresh={handleRefresh}
-        />
-      }
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <AppText
-          variant="h2"
-          style={{
-            color: theme.colors.onBackground,
-          }}
-        >
-          {t(Translations.PROFILE_TITLE)}
-        </AppText>
-        <Pressable
-          onPress={() => router.push('/profile/edit')}
-          hitSlop={12}
-          style={[
-            styles.editPill,
-            {
-              backgroundColor: theme.colors.primary,
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name="pencil-outline"
-            size={14}
-            color={theme.colors.onPrimary}
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        style={{
+          flex: 1,
+          backgroundColor: theme.colors.background,
+        }}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={profileRefetching || photosRefetching}
+            onRefresh={handleRefresh}
           />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
           <AppText
-            variant="caption"
+            variant="h2"
             style={{
-              color: theme.colors.onPrimary,
-              fontWeight: '700',
-              marginLeft: 6,
+              color: theme.colors.onBackground,
             }}
           >
-            {t(Translations.PROFILE_EDIT_ACTION)}
+            {t(Translations.PROFILE_TITLE)}
           </AppText>
-        </Pressable>
-      </View>
-
-      {/* Avatar + identity */}
-      <View style={styles.identity}>
-        {profile?.avatar_url ? (
-          <Image
-            source={{
-              uri: profile.avatar_url,
-            }}
-            style={styles.avatar}
-          />
-        ) : (
-          <View
+          <Pressable
+            onPress={() => router.push('/profile/edit')}
+            hitSlop={12}
             style={[
-              styles.avatar,
-              styles.avatarPlaceholder,
+              styles.editPill,
               {
-                backgroundColor: surfaceLow,
+                backgroundColor: theme.colors.primary,
               },
             ]}
           >
             <MaterialCommunityIcons
-              name="account"
-              size={56}
-              color={theme.colors.onSurfaceVariant}
-            />
-          </View>
-        )}
-        <Spacer spacing={Spacing.SPACING_PADDING_12} />
-        <AppText
-          variant="h2"
-          style={{
-            color: theme.colors.onBackground,
-            textAlign: 'center',
-          }}
-        >
-          {profile?.display_name ?? t(Translations.PROFILE_NO_NAME)}
-        </AppText>
-        {profile?.home_city ? (
-          <View style={styles.cityRow}>
-            <MaterialCommunityIcons
-              name="map-marker-outline"
+              name="pencil-outline"
               size={14}
-              color={theme.colors.onSurfaceVariant}
+              color={theme.colors.onPrimary}
             />
             <AppText
               variant="caption"
               style={{
-                color: theme.colors.onSurfaceVariant,
-                marginLeft: 4,
+                color: theme.colors.onPrimary,
+                fontWeight: '700',
+                marginLeft: 6,
               }}
             >
-              {profile.home_city}
+              {t(Translations.PROFILE_EDIT_ACTION)}
             </AppText>
-          </View>
-        ) : null}
-        <Spacer spacing={Spacing.SPACING_PADDING_8} />
-        {/* Mode badge. H5: `mode` is null while the coords are unknown —
+          </Pressable>
+        </View>
+
+        {/* Avatar + identity */}
+        <View style={styles.identity}>
+          {profile?.avatar_url ? (
+            <Image
+              source={{
+                uri: profile.avatar_url,
+              }}
+              style={styles.avatar}
+            />
+          ) : (
+            <View
+              style={[
+                styles.avatar,
+                styles.avatarPlaceholder,
+                {
+                  backgroundColor: surfaceLow,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="account"
+                size={56}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
+          )}
+          <Spacer spacing={Spacing.SPACING_PADDING_12} />
+          <AppText
+            variant="h2"
+            style={{
+              color: theme.colors.onBackground,
+              textAlign: 'center',
+            }}
+          >
+            {profile?.display_name ?? t(Translations.PROFILE_NO_NAME)}
+          </AppText>
+          {profile?.home_city ? (
+            <View style={styles.cityRow}>
+              <MaterialCommunityIcons
+                name="map-marker-outline"
+                size={14}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <AppText
+                variant="caption"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  marginLeft: 4,
+                }}
+              >
+                {profile.home_city}
+              </AppText>
+            </View>
+          ) : null}
+          <Spacer spacing={Spacing.SPACING_PADDING_8} />
+          {/* Mode badge. H5: `mode` is null while the coords are unknown —
             it used to be 'local', so a traveler was badged LOCAL until
             the location landed. A neutral badge says "we don't know
             yet" instead of guessing. */}
-        <View
-          style={[
-            styles.modeBadge,
-            {
-              backgroundColor: modeKnown
-                ? theme.colors.primaryContainer
-                : theme.colors.surfaceVariant,
-            },
-          ]}
+          <View
+            style={[
+              styles.modeBadge,
+              {
+                backgroundColor: modeKnown
+                  ? theme.colors.primaryContainer
+                  : theme.colors.surfaceVariant,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name={modeIcon}
+              size={14}
+              color={
+                modeKnown
+                  ? theme.colors.onPrimaryContainer
+                  : theme.colors.onSurfaceVariant
+              }
+            />
+            <AppText
+              variant="caption"
+              style={{
+                color: modeKnown
+                  ? theme.colors.onPrimaryContainer
+                  : theme.colors.onSurfaceVariant,
+                fontWeight: '700',
+                marginLeft: 6,
+                letterSpacing: 0.5,
+              }}
+            >
+              {t(modeLabel)}
+            </AppText>
+          </View>
+        </View>
+
+        <Spacer spacing={Spacing.SPACING_PADDING_24} />
+
+        {/* About */}
+        <Section
+          title={t(Translations.PROFILE_SECTION_ABOUT)}
+          bg={theme.colors.surface}
         >
-          <MaterialCommunityIcons
-            name={modeIcon}
-            size={14}
-            color={
-              modeKnown
-                ? theme.colors.onPrimaryContainer
-                : theme.colors.onSurfaceVariant
-            }
-          />
           <AppText
-            variant="caption"
+            variant="body"
             style={{
-              color: modeKnown
-                ? theme.colors.onPrimaryContainer
-                : theme.colors.onSurfaceVariant,
-              fontWeight: '700',
-              marginLeft: 6,
-              letterSpacing: 0.5,
+              color: theme.colors.onSurface,
+              lineHeight: 22,
             }}
           >
-            {t(modeLabel)}
+            {profile?.bio?.trim() || t(Translations.PROFILE_BIO_EMPTY)}
           </AppText>
-        </View>
-      </View>
+        </Section>
 
-      <Spacer spacing={Spacing.SPACING_PADDING_24} />
+        {/* Photos. A failed read must not masquerade as an empty gallery
+          (the PR-H2 rule): show it only as empty when the read actually
+          succeeded with zero photos; surface an error otherwise. A
+          stale-but-usable list keeps rendering even if a refetch errors. */}
+        {photos && photos.length > 0 ? (
+          <>
+            <Spacer spacing={Spacing.SPACING_PADDING_16} />
+            <Section
+              title={t(Translations.PROFILE_SECTION_GALLERY)}
+              bg={theme.colors.surface}
+            >
+              <View style={styles.photoGrid}>
+                {photos.map(p => (
+                  <View
+                    key={p.id}
+                    style={[
+                      styles.photoCell,
+                      {
+                        backgroundColor: surfaceLow,
+                      },
+                    ]}
+                  >
+                    <Image source={{ uri: p.url }} style={styles.photoImg} />
+                  </View>
+                ))}
+              </View>
+            </Section>
+          </>
+        ) : photosError ? (
+          <>
+            <Spacer spacing={Spacing.SPACING_PADDING_16} />
+            <Section
+              title={t(Translations.PROFILE_SECTION_GALLERY)}
+              bg={theme.colors.surface}
+            >
+              <AppText
+                variant="body"
+                style={{ color: theme.colors.onSurfaceVariant }}
+              >
+                {t(Translations.PROFILE_GALLERY_ERROR)}
+              </AppText>
+            </Section>
+          </>
+        ) : null}
 
-      {/* About */}
-      <Section
-        title={t(Translations.PROFILE_SECTION_ABOUT)}
-        bg={theme.colors.surface}
-      >
-        <AppText
-          variant="body"
-          style={{
-            color: theme.colors.onSurface,
-            lineHeight: 22,
-          }}
+        {/* Interests */}
+        {profile?.interests && profile.interests.length > 0 ? (
+          <>
+            <Spacer spacing={Spacing.SPACING_PADDING_16} />
+            <Section
+              title={t(Translations.PROFILE_SECTION_INTERESTS)}
+              bg={theme.colors.surface}
+            >
+              <View style={styles.chips}>
+                {profile.interests.map(interest => (
+                  <Chip
+                    key={interest}
+                    style={[
+                      styles.chip,
+                      {
+                        backgroundColor: surfaceLow,
+                      },
+                    ]}
+                    textStyle={{
+                      color: theme.colors.onSurface,
+                    }}
+                  >
+                    {interest}
+                  </Chip>
+                ))}
+              </View>
+            </Section>
+          </>
+        ) : null}
+
+        <Spacer spacing={Spacing.SPACING_PADDING_32} />
+
+        <AppButton
+          variant="outlined"
+          onPress={() =>
+            logout.mutate(undefined, {
+              onError: err =>
+                setLogoutError(
+                  errorMessage(err, Translations.PROFILE_LOGOUT_ERROR),
+                ),
+            })
+          }
+          loading={logout.isPending}
+          disabled={logout.isPending}
         >
-          {profile?.bio?.trim() || t(Translations.PROFILE_BIO_EMPTY)}
-        </AppText>
-      </Section>
+          {t(Translations.PROFILE_LOGOUT)}
+        </AppButton>
 
-      {/* Photos */}
-      {photos && photos.length > 0 ? (
-        <>
-          <Spacer spacing={Spacing.SPACING_PADDING_16} />
-          <Section
-            title={t(Translations.PROFILE_SECTION_GALLERY)}
-            bg={theme.colors.surface}
-          >
-            <View style={styles.photoGrid}>
-              {photos.map(p => (
-                <View
-                  key={p.id}
-                  style={[
-                    styles.photoCell,
-                    {
-                      backgroundColor: surfaceLow,
-                    },
-                  ]}
-                >
-                  <Image source={{ uri: p.url }} style={styles.photoImg} />
-                </View>
-              ))}
-            </View>
-          </Section>
-        </>
-      ) : null}
-
-      {/* Interests */}
-      {profile?.interests && profile.interests.length > 0 ? (
-        <>
-          <Spacer spacing={Spacing.SPACING_PADDING_16} />
-          <Section
-            title={t(Translations.PROFILE_SECTION_INTERESTS)}
-            bg={theme.colors.surface}
-          >
-            <View style={styles.chips}>
-              {profile.interests.map(interest => (
-                <Chip
-                  key={interest}
-                  style={[
-                    styles.chip,
-                    {
-                      backgroundColor: surfaceLow,
-                    },
-                  ]}
-                  textStyle={{
-                    color: theme.colors.onSurface,
-                  }}
-                >
-                  {interest}
-                </Chip>
-              ))}
-            </View>
-          </Section>
-        </>
-      ) : null}
-
-      <Spacer spacing={Spacing.SPACING_PADDING_32} />
-
-      <AppButton
-        variant="outlined"
-        onPress={() => logout.mutate()}
-        loading={logout.isPending}
-        disabled={logout.isPending}
+        <Spacer spacing={Spacing.SPACING_PADDING_32} />
+      </ScrollView>
+      <Snackbar
+        visible={!!logoutError}
+        onDismiss={() => setLogoutError(null)}
+        duration={4000}
       >
-        {t(Translations.PROFILE_LOGOUT)}
-      </AppButton>
-
-      <Spacer spacing={Spacing.SPACING_PADDING_32} />
-    </ScrollView>
+        {logoutError ?? ''}
+      </Snackbar>
+    </View>
   );
 }
 

@@ -11,6 +11,8 @@ export default {
   profileSaveError: "Couldn't save your changes. Please try again.",
   profilePhotoUploadError: "Photo didn't upload. Please try again.",
   profilePhotoDeleteError: "Couldn't delete the photo. Please try again.",
+  profileLogoutError: "Couldn't log you out. Please try again.",
+  profileGalleryError: "Couldn't load your photos.",
 
   profileTitle: 'Profile',
   profileEditAction: 'Edit',

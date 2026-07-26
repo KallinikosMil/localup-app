@@ -7,6 +7,8 @@ export default {
   profileSaveError: 'Οι αλλαγές δεν αποθηκεύτηκαν. Δοκίμασε ξανά.',
   profilePhotoUploadError: 'Η φωτογραφία δεν ανέβηκε. Δοκίμασε ξανά.',
   profilePhotoDeleteError: 'Η φωτογραφία δεν διαγράφηκε. Δοκίμασε ξανά.',
+  profileLogoutError: 'Η αποσύνδεση απέτυχε. Δοκίμασε ξανά.',
+  profileGalleryError: 'Δεν φορτώθηκαν οι φωτογραφίες σου.',
 
   profileTitle: 'Προφίλ',
   profileEditAction: 'Επεξεργασία',

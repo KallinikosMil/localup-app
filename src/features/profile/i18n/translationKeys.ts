@@ -7,6 +7,8 @@ export enum Translations {
   PROFILE_SAVE_ERROR = 'profileSaveError',
   PROFILE_PHOTO_UPLOAD_ERROR = 'profilePhotoUploadError',
   PROFILE_PHOTO_DELETE_ERROR = 'profilePhotoDeleteError',
+  PROFILE_LOGOUT_ERROR = 'profileLogoutError',
+  PROFILE_GALLERY_ERROR = 'profileGalleryError',
 
   // Profile tab
   PROFILE_TITLE = 'profileTitle',
