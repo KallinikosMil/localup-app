@@ -23,6 +23,7 @@ import {
   useSendMessage,
   type ChatMessage,
 } from '@features/chat/hooks/useChat';
+import { useMarkMatchRead } from '@features/matches/hooks/useReadTracking';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/chat/i18n/translationKeys';
@@ -50,6 +51,21 @@ export default function ChatScreen() {
     threadId ?? null,
   );
   const sendMessage = useSendMessage(matchId);
+
+  // Clear this match's unread state while it's open. Runs on mount and
+  // whenever a new message arrives during the visit. Mark read up to the
+  // newest message's own timestamp (not just Date.now()) so device/server
+  // clock skew can't leave a just-read chat still flagged unread.
+  const markRead = useMarkMatchRead();
+  const newestActivity = (messages ?? []).reduce(
+    (max, m) => Math.max(max, new Date(m.created_at).getTime()),
+    0,
+  );
+  useEffect(() => {
+    if (matchId) {
+      void markRead(matchId, Math.max(Date.now(), newestActivity + 1));
+    }
+  }, [matchId, newestActivity, markRead]);
 
   const [text, setText] = useState('');
   const listRef = useRef<FlatList>(null);

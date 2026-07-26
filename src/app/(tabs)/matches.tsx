@@ -17,6 +17,7 @@ import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useMatches, type Match } from '@features/matches/hooks/useMatches';
+import { useUnreadMatches } from '@features/matches/hooks/useReadTracking';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/matches/i18n/translationKeys';
@@ -36,6 +37,7 @@ export default function MatchesScreen() {
     isFetching,
     refetch,
   } = useMatches();
+  const { isUnread } = useUnreadMatches();
 
   // After a few seconds of loading, reassure the user it isn't
   // frozen — same as chat (U5). Resets when loading ends.
@@ -49,86 +51,101 @@ export default function MatchesScreen() {
     return () => clearTimeout(t);
   }, [isLoading]);
 
-  const renderItem = ({ item }: { item: Match }) => (
-    <Pressable
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.colors.surfaceVariant,
-        },
-      ]}
-      onPress={() => {
-        router.push({
-          pathname: '/chat/[matchId]',
-          params: {
-            matchId: item.id,
-            name: item.display_name,
-            // Hand the chat the thread it
-            // already knows → skips the
-            // thread lookup (§1b).
-            ...(item.thread_id
-              ? {
-                  threadId: item.thread_id,
-                }
-              : {}),
+  const renderItem = ({ item }: { item: Match }) => {
+    const unread = isUnread(item);
+    return (
+      <Pressable
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.surfaceVariant,
           },
-        });
-      }}
-    >
-      {item.avatar_url ? (
-        <Image
-          source={{
-            uri: item.avatar_url,
-          }}
-          style={styles.avatar}
-        />
-      ) : (
-        <View
-          style={[
-            styles.avatar,
-            styles.avatarPlaceholder,
-            {
-              backgroundColor: theme.colors.surfaceVariant,
+        ]}
+        onPress={() => {
+          router.push({
+            pathname: '/chat/[matchId]',
+            params: {
+              matchId: item.id,
+              name: item.display_name,
+              // Hand the chat the thread it
+              // already knows → skips the
+              // thread lookup (§1b).
+              ...(item.thread_id
+                ? {
+                    threadId: item.thread_id,
+                  }
+                : {}),
             },
-          ]}
-        >
+          });
+        }}
+      >
+        {item.avatar_url ? (
+          <Image
+            source={{
+              uri: item.avatar_url,
+            }}
+            style={styles.avatar}
+          />
+        ) : (
+          <View
+            style={[
+              styles.avatar,
+              styles.avatarPlaceholder,
+              {
+                backgroundColor: theme.colors.surfaceVariant,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="account"
+              size={28}
+              color={theme.colors.onSurfaceVariant}
+            />
+          </View>
+        )}
+
+        <View style={styles.info}>
+          <AppText
+            variant="body"
+            style={{
+              color: theme.colors.onSurface,
+              fontWeight: '600',
+            }}
+          >
+            {item.display_name}
+          </AppText>
+          <AppText
+            variant="caption"
+            numberOfLines={1}
+            style={{
+              color: unread
+                ? theme.colors.onSurface
+                : theme.colors.onSurfaceVariant,
+              fontStyle: item.last_message ? 'normal' : 'italic',
+              fontWeight: unread ? '700' : '400',
+            }}
+          >
+            {item.last_message ?? t(Translations.MATCHES_SAY_HELLO)}
+          </AppText>
+        </View>
+
+        {unread ? (
+          <View
+            style={[
+              styles.unreadDot,
+              { backgroundColor: theme.colors.primary },
+            ]}
+          />
+        ) : (
           <MaterialCommunityIcons
-            name="account"
-            size={28}
+            name="chevron-right"
+            size={24}
             color={theme.colors.onSurfaceVariant}
           />
-        </View>
-      )}
-
-      <View style={styles.info}>
-        <AppText
-          variant="body"
-          style={{
-            color: theme.colors.onSurface,
-            fontWeight: '600',
-          }}
-        >
-          {item.display_name}
-        </AppText>
-        <AppText
-          variant="caption"
-          numberOfLines={1}
-          style={{
-            color: theme.colors.onSurfaceVariant,
-            fontStyle: item.last_message ? 'normal' : 'italic',
-          }}
-        >
-          {item.last_message ?? t(Translations.MATCHES_SAY_HELLO)}
-        </AppText>
-      </View>
-
-      <MaterialCommunityIcons
-        name="chevron-right"
-        size={24}
-        color={theme.colors.onSurfaceVariant}
-      />
-    </Pressable>
-  );
+        )}
+      </Pressable>
+    );
+  };
 
   return (
     <View
@@ -303,5 +320,11 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
     marginLeft: Spacing.SPACING_PADDING_16,
+  },
+  unreadDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginLeft: Spacing.SPACING_PADDING_8,
   },
 });
