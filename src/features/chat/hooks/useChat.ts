@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store';
+import { useForegroundEpoch } from '@shared/hooks/useForegroundEpoch';
 
 export type ChatMessage = {
   id: string;
@@ -45,6 +46,9 @@ const byCreatedAtAsc = (a: ChatMessage, b: ChatMessage) =>
 export const useChat = (matchId: string, initialThreadId?: string | null) => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
+  // Rebuilds both channels below on return to foreground — a chat left
+  // open in the background otherwise silently stops receiving messages.
+  const foregroundEpoch = useForegroundEpoch();
 
   const query = useQuery<ChatData>({
     queryKey: ['chat', matchId],
@@ -143,7 +147,7 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [threadId, matchId, queryClient]);
+  }, [threadId, matchId, queryClient, foregroundEpoch]);
 
   // While no thread exists yet (neither side has sent), watch for
   // its creation so the recipient's screen fills in when the first
@@ -172,7 +176,7 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [threadId, matchId, queryClient]);
+  }, [threadId, matchId, queryClient, foregroundEpoch]);
 
   return {
     threadId,

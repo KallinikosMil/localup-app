@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store';
+import { useForegroundEpoch } from '@shared/hooks/useForegroundEpoch';
 
 export type Match = {
   id: string;
@@ -29,6 +30,9 @@ const MATCHES_FETCH_TIMEOUT_MS = 15_000;
 export const useMatches = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
+  // Rebuilds the channel below whenever the app returns to the
+  // foreground — the socket does not survive a long background.
+  const foregroundEpoch = useForegroundEpoch();
 
   const query = useQuery({
     queryKey: ['matches', uid],
@@ -125,7 +129,9 @@ export const useMatches = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [uid, queryClient]);
+    // foregroundEpoch is intentionally a dependency: bumping it tears the
+    // channel down through the cleanup above and subscribes a fresh one.
+  }, [uid, queryClient, foregroundEpoch]);
 
   return query;
 };
