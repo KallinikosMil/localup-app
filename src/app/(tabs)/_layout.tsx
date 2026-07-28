@@ -49,22 +49,21 @@ export default function TabLayout() {
           // undefined (not 0) so the badge disappears entirely when there
           // is nothing unread, rather than showing a "0".
           tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
-          // Amber, NOT primary: the active tab tint is `primary`, so a
-          // primary badge sat on the active tab as the same colour and
-          // stopped reading as "something wants you". Amber is the app's
-          // only warm accent — it can never collide with the tint, and it
-          // doesn't carry the "reject" meaning red has here (`pass`).
+          // The container tone, NOT `primary`: the active tab tint IS
+          // `primary`, so a primary badge sat on the active tab in the
+          // exact colour of the icon under it and stopped reading as a
+          // separate "something wants you" marker.
           //
-          // Amber is LIGHT in both themes (#F59E0B / #FFD740), so the
-          // label must be DARK in both — the mirror of ModeBadge's flip.
-          // `onSurface` is dark only in light mode, `background` only in
-          // dark mode; picking per theme keeps the number legible in both
-          // (white-on-amber would be ~2:1 and unreadable).
+          // primaryContainer/onPrimaryContainer is a designed pair, so it
+          // stays legible in both themes on its own — pale lilac with a
+          // deep violet numeral in light, deep violet with a pale numeral
+          // in dark. It also never collides with the tint in EITHER mode,
+          // which a mid-light violet would: dark-mode `primary` is itself
+          // a light violet (#D0BCFF), so #CCC2FF would read as the same
+          // colour there.
           tabBarBadgeStyle: {
-            backgroundColor: theme.colors.warning,
-            color: theme.dark
-              ? theme.colors.background
-              : theme.colors.onSurface,
+            backgroundColor: theme.colors.primaryContainer,
+            color: theme.colors.onPrimaryContainer,
             fontWeight: '700',
           },
           tabBarIcon: ({ color, size, focused }) => (

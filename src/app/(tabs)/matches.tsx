@@ -130,11 +130,15 @@ export default function MatchesScreen() {
           </AppText>
         </View>
 
+        {/* Solid `primary` here, not the container tone the tab badge
+            uses: this dot sits ON a surfaceVariant card, which is itself
+            a pale lilac, so a pale dot would vanish into it. Same meaning,
+            different contrast context. */}
         {unread ? (
           <View
             style={[
               styles.unreadDot,
-              { backgroundColor: theme.colors.warning },
+              { backgroundColor: theme.colors.primary },
             ]}
           />
         ) : (
