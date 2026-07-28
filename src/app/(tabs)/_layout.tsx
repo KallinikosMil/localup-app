@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { useTheme } from 'react-native-paper';
+import { useAppTheme } from '@theme/paper';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
 import useLocation from '@shared/hooks/useLocation';
@@ -8,7 +8,7 @@ import { useSyncLocation } from '@features/profile/hooks/useProfile';
 import { useUnreadMatches } from '@features/matches/hooks/useReadTracking';
 
 export default function TabLayout() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const { latitude, longitude } = useLocation();
   useSyncLocation(latitude, longitude);
 
@@ -49,9 +49,23 @@ export default function TabLayout() {
           // undefined (not 0) so the badge disappears entirely when there
           // is nothing unread, rather than showing a "0".
           tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+          // Amber, NOT primary: the active tab tint is `primary`, so a
+          // primary badge sat on the active tab as the same colour and
+          // stopped reading as "something wants you". Amber is the app's
+          // only warm accent — it can never collide with the tint, and it
+          // doesn't carry the "reject" meaning red has here (`pass`).
+          //
+          // Amber is LIGHT in both themes (#F59E0B / #FFD740), so the
+          // label must be DARK in both — the mirror of ModeBadge's flip.
+          // `onSurface` is dark only in light mode, `background` only in
+          // dark mode; picking per theme keeps the number legible in both
+          // (white-on-amber would be ~2:1 and unreadable).
           tabBarBadgeStyle: {
-            backgroundColor: theme.colors.primary,
-            color: theme.colors.onPrimary,
+            backgroundColor: theme.colors.warning,
+            color: theme.dark
+              ? theme.colors.background
+              : theme.colors.onSurface,
+            fontWeight: '700',
           },
           tabBarIcon: ({ color, size, focused }) => (
             <Icon

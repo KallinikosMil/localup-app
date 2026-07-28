@@ -8,7 +8,8 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-import { ActivityIndicator, useTheme } from 'react-native-paper';
+import { ActivityIndicator } from 'react-native-paper';
+import { useAppTheme } from '@theme/paper';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +26,7 @@ import { Translations } from '@features/matches/i18n/translationKeys';
 const AVATAR_SIZE = 60;
 
 export default function MatchesScreen() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const router = useRouter();
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
@@ -133,7 +134,7 @@ export default function MatchesScreen() {
           <View
             style={[
               styles.unreadDot,
-              { backgroundColor: theme.colors.primary },
+              { backgroundColor: theme.colors.warning },
             ]}
           />
         ) : (
