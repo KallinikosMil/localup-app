@@ -58,3 +58,6 @@ SUPABASE_SETUP.md
 docs/superpowers/
 LOCALUP_OVERVIEW.md
 .claude/
+
+# Security notes naming the live project (never publish)
+SECURITY-FIX-*.md
