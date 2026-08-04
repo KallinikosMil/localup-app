@@ -118,7 +118,22 @@ export function useCompleteOnboarding() {
         p_avatar_url: urlData.publicUrl,
         p_interest_ids: data.interestIds,
       });
-      if (rpcError) throw rpcError;
+      if (rpcError) {
+        // The upload in step 1 already succeeded, so a failure here leaves
+        // that object in the bucket with nothing referencing it — and the
+        // filename is unique per attempt (upsert:false, the bucket has no
+        // UPDATE policy), so every Finish retry leaked another copy.
+        // Best-effort cleanup, and deliberately non-fatal: if the delete
+        // itself fails we still surface the ORIGINAL error, which is the
+        // one the user needs to see.
+        const { error: cleanupError } = await supabase.storage
+          .from(PHOTO_BUCKET)
+          .remove([path]);
+        if (cleanupError && __DEV__) {
+          console.warn('[onboarding] orphaned upload left behind:', path);
+        }
+        throw rpcError;
+      }
 
       // 4. Only now is the user really onboarded.
       store.dispatch(setOnboardingComplete(true));

@@ -1,8 +1,10 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
+import { Translations } from '@shared/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
@@ -16,6 +18,7 @@ type ModeBadgeProps = {
 
 const ModeBadge = ({ mode, size = 'md' }: ModeBadgeProps) => {
   const theme = useAppTheme();
+  const { t } = useTranslation();
   const isTraveler = mode === 'traveler';
   const bg = isTraveler ? theme.colors.modeTraveler : theme.colors.modeLocal;
   // In dark mode the mode pills flip to light
@@ -39,7 +42,9 @@ const ModeBadge = ({ mode, size = 'md' }: ModeBadgeProps) => {
         color={fg}
       />
       <AppText variant="overline" style={{ color: fg }}>
-        {isTraveler ? 'Traveler' : 'Local'}
+        {isTraveler
+          ? t(Translations.COMMON_MODE_TRAVELER)
+          : t(Translations.COMMON_MODE_LOCAL)}
       </AppText>
     </View>
   );

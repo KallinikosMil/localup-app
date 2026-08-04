@@ -19,8 +19,20 @@ import {
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Loads the app's font families and drops the splash once they're ready.
+//
+// Returns "can we render yet?", which is NOT the same as "did the fonts
+// load?". `useFonts` reports failure through its second element, and that
+// element used to be ignored: on a failed font asset `fontsLoaded` stays
+// false forever, so AppProviders' `if (!fontsLoaded) return null` rendered
+// nothing and the splash was never hidden — the app was bricked on the
+// splash screen with no error, no retry and no way out.
+//
+// A missing typeface is a cosmetic problem; a dead app is not. On error we
+// carry on and let React Native fall back to the system font. Everything
+// still renders, it just looks slightly off — and `typography.ts` only
+// names families, so a missing one degrades rather than throwing.
 export const useAppFonts = () => {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
@@ -30,11 +42,15 @@ export const useAppFonts = () => {
     Inter_700Bold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [fontsLoaded]);
+  const ready = fontsLoaded || !!fontError;
 
-  return fontsLoaded;
+  useEffect(() => {
+    if (!ready) return;
+    if (fontError && __DEV__) {
+      console.warn('[fonts] falling back to system fonts:', fontError);
+    }
+    SplashScreen.hideAsync().catch(() => {});
+  }, [ready, fontError]);
+
+  return ready;
 };

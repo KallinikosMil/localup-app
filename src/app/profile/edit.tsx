@@ -51,7 +51,7 @@ export default function EditProfileScreen() {
     error,
     refetch,
   } = useProfile();
-  const { data: photos } = usePhotos(profile?.user_id);
+  const { data: photos, isError: photosError } = usePhotos(profile?.user_id);
   const updateProfile = useUpdateProfile();
   const uploadPhoto = useUploadPhoto();
   const deletePhoto = useDeletePhoto();
@@ -551,6 +551,21 @@ export default function EditProfileScreen() {
           title={t(Translations.PROFILE_SECTION_YOUR_GALLERY)}
           bg={surfaceLowest}
         >
+          {/* A failed read must not present as "you have no photos" (the
+              PR-H2 rule) — that invites the user to re-upload photos they
+              already have. Only shown when the read failed AND nothing is
+              cached; a stale-but-usable list still renders below. */}
+          {photosError && !photos?.length ? (
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                marginBottom: Spacing.SPACING_PADDING_8,
+              }}
+            >
+              {t(Translations.PROFILE_GALLERY_ERROR)}
+            </AppText>
+          ) : null}
           <View style={styles.photoGrid}>
             {(photos ?? []).map(p => (
               <Pressable

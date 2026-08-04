@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter, useSegments } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { RootState } from '@store';
 import AuthErrorScreen from '@features/auth/components/AuthErrorScreen';
 import FullScreenLoader from '@shared/components/FullScreenLoader';
+import { Translations } from '@shared/i18n/translationKeys';
 
 // Auth-based routing: keeps unauthenticated users in /auth, routes
 // authenticated ones to onboarding or the tabs depending on their
@@ -11,9 +13,26 @@ import FullScreenLoader from '@shared/components/FullScreenLoader';
 export default function AppGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();
+  const { t } = useTranslation();
   const { user, initialized, onboardingComplete, authError } = useSelector(
     (s: RootState) => s.auth,
   );
+
+  // The bootstrap tolerates a Supabase project waking from auto-pause: the
+  // profile read gets 15s per attempt plus two backoff retries, so a cold
+  // start can legitimately take ~45s. Shortening that budget would turn
+  // slow-but-fine wakes into false failures — the actual problem was that
+  // those 45s were an unlabelled spinner. Say what's happening instead,
+  // matching what chat/matches/profile already do at 4.5s.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (initialized) {
+      setSlow(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlow(true), 4500);
+    return () => clearTimeout(timer);
+  }, [initialized]);
 
   useEffect(() => {
     if (!initialized) return;
@@ -73,7 +92,12 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
   // every frame now (login.tsx renders the identical component), so the
   // handoff is seamless.
   // Order matters: not-initialised → unknown-account → unknown-status.
-  if (!initialized) return <FullScreenLoader />;
+  if (!initialized)
+    return (
+      <FullScreenLoader
+        message={slow ? t(Translations.COMMON_WAKING) : undefined}
+      />
+    );
   // Same tightening as the routing effect: the error screen may only
   // take the frame when we genuinely do not know the account state.
   // Unconditionally, it meant one failed profile read mid-session

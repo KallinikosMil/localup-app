@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -27,6 +27,9 @@ type CityResult = {
 };
 
 const DEBOUNCE_MS = 300;
+// Shorter than the app's 15s Supabase budget: this is a type-ahead, and a
+// suggestion that arrives after several seconds is useless anyway.
+const SEARCH_TIMEOUT_MS = 8000;
 
 const HomeCityScreen = () => {
   const { t } = useTranslation();
@@ -37,23 +40,62 @@ const HomeCityScreen = () => {
   const [results, setResults] = useState<CityResult[]>([]);
   const [selectedCity, setSelectedCity] = useState(data.homeCity);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inFlightRef = useRef<AbortController | null>(null);
 
+  // Leaving the screen mid-search must not leave a pending debounce timer
+  // or an open request behind to call setState on an unmounted component.
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      inFlightRef.current?.abort();
+    },
+    [],
+  );
+
+  // Nominatim is the one network call the app makes that is NOT a Supabase
+  // call, so the global 15s fetch timeout in config/supabase.ts does not
+  // cover it: a hung connection here hangs forever. It also had no request
+  // sequencing, so a slow earlier response could land after a newer one and
+  // repopulate a list the user had already moved past (or cleared).
+  //
+  // Aborting the previous request on every new search fixes both: the stale
+  // response is cancelled rather than raced, and the timeout gives the
+  // request an upper bound.
   const searchCities = useCallback(async (text: string) => {
+    inFlightRef.current?.abort();
+
     if (text.length < 2) {
       setResults([]);
       return;
     }
+
+    const controller = new AbortController();
+    inFlightRef.current = controller;
+    const timeout = setTimeout(() => controller.abort(), SEARCH_TIMEOUT_MS);
+
     try {
       const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&limit=5&addressdetails=1&featuretype=city`;
       const res = await fetch(url, {
         headers: {
           'User-Agent': 'LocalUp/1.0',
         },
+        signal: controller.signal,
       });
       const json: CityResult[] = await res.json();
+      // A newer search started while this one was in flight — its results
+      // are the truth, so drop these rather than overwriting.
+      if (controller.signal.aborted) return;
       setResults(json);
     } catch {
+      // An abort is expected (superseded or timed out) and must NOT wipe the
+      // list the newer search is about to fill.
+      if (controller.signal.aborted) return;
       setResults([]);
+    } finally {
+      clearTimeout(timeout);
+      if (inFlightRef.current === controller) {
+        inFlightRef.current = null;
+      }
     }
   }, []);
 
