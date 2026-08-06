@@ -183,7 +183,7 @@ const LoginScreen = () => {
               <AppButton
                 variant="link"
                 compact
-                onPress={() => {}}
+                onPress={() => router.push('/auth/forgot-password')}
                 contentStyle={null}
                 labelStyle={styles.forgotLabel}
               >

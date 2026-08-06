@@ -25,6 +25,12 @@ export interface AuthState {
   // carried here for AuthErrorScreen to render the right sentence.
   // Meaningless unless authError is true.
   authErrorOffline: boolean;
+  // The recovery link signed the user in FOR THE SOLE PURPOSE of setting
+  // a new password. They are authenticated, so without this flag AppGuard
+  // would route them straight into the app and they could never reach the
+  // reset screen — the link would look broken. Cleared once the password
+  // is actually changed (or on sign-out / a different user).
+  passwordRecovery: boolean;
 }
 
 const initialState: AuthState = {
@@ -33,6 +39,7 @@ const initialState: AuthState = {
   onboardingComplete: null,
   authError: false,
   authErrorOffline: false,
+  passwordRecovery: false,
 };
 
 const authSlice = createSlice({
@@ -61,6 +68,11 @@ const authSlice = createSlice({
         state.onboardingComplete = null;
         state.authError = false;
         state.authErrorOffline = false;
+        // A logout or a different account ends any recovery in progress.
+        // NOTE: the PASSWORD_RECOVERY handler must therefore dispatch
+        // setUser BEFORE setPasswordRecovery(true), or it would clear the
+        // flag it just set (the recovery session IS an identity change).
+        state.passwordRecovery = false;
       }
     },
     setOnboardingComplete: (state, action: PayloadAction<boolean | null>) => {
@@ -78,9 +90,17 @@ const authSlice = createSlice({
         ? (action.payload.offline ?? false)
         : false;
     },
+    setPasswordRecovery: (state, action: PayloadAction<boolean>) => {
+      state.passwordRecovery = action.payload;
+    },
   },
 });
 
-export const { setInitialized, setUser, setOnboardingComplete, setAuthError } =
-  authSlice.actions;
+export const {
+  setInitialized,
+  setUser,
+  setOnboardingComplete,
+  setAuthError,
+  setPasswordRecovery,
+} = authSlice.actions;
 export default authSlice.reducer;

@@ -22,6 +22,8 @@ export default {
     'Confirm your email first — check your inbox for the link.',
   authErrorEmailTaken: 'That email is already registered. Try logging in.',
   authErrorWeakPassword: 'That password is too weak. Pick a longer one.',
+  authErrorInvalidEmail:
+    "That email address isn't valid. Check it and try again.",
   authErrorRateLimited: 'Too many attempts. Wait a moment and try again.',
   authErrorNetwork: "Couldn't reach the server — check your connection.",
   authErrorSignupUnverifiable:
@@ -30,4 +32,21 @@ export default {
   authConfirmEmailSent: 'Confirmation mail sent, check your inbox!',
   authBootstrapErrorTitle: "Couldn't load your account",
   authBootstrapRetry: 'Retry',
+  authForgotTitle: 'Reset your password',
+  authForgotSubtitle:
+    "Enter your email and we'll send you a link to set a new password.",
+  authForgotSend: 'Send reset link',
+  authForgotSentTitle: 'Check your inbox',
+  authForgotSentBody:
+    'If an account exists for that address, a reset link is on its way. The link expires in one hour.',
+  authForgotBack: 'Back to login',
+  authResetTitle: 'Set a new password',
+  authResetSubtitle: 'Choose a password you have not used before.',
+  authResetNewPassword: 'New password',
+  authResetSubmit: 'Save new password',
+  authResetDone: 'Password updated. You are signed in.',
+  authPasswordMin: 'Password must be at least 8 characters',
+  authPasswordMismatch: 'Passwords do not match',
+  authEmailRequired: 'Please enter your email',
+  authPasswordRequired: 'Please enter your password',
 };

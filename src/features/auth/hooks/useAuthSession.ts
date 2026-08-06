@@ -8,6 +8,7 @@ import {
   setAuthError,
   setInitialized,
   setOnboardingComplete,
+  setPasswordRecovery,
   setUser,
 } from '@features/auth/slices/authSlice';
 
@@ -292,6 +293,23 @@ export const useAuthSession = () => {
       // sign-out), so there's nothing to error-check here. setUser is
       // synchronous and touches no network — safe inside the callback.
       store.dispatch(setUser(nextUser));
+
+      // The recovery link signs the user IN, so by this point they look
+      // like any other authenticated user and AppGuard would happily drop
+      // them on Discover — the reset screen would be unreachable and the
+      // email link would look broken. Flag it so the guard can hold them
+      // on the reset screen instead.
+      //
+      // Order matters: this MUST come after setUser, because a recovery
+      // session is an identity change and setUser clears the flag on one.
+      //
+      // Deliberately does NOT return early: the profile read below still
+      // runs, so `onboardingComplete` is known by the time the password
+      // is changed and the guard can route correctly the moment the flag
+      // clears — otherwise it would sit on the unknown-status loader.
+      if (event === 'PASSWORD_RECOVERY') {
+        store.dispatch(setPasswordRecovery(true));
+      }
 
       // TOKEN_REFRESHED fires ~hourly, and on every app resume, with the
       // SAME uid. setUser above already keeps a known status across

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useRouter, useSegments } from 'expo-router';
+import { usePathname, useRouter, useSegments } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { RootState } from '@store';
 import AuthErrorScreen from '@features/auth/components/AuthErrorScreen';
@@ -13,10 +13,10 @@ import { Translations } from '@shared/i18n/translationKeys';
 export default function AppGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();
+  const pathname = usePathname();
   const { t } = useTranslation();
-  const { user, initialized, onboardingComplete, authError } = useSelector(
-    (s: RootState) => s.auth,
-  );
+  const { user, initialized, onboardingComplete, authError, passwordRecovery } =
+    useSelector((s: RootState) => s.auth);
 
   // The bootstrap tolerates a Supabase project waking from auto-pause: the
   // profile read gets 15s per attempt plus two backoff retries, so a cold
@@ -50,8 +50,19 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === 'auth';
     const inOnboarding = segments[0] === 'onboarding';
     const inDev = __DEV__ && segments[0] === 'dev';
+    const onResetScreen = pathname === '/auth/reset-password';
 
     if (inDev) return;
+
+    // A recovery link SIGNS THE USER IN, so every rule below would treat
+    // them as a normal authenticated user and send them to Discover —
+    // the reset screen would be unreachable and the emailed link would
+    // look broken. Hold them here until the password is actually changed
+    // (useUpdatePassword clears the flag), then the rules resume.
+    if (passwordRecovery) {
+      if (!onResetScreen) router.replace('/auth/reset-password');
+      return;
+    }
 
     // W5: onboarding status for this user isn't known yet (the
     // SIGNED_IN profile fetch is still in flight — onboardingComplete
@@ -75,7 +86,15 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
     } else if (user && onboardingComplete && inOnboarding) {
       router.replace('/(tabs)/discover');
     }
-  }, [initialized, authError, user, onboardingComplete, segments]);
+  }, [
+    initialized,
+    authError,
+    user,
+    onboardingComplete,
+    passwordRecovery,
+    pathname,
+    segments,
+  ]);
 
   // Render NO CHILDREN until we know where this user belongs.
   // `app/index.ts` redirects `/` → `/(tabs)/discover` unconditionally, so
@@ -98,6 +117,12 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
         message={slow ? t(Translations.COMMON_WAKING) : undefined}
       />
     );
+  // Password recovery outranks both gates below. The profile read is
+  // still in flight (or may even have failed) while the user is standing
+  // on the reset screen — neither an unknown status nor a failed read
+  // should stop them setting a new password, which is the one thing they
+  // came here to do.
+  if (passwordRecovery) return <>{children}</>;
   // Same tightening as the routing effect: the error screen may only
   // take the frame when we genuinely do not know the account state.
   // Unconditionally, it meant one failed profile read mid-session

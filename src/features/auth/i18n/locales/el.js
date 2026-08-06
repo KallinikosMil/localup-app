@@ -23,6 +23,8 @@ export default {
   authErrorEmailTaken:
     'Αυτό το email έχει ήδη λογαριασμό. Δοκίμασε να συνδεθείς.',
   authErrorWeakPassword: 'Ο κωδικός είναι πολύ αδύναμος. Διάλεξε μεγαλύτερο.',
+  authErrorInvalidEmail:
+    'Αυτή η διεύθυνση email δεν είναι έγκυρη. Έλεγξέ την και δοκίμασε ξανά.',
   authErrorRateLimited:
     'Πάρα πολλές προσπάθειες. Περίμενε λίγο και δοκίμασε ξανά.',
   authErrorNetwork: 'Δεν βρέθηκε ο διακομιστής — έλεγξε τη σύνδεσή σου.',
@@ -33,4 +35,21 @@ export default {
     'Στάλθηκε email επιβεβαίωσης, έλεγξε τα εισερχόμενά σου!',
   authBootstrapErrorTitle: 'Δεν ήταν δυνατή η φόρτωση του λογαριασμού σου',
   authBootstrapRetry: 'Δοκίμασε ξανά',
+  authForgotTitle: 'Επαναφορά κωδικού',
+  authForgotSubtitle:
+    'Γράψε το email σου και θα σου στείλουμε σύνδεσμο για να ορίσεις νέο κωδικό.',
+  authForgotSend: 'Αποστολή συνδέσμου',
+  authForgotSentTitle: 'Έλεγξε τα εισερχόμενά σου',
+  authForgotSentBody:
+    'Αν υπάρχει λογαριασμός με αυτή τη διεύθυνση, ο σύνδεσμος επαναφοράς είναι καθ οδόν. Λήγει σε μία ώρα.',
+  authForgotBack: 'Επιστροφή στη σύνδεση',
+  authResetTitle: 'Όρισε νέο κωδικό',
+  authResetSubtitle: 'Διάλεξε κωδικό που δεν έχεις ξαναχρησιμοποιήσει.',
+  authResetNewPassword: 'Νέος κωδικός',
+  authResetSubmit: 'Αποθήκευση κωδικού',
+  authResetDone: 'Ο κωδικός ενημερώθηκε. Είσαι συνδεδεμένος.',
+  authPasswordMin: 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες',
+  authPasswordMismatch: 'Οι κωδικοί δεν ταιριάζουν',
+  authEmailRequired: 'Συμπλήρωσε το email σου',
+  authPasswordRequired: 'Συμπλήρωσε τον κωδικό σου',
 };

@@ -25,6 +25,7 @@ export enum Translations {
   AUTH_ERROR_EMAIL_TAKEN = 'authErrorEmailTaken',
   AUTH_ERROR_WEAK_PASSWORD = 'authErrorWeakPassword',
   AUTH_ERROR_RATE_LIMITED = 'authErrorRateLimited',
+  AUTH_ERROR_INVALID_EMAIL = 'authErrorInvalidEmail',
   AUTH_ERROR_NETWORK = 'authErrorNetwork',
   AUTH_ERROR_SIGNUP_UNVERIFIABLE = 'authErrorSignupUnverifiable',
   AUTH_DISMISS = 'authDismiss',
@@ -34,4 +35,24 @@ export enum Translations {
   // authBootstrapErrorBody said "Check your connection" for every
   // failure, including the ones that had nothing to do with the network.
   AUTH_BOOTSTRAP_RETRY = 'authBootstrapRetry',
+
+  // Password recovery
+  AUTH_FORGOT_TITLE = 'authForgotTitle',
+  AUTH_FORGOT_SUBTITLE = 'authForgotSubtitle',
+  AUTH_FORGOT_SEND = 'authForgotSend',
+  AUTH_FORGOT_SENT_TITLE = 'authForgotSentTitle',
+  // Deliberately says "if an account exists" — confirming which
+  // addresses are registered to an anonymous caller is an enumeration
+  // vector, and this screen needs no session.
+  AUTH_FORGOT_SENT_BODY = 'authForgotSentBody',
+  AUTH_FORGOT_BACK = 'authForgotBack',
+  AUTH_RESET_TITLE = 'authResetTitle',
+  AUTH_RESET_SUBTITLE = 'authResetSubtitle',
+  AUTH_RESET_NEW_PASSWORD = 'authResetNewPassword',
+  AUTH_RESET_SUBMIT = 'authResetSubmit',
+  AUTH_RESET_DONE = 'authResetDone',
+  AUTH_PASSWORD_MIN = 'authPasswordMin',
+  AUTH_PASSWORD_MISMATCH = 'authPasswordMismatch',
+  AUTH_EMAIL_REQUIRED = 'authEmailRequired',
+  AUTH_PASSWORD_REQUIRED = 'authPasswordRequired',
 }

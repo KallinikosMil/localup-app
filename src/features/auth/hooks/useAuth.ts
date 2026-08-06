@@ -4,6 +4,7 @@ import {
   isAuthRetryableFetchError,
   isAuthWeakPasswordError,
 } from '@supabase/supabase-js';
+import * as Linking from 'expo-linking';
 import { supabase } from '@config/supabase';
 import { Translations } from '@features/auth/i18n/translationKeys';
 
@@ -21,6 +22,7 @@ export enum AuthErrorCode {
   EMAIL_TAKEN = 'email_taken',
   WEAK_PASSWORD = 'weak_password',
   RATE_LIMITED = 'rate_limited',
+  INVALID_EMAIL = 'invalid_email',
   NETWORK = 'network',
   // "The sign-up MAY have worked — we cannot tell." See classifySignUp.
   SIGNUP_UNVERIFIABLE = 'signup_unverifiable',
@@ -84,6 +86,7 @@ const MESSAGE_BY_CODE: Record<AuthErrorCode, Translations> = {
   [AuthErrorCode.EMAIL_TAKEN]: Translations.AUTH_ERROR_EMAIL_TAKEN,
   [AuthErrorCode.WEAK_PASSWORD]: Translations.AUTH_ERROR_WEAK_PASSWORD,
   [AuthErrorCode.RATE_LIMITED]: Translations.AUTH_ERROR_RATE_LIMITED,
+  [AuthErrorCode.INVALID_EMAIL]: Translations.AUTH_ERROR_INVALID_EMAIL,
   [AuthErrorCode.NETWORK]: Translations.AUTH_ERROR_NETWORK,
   [AuthErrorCode.SIGNUP_UNVERIFIABLE]:
     Translations.AUTH_ERROR_SIGNUP_UNVERIFIABLE,
@@ -180,6 +183,49 @@ export function useRegister() {
       if (outcome === 'unverifiable') {
         throw new AuthFailure(AuthErrorCode.SIGNUP_UNVERIFIABLE);
       }
+    },
+  });
+}
+
+// Where Supabase should send the user back to after they tap the link in
+// the recovery email. `createURL` resolves per environment — in Expo Go
+// it produces the exp:// dev-server URL, in a standalone build the app's
+// own `localup-app://` scheme — so the same code works in both.
+//
+// ⚠️ Whatever this resolves to must ALSO be listed under
+// Authentication → URL Configuration → Redirect URLs in the Supabase
+// dashboard, or the link silently falls back to the Site URL and the
+// user lands nowhere useful. The dev-server URL changes with your LAN
+// IP, so add a wildcard (exp://*) for development.
+export const passwordResetRedirectTo = () =>
+  Linking.createURL('/auth/reset-password');
+
+// Sends the recovery email. Deliberately does NOT reveal whether the
+// address exists: Supabase returns success either way, and the screen
+// shows the same "check your inbox" message regardless — telling an
+// anonymous caller which emails are registered is an enumeration
+// vector, and this endpoint is reachable without a session.
+export function useRequestPasswordReset() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        { redirectTo: passwordResetRedirectTo() },
+      );
+      if (error) throw error;
+    },
+  });
+}
+
+// Sets the new password. Only callable once the recovery link has
+// established a session (Supabase signs the user in as part of the
+// recovery flow), which is why this is a plain updateUser and not a
+// token exchange.
+export function useUpdatePassword() {
+  return useMutation({
+    mutationFn: async (password: string) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
     },
   });
 }
