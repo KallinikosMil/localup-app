@@ -88,8 +88,11 @@ export const useCandidates = () => {
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
     queryFn: async (): Promise<Candidate[]> => {
+      // No swiper id: the RPC derives it from auth.uid(). It used to take
+      // one and never check it against the caller, so any signed-in user
+      // could ask for anyone else's deck. `uid` is still used for the
+      // query key and the enabled gate — just never sent as identity.
       const { data, error } = await supabase.rpc('discover_candidates', {
-        p_swiper_id: uid!,
         p_limit: 20,
       });
       if (error) throw error;

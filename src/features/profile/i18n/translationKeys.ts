@@ -18,6 +18,11 @@ export enum Translations {
   PROFILE_VIEW_UNMATCH_CANCEL = 'profileViewUnmatchCancel',
   PROFILE_VIEW_UNMATCH_ERROR = 'profileViewUnmatchError',
   PROFILE_VIEW_NO_PHOTOS = 'profileViewNoPhotos',
+  PROFILE_VIEW_BLOCK = 'profileViewBlock',
+  PROFILE_VIEW_BLOCK_TITLE = 'profileViewBlockTitle',
+  PROFILE_VIEW_BLOCK_BODY = 'profileViewBlockBody',
+  PROFILE_VIEW_BLOCK_CONFIRM = 'profileViewBlockConfirm',
+  PROFILE_VIEW_BLOCK_ERROR = 'profileViewBlockError',
 
   // Profile tab
   PROFILE_TITLE = 'profileTitle',

@@ -69,4 +69,10 @@ export default {
   profileViewUnmatchCancel: 'Άκυρο',
   profileViewUnmatchError: 'Η κατάργηση απέτυχε. Δοκίμασε ξανά.',
   profileViewNoPhotos: 'Δεν υπάρχουν φωτογραφίες ακόμα.',
+  profileViewBlock: 'Αποκλεισμός',
+  profileViewBlockTitle: 'Αποκλεισμός του/της {{name}};',
+  profileViewBlockBody:
+    'Δεν θα ξαναδείτε ο ένας τον άλλον, ούτε εδώ ούτε στο Discover. Δεν ειδοποιείται.',
+  profileViewBlockConfirm: 'Αποκλεισμός',
+  profileViewBlockError: 'Ο αποκλεισμός απέτυχε. Δοκίμασε ξανά.',
 };

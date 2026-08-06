@@ -27,6 +27,7 @@ import {
   computeMode,
 } from '@features/profile/hooks/useProfile';
 import { useUnmatch } from '@features/matches/hooks/useUnmatch';
+import { useBlockUser } from '@features/matches/hooks/useBlockUser';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { useAppTheme, AppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
@@ -58,6 +59,13 @@ export default function UserProfileScreen() {
   const { latitude, longitude } = useLocation();
   const unmatch = useUnmatch();
 
+  const block = useBlockUser();
+  // Which destructive action the confirmation is asking about. One modal,
+  // two questions — two modals with near-identical bodies is how you end
+  // up shipping the wrong copy on one of them.
+  const [pendingAction, setPendingAction] = useState<'unmatch' | 'block'>(
+    'unmatch',
+  );
   const { modalProps, openModal, closeModal } = useModal();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   // Which photo is open full-screen; null = none. Holding the URL rather
@@ -82,6 +90,16 @@ export default function UserProfileScreen() {
       : mode === 'local'
         ? 'home-variant-outline'
         : 'map-marker-question-outline';
+
+  const confirmBlock = () => {
+    if (!userId) return;
+    closeModal();
+    block.mutate(userId, {
+      onSuccess: () => router.replace('/(tabs)/matches'),
+      onError: err =>
+        setErrorMsg(errorMessage(err, Translations.PROFILE_VIEW_BLOCK_ERROR)),
+    });
+  };
 
   const confirmUnmatch = () => {
     if (!matchId) return;
@@ -317,9 +335,12 @@ export default function UserProfileScreen() {
               profile — it just cannot unmatch. */}
           {matchId ? (
             <Pressable
-              onPress={openModal}
+              onPress={() => {
+                setPendingAction('unmatch');
+                openModal();
+              }}
               hitSlop={8}
-              disabled={unmatch.isPending}
+              disabled={unmatch.isPending || block.isPending}
               style={styles.destructive}
             >
               {unmatch.isPending ? (
@@ -328,13 +349,13 @@ export default function UserProfileScreen() {
                 <MaterialCommunityIcons
                   name="account-remove-outline"
                   size={16}
-                  color={theme.colors.error}
+                  color={theme.colors.onSurfaceVariant}
                 />
               )}
               <AppText
                 variant="body"
                 style={{
-                  color: theme.colors.error,
+                  color: theme.colors.onSurfaceVariant,
                   fontWeight: '600',
                   marginLeft: 6,
                 }}
@@ -343,6 +364,40 @@ export default function UserProfileScreen() {
               </AppText>
             </Pressable>
           ) : null}
+
+          {/* Block does not need a match — you may want it for someone you
+              only met in the deck. Rendered in the error tone while
+              unmatch is neutral, because they are not equivalent: unmatch
+              is reversible by matching again, a block is not. */}
+          <Pressable
+            onPress={() => {
+              setPendingAction('block');
+              openModal();
+            }}
+            hitSlop={8}
+            disabled={unmatch.isPending || block.isPending}
+            style={styles.destructive}
+          >
+            {block.isPending ? (
+              <ActivityIndicator size={16} />
+            ) : (
+              <MaterialCommunityIcons
+                name="block-helper"
+                size={16}
+                color={theme.colors.error}
+              />
+            )}
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.error,
+                fontWeight: '600',
+                marginLeft: 6,
+              }}
+            >
+              {t(Translations.PROFILE_VIEW_BLOCK)}
+            </AppText>
+          </Pressable>
         </View>
       </ScrollView>
 
@@ -352,9 +407,12 @@ export default function UserProfileScreen() {
             variant="h3"
             style={{ color: theme.colors.onSurface, textAlign: 'center' }}
           >
-            {t(Translations.PROFILE_VIEW_UNMATCH_TITLE, {
-              name: displayName,
-            })}
+            {t(
+              pendingAction === 'block'
+                ? Translations.PROFILE_VIEW_BLOCK_TITLE
+                : Translations.PROFILE_VIEW_UNMATCH_TITLE,
+              { name: displayName },
+            )}
           </AppText>
           <Spacer spacing={Spacing.SPACING_PADDING_8} />
           <AppText
@@ -364,15 +422,23 @@ export default function UserProfileScreen() {
               textAlign: 'center',
             }}
           >
-            {t(Translations.PROFILE_VIEW_UNMATCH_BODY)}
+            {t(
+              pendingAction === 'block'
+                ? Translations.PROFILE_VIEW_BLOCK_BODY
+                : Translations.PROFILE_VIEW_UNMATCH_BODY,
+            )}
           </AppText>
           <Spacer spacing={Spacing.SPACING_PADDING_16} />
           <AppButton
             variant="primary"
             buttonColor={theme.colors.error}
-            onPress={confirmUnmatch}
+            onPress={pendingAction === 'block' ? confirmBlock : confirmUnmatch}
           >
-            {t(Translations.PROFILE_VIEW_UNMATCH_CONFIRM)}
+            {t(
+              pendingAction === 'block'
+                ? Translations.PROFILE_VIEW_BLOCK_CONFIRM
+                : Translations.PROFILE_VIEW_UNMATCH_CONFIRM,
+            )}
           </AppButton>
           <Spacer spacing={Spacing.SPACING_PADDING_8} />
           <AppButton variant="link" onPress={closeModal}>

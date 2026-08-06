@@ -71,4 +71,10 @@ export default {
   profileViewUnmatchCancel: 'Cancel',
   profileViewUnmatchError: "Couldn't end the match. Please try again.",
   profileViewNoPhotos: 'No photos yet.',
+  profileViewBlock: 'Block',
+  profileViewBlockTitle: 'Block {{name}}?',
+  profileViewBlockBody:
+    'You will not see each other again, here or in Discover. They are not told.',
+  profileViewBlockConfirm: 'Block',
+  profileViewBlockError: "Couldn't block this person. Please try again.",
 };
