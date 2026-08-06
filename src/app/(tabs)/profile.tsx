@@ -29,8 +29,6 @@ import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
-const PHOTO_SIZE = 96;
-
 export default function ProfileScreen() {
   const theme = useAppTheme();
   const router = useRouter();
@@ -359,12 +357,12 @@ export default function ProfileScreen() {
                 title={t(Translations.PROFILE_SECTION_GALLERY)}
                 bg={theme.colors.surface}
               >
-                <View style={styles.photoGrid}>
+                <View>
                   {photos.map(p => (
                     <View
                       key={p.id}
                       style={[
-                        styles.photoCell,
+                        styles.photoFull,
                         {
                           backgroundColor: surfaceLow,
                         },
@@ -609,16 +607,14 @@ const styles = StyleSheet.create({
     padding: Spacing.SPACING_PADDING_16,
     borderRadius: BorderRadius.xxl,
   },
-  photoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  photoCell: {
-    width: PHOTO_SIZE,
-    height: PHOTO_SIZE,
-    borderRadius: BorderRadius.lg,
+  // Full width, portrait, stacked — the same treatment a match's profile
+  // gets, so your own profile shows you exactly what they see.
+  photoFull: {
+    width: '100%',
+    aspectRatio: 4 / 5,
+    borderRadius: BorderRadius.xl,
     overflow: 'hidden',
+    marginBottom: Spacing.SPACING_PADDING_12,
   },
   photoImg: {
     width: '100%',

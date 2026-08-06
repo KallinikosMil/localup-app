@@ -189,7 +189,21 @@ export default function ChatScreen() {
           }
           disabled={!userId}
           hitSlop={8}
-          style={styles.headerTitle}
+          style={[
+            styles.headerTitle,
+            // A tinted pill so the name LOOKS like the control it is. A
+            // bare title that happens to navigate is invisible
+            // affordance — nobody taps it because nothing says they can.
+            userId
+              ? {
+                  backgroundColor: theme.colors.surface,
+                  paddingLeft: Spacing.SPACING_PADDING_12,
+                  paddingRight: Spacing.SPACING_PADDING_8,
+                  paddingVertical: 6,
+                  borderRadius: BorderRadius.pill,
+                }
+              : null,
+          ]}
         >
           <AppText
             variant="h3"

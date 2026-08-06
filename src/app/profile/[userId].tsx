@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Image, ScrollView, Pressable } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  ScrollView,
+  Pressable,
+  Modal,
+} from 'react-native';
 import { ActivityIndicator, Chip, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,8 +31,6 @@ import { Translations } from '@features/profile/i18n/translationKeys';
 import { useAppTheme, AppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
-
-const PHOTO_SIZE = 96;
 
 // Read-only view of a MATCH's profile. Deliberately a separate screen from
 // the (tabs)/profile one: that screen is "you" and is editable, this one is
@@ -55,6 +60,10 @@ export default function UserProfileScreen() {
 
   const { modalProps, openModal, closeModal } = useModal();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // Which photo is open full-screen; null = none. Holding the URL rather
+  // than an index means the viewer can't point at a stale slot if the
+  // list refetches underneath it.
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
 
   const mode = computeMode(
     profile,
@@ -246,27 +255,35 @@ export default function UserProfileScreen() {
 
           <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
-          <Section
-            title={t(Translations.PROFILE_SECTION_GALLERY)}
-            theme={theme}
-          >
-            {photos && photos.length > 0 ? (
-              <View style={styles.photoGrid}>
-                {photos.map(p => (
-                  <View key={p.id} style={styles.photoCell}>
-                    <Image source={{ uri: p.url }} style={styles.photoImg} />
-                  </View>
-                ))}
-              </View>
-            ) : (
+          {/* Photos read the way they do on Tinder/Bumble: full width, one
+              under the other, at a portrait ratio — not a grid of stamps.
+              A face is the whole point of the screen, so it gets the whole
+              column. Each one opens full-screen. */}
+          {photos && photos.length > 0 ? (
+            <View>
+              {photos.map(p => (
+                <Pressable
+                  key={p.id}
+                  onPress={() => setViewerUrl(p.url)}
+                  style={styles.photoFull}
+                >
+                  <Image source={{ uri: p.url }} style={styles.photoImg} />
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <Section
+              title={t(Translations.PROFILE_SECTION_GALLERY)}
+              theme={theme}
+            >
               <AppText
                 variant="body"
                 style={{ color: theme.colors.onSurfaceVariant }}
               >
                 {t(Translations.PROFILE_VIEW_NO_PHOTOS)}
               </AppText>
-            )}
-          </Section>
+            </Section>
+          )}
 
           {profile?.interests && profile.interests.length > 0 ? (
             <>
@@ -363,6 +380,38 @@ export default function UserProfileScreen() {
           </AppButton>
         </View>
       </CustomModal>
+
+      {/* Full-screen photo. `resizeMode="contain"` on a black field, so a
+          portrait shot is never cropped to fit the viewport — the point of
+          opening it is to see all of it. Tap anywhere to close. */}
+      <Modal
+        visible={!!viewerUrl}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setViewerUrl(null)}
+        statusBarTranslucent
+      >
+        <Pressable style={styles.viewer} onPress={() => setViewerUrl(null)}>
+          {viewerUrl ? (
+            <Image
+              source={{ uri: viewerUrl }}
+              style={styles.viewerImage}
+              resizeMode="contain"
+            />
+          ) : null}
+          <Pressable
+            onPress={() => setViewerUrl(null)}
+            hitSlop={12}
+            style={[styles.viewerClose, { top: insets.top + 8 }]}
+          >
+            <MaterialCommunityIcons
+              name="close"
+              size={24}
+              color={theme.colors.ON_PHOTO}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       <Snackbar
         visible={!!errorMsg}
@@ -469,14 +518,31 @@ const styles = StyleSheet.create({
     padding: Spacing.SPACING_PADDING_16,
     borderRadius: BorderRadius.xxl,
   },
-  photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  photoCell: {
-    width: PHOTO_SIZE,
-    height: PHOTO_SIZE,
-    borderRadius: BorderRadius.lg,
+  photoFull: {
+    width: '100%',
+    // Portrait, like every dating app: a person is taller than they are
+    // wide, and a 1:1 crop cuts heads off.
+    aspectRatio: 4 / 5,
+    borderRadius: BorderRadius.xxl,
     overflow: 'hidden',
+    marginBottom: Spacing.SPACING_PADDING_12,
   },
   photoImg: { width: '100%', height: '100%' },
+  viewer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.95)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewerImage: { width: '100%', height: '100%' },
+  viewerClose: {
+    position: 'absolute',
+    right: Spacing.SPACING_PADDING_16,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderRadius: BorderRadius.pill },
   destructive: {
