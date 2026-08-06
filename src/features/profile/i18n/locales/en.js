@@ -63,4 +63,12 @@ export default {
     'Currently shown as {{mode}} — manual override active.',
   profileModeNoteUnknown:
     "Waiting for your location — we can't work out your mode yet.",
+  profileViewUnmatch: 'Unmatch',
+  profileViewUnmatchTitle: 'Unmatch {{name}}?',
+  profileViewUnmatchBody:
+    'You will both stop seeing this match and the conversation will be removed from your list.',
+  profileViewUnmatchConfirm: 'Unmatch',
+  profileViewUnmatchCancel: 'Cancel',
+  profileViewUnmatchError: "Couldn't end the match. Please try again.",
+  profileViewNoPhotos: 'No photos yet.',
 };

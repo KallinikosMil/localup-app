@@ -80,30 +80,47 @@ export default function MatchesScreen() {
           });
         }}
       >
-        {item.avatar_url ? (
-          <Image
-            source={{
-              uri: item.avatar_url,
-            }}
-            style={styles.avatar}
-          />
-        ) : (
-          <View
-            style={[
-              styles.avatar,
-              styles.avatarPlaceholder,
-              {
-                backgroundColor: theme.colors.surfaceVariant,
+        {/* The avatar opens the person's profile; the rest of the row
+            opens the chat. Two destinations in one row, so the smaller,
+            clearly-bounded target gets the secondary action. */}
+        <Pressable
+          onPress={() =>
+            router.push({
+              pathname: '/profile/[userId]',
+              params: {
+                userId: item.user_id,
+                matchId: item.id,
+                name: item.display_name,
               },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="account"
-              size={28}
-              color={theme.colors.onSurfaceVariant}
+            })
+          }
+          hitSlop={4}
+        >
+          {item.avatar_url ? (
+            <Image
+              source={{
+                uri: item.avatar_url,
+              }}
+              style={styles.avatar}
             />
-          </View>
-        )}
+          ) : (
+            <View
+              style={[
+                styles.avatar,
+                styles.avatarPlaceholder,
+                {
+                  backgroundColor: theme.colors.surfaceVariant,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="account"
+                size={28}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
+          )}
+        </Pressable>
 
         <View style={styles.info}>
           <AppText

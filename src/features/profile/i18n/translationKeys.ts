@@ -10,6 +10,15 @@ export enum Translations {
   PROFILE_LOGOUT_ERROR = 'profileLogoutError',
   PROFILE_GALLERY_ERROR = 'profileGalleryError',
 
+  // Viewing a match's profile
+  PROFILE_VIEW_UNMATCH = 'profileViewUnmatch',
+  PROFILE_VIEW_UNMATCH_TITLE = 'profileViewUnmatchTitle',
+  PROFILE_VIEW_UNMATCH_BODY = 'profileViewUnmatchBody',
+  PROFILE_VIEW_UNMATCH_CONFIRM = 'profileViewUnmatchConfirm',
+  PROFILE_VIEW_UNMATCH_CANCEL = 'profileViewUnmatchCancel',
+  PROFILE_VIEW_UNMATCH_ERROR = 'profileViewUnmatchError',
+  PROFILE_VIEW_NO_PHOTOS = 'profileViewNoPhotos',
+
   // Profile tab
   PROFILE_TITLE = 'profileTitle',
   PROFILE_EDIT_ACTION = 'profileEditAction',

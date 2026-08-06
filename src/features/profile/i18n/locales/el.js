@@ -61,4 +61,12 @@ export default {
     'Εμφανίζεσαι ως {{mode}} — ενεργή χειροκίνητη επιλογή.',
   profileModeNoteUnknown:
     'Περιμένουμε την τοποθεσία σου — δεν μπορούμε ακόμη να βρούμε τη λειτουργία σου.',
+  profileViewUnmatch: 'Κατάργηση ταιριάσματος',
+  profileViewUnmatchTitle: 'Κατάργηση ταιριάσματος με {{name}};',
+  profileViewUnmatchBody:
+    'Δεν θα βλέπετε πλέον ο ένας τον άλλον και η συνομιλία θα αφαιρεθεί από τη λίστα σου.',
+  profileViewUnmatchConfirm: 'Κατάργηση',
+  profileViewUnmatchCancel: 'Άκυρο',
+  profileViewUnmatchError: 'Η κατάργηση απέτυχε. Δοκίμασε ξανά.',
+  profileViewNoPhotos: 'Δεν υπάρχουν φωτογραφίες ακόμα.',
 };

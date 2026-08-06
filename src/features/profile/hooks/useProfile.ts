@@ -96,6 +96,51 @@ export const useProfile = () => {
   });
 };
 
+// The same read as useProfile, but for SOMEONE ELSE — the view-a-match's
+// -profile screen. Separate hook rather than a parameter on useProfile so
+// the two can never be confused at a call site: this one is read-only and
+// its cache key is distinct, so a foreign profile can never be written
+// into ['profile', <me>] and rendered as your own.
+//
+// `profiles` and `user_interests` are readable by any authenticated user
+// (RLS), so no privileged path is needed here. Photos are the exception:
+// `media` is owner-only PLUS an active-match policy, so usePhotos(otherId)
+// returns rows only while you are actually matched — enforced in the
+// database, not here.
+export const useUserProfile = (userId: string | null | undefined) => {
+  return useQuery({
+    queryKey: ['user-profile', userId],
+    enabled: !!userId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select(
+          'user_id, display_name, home_city, home_lat, home_lng, current_lat, current_lng, bio, avatar_url, mode_override',
+        )
+        .eq('user_id', userId!)
+        .single();
+
+      if (error) throw error;
+
+      const { data: userInterests, error: interestsError } = await supabase
+        .from('user_interests')
+        .select('interest_id, interests(name)')
+        .eq('user_id', userId!);
+
+      // Same rule as useProfile: a failed interests read must not present
+      // as "this person picked none".
+      if (interestsError) throw interestsError;
+
+      const interests = (userInterests ?? []).flatMap(ui =>
+        interestNamesFrom(ui.interests),
+      );
+
+      return { ...profile, interests } as Profile;
+    },
+  });
+};
+
 export type ProfileUpdate = Partial<{
   display_name: string;
   bio: string;
