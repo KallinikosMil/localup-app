@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+
 import { Spacing } from '@theme/constants/Spacing';
 
 type Props = {

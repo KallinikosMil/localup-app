@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from 'react-native-paper';
+
 type Props = {
   name?: React.ComponentProps<typeof Ionicons>['name'];
   size?: number;

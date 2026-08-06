@@ -13,9 +13,6 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 
-// Hold the splash until fonts are ready — typography.ts references these
-// families by name; rendering before they load falls back to system fonts
-// for a frame.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Loads the app's font families and drops the splash once they're ready.

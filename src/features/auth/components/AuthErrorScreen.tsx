@@ -7,17 +7,13 @@ import { useSelector } from 'react-redux';
 
 import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
-import { Translations as Common } from '@shared/i18n/translationKeys';
 import { RootState } from '@store';
+import { retryAuthBootstrap } from '@features/auth/hooks/useAuthSession';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/auth/i18n/translationKeys';
-import { retryAuthBootstrap } from '@features/auth/hooks/useAuthSession';
 
-// W13: shown when we could NOT determine the user's account state.
-// The whole point is that we don't guess — we say so and offer a
-// retry, instead of picking a branch (which used to mean routing an
-// onboarded user back through onboarding and overwriting them).
 export default function AuthErrorScreen() {
   const theme = useTheme();
   const { t } = useTranslation();

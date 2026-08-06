@@ -2,10 +2,10 @@ import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector } from 'react-redux';
+
 import { RootState } from '@store';
 import { useMatches, type Match } from '@features/matches/hooks/useMatches';
 
-// matchId → epoch ms the user last opened that chat.
 type ReadMap = Record<string, number>;
 
 // There is no server-side read state (no last_read_at / read receipts),

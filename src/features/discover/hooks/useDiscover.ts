@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@config/supabase';
 import { useSelector } from 'react-redux';
+
+import { supabase } from '@config/supabase';
 import { RootState } from '@store';
 import {
   haversineKm,
@@ -9,11 +10,6 @@ import {
   useProfile,
 } from '@features/profile/hooks/useProfile';
 
-// If a fresh GPS fix drifts more than this from the
-// coords the deck was computed against, invalidate
-// and refetch. Captured-decision from brainstorm
-// Round 3: keep cold-open fast (use stale), correct
-// later only if the user actually moved.
 const STALE_GPS_KM_THRESHOLD = 5;
 
 export type Candidate = {

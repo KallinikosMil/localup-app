@@ -17,10 +17,10 @@ import type { TFunction } from 'i18next';
 import AppText from '@shared/components/AppText';
 import ModeBadge from '@shared/components/ModeBadge';
 import InterestChip from '@shared/components/InterestChip';
+import { type Candidate } from '../hooks/useDiscover';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
-import { type Candidate } from '../hooks/useDiscover';
 import { Translations } from '../i18n/translationKeys';
 
 const MAX_CHIPS = 3;

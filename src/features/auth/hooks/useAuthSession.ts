@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { isAuthRetryableFetchError } from '@supabase/supabase-js';
+
 import { supabase } from '@config/supabase';
 import { isNetworkError } from '@shared/utils/networkError';
 import { store } from '@store';

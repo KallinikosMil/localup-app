@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { usePathname, useRouter, useSegments } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { RootState } from '@store';
+
 import AuthErrorScreen from '@features/auth/components/AuthErrorScreen';
 import FullScreenLoader from '@shared/components/FullScreenLoader';
+import { RootState } from '@store';
 import { Translations } from '@shared/i18n/translationKeys';
 
-// Auth-based routing: keeps unauthenticated users in /auth, routes
-// authenticated ones to onboarding or the tabs depending on their
-// onboarding status.
 export default function AppGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();

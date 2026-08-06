@@ -1,12 +1,5 @@
 import { TextStyle } from 'react-native';
 
-// UI redesign scale (spec 2026-06-10-ui-redesign §2.1):
-// Plus Jakarta Sans for headlines, Inter for body. Fonts
-// are loaded in AppProviders via useFonts — fontFamily here
-// must match the loaded names exactly. fontWeight is NOT
-// set alongside fontFamily: Android resolves weight from
-// the font file itself, and a mismatched fontWeight makes
-// it silently fall back to the system font.
 export type TypographyVariant =
   | 'display'
   | 'h1'

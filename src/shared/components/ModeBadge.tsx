@@ -8,9 +8,6 @@ import { Translations } from '@shared/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
-// Single source of truth for the TRAVELER/LOCAL pill —
-// the core brand element (UI redesign spec §3.1). Replaces
-// the inline implementations in SwipeCard and friends.
 type ModeBadgeProps = {
   mode: 'local' | 'traveler';
   size?: 'sm' | 'md';

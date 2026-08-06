@@ -8,8 +8,6 @@ import Spacer from '@shared/components/Spacer';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 
-// Standard empty state — "No one nearby" pattern for
-// Discover/Matches/Photos (UI redesign spec §3.5).
 type EmptyStateProps = {
   icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
   title: string;

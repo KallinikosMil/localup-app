@@ -1,19 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
+
 import { supabase } from '@config/supabase';
 import { RootState } from '@store';
 import type { Match } from '@features/matches/hooks/useMatches';
 
-// Ends a match. Deliberately a STATUS CHANGE, not a delete:
-//
-//  • `get_matches_overview` already filters `status = 'active'`, so the
-//    row disappears from both users' lists with no further work.
-//  • The chat thread and its messages stay referentially intact — a
-//    delete would either cascade them away or leave orphans.
-//  • It is auditable and reversible, which a delete is not.
-//
-// RLS is what makes this safe: the `matches` policies scope writes to the
-// two participants, so a caller cannot end someone else's match by id.
 export const useUnmatch = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();

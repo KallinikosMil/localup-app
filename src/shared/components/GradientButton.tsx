@@ -12,9 +12,6 @@ import { useAppTheme } from '@theme/paper';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Spacing } from '@theme/constants/Spacing';
 
-// Primary CTA only — at most one per screen (UI redesign
-// spec §3.3). 45° brand gradient, pill radius, press
-// feedback via scale 0.96.
 type GradientButtonProps = {
   children: React.ReactNode;
   onPress: () => void;

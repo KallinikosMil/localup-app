@@ -1,11 +1,11 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { useAppTheme } from '@theme/paper';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
 import useLocation from '@shared/hooks/useLocation';
 import { useSyncLocation } from '@features/profile/hooks/useProfile';
 import { useUnreadMatches } from '@features/matches/hooks/useReadTracking';
+import { useAppTheme } from '@theme/paper';
 
 export default function TabLayout() {
   const theme = useAppTheme();

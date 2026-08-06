@@ -1,12 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { supabase } from '@config/supabase';
 import { store } from '@store';
 import { setOnboardingComplete } from '@features/auth/slices/authSlice';
 
-// H3: the coords/photo are REQUIRED here, not optional. The screen
-// used to paper over missing values with `?? 0` / `?? ''` — see
-// interests.tsx. Typing them as non-null makes that impossible to
-// re-introduce without the compiler complaining.
 type OnboardingData = {
   displayName: string;
   dateOfBirth: string;

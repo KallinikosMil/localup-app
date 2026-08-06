@@ -14,9 +14,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { RootState } from '@store';
 
 import AppText from '@shared/components/AppText';
+import { RootState } from '@store';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import {
   useChat,
@@ -31,7 +31,7 @@ import { Translations } from '@features/chat/i18n/translationKeys';
 export default function ChatScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { matchId, name, threadId } = useLocalSearchParams<{
+  const { matchId, name, threadId, userId } = useLocalSearchParams<{
     matchId: string;
     name: string;
     // Passed from Matches (which already
@@ -40,6 +40,10 @@ export default function ChatScreen() {
     // / brand-new matches → resolved in
     // the fallback path.
     threadId?: string;
+    // Also handed over from Matches, so the header can open their
+    // profile without a second lookup. Absent on deep links — the
+    // header just isn't tappable then.
+    userId?: string;
   }>();
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const { t } = useTranslation();
@@ -170,15 +174,39 @@ export default function ChatScreen() {
             color={theme.colors.onBackground}
           />
         </Pressable>
-        <AppText
-          variant="h3"
-          style={{
-            color: theme.colors.onBackground,
-            marginLeft: Spacing.SPACING_PADDING_16,
-          }}
+        {/* Tapping the name opens their profile — the way you'd expect
+            coming from any other chat app. Only tappable when we actually
+            know who they are: the id is handed over from the Matches row,
+            so a deep link into a chat still works, it just isn't a link. */}
+        <Pressable
+          onPress={() =>
+            userId
+              ? router.push({
+                  pathname: '/profile/[userId]',
+                  params: { userId, matchId, name: name ?? '' },
+                })
+              : undefined
+          }
+          disabled={!userId}
+          hitSlop={8}
+          style={styles.headerTitle}
         >
-          {name ?? t(Translations.CHAT_TITLE_FALLBACK)}
-        </AppText>
+          <AppText
+            variant="h3"
+            style={{
+              color: theme.colors.onBackground,
+            }}
+          >
+            {name ?? t(Translations.CHAT_TITLE_FALLBACK)}
+          </AppText>
+          {userId ? (
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={20}
+              color={theme.colors.onSurfaceVariant}
+            />
+          ) : null}
+        </Pressable>
       </View>
 
       {/* Messages */}
@@ -324,6 +352,11 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: Spacing.SPACING_PADDING_16,
+  },
   root: {
     flex: 1,
   },

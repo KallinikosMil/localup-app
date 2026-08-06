@@ -5,9 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AppText from '@shared/components/AppText';
 import { useAppTheme } from '@theme/paper';
 
-// Avatar with brand-gradient ring option (new-match
-// emphasis) and an initial-letter fallback — NOT the
-// generic account icon (UI redesign spec §3.4).
 type AvatarProps = {
   uri: string | null | undefined;
   size: number;

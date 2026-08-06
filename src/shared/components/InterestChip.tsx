@@ -6,12 +6,6 @@ import AppText from '@shared/components/AppText';
 import { useAppTheme } from '@theme/paper';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
-// Two faces (UI redesign spec §3.2):
-// - variant 'frosted' | 'tonal': display-only pill for
-//   cards/profile (frosted sits on photos, tonal on
-//   surfaces).
-// - no variant: legacy selectable Paper Chip, still used
-//   by onboarding interest picking. Migrate later.
 type Props = {
   label: string;
   variant?: 'frosted' | 'tonal';

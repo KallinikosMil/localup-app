@@ -5,16 +5,9 @@ import {
   isAuthWeakPasswordError,
 } from '@supabase/supabase-js';
 import * as Linking from 'expo-linking';
+
 import { supabase } from '@config/supabase';
 import { Translations } from '@features/auth/i18n/translationKeys';
-
-// ─── Error taxonomy ──────────────────────────────────────────────────
-//
-// The screens used to render `err.message` — Supabase's own English
-// prose — straight into the modal. Every auth failure is instead
-// classified into one of these codes here, and the screens translate the
-// code. Classification reads STRUCTURED fields only (error classes and
-// the documented `code` field), never message text.
 
 export enum AuthErrorCode {
   INVALID_CREDENTIALS = 'invalid_credentials',

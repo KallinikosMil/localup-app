@@ -9,7 +9,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
-import { useAppTheme } from '@theme/paper';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +18,7 @@ import Spacer from '@shared/components/Spacer';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useMatches, type Match } from '@features/matches/hooks/useMatches';
 import { useUnreadMatches } from '@features/matches/hooks/useReadTracking';
+import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/matches/i18n/translationKeys';
@@ -68,6 +68,10 @@ export default function MatchesScreen() {
             params: {
               matchId: item.id,
               name: item.display_name,
+              // Lets the chat header open this person's profile without
+              // another lookup. Optional there — a deep link won't carry
+              // it, and the header simply isn't tappable in that case.
+              userId: item.user_id,
               // Hand the chat the thread it
               // already knows → skips the
               // thread lookup (§1b).

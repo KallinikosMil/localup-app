@@ -9,7 +9,6 @@ import {
   TextInput as RNTextInput,
 } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
-import { useAppTheme, AppTheme } from '@theme/paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +27,7 @@ import {
   computeMode,
   type ProfileMode,
 } from '@features/profile/hooks/useProfile';
+import { useAppTheme, AppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';

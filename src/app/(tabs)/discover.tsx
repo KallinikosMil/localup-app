@@ -16,22 +16,20 @@ import AppButton from '@shared/components/AppButton';
 import EmptyState from '@shared/components/EmptyState';
 import GradientButton from '@shared/components/GradientButton';
 import Spacer from '@shared/components/Spacer';
-import { useAppTheme } from '@theme/paper';
+import SwipeCard from '@features/discover/components/SwipeCard';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
-import SwipeCard from '@features/discover/components/SwipeCard';
 import {
   useCandidates,
   useStaleLocationRefetch,
   useSwipe,
   type Candidate,
 } from '@features/discover/hooks/useDiscover';
+import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/discover/i18n/translationKeys';
 
-// Placeholder for the sibling discovery-filters spec —
-// the header filter button renders only when this flips.
 const FILTERS_ENABLED = false;
 
 export default function DiscoverScreen() {

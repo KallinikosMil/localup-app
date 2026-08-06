@@ -13,8 +13,8 @@ import OnboardingProgress from '@shared/components/OnboardingProgress';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { useCompleteOnboarding } from '@features/onboarding/hooks/useOnboarding';
-import { Translations } from '@features/onboarding/i18n/translationKeys';
 import { supabase } from '@config/supabase';
+import { Translations } from '@features/onboarding/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 
 const MIN_INTERESTS = 3;

@@ -3,19 +3,18 @@ import { StyleSheet, View, ScrollView } from 'react-native';
 import { Text, IconButton, Divider } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AppText from '@shared/components/AppText';
-import AppButton from '@shared/components/AppButton';
-import FullScreenLoader from '@shared/components/FullScreenLoader';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { useLogin, authErrorKey } from '@features/auth/hooks/useAuth';
-import useModal from '@shared/hooks/useModal';
 
+import AppText from '@shared/components/AppText';
+import AppButton from '@shared/components/AppButton';
+import FullScreenLoader from '@shared/components/FullScreenLoader';
 import Spacer from '@shared/components/Spacer';
 import InputField from '@shared/components/InputField';
 import CustomModal from '@shared/components/CustomModal';
-
+import { useLogin, authErrorKey } from '@features/auth/hooks/useAuth';
+import useModal from '@shared/hooks/useModal';
 import { Spacing } from '@theme/constants/Spacing';
 import { Translations } from '@features/auth/i18n/translationKeys';
 import { useThemeMode } from '@theme/ThemeModeProvider';

@@ -10,7 +10,6 @@ import {
 import { ActivityIndicator, Chip, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useAppTheme, AppTheme } from '@theme/paper';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +24,7 @@ import {
   usePhotos,
   computeMode,
 } from '@features/profile/hooks/useProfile';
+import { useAppTheme, AppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';

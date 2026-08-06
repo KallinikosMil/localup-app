@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@config/supabase';
 import { useSelector } from 'react-redux';
+
+import { supabase } from '@config/supabase';
 import { RootState } from '@store';
 import { useForegroundEpoch } from '@shared/hooks/useForegroundEpoch';
 

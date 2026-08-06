@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { useColorScheme } from 'react-native';
 import * as SystemUI from 'expo-system-ui';
+
 import { PaperLight, PaperDark } from '@theme/paper';
 
 type Mode = 'light' | 'dark' | 'system';
