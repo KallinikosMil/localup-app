@@ -7,6 +7,7 @@ import AppGuard from '@features/auth/components/AppGuard';
 import { store } from '@store';
 import { queryClient } from '@config/queryClient';
 import { useAuthSession } from '@features/auth/hooks/useAuthSession';
+import { useAuthDeepLink } from '@features/auth/hooks/useAuthDeepLink';
 import { useAppFonts } from '@shared/hooks/useAppFonts';
 import '@config/i18n';
 import { ThemeModeProvider } from '@theme/ThemeModeProvider';
@@ -18,6 +19,9 @@ export default function AppProviders({
 }) {
   const fontsLoaded = useAppFonts();
   useAuthSession();
+  // Must live alongside useAuthSession, above the Redux Provider: a
+  // recovery link can arrive before any screen has mounted.
+  useAuthDeepLink();
 
   if (!fontsLoaded) {
     return null;

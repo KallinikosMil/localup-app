@@ -72,6 +72,7 @@ export default function MatchesScreen() {
               // another lookup. Optional there — a deep link won't carry
               // it, and the header simply isn't tappable in that case.
               userId: item.user_id,
+              ...(item.avatar_url ? { avatar: item.avatar_url } : {}),
               // Hand the chat the thread it
               // already knows → skips the
               // thread lookup (§1b).

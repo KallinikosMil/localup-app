@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  Image,
 } from 'react-native';
 import { useTheme, ActivityIndicator, Snackbar } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -31,7 +32,7 @@ import { Translations } from '@features/chat/i18n/translationKeys';
 export default function ChatScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { matchId, name, threadId, userId } = useLocalSearchParams<{
+  const { matchId, name, threadId, userId, avatar } = useLocalSearchParams<{
     matchId: string;
     name: string;
     // Passed from Matches (which already
@@ -44,6 +45,10 @@ export default function ChatScreen() {
     // profile without a second lookup. Absent on deep links — the
     // header just isn't tappable then.
     userId?: string;
+    // Their avatar, for the header. Passed along rather than fetched:
+    // the Matches row already has it and a chat header should not wait
+    // on a round trip to draw itself.
+    avatar?: string;
   }>();
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const { t } = useTranslation();
@@ -174,10 +179,11 @@ export default function ChatScreen() {
             color={theme.colors.onBackground}
           />
         </Pressable>
-        {/* Tapping the name opens their profile — the way you'd expect
-            coming from any other chat app. Only tappable when we actually
-            know who they are: the id is handed over from the Matches row,
-            so a deep link into a chat still works, it just isn't a link. */}
+        {/* Avatar + name, tappable as ONE target — the way every chat app
+            does it. No pill, no chevron: the person's own photo next to
+            their name is the affordance, and dressing it up as a button
+            makes the header look like a toolbar instead of a conversation.
+            Inert when we don't know who they are (deep link, no id). */}
         <Pressable
           onPress={() =>
             userId
@@ -189,37 +195,34 @@ export default function ChatScreen() {
           }
           disabled={!userId}
           hitSlop={8}
-          style={[
-            styles.headerTitle,
-            // A tinted pill so the name LOOKS like the control it is. A
-            // bare title that happens to navigate is invisible
-            // affordance — nobody taps it because nothing says they can.
-            userId
-              ? {
-                  backgroundColor: theme.colors.surface,
-                  paddingLeft: Spacing.SPACING_PADDING_12,
-                  paddingRight: Spacing.SPACING_PADDING_8,
-                  paddingVertical: 6,
-                  borderRadius: BorderRadius.pill,
-                }
-              : null,
-          ]}
+          style={styles.headerTitle}
         >
+          {avatar ? (
+            <Image source={{ uri: avatar }} style={styles.headerAvatar} />
+          ) : (
+            <View
+              style={[
+                styles.headerAvatar,
+                styles.headerAvatarFallback,
+                { backgroundColor: theme.colors.surface },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="account"
+                size={18}
+                color={theme.colors.onSurfaceVariant}
+              />
+            </View>
+          )}
           <AppText
             variant="h3"
             style={{
               color: theme.colors.onBackground,
+              marginLeft: Spacing.SPACING_PADDING_8,
             }}
           >
             {name ?? t(Translations.CHAT_TITLE_FALLBACK)}
           </AppText>
-          {userId ? (
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={20}
-              color={theme.colors.onSurfaceVariant}
-            />
-          ) : null}
         </Pressable>
       </View>
 
@@ -366,6 +369,15 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  headerAvatarFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerTitle: {
     flexDirection: 'row',
     alignItems: 'center',

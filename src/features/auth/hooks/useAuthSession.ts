@@ -38,6 +38,25 @@ const authLog = (branch: string, extra?: Record<string, unknown>) => {
 
 const uidTag = (id?: string | null) => (id ? `${id.slice(0, 8)}…` : null);
 
+// Guards the cold-start bootstrap against being overtaken.
+//
+// bootstrapAuth reads the PERSISTED session asynchronously. If something
+// installs a DIFFERENT session while that read is in flight — a recovery
+// deep link is the real case — the read resolves afterwards holding the
+// old session and writes it back over the new one. Observed exactly that:
+// the link signed in as the recovering user, then `bootstrap OK → session
+// restored` put the previous user back and cleared the recovery flag with
+// them.
+//
+// Anything that establishes a session out-of-band bumps this first;
+// bootstrapAuth captures it on entry and refuses to publish a result that
+// the world has moved past. Same shape as the `isStale` guard below, one
+// level up.
+let authEpoch = 0;
+export const invalidateAuthBootstrap = () => {
+  authEpoch += 1;
+};
+
 // The profile read is the one thing standing between the user and the
 // app, so give a transient blip a couple of chances before we surface
 // the error screen.
@@ -148,8 +167,18 @@ const isTransportFailure = (error: unknown) => {
 // Cold-start (and Retry) bootstrap: restore the persisted session and
 // resolve the onboarding status for it.
 const bootstrapAuth = async () => {
+  const epoch = authEpoch;
+  // True once someone else has installed a session while we were reading
+  // the persisted one. Our result is then stale by definition.
+  const overtaken = () => {
+    if (epoch === authEpoch) return false;
+    authLog('bootstrap overtaken by a newer session → discarding result');
+    return true;
+  };
+
   try {
     const { data, error } = await supabase.auth.getSession();
+    if (overtaken()) return;
 
     // W12: an AUTH error from getSession means the persisted session is
     // unusable (most often a rotated single-use refresh token). We used
@@ -209,6 +238,10 @@ const bootstrapAuth = async () => {
         { uid: uidTag(session?.user?.id) },
       );
     }
+
+    // Re-check: signOut above is awaited, so a deep link could have
+    // landed in the meantime.
+    if (overtaken()) return;
 
     store.dispatch(setUser(toAuthUser(session)));
     await syncOnboardingStatus(session);
