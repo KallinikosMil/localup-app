@@ -55,6 +55,7 @@ export default function ChatScreen() {
 
   const insets = useSafeAreaInsets();
   const errorMessage = useErrorMessage();
+
   const { messages, isLoading, isError, error, refetch } = useChat(
     matchId,
     threadId ?? null,
@@ -125,7 +126,12 @@ export default function ChatScreen() {
             : [
                 styles.bubbleTheirs,
                 {
-                  backgroundColor: theme.colors.surfaceVariant,
+                  // White with a hairline, not a fill. surfaceVariant is
+                  // #E6E0F6 — violet enough that their messages competed
+                  // with the accent on ours, and the whole thread read as
+                  // one voice. The accent should mean "me" and nothing else.
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.outlineVariant,
                 },
               ],
         ]}
@@ -162,12 +168,17 @@ export default function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : insets.top}
     >
-      {/* Header */}
+      {/* Header. Same background as the conversation itself, not a tinted
+          toolbar — a chat is a room you are in, not a screen you are
+          operating. A hairline does the separating instead of a fill, so
+          the name reads as a name and not as a title bar. It stays opaque
+          so messages scroll underneath rather than showing through. */}
       <View
         style={[
           styles.header,
           {
-            backgroundColor: theme.colors.surfaceVariant,
+            backgroundColor: theme.colors.background,
+            borderBottomColor: theme.colors.outlineVariant,
             paddingTop: insets.top + Spacing.SPACING_PADDING_8,
           },
         ]}
@@ -314,7 +325,8 @@ export default function ChatScreen() {
         style={[
           styles.inputRow,
           {
-            backgroundColor: theme.colors.surfaceVariant,
+            backgroundColor: theme.colors.background,
+            borderTopColor: theme.colors.outlineVariant,
           },
         ]}
       >
@@ -323,6 +335,7 @@ export default function ChatScreen() {
             styles.input,
             {
               backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outlineVariant,
               color: theme.colors.onSurface,
             },
           ]}
@@ -341,7 +354,7 @@ export default function ChatScreen() {
             {
               backgroundColor: text.trim()
                 ? theme.colors.primary
-                : theme.colors.surfaceVariant,
+                : theme.colors.outlineVariant,
             },
           ]}
         >
@@ -391,6 +404,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.SPACING_PADDING_16,
     paddingBottom: Spacing.SPACING_PADDING_16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   center: {
     flex: 1,
@@ -423,15 +437,18 @@ const styles = StyleSheet.create({
   bubbleTheirs: {
     alignSelf: 'flex-start',
     borderBottomLeftRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     padding: Spacing.SPACING_PADDING_8,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
   input: {
     flex: 1,
     borderRadius: BorderRadius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: Spacing.SPACING_PADDING_16,
     paddingVertical: Spacing.SPACING_PADDING_8,
     maxHeight: 100,

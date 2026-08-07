@@ -38,6 +38,13 @@
           "color": "#653FD4"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7eb2ddc2-c55b-4ea5-9010-811c1049a8f7"
+      }
+    },
+    "owner": "drumber"
   }
 }

@@ -1,3 +1,8 @@
+// Must stay the first import: it silences a warning that expo-notifications
+// emits from its own module body, so it has to run before anything pulls
+// that package in. See the file for why, and when to delete it.
+import '@config/logbox';
+
 import React from 'react';
 import { Stack } from 'expo-router';
 

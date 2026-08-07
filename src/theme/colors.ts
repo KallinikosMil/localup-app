@@ -21,6 +21,12 @@ const lightBase = {
   WHITE: '#FFFFFF',
   GREY_050: '#FDFCFE',
   GREY_100: '#E6E0F6',
+  // A genuinely neutral light grey, for hairlines and bubble edges.
+  // GREY_100 above is #E6E0F6 — saturated enough to read as violet, so a
+  // border drawn in it competes with the accent instead of receding. This
+  // one keeps only a trace of the same hue, enough to belong to the
+  // palette and not enough to be seen as a colour.
+  GREY_200: '#E8E6EC',
   GREY_400: '#79747E',
   GREY_600: '#49454F',
   GREY_900: '#1E1A1F',
@@ -58,6 +64,9 @@ const darkBase: typeof lightBase = {
   WHITE: '#27252B',
   GREY_050: '#1C1B1F',
   GREY_100: '#49454F',
+  // Dark-mode counterpart: a hairline has to sit just above the ground,
+  // not halfway to the text, or it reads as a border instead of a seam.
+  GREY_200: '#35323B',
   GREY_400: '#938F99',
   GREY_600: '#CAC4D0',
   GREY_900: '#E6E1E5',
@@ -112,6 +121,7 @@ export const lightColors = {
   onSurfaceVariant: lightBase.GREY_600,
 
   outline: lightBase.GREY_400,
+  outlineVariant: lightBase.GREY_200,
   error: lightBase.RED_700,
   onError: lightBase.WHITE,
 
@@ -151,6 +161,7 @@ export const darkColors: typeof lightColors = {
   onSurfaceVariant: darkBase.GREY_600,
 
   outline: darkBase.GREY_400,
+  outlineVariant: darkBase.GREY_200,
   error: darkBase.RED_700,
   onError: darkBase.RED_900,
 
