@@ -41,7 +41,7 @@ export default {
   profileSectionAboutYou: 'About you',
   profileBioPlaceholder: 'Share what makes you, you.',
   profileSectionYourGallery: 'Your gallery',
-  profilePhotoHint: 'Long press to remove',
+  profilePhotoHint: 'Press and hold to remove',
   profilePhotoPermissionTitle: 'Permission needed',
   profilePhotoPermissionBody: 'Allow photo library access to add photos.',
   profilePhotoDeleteTitle: 'Delete photo?',

@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
+import GalleryPhoto from '@features/profile/components/GalleryPhoto';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import {
@@ -568,18 +569,13 @@ export default function EditProfileScreen() {
           ) : null}
           <View style={styles.photoGrid}>
             {(photos ?? []).map(p => (
-              <Pressable
+              <GalleryPhoto
                 key={p.id}
-                onLongPress={() => confirmDelete(p.id)}
-                style={[
-                  styles.photoCell,
-                  {
-                    backgroundColor: surfaceLow,
-                  },
-                ]}
-              >
-                <Image source={{ uri: p.url }} style={styles.photoImg} />
-              </Pressable>
+                uri={p.url}
+                size={PHOTO_SIZE}
+                background={surfaceLow}
+                onRemove={() => confirmDelete(p.id)}
+              />
             ))}
             {canAddPhoto ? (
               <Pressable
@@ -605,16 +601,23 @@ export default function EditProfileScreen() {
               </Pressable>
             ) : null}
           </View>
-          <Spacer spacing={Spacing.SPACING_PADDING_8} />
-          <AppText
-            variant="caption"
-            style={{
-              color: theme.colors.onSurfaceVariant,
-              fontStyle: 'italic',
-            }}
-          >
-            {t(Translations.PROFILE_PHOTO_HINT)}
-          </AppText>
+          {/* Only once there is something to remove. On an empty gallery
+              the hint described a gesture with no target, right under a
+              lone "+" — it read as an instruction for the button. */}
+          {photos?.length ? (
+            <>
+              <Spacer spacing={Spacing.SPACING_PADDING_8} />
+              <AppText
+                variant="caption"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontStyle: 'italic',
+                }}
+              >
+                {t(Translations.PROFILE_PHOTO_HINT)}
+              </AppText>
+            </>
+          ) : null}
         </Section>
 
         <Spacer spacing={Spacing.SPACING_PADDING_16} />
