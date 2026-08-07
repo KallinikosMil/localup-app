@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 
 import Shell from '@providers/Shell';
 import AppGuard from '@features/auth/components/AppGuard';
+import PushRegistrar from '@features/notifications/components/PushRegistrar';
 import { store } from '@store';
 import { queryClient } from '@config/queryClient';
 import { useAuthSession } from '@features/auth/hooks/useAuthSession';
@@ -31,6 +32,7 @@ export default function AppProviders({
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <ThemeModeProvider>
+          <PushRegistrar />
           <Shell>
             <AppGuard>{children}</AppGuard>
           </Shell>

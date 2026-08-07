@@ -61,3 +61,6 @@ LOCALUP_OVERVIEW.md
 
 # Security notes naming the live project (never publish)
 SECURITY-FIX-*.md
+
+# Supabase CLI local state
+supabase/.temp/
