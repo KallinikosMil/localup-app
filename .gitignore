@@ -64,3 +64,8 @@ SECURITY-FIX-*.md
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Firebase — the Android app it identifies is this repo, and the file
+# carries project identifiers. Public repo: keep it out.
+google-services.json
+GoogleService-Info.plist
