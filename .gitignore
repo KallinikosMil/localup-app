@@ -69,3 +69,7 @@ supabase/.temp/
 # carries project identifiers. Public repo: keep it out.
 google-services.json
 GoogleService-Info.plist
+
+# Firebase admin service account: can send push to any device. Never commit.
+fcm-service-account.json
+*-firebase-adminsdk-*.json
