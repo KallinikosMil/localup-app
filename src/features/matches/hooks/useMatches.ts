@@ -20,6 +20,12 @@ export type Match = {
   last_message: string | null;
   last_message_at: string | null;
   created_at: string;
+  // My own read watermark for this match, null until I first open it.
+  // Server-side, so it follows the account and not the handset.
+  last_read_at: string | null;
+  // Messages from the other person newer than that watermark. Derived by
+  // the RPC on every read rather than stored, so it cannot drift.
+  unread_count: number;
 };
 
 // Mirror the chat fix (U5): a stalled request (network blip, slow
@@ -101,6 +107,7 @@ export const useMatches = () => {
             thread_id: string;
             body: string | null;
             created_at: string;
+            sender_id: string | null;
           };
           const cached = queryClient.getQueryData<Match[]>(['matches', uid]);
           const known = cached?.some(m => m.thread_id === msg.thread_id);
@@ -112,6 +119,10 @@ export const useMatches = () => {
             });
             return;
           }
+          // My own messages are never unread to me. Keeping the count in
+          // step here matters because the RPC only recomputes it on a
+          // refetch, and this patch exists precisely to avoid one.
+          const fromOther = msg.sender_id !== uid;
           queryClient.setQueryData<Match[]>(['matches', uid], old =>
             (old ?? []).map(m =>
               m.thread_id === msg.thread_id
@@ -119,6 +130,9 @@ export const useMatches = () => {
                     ...m,
                     last_message: msg.body ?? '',
                     last_message_at: msg.created_at,
+                    unread_count: fromOther
+                      ? (m.unread_count ?? 0) + 1
+                      : m.unread_count,
                   }
                 : m,
             ),
