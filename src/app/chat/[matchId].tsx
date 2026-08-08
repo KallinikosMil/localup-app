@@ -25,6 +25,7 @@ import {
   type ChatMessage,
 } from '@features/chat/hooks/useChat';
 import { useMarkMatchRead } from '@features/matches/hooks/useReadTracking';
+import { useMatches } from '@features/matches/hooks/useMatches';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/chat/i18n/translationKeys';
@@ -32,9 +33,18 @@ import { Translations } from '@features/chat/i18n/translationKeys';
 export default function ChatScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { matchId, name, threadId, userId, avatar } = useLocalSearchParams<{
+  const {
+    matchId,
+    name: nameParam,
+    threadId,
+    userId: userIdParam,
+    avatar: avatarParam,
+  } = useLocalSearchParams<{
     matchId: string;
-    name: string;
+    // All of these are optional in practice: a notification tap arrives
+    // with only a matchId. They are a fast path, not the source of truth —
+    // see the lookup below.
+    name?: string;
     // Passed from Matches (which already
     // knows it) so the chat skips the
     // thread lookup. Absent on deep links
@@ -55,6 +65,17 @@ export default function ChatScreen() {
 
   const insets = useSafeAreaInsets();
   const errorMessage = useErrorMessage();
+
+  // Matches hands the header everything it needs; a notification tap hands
+  // it only a matchId, so without this the header read "Chat" next to a
+  // blank avatar for the one entry point where you most want to see who
+  // you are talking to. The matches list is already loaded and cached, so
+  // recovering the rest is a lookup rather than a request.
+  const { data: matches } = useMatches();
+  const fromList = (matches ?? []).find(m => m.id === matchId);
+  const name = nameParam ?? fromList?.display_name;
+  const userId = userIdParam ?? fromList?.user_id;
+  const avatar = avatarParam ?? fromList?.avatar_url ?? undefined;
 
   const { messages, isLoading, isError, error, refetch } = useChat(
     matchId,

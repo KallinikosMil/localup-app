@@ -45,6 +45,26 @@ const ensureAndroidChannel = async () => {
   });
 };
 
+// getExpoPushTokenAsync talks to Google and then to Expo, and either leg
+// can stall without ever rejecting — on an emulator whose Play Services
+// cannot reach FCM it simply never settles. A hang that logs nothing is
+// indistinguishable from code that never ran, so give it a deadline and
+// turn silence into a message.
+const withDeadline = async <T>(work: Promise<T>, ms: number, what: string) => {
+  let timer: ReturnType<typeof setTimeout>;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`${what} did not settle within ${ms}ms`)),
+      ms,
+    );
+  });
+  try {
+    return await Promise.race([work, deadline]);
+  } finally {
+    clearTimeout(timer!);
+  }
+};
+
 // Asks only if we have not been answered before. Re-prompting a user who
 // said no is both pointless (the OS will not show the dialog again) and
 // the reason apps get muted for good.
@@ -64,14 +84,37 @@ const ensurePermission = async () => {
 // previous one's messages.
 export const usePushRegistration = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
-  // Survives the effect so the cleanup can unregister the exact token it
+  // Survives the effect so sign-out can unregister the exact token that was
   // registered, even though the token itself is fetched asynchronously.
   const tokenRef = useRef<string | null>(null);
+  // Distinguishes "the user signed out" from "this effect merely re-ran".
+  const previousUid = useRef<string | undefined>(undefined);
+  // Only the newest run may write. A generation counter rather than a
+  // per-run `cancelled` flag, because it can say WHY it stopped — an
+  // abandoned registration that logs nothing is indistinguishable from one
+  // that never started, which is exactly how the first version hid itself.
+  const generation = useRef(0);
 
   useEffect(() => {
+    // Sign-out, and only sign-out, releases the device. Doing this in the
+    // effect cleanup instead meant every re-run deleted the token that had
+    // just been registered — and the auth bootstrap writes the session more
+    // than once, so re-runs are normal rather than exceptional.
+    if (!uid && previousUid.current && tokenRef.current) {
+      const token = tokenRef.current;
+      tokenRef.current = null;
+      pushLog('signed out → releasing this device');
+      void supabase.from('push_tokens').delete().eq('token', token);
+    }
+    previousUid.current = uid;
     if (!uid) return;
 
-    let cancelled = false;
+    const myGeneration = ++generation.current;
+    const superseded = () => {
+      if (myGeneration === generation.current) return false;
+      pushLog('registration superseded by a newer run → abandoning');
+      return true;
+    };
 
     const register = async () => {
       if (isExpoGo) {
@@ -87,20 +130,24 @@ export const usePushRegistration = () => {
         return;
       }
 
+      pushLog('registering with projectId', projectId);
+
       try {
         await ensureAndroidChannel();
-        if (cancelled) return;
+        if (superseded()) return;
 
         if (!(await ensurePermission())) {
           pushLog('skipped: permission not granted');
           return;
         }
-        if (cancelled) return;
+        if (superseded()) return;
 
-        const { data: token } = await Notifications.getExpoPushTokenAsync({
-          projectId,
-        });
-        if (cancelled) return;
+        const { data: token } = await withDeadline(
+          Notifications.getExpoPushTokenAsync({ projectId }),
+          20_000,
+          'getExpoPushTokenAsync',
+        );
+        if (superseded()) return;
         tokenRef.current = token;
 
         // Through an RPC rather than a table write: claiming a token is a
@@ -123,15 +170,5 @@ export const usePushRegistration = () => {
     };
 
     void register();
-
-    return () => {
-      cancelled = true;
-      const token = tokenRef.current;
-      if (!token) return;
-      tokenRef.current = null;
-      // Fire-and-forget: the session may already be gone, in which case
-      // RLS drops it and the row is reclaimed by whoever signs in next.
-      void supabase.from('push_tokens').delete().eq('token', token);
-    };
   }, [uid]);
 };

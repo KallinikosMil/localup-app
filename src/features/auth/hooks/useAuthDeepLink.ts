@@ -65,23 +65,32 @@ const handleUrl = async (url: string | null) => {
   }
 
   const isRecovery = p.type === 'recovery';
+  const hasTokens = !!(p.access_token && p.refresh_token);
+  const hasCode = !!p.code;
+
+  // Decide this BEFORE touching the bootstrap. Every link the app opens
+  // arrives here, not just auth ones — the dev-client launcher URL, and
+  // (more importantly) every tap on a push notification, which carries a
+  // matchId and no credentials. Invalidating first and checking after
+  // meant any of those discarded the restored session and dumped a
+  // signed-in user back on the login screen, with nothing in the log to
+  // say why. That was the unexplained ejection.
+  if (!hasTokens && !hasCode) return;
 
   // Announce BEFORE writing the session: the cold-start bootstrap may
   // already be mid-read of the persisted one, and it must discard that
   // result rather than write the previous user back over this link.
   invalidateAuthBootstrap();
 
-  if (p.access_token && p.refresh_token) {
+  if (hasTokens) {
     const { error } = await supabase.auth.setSession({
       access_token: p.access_token,
       refresh_token: p.refresh_token,
     });
     if (error) return;
-  } else if (p.code) {
+  } else {
     const { error } = await supabase.auth.exchangeCodeForSession(p.code);
     if (error) return;
-  } else {
-    return; // not an auth link
   }
 
   // setSession/exchangeCode emit SIGNED_IN, never PASSWORD_RECOVERY —
