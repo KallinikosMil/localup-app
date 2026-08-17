@@ -79,10 +79,16 @@ const InterestsScreen = () => {
   } = useQuery({
     queryKey: ['interests'],
     queryFn: async () => {
+      // Ordered on the server, because a SELECT without ORDER BY has no
+      // order to promise: the same query can hand back the categories — and
+      // the chips inside them — in a different arrangement on every load, so
+      // the grid a user learned the shape of quietly rearranges itself.
       const { data, error } = await supabase
         .from('interests')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('category')
+        .order('name');
       if (error) throw error;
       return data as Interest[];
     },
@@ -363,6 +369,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: Spacing.SPACING_PADDING_8,
+    // Spacing belongs to the row, not to each chip. A per-chip margin also
+    // padded the outside edges, so the grid sat inset from the headings above
+    // it and the wrapped rows never lined up with the screen's gutter.
+    gap: Spacing.SPACING_PADDING_8,
   },
   loader: {
     marginVertical: Spacing.SPACING_PADDING_32,

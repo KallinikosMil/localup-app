@@ -46,15 +46,9 @@ const OnboardingProgress = ({
           {step} / {totalSteps}
         </AppText>
       </View>
-      <AppText
-        variant="h3"
-        style={{
-          color: theme.colors.onBackground,
-          marginTop: Spacing.SPACING_PADDING_8,
-        }}
-      >
-        {title}
-      </AppText>
+      {/* Above the title, not below it. Every screen follows the header with
+          its own subtitle, so a bar sitting between the two cut the heading
+          block in half and read as a divider rather than as progress. */}
       <View style={styles.segmentRow}>
         {segments.map(i => (
           <View
@@ -71,6 +65,14 @@ const OnboardingProgress = ({
           />
         ))}
       </View>
+      <AppText
+        variant="h3"
+        style={{
+          color: theme.colors.onBackground,
+        }}
+      >
+        {title}
+      </AppText>
     </View>
   );
 };
@@ -79,7 +81,7 @@ export default OnboardingProgress;
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.SPACING_PADDING_16,
+    gap: Spacing.SPACING_PADDING_12,
   },
   headerRow: {
     flexDirection: 'row',

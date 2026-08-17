@@ -213,16 +213,10 @@ const HomeCityScreen = () => {
           </View>
         ) : null}
 
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
-
-        <AppText
-          variant="caption"
-          style={{
-            color: theme.colors.onSurfaceVariant,
-          }}
-        >
-          {t(Translations.ONBOARDING_CITY_EXPLANATION)}
-        </AppText>
+        {/* The screen's subtitle already says this ("This helps us connect
+            you with travelers or locals"); the caption underneath restated it
+            at greater length. One explanation, in the position every other
+            step puts it. */}
 
         <View style={styles.bottomSection}>
           <AppButton

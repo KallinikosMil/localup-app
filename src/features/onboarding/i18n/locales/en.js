@@ -13,8 +13,6 @@ export default {
     step2Subtitle: 'This helps us connect you with travelers or locals',
     cityLabel: 'Home City',
     cityRequired: 'Please select your home city',
-    cityExplanation:
-      'We use this to know if you are a local or a traveler in any given location.',
     step3Title: 'Add a Photo',
     step3Subtitle: 'Help others recognize you',
     uploadPhoto: 'Upload Photo',

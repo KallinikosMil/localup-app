@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
-import { useTheme } from 'react-native-paper';
+import { HelperText, TextInput, useTheme } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,6 @@ import OnboardingProgress from '@shared/components/OnboardingProgress';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
-import { BorderRadius } from '@theme/constants/BorderRadius';
 
 type NameAgeForm = {
   displayName: string;
@@ -131,50 +130,33 @@ const NameAgeScreen = () => {
           />
         </FormProvider>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_24} />
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
 
-        <AppText
-          variant="label"
-          style={{
-            color: theme.colors.onBackground,
-            marginBottom: Spacing.SPACING_PADDING_8,
-          }}
-        >
-          {t(Translations.ONBOARDING_DOB_LABEL)}
-        </AppText>
-
-        <Pressable
-          onPress={() => setShowPicker(true)}
-          style={[
-            styles.dobButton,
-            {
-              borderColor: dobError ? theme.colors.error : theme.colors.outline,
-              backgroundColor: theme.colors.surface,
-            },
-          ]}
-        >
-          <AppText
-            variant="body"
-            style={{
-              color: dob
-                ? theme.colors.onSurface
-                : theme.colors.onSurfaceVariant,
-            }}
-          >
-            {dob ? formatDate(dob) : t(Translations.ONBOARDING_DOB_LABEL)}
-          </AppText>
+        {/* The same Paper field as the name above, rather than a bespoke box.
+            It used to be a bordered Pressable with its own label on top AND
+            "Date of Birth" repeated inside as the placeholder — the label said
+            itself twice, and the box was taller and rounder than the field it
+            sat under. Reusing the input gives the floating label, the matching
+            shape and the error state for free; the calendar icon is what says
+            it opens a picker. pointerEvents="none" keeps the taps on the
+            Pressable instead of the (non-editable) field swallowing them. */}
+        <Pressable onPress={() => setShowPicker(true)}>
+          <View pointerEvents="none">
+            <TextInput
+              label={t(Translations.ONBOARDING_DOB_LABEL)}
+              mode="outlined"
+              value={dob ? formatDate(dob) : ''}
+              editable={false}
+              error={!!dobError}
+              right={<TextInput.Icon icon="calendar" />}
+            />
+          </View>
         </Pressable>
 
         {dobError ? (
-          <AppText
-            variant="caption"
-            style={{
-              color: theme.colors.error,
-              marginTop: 4,
-            }}
-          >
+          <HelperText type="error" visible padding="none">
             {dobError}
-          </AppText>
+          </HelperText>
         ) : null}
 
         {showPicker ? (
@@ -216,12 +198,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.SPACING_PADDING_24,
     paddingTop: Spacing.SPACING_PADDING_24,
     paddingBottom: Spacing.SPACING_PADDING_32,
-  },
-  dobButton: {
-    borderWidth: 1,
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.SPACING_PADDING_16,
-    paddingHorizontal: Spacing.SPACING_PADDING_16,
   },
   bottomSection: {
     marginTop: 'auto',

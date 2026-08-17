@@ -56,7 +56,6 @@ const InterestChip = ({
       selected={selected}
       onPress={onPress}
       icon={icon}
-      style={styles.legacy}
       compact
     >
       {label}
@@ -72,8 +71,5 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
     paddingHorizontal: 12,
     paddingVertical: 4,
-  },
-  legacy: {
-    margin: 4,
   },
 });

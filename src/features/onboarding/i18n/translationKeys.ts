@@ -12,7 +12,6 @@ export const Translations = {
   ONBOARDING_STEP_2_SUBTITLE: 'onboarding.step2Subtitle',
   ONBOARDING_CITY_LABEL: 'onboarding.cityLabel',
   ONBOARDING_CITY_REQUIRED: 'onboarding.cityRequired',
-  ONBOARDING_CITY_EXPLANATION: 'onboarding.cityExplanation',
   ONBOARDING_STEP_3_TITLE: 'onboarding.step3Title',
   ONBOARDING_STEP_3_SUBTITLE: 'onboarding.step3Subtitle',
   ONBOARDING_UPLOAD_PHOTO: 'onboarding.uploadPhoto',
