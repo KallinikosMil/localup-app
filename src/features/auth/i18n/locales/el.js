@@ -51,5 +51,7 @@ export default {
   authPasswordMin: 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες',
   authPasswordMismatch: 'Οι κωδικοί δεν ταιριάζουν',
   authEmailRequired: 'Συμπλήρωσε το email σου',
+  authEmailInvalid: 'Το email δεν είναι έγκυρο',
   authPasswordRequired: 'Συμπλήρωσε τον κωδικό σου',
+  authConfirmPasswordRequired: 'Επιβεβαίωσε τον κωδικό σου',
 };

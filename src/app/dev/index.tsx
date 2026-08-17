@@ -9,14 +9,27 @@ import Spacer from '@shared/components/Spacer';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
+// Every entry points into /dev, because AppGuard exempts that group and
+// redirects everything else. The two auth links used to go straight to
+// /auth/login and /auth/register, so tapping them while signed in — which is
+// the normal state when you are here to look at a screen — bounced you to
+// Discover. They were the only dead links in the gallery.
 const SCREENS = [
   {
     label: 'Login',
-    route: '/auth/login',
+    route: '/dev/login',
   },
   {
     label: 'Register',
-    route: '/auth/register',
+    route: '/dev/register',
+  },
+  {
+    label: 'Forgot Password',
+    route: '/dev/forgot-password',
+  },
+  {
+    label: 'Reset Password',
+    route: '/dev/reset-password',
   },
   {
     label: '1. Name & Age',
@@ -35,6 +48,11 @@ const SCREENS = [
     route: '/dev/interests',
   },
 ] as const;
+
+// The two groups below are slices of that one list, so the boundary has to be
+// named — it was a bare `slice(0, 2)` / `slice(2)`, which silently mislabels
+// every screen added to either group.
+const AUTH_SCREEN_COUNT = 4;
 
 const DevGallery = () => {
   const theme = useTheme();
@@ -83,7 +101,7 @@ const DevGallery = () => {
           Auth Screens
         </AppText>
 
-        {SCREENS.slice(0, 2).map(s => (
+        {SCREENS.slice(0, AUTH_SCREEN_COUNT).map(s => (
           <ScreenLink
             key={s.route}
             label={s.label}
@@ -103,7 +121,7 @@ const DevGallery = () => {
           Onboarding Screens
         </AppText>
 
-        {SCREENS.slice(2).map(s => (
+        {SCREENS.slice(AUTH_SCREEN_COUNT).map(s => (
           <ScreenLink
             key={s.route}
             label={s.label}

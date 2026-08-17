@@ -48,5 +48,7 @@ export default {
   authPasswordMin: 'Password must be at least 8 characters',
   authPasswordMismatch: 'Passwords do not match',
   authEmailRequired: 'Please enter your email',
+  authEmailInvalid: 'Please enter a valid email',
   authPasswordRequired: 'Please enter your password',
+  authConfirmPasswordRequired: 'Please confirm your password',
 };

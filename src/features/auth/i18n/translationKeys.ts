@@ -54,5 +54,7 @@ export enum Translations {
   AUTH_PASSWORD_MIN = 'authPasswordMin',
   AUTH_PASSWORD_MISMATCH = 'authPasswordMismatch',
   AUTH_EMAIL_REQUIRED = 'authEmailRequired',
+  AUTH_EMAIL_INVALID = 'authEmailInvalid',
   AUTH_PASSWORD_REQUIRED = 'authPasswordRequired',
+  AUTH_CONFIRM_PASSWORD_REQUIRED = 'authConfirmPasswordRequired',
 }

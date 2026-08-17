@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { ActivityIndicator, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
+import FullScreenLoader from '@shared/components/FullScreenLoader';
 import InputField from '@shared/components/InputField';
 import Spacer from '@shared/components/Spacer';
 import CustomModal from '@shared/components/CustomModal';
@@ -61,14 +62,9 @@ const ResetPasswordScreen = () => {
     });
   });
 
+  // The same loader the other auth screens use.
   if (updatePassword.isPending) {
-    return (
-      <View
-        style={[styles.center, { backgroundColor: theme.colors.background }]}
-      >
-        <ActivityIndicator animating size="large" />
-      </View>
-    );
+    return <FullScreenLoader />;
   }
 
   return (
@@ -148,16 +144,19 @@ const ResetPasswordScreen = () => {
         </ScrollView>
       </View>
 
+      {/* CustomModal already centres its children, so the wrapper only
+          repeated what the modal does. */}
       <CustomModal {...modalProps} onDismiss={closeModal}>
-        <View style={styles.modalContent}>
-          <AppText variant="body" style={{ color: theme.colors.error }}>
-            {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
-          </AppText>
-          <Spacer spacing={Spacing.SPACING_PADDING_16} />
-          <AppButton variant="primary" onPress={closeModal}>
-            {t(Translations.AUTH_DISMISS)}
-          </AppButton>
-        </View>
+        <AppText
+          variant="body"
+          style={{ color: theme.colors.error, textAlign: 'center' }}
+        >
+          {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
+        </AppText>
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+        <AppButton variant="primary" onPress={closeModal}>
+          {t(Translations.AUTH_DISMISS)}
+        </AppButton>
       </CustomModal>
     </>
   );
@@ -167,11 +166,9 @@ export default ResetPasswordScreen;
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: {
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: Spacing.SPACING_PADDING_24,
   },
-  modalContent: { alignItems: 'center' },
 });

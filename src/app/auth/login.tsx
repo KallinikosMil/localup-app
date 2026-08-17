@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Text, IconButton, Divider } from 'react-native-paper';
+import { IconButton, Divider } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -150,14 +150,13 @@ const LoginScreen = () => {
                 rules={{
                   required: {
                     value: true,
-                    message: 'Please enter your email',
+                    message: t(Translations.AUTH_EMAIL_REQUIRED),
                   },
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Please enter a valid email',
+                    message: t(Translations.AUTH_EMAIL_INVALID),
                   },
                 }}
-                dense
                 autoCapitalize="none"
                 keyboardType="email-address"
                 returnKeyType="next"
@@ -169,10 +168,9 @@ const LoginScreen = () => {
                 rules={{
                   required: {
                     value: true,
-                    message: 'Please enter your password',
+                    message: t(Translations.AUTH_PASSWORD_REQUIRED),
                   },
                 }}
-                dense
                 secureTextEntry
                 returnKeyType="done"
               />
@@ -262,21 +260,24 @@ const LoginScreen = () => {
         </ScrollView>
       </View>
 
+      {/* CustomModal already centres and pads by 24 — the wrapper used to pad
+          another 24 on top of that, so this modal sat noticeably chunkier than
+          the identical one on forgot-password. AppText, not Paper's Text, for
+          the same reason every other string in the app uses it. */}
       <CustomModal {...modalProps} onDismiss={handleDismiss}>
-        <View style={styles.modalContent}>
-          <Text
-            variant="bodyMedium"
-            style={{
-              color: theme.colors.error,
-            }}
-          >
-            {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
-          </Text>
-          <Spacer spacing={Spacing.SPACING_PADDING_16} />
-          <AppButton variant="primary" onPress={handleDismiss}>
-            {t(Translations.AUTH_DISMISS)}
-          </AppButton>
-        </View>
+        <AppText
+          variant="body"
+          style={{
+            color: theme.colors.error,
+            textAlign: 'center',
+          }}
+        >
+          {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
+        </AppText>
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+        <AppButton variant="primary" onPress={handleDismiss}>
+          {t(Translations.AUTH_DISMISS)}
+        </AppButton>
       </CustomModal>
     </>
   );
@@ -330,10 +331,5 @@ const styles = StyleSheet.create({
   authLink: {
     marginLeft: Spacing.SPACING_PADDING_8 / 2,
     fontWeight: '600',
-  },
-  modalContent: {
-    alignItems: 'center',
-    padding: Spacing.SPACING_PADDING_24,
-    borderRadius: Spacing.SPACING_PADDING_16,
   },
 });

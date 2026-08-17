@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { ActivityIndicator, Text, Divider } from 'react-native-paper';
+import { Divider } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
+import FullScreenLoader from '@shared/components/FullScreenLoader';
 import Spacer from '@shared/components/Spacer';
 import InputField from '@shared/components/InputField';
 import CustomModal from '@shared/components/CustomModal';
@@ -79,19 +80,11 @@ const RegisterScreen = () => {
     router.back();
   };
 
+  // The same loader login uses, rather than a third hand-rolled centred
+  // spinner. Each auth screen had its own, with its own wrapper style, so
+  // the pending frame shifted depending on which screen you were on.
   if (register.isPending) {
-    return (
-      <View
-        style={[
-          styles.loaderWrap,
-          {
-            backgroundColor: theme.colors.background,
-          },
-        ]}
-      >
-        <ActivityIndicator animating size="large" />
-      </View>
-    );
+    return <FullScreenLoader />;
   }
 
   return (
@@ -149,14 +142,13 @@ const RegisterScreen = () => {
                 rules={{
                   required: {
                     value: true,
-                    message: 'Please enter your email',
+                    message: t(Translations.AUTH_EMAIL_REQUIRED),
                   },
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Please enter a valid email',
+                    message: t(Translations.AUTH_EMAIL_INVALID),
                   },
                 }}
-                dense
                 autoCapitalize="none"
                 keyboardType="email-address"
                 returnKeyType="next"
@@ -168,14 +160,13 @@ const RegisterScreen = () => {
                 rules={{
                   required: {
                     value: true,
-                    message: 'Please enter your password',
+                    message: t(Translations.AUTH_PASSWORD_REQUIRED),
                   },
                   minLength: {
                     value: 8,
-                    message: 'Password must be at least 8 characters',
+                    message: t(Translations.AUTH_PASSWORD_MIN),
                   },
                 }}
-                dense
                 secureTextEntry
                 returnKeyType="next"
               />
@@ -186,14 +177,13 @@ const RegisterScreen = () => {
                 rules={{
                   required: {
                     value: true,
-                    message: 'Please confirm your password',
+                    message: t(Translations.AUTH_CONFIRM_PASSWORD_REQUIRED),
                   },
                   validate: value =>
                     value === form.getValues('password') ||
-                    'Passwords do not match',
+                    t(Translations.AUTH_PASSWORD_MISMATCH),
                   deps: ['password'],
                 }}
-                dense
                 secureTextEntry
                 returnKeyType="done"
               />
@@ -271,21 +261,24 @@ const RegisterScreen = () => {
         </ScrollView>
       </View>
 
+      {/* CustomModal already centres and pads by 24 — the wrapper used to pad
+          another 24 on top of that, so this modal sat noticeably chunkier than
+          the identical one on forgot-password. AppText, not Paper's Text, for
+          the same reason every other string in the app uses it. */}
       <CustomModal {...modalProps} onDismiss={handleDismiss}>
-        <View style={styles.modalContent}>
-          <Text
-            variant="bodyMedium"
-            style={{
-              color: isSuccess ? theme.colors.primary : theme.colors.error,
-            }}
-          >
-            {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
-          </Text>
-          <Spacer spacing={Spacing.SPACING_PADDING_16} />
-          <AppButton variant="primary" onPress={handleDismiss}>
-            {t(Translations.AUTH_DISMISS)}
-          </AppButton>
-        </View>
+        <AppText
+          variant="body"
+          style={{
+            color: isSuccess ? theme.colors.primary : theme.colors.error,
+            textAlign: 'center',
+          }}
+        >
+          {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
+        </AppText>
+        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+        <AppButton variant="primary" onPress={handleDismiss}>
+          {t(Translations.AUTH_DISMISS)}
+        </AppButton>
       </CustomModal>
     </>
   );
@@ -296,11 +289,6 @@ export default RegisterScreen;
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  loaderWrap: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   scrollContent: {
     flexGrow: 1,
@@ -333,10 +321,5 @@ const styles = StyleSheet.create({
   authLink: {
     marginLeft: Spacing.SPACING_PADDING_8 / 2,
     fontWeight: '600',
-  },
-  modalContent: {
-    alignItems: 'center',
-    padding: Spacing.SPACING_PADDING_24,
-    borderRadius: Spacing.SPACING_PADDING_16,
   },
 });
