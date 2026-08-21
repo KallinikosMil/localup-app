@@ -21,11 +21,8 @@ import AppButton from '@shared/components/AppButton';
 import useModal from '@shared/hooks/useModal';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
-import {
-  useUserProfile,
-  usePhotos,
-  computeMode,
-} from '@features/profile/hooks/useProfile';
+import { useUserProfile, usePhotos } from '@features/profile/hooks/useProfile';
+import { computeMode } from '@features/profile/utils/mode';
 import { useUnmatch } from '@features/matches/hooks/useUnmatch';
 import { useBlockUser } from '@features/matches/hooks/useBlockUser';
 import { Translations } from '@features/profile/i18n/translationKeys';

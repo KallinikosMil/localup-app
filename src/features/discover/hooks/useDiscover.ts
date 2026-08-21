@@ -5,10 +5,10 @@ import { useSelector } from 'react-redux';
 import { supabase } from '@config/supabase';
 import { RootState } from '@store';
 import {
-  haversineKm,
   interestNamesFrom,
   useProfile,
 } from '@features/profile/hooks/useProfile';
+import { haversineKm } from '@features/profile/utils/mode';
 
 const STALE_GPS_KM_THRESHOLD = 5;
 

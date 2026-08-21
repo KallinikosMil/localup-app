@@ -25,9 +25,8 @@ import {
   usePhotos,
   useUploadPhoto,
   useDeletePhoto,
-  computeMode,
-  type ProfileMode,
 } from '@features/profile/hooks/useProfile';
+import { computeMode, type ProfileMode } from '@features/profile/utils/mode';
 import { useAppTheme, AppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';

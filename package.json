@@ -9,7 +9,14 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm test"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -49,9 +56,14 @@
     "react-redux": "^9.2.0"
   },
   "devDependencies": {
+    "@types/jest": "29.5.14",
     "@types/react": "~19.1.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "^54.0.4",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~10.0.0",
+    "jest": "~29.7.0",
+    "jest-expo": "~54.0.18",
     "prettier": "^3.9.5",
     "typescript": "~5.9.2"
   },

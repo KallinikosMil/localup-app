@@ -19,12 +19,9 @@ import Spacer from '@shared/components/Spacer';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useLogout } from '@features/auth/hooks/useAuth';
-import {
-  useProfile,
-  usePhotos,
-  computeMode,
-} from '@features/profile/hooks/useProfile';
-import { useAppTheme, AppTheme } from '@theme/paper';
+import { useProfile, usePhotos } from '@features/profile/hooks/useProfile';
+import { computeMode } from '@features/profile/utils/mode';
+import { useAppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';

@@ -11,6 +11,7 @@ import Spacer from '@shared/components/Spacer';
 import InterestChip from '@shared/components/InterestChip';
 import OnboardingProgress from '@shared/components/OnboardingProgress';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
+import { toISODate } from '@shared/utils/date';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { useCompleteOnboarding } from '@features/onboarding/hooks/useOnboarding';
 import { supabase } from '@config/supabase';
@@ -130,17 +131,11 @@ const InterestsScreen = () => {
     // every distance calculation the app makes, forever, with no error.
     // A missing value is NOT a zero. Refuse, and tell the user exactly
     // which step to go back to.
-    // A birthdate is a CALENDAR date, not an instant. toISOString()
-    // converts to UTC first, so a date the picker stored at local
-    // midnight rolls back a full day for anyone east of UTC — i.e. every
-    // user in Greece. And there is no date-of-birth field on
-    // profile/edit, so a wrong value written here can never be corrected
-    // from inside the app. Read the local calendar fields directly.
+    // See toISODate: a birthdate is a calendar date, and toISOString would
+    // shift it a day for every user east of UTC. It lives in shared/utils now
+    // so the rule can be tested instead of trusted.
     const dob = onboardingData.dateOfBirth;
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const dateOfBirth = dob
-      ? `${dob.getFullYear()}-${pad(dob.getMonth() + 1)}-${pad(dob.getDate())}`
-      : '';
+    const dateOfBirth = dob ? toISODate(dob) : '';
     const { homeLat, homeLng, photoUri } = onboardingData;
 
     if (!dateOfBirth) {

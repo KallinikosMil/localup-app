@@ -4,8 +4,13 @@ import { useSelector } from 'react-redux';
 
 import { supabase } from '@config/supabase';
 import { RootState } from '@store';
+import { haversineKm } from '@features/profile/utils/mode';
+import type { ProfileMode } from '@features/profile/utils/mode';
 
-export type ProfileMode = 'traveler' | 'local';
+// The mode rule and its type live in utils/mode.ts — it is pure arithmetic
+// and belongs outside a hooks file. Re-exported so existing imports still
+// resolve from here.
+export type { ProfileMode } from '@features/profile/utils/mode';
 
 export type Profile = {
   user_id: string;
@@ -418,55 +423,4 @@ export const useSyncLocation = (lat: number | null, lng: number | null) => {
 
     syncLocation();
   }, [uid, lat, lng, queryClient]);
-};
-
-export const haversineKm = (
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number,
-): number => {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
-};
-
-export const LOCAL_RADIUS_KM = 50;
-
-// Returns null when the mode is genuinely UNKNOWN — i.e. we don't have
-// both a home and a current position to compare. It used to return
-// 'local' for that case, which is indistinguishable from a real local:
-// a traveler's badge read LOCAL for the first frames and then flipped,
-// and a user whose coords never arrive was told, confidently and
-// permanently, that they are a local. Missing data is not an answer;
-// the call sites render a neutral badge for null.
-export const computeMode = (
-  profile: Profile | null | undefined,
-  currentLat: number | null,
-  currentLng: number | null,
-): ProfileMode | null => {
-  if (profile?.mode_override) {
-    return profile.mode_override;
-  }
-  if (
-    profile?.home_lat == null ||
-    profile?.home_lng == null ||
-    currentLat == null ||
-    currentLng == null
-  ) {
-    return null;
-  }
-  const dist = haversineKm(
-    currentLat,
-    currentLng,
-    profile.home_lat,
-    profile.home_lng,
-  );
-  return dist > LOCAL_RADIUS_KM ? 'traveler' : 'local';
 };

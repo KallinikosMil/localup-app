@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import { Modal, Portal, useTheme } from 'react-native-paper';
 
 import { Spacing } from '@theme';
