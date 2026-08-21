@@ -13,6 +13,7 @@ import Spacer from '@shared/components/Spacer';
 import InputField from '@shared/components/InputField';
 import CustomModal from '@shared/components/CustomModal';
 import { useLogin, authErrorKey } from '@features/auth/hooks/useAuth';
+import { useGoogleSignIn } from '@features/auth/hooks/useGoogleSignIn';
 import useModal from '@shared/hooks/useModal';
 import { Spacing } from '@theme/constants/Spacing';
 import { Translations } from '@features/auth/i18n/translationKeys';
@@ -29,6 +30,7 @@ const LoginScreen = () => {
   const insets = useSafeAreaInsets();
   const { setMode, resolvedMode } = useThemeMode();
   const login = useLogin();
+  const google = useGoogleSignIn();
   const { modalProps, openModal, closeModal } = useModal();
   const [modalMessage, setModalMessage] = useState('');
 
@@ -67,7 +69,20 @@ const LoginScreen = () => {
 
   const handleDismiss = () => {
     login.reset();
+    google.reset();
     closeModal();
+  };
+
+  // Cancelling is a choice, not a failure: openAuthSessionAsync resolves
+  // 'cancel'/'dismiss' and the hook maps those to 'cancelled', so nothing is
+  // shown. AppGuard does the navigating on success.
+  const onGoogle = () => {
+    google.mutate(undefined, {
+      onError: err => {
+        setModalMessage(t(authErrorKey(err)));
+        openModal();
+      },
+    });
   };
 
   const goToRegister = () => {
@@ -78,7 +93,10 @@ const LoginScreen = () => {
   // onboarding status. sign-in resolves → this screen unmounts →
   // AppGuard takes the frame; identical pixels on both sides of that
   // handoff, so it reads as one continuous loader instead of two.
-  if (login.isPending) {
+  // The system browser covers the screen for the Google leg, so the same
+  // loader sits behind it — and is what the user lands back on if they
+  // cancel, rather than a blank frame.
+  if (login.isPending || google.isPending) {
     return <FullScreenLoader />;
   }
 
@@ -229,7 +247,7 @@ const LoginScreen = () => {
 
             <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
-            <AppButton variant="google" icon="google" onPress={() => {}}>
+            <AppButton variant="google" icon="google" onPress={onGoogle}>
               {t(Translations.AUTH_GOOGLE_SIGN_IN)}
             </AppButton>
           </View>

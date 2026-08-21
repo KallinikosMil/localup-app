@@ -13,6 +13,7 @@ import Spacer from '@shared/components/Spacer';
 import InputField from '@shared/components/InputField';
 import CustomModal from '@shared/components/CustomModal';
 import { useRegister, authErrorKey } from '@features/auth/hooks/useAuth';
+import { useGoogleSignIn } from '@features/auth/hooks/useGoogleSignIn';
 import useModal from '@shared/hooks/useModal';
 import { Spacing } from '@theme/constants/Spacing';
 import { Translations } from '@features/auth/i18n/translationKeys';
@@ -28,6 +29,7 @@ const RegisterScreen = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const register = useRegister();
+  const google = useGoogleSignIn();
   const { modalProps, openModal, closeModal } = useModal();
   const [modalMessage, setModalMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -72,7 +74,20 @@ const RegisterScreen = () => {
 
   const handleDismiss = () => {
     register.reset();
+    google.reset();
     closeModal();
+  };
+
+  // Signing up with Google and signing in with Google are the same call —
+  // the provider decides whether the account already exists.
+  const onGoogle = () => {
+    google.mutate(undefined, {
+      onError: err => {
+        setIsSuccess(false);
+        setModalMessage(t(authErrorKey(err)));
+        openModal();
+      },
+    });
   };
 
   const goToLogin = () => {
@@ -82,7 +97,7 @@ const RegisterScreen = () => {
   // The same loader login uses, rather than a third hand-rolled centred
   // spinner. Each auth screen had its own, with its own wrapper style, so
   // the pending frame shifted depending on which screen you were on.
-  if (register.isPending) {
+  if (register.isPending || google.isPending) {
     return <FullScreenLoader />;
   }
 
@@ -230,7 +245,7 @@ const RegisterScreen = () => {
 
             <Spacer spacing={Spacing.SPACING_PADDING_24} />
 
-            <AppButton variant="google" icon="google" onPress={() => {}}>
+            <AppButton variant="google" icon="google" onPress={onGoogle}>
               {t(Translations.AUTH_GOOGLE_SIGN_IN)}
             </AppButton>
           </View>
