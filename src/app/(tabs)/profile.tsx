@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
+import ScreenSafeArea from '@shared/components/ScreenSafeArea';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
 import useLocation from '@shared/hooks/useLocation';
@@ -31,7 +32,7 @@ import { Translations as Common } from '@shared/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
-export default function ProfileScreen() {
+function ProfileScreenContent() {
   const theme = useAppTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -589,6 +590,18 @@ const hexToRgb = (hex: string) => {
     b: n & 255,
   };
 };
+
+// The app-level SafeAreaView is gone (see Shell) so Discover can run
+// edge to edge. This screen still wants the inset, and it has several
+// top-level returns (loading, error, content) — wrapping the export is
+// one place instead of three.
+export default function ProfileScreen() {
+  return (
+    <ScreenSafeArea reserveTabBar>
+      <ProfileScreenContent />
+    </ScreenSafeArea>
+  );
+}
 
 const styles = StyleSheet.create({
   center: {

@@ -14,6 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
+import ScreenSafeArea from '@shared/components/ScreenSafeArea';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
@@ -27,7 +28,7 @@ import { Translations as Common } from '@shared/i18n/translationKeys';
 
 const AVATAR_SIZE = 60;
 
-export default function MatchesScreen() {
+function MatchesScreenContent() {
   const theme = useAppTheme();
   const router = useRouter();
   const { t } = useTranslation();
@@ -289,6 +290,18 @@ export default function MatchesScreen() {
         />
       )}
     </View>
+  );
+}
+
+// The app-level SafeAreaView is gone (see Shell) so Discover can run
+// edge to edge. This screen still wants the inset, and it has several
+// top-level returns (loading, error, content) — wrapping the export is
+// one place instead of three.
+export default function MatchesScreen() {
+  return (
+    <ScreenSafeArea reserveTabBar>
+      <MatchesScreenContent />
+    </ScreenSafeArea>
   );
 }
 
