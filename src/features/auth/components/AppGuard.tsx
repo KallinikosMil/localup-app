@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { usePathname, useRouter, useSegments } from 'expo-router';
+import {
+  usePathname,
+  useRootNavigationState,
+  useRouter,
+  useSegments,
+} from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import AuthErrorScreen from '@features/auth/components/AuthErrorScreen';
@@ -12,6 +17,15 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();
   const pathname = usePathname();
+  // undefined until the root <Stack> has actually mounted. Navigating before
+  // that throws "Attempted to navigate before mounting the Root Layout
+  // component" — which is exactly what happens on a cold start with NO
+  // session: the routing effect below wants to replace() to /auth/login on
+  // the very first commit, before the navigator this component sits inside
+  // has finished rendering. It surfaced only after a data wipe, because
+  // every other start had a session to restore and took a slower path.
+  const rootNavigationState = useRootNavigationState();
+  const navigatorReady = !!rootNavigationState?.key;
   const { t } = useTranslation();
   const { user, initialized, onboardingComplete, authError, passwordRecovery } =
     useSelector((s: RootState) => s.auth);
@@ -33,6 +47,8 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
   }, [initialized]);
 
   useEffect(() => {
+    // Nothing may route until there is a navigator to route in.
+    if (!navigatorReady) return;
     if (!initialized) return;
 
     // We don't know the account state (W13). Don't route on a guess —
@@ -85,6 +101,7 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
       router.replace('/(tabs)/discover');
     }
   }, [
+    navigatorReady,
     initialized,
     authError,
     user,
