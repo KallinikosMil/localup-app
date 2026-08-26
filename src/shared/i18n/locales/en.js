@@ -21,6 +21,8 @@ export default {
   a11yProfilePhoto: 'Photo of {{name}}',
   a11yPhotoOfTotal: 'Photo {{index}} of {{total}}',
   a11yRemovePhotoHint: 'Press and hold to remove this photo',
+  a11yChangePhoto: 'Change photo',
   a11yAddPhoto: 'Add a photo',
   a11yOnboardingProgress: 'Step {{step}} of {{total}}',
+  commonStepCount: '{{step}} of {{total}}',
 };

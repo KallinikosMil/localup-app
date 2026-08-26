@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
-import { HelperText, TextInput, useTheme } from 'react-native-paper';
+import { StyleSheet, View, Pressable } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
 import AppText from '@shared/components/AppText';
-import AppButton from '@shared/components/AppButton';
-import Spacer from '@shared/components/Spacer';
 import InputField from '@shared/components/InputField';
-import OnboardingProgress from '@shared/components/OnboardingProgress';
+import OnboardingShell from '@features/onboarding/components/OnboardingShell';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
-import { Spacing } from '@theme/constants/Spacing';
+import { useAppTheme } from '@theme/paper';
+import { Layout } from '@theme/constants/Layout';
 
 type NameAgeForm = {
   displayName: string;
@@ -34,7 +33,7 @@ const formatDate = (date: Date) =>
 
 const NameAgeScreen = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const theme = useAppTheme();
   const { data, update } = useOnboardingData();
 
   const maxDate = getMaxDate();
@@ -83,131 +82,148 @@ const NameAgeScreen = () => {
   });
 
   return (
-    <View
-      style={[
-        styles.root,
-        {
-          backgroundColor: theme.colors.background,
-        },
-      ]}
+    <OnboardingShell
+      step={1}
+      totalSteps={4}
+      showBack={false}
+      title={t(Translations.ONBOARDING_STEP_1_TITLE)}
+      subtitle={t(Translations.ONBOARDING_STEP_1_SUBTITLE)}
+      actionLabel={t(Translations.ONBOARDING_NEXT)}
+      onAction={onNext}
+      actionDisabled={!isValid}
     >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <OnboardingProgress
-          step={1}
-          totalSteps={4}
-          title={t(Translations.ONBOARDING_STEP_1_TITLE)}
-          showBack={false}
-        />
-
-        <Spacer spacing={Spacing.SPACING_PADDING_8} />
-
-        <AppText
-          variant="body"
-          style={{
-            color: theme.colors.onSurfaceVariant,
+      <FormProvider {...form}>
+        <InputField
+          name="displayName"
+          icon="account-outline"
+          label={t(Translations.ONBOARDING_NAME_LABEL)}
+          helper={t(Translations.ONBOARDING_NAME_HELPER)}
+          rules={{
+            required: {
+              value: true,
+              message: t(Translations.ONBOARDING_NAME_REQUIRED),
+            },
           }}
+          autoCapitalize="words"
+          returnKeyType="next"
+        />
+      </FormProvider>
+
+      {/* Built to match InputField rather than reusing it: this opens a
+          picker instead of taking typing, and a real TextInput made
+          non-editable is a field that looks focusable and is not. The
+          label, box and helper line below are the same shapes, so the two
+          read as one form. */}
+      <View>
+        <AppText
+          variant="caption"
+          style={[
+            styles.label,
+            {
+              color: theme.colors.onSurfaceFaint,
+            },
+          ]}
         >
-          {t(Translations.ONBOARDING_STEP_1_SUBTITLE)}
+          {t(Translations.ONBOARDING_DOB_LABEL)}
         </AppText>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_32} />
-
-        <FormProvider {...form}>
-          <InputField
-            name="displayName"
-            label={t(Translations.ONBOARDING_NAME_LABEL)}
-            rules={{
-              required: {
-                value: true,
-                message: t(Translations.ONBOARDING_NAME_REQUIRED),
-              },
-            }}
-            autoCapitalize="words"
-            returnKeyType="next"
-          />
-        </FormProvider>
-
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
-
-        {/* The same Paper field as the name above, rather than a bespoke box.
-            It used to be a bordered Pressable with its own label on top AND
-            "Date of Birth" repeated inside as the placeholder — the label said
-            itself twice, and the box was taller and rounder than the field it
-            sat under. Reusing the input gives the floating label, the matching
-            shape and the error state for free; the calendar icon is what says
-            it opens a picker. pointerEvents="none" keeps the taps on the
-            Pressable instead of the (non-editable) field swallowing them. */}
         <Pressable
           onPress={() => setShowPicker(true)}
-          // The field inside is pointerEvents="none", so the Pressable is the
-          // control a reader lands on; it has to carry the field's identity.
           accessibilityRole="button"
           accessibilityLabel={t(Translations.ONBOARDING_DOB_LABEL)}
           accessibilityValue={{ text: dob ? formatDate(dob) : '' }}
+          style={[
+            styles.box,
+            {
+              backgroundColor: theme.colors.surfaceElevated,
+              borderColor: dobError
+                ? theme.colors.error
+                : theme.colors.outlineVariant,
+            },
+          ]}
         >
-          <View pointerEvents="none">
-            <TextInput
-              label={t(Translations.ONBOARDING_DOB_LABEL)}
-              mode="outlined"
-              value={dob ? formatDate(dob) : ''}
-              editable={false}
-              error={!!dobError}
-              right={<TextInput.Icon icon="calendar" />}
-            />
-          </View>
+          <MaterialCommunityIcons
+            name="calendar-outline"
+            size={Layout.FIELD_ICON}
+            color={theme.colors.onSurfaceFaint}
+          />
+          <AppText
+            variant="message"
+            style={[
+              styles.value,
+              {
+                color: dob
+                  ? theme.colors.onSurface
+                  : theme.colors.onSurfaceFaint,
+              },
+            ]}
+          >
+            {dob ? formatDate(dob) : t(Translations.ONBOARDING_DOB_PLACEHOLDER)}
+          </AppText>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={18}
+            color={theme.colors.onSurfaceFaint}
+          />
         </Pressable>
 
-        {dobError ? (
-          <HelperText type="error" visible padding="none">
-            {dobError}
-          </HelperText>
-        ) : null}
+        <AppText
+          variant="caption"
+          style={[
+            styles.helper,
+            {
+              color: dobError
+                ? theme.colors.error
+                : theme.colors.onSurfaceFaint,
+            },
+          ]}
+        >
+          {/* The reassurance is the point: people hesitate over a birth
+              date, and it is true — only the age ever leaves the server. */}
+          {dobError || t(Translations.ONBOARDING_DOB_HELPER)}
+        </AppText>
+      </View>
 
-        {showPicker ? (
-          <DateTimePicker
-            value={dob ?? maxDate}
-            mode="date"
-            display="spinner"
-            maximumDate={maxDate}
-            onChange={onDateChange}
-            positiveButton={{
-              label: t(Translations.ONBOARDING_PICKER_OK),
-              textColor: theme.colors.primary,
-            }}
-            negativeButton={{
-              label: t(Translations.ONBOARDING_PICKER_CANCEL),
-              textColor: theme.colors.primary,
-            }}
-          />
-        ) : null}
-
-        <View style={styles.bottomSection}>
-          <AppButton variant="primary" onPress={onNext} disabled={!isValid}>
-            {t(Translations.ONBOARDING_NEXT)}
-          </AppButton>
-        </View>
-      </ScrollView>
-    </View>
+      {showPicker ? (
+        <DateTimePicker
+          value={dob ?? maxDate}
+          mode="date"
+          display="spinner"
+          maximumDate={maxDate}
+          onChange={onDateChange}
+          positiveButton={{
+            label: t(Translations.ONBOARDING_PICKER_OK),
+            textColor: theme.colors.primary,
+          }}
+          negativeButton={{
+            label: t(Translations.ONBOARDING_PICKER_CANCEL),
+            textColor: theme.colors.primary,
+          }}
+        />
+      ) : null}
+    </OnboardingShell>
   );
 };
 
 export default NameAgeScreen;
 
 const styles = StyleSheet.create({
-  root: {
+  label: {
+    marginBottom: Layout.FIELD_LABEL_GAP,
+  },
+  box: {
+    minHeight: Layout.FIELD_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.FIELD_INNER_GAP,
+    paddingHorizontal: Layout.FIELD_PADDING_H,
+    borderRadius: Layout.FIELD_RADIUS,
+    borderWidth: 1,
+  },
+  value: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_24,
-    paddingBottom: Spacing.SPACING_PADDING_32,
-  },
-  bottomSection: {
-    marginTop: 'auto',
-    paddingTop: Spacing.SPACING_PADDING_32,
+  helper: {
+    marginTop: Layout.FIELD_LABEL_GAP,
   },
 });

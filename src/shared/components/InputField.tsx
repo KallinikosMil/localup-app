@@ -35,9 +35,13 @@ export type InputFieldProps<T extends FieldValues> = {
   label?: string;
   rules?: RegisterOptions<T, FieldPath<T>>;
   validateOnBlur?: boolean;
-  // Leading glyph. Optional: the onboarding fields have none, and an icon
-  // that means nothing is worse than no icon.
+  // Leading glyph. Optional: an icon that means nothing is worse than no
+  // icon.
   icon?: IconName;
+  // A line under the field explaining what it is for. Replaced by the
+  // validation message while the field is invalid — two lines of small
+  // grey text, one of them an error, is how an error goes unread.
+  helper?: string;
 } & Omit<RNInputProps, 'value' | 'onChangeText' | 'onBlur' | 'style'>;
 
 const InputField = <T extends FieldValues>({
@@ -46,6 +50,7 @@ const InputField = <T extends FieldValues>({
   rules,
   validateOnBlur = true,
   icon,
+  helper,
   secureTextEntry,
   ...rest
 }: InputFieldProps<T>) => {
@@ -148,17 +153,19 @@ const InputField = <T extends FieldValues>({
         ) : null}
       </View>
 
-      {error?.message ? (
+      {error?.message || helper ? (
         <AppText
           variant="caption"
           style={[
-            styles.error,
+            styles.helper,
             {
-              color: theme.colors.error,
+              color: error?.message
+                ? theme.colors.error
+                : theme.colors.onSurfaceFaint,
             },
           ]}
         >
-          {error.message}
+          {error?.message ?? helper}
         </AppText>
       ) : null}
     </View>
@@ -186,7 +193,7 @@ const styles = StyleSheet.create({
     // padding plus the box's minHeight does it reliably in both themes.
     paddingVertical: Spacing.md,
   },
-  error: {
-    marginTop: Spacing.xs,
+  helper: {
+    marginTop: Layout.FIELD_LABEL_GAP,
   },
 });

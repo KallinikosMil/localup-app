@@ -34,5 +34,10 @@ export enum Translations {
   A11Y_PHOTO_OF_TOTAL = 'a11yPhotoOfTotal',
   A11Y_REMOVE_PHOTO_HINT = 'a11yRemovePhotoHint',
   A11Y_ADD_PHOTO = 'a11yAddPhoto',
+  A11Y_CHANGE_PHOTO = 'a11yChangePhoto',
   A11Y_ONBOARDING_PROGRESS = 'a11yOnboardingProgress',
+  // The visible counter beside the bar. Shorter than the a11y label,
+  // which says 'Step 1 of 4' in full because a reader has no bar to
+  // look at.
+  COMMON_STEP_COUNT = 'commonStepCount',
 }

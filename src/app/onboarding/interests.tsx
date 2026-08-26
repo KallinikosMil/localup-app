@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
-import { TextInput, ActivityIndicator, useTheme } from 'react-native-paper';
+import { StyleSheet, View, TextInput } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -9,14 +9,17 @@ import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
 import Spacer from '@shared/components/Spacer';
 import InterestChip from '@shared/components/InterestChip';
-import OnboardingProgress from '@shared/components/OnboardingProgress';
+import OnboardingShell from '@features/onboarding/components/OnboardingShell';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { toISODate } from '@shared/utils/date';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { useCompleteOnboarding } from '@features/onboarding/hooks/useOnboarding';
 import { supabase } from '@config/supabase';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
+import { useAppTheme } from '@theme/paper';
+import { Typography } from '@theme/typography';
 import { Spacing } from '@theme/constants/Spacing';
+import { Layout } from '@theme/constants/Layout';
 
 const MIN_INTERESTS = 3;
 const MAX_INTERESTS = 5;
@@ -46,7 +49,7 @@ const MISSING_ROUTE: Record<MissingField, string> = {
 
 const InterestsScreen = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const theme = useAppTheme();
   const errorMessage = useErrorMessage();
   const { data: onboardingData, update } = useOnboardingData();
 
@@ -169,52 +172,129 @@ const InterestsScreen = () => {
   };
 
   return (
-    <View
-      style={[
-        styles.root,
-        {
-          backgroundColor: theme.colors.background,
-        },
-      ]}
+    <OnboardingShell
+      step={4}
+      totalSteps={4}
+      title={t(Translations.ONBOARDING_STEP_4_TITLE)}
+      subtitle={t(Translations.ONBOARDING_STEP_4_SUBTITLE)}
+      actionLabel={
+        finishFailed
+          ? t(Translations.ONBOARDING_RETRY)
+          : t(Translations.ONBOARDING_FINISH)
+      }
+      onAction={onFinish}
+      actionDisabled={!canFinish || isPending}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <OnboardingProgress
-          step={4}
-          totalSteps={4}
-          title={t(Translations.ONBOARDING_STEP_4_TITLE)}
-        />
+      <AppText
+        variant="caption"
+        style={{
+          color: theme.colors.onSurfaceVariant,
+        }}
+      >
+        {t(Translations.ONBOARDING_INTERESTS_SELECTED, {
+          selected: selectedIds.length,
+          max: MAX_INTERESTS,
+        })}
+      </AppText>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_8} />
+      <Spacer spacing={Spacing.SPACING_PADDING_8} />
 
-        <AppText
-          variant="body"
-          style={{
-            color: theme.colors.onSurfaceVariant,
-          }}
-        >
-          {t(Translations.ONBOARDING_STEP_4_SUBTITLE)}
-        </AppText>
+      {isLoading ? (
+        <ActivityIndicator style={styles.loader} />
+      ) : interestsFailed ? (
+        <View style={styles.errorBlock}>
+          <AppText
+            variant="body"
+            style={{
+              color: theme.colors.error,
+              textAlign: 'center',
+            }}
+          >
+            {errorMessage(
+              interestsError,
+              Translations.ONBOARDING_INTERESTS_ERROR,
+            )}
+          </AppText>
+          <Spacer spacing={Spacing.SPACING_PADDING_12} />
+          <AppButton variant="outlined" onPress={() => refetchInterests()}>
+            {t(Translations.ONBOARDING_RETRY)}
+          </AppButton>
+        </View>
+      ) : (
+        Object.entries(grouped).map(([category, items]) => (
+          <View key={category} style={styles.categoryBlock}>
+            <AppText
+              variant="label"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+              }}
+            >
+              {category}
+            </AppText>
+            <View style={styles.chipRow}>
+              {items.map(interest => (
+                <InterestChip
+                  key={interest.id}
+                  label={interest.name}
+                  icon={interest.icon ?? undefined}
+                  selected={selectedIds.includes(interest.id)}
+                  onPress={() => toggleInterest(interest.id)}
+                />
+              ))}
+            </View>
+          </View>
+        ))
+      )}
 
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+      {!canFinish && selectedIds.length > 0 ? (
+        <>
+          <Spacer spacing={Spacing.SPACING_PADDING_8} />
+          <AppText
+            variant="caption"
+            style={{
+              color: theme.colors.error,
+            }}
+          >
+            {t(Translations.ONBOARDING_INTERESTS_MIN)}
+          </AppText>
+        </>
+      ) : null}
 
+      <Spacer spacing={Spacing.SPACING_PADDING_24} />
+
+      <View>
         <AppText
           variant="caption"
-          style={{
-            color: theme.colors.onSurfaceVariant,
-          }}
+          style={[
+            styles.fieldLabel,
+            {
+              color: theme.colors.onSurfaceFaint,
+            },
+          ]}
         >
-          {t(Translations.ONBOARDING_INTERESTS_SELECTED, {
-            selected: selectedIds.length,
-            max: MAX_INTERESTS,
-          })}
+          {t(Translations.ONBOARDING_BIO_LABEL)}
         </AppText>
+        <TextInput
+          placeholder={t(Translations.ONBOARDING_BIO_PLACEHOLDER)}
+          placeholderTextColor={theme.colors.onSurfaceFaint}
+          value={bio}
+          onChangeText={setBio}
+          multiline
+          style={[
+            styles.bioInput,
+            Typography.message.style,
+            {
+              backgroundColor: theme.colors.surfaceElevated,
+              borderColor: theme.colors.outlineVariant,
+              color: theme.colors.onSurface,
+            },
+          ]}
+        />
+      </View>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_8} />
-
-        {isLoading ? (
-          <ActivityIndicator style={styles.loader} />
-        ) : interestsFailed ? (
-          <View style={styles.errorBlock}>
+      <View style={styles.notices}>
+        {missing ? (
+          <>
             <AppText
               variant="body"
               style={{
@@ -222,140 +302,48 @@ const InterestsScreen = () => {
                 textAlign: 'center',
               }}
             >
-              {errorMessage(
-                interestsError,
-                Translations.ONBOARDING_INTERESTS_ERROR,
-              )}
+              {t(MISSING_MESSAGE[missing])}
             </AppText>
             <Spacer spacing={Spacing.SPACING_PADDING_12} />
-            <AppButton variant="outlined" onPress={() => refetchInterests()}>
-              {t(Translations.ONBOARDING_RETRY)}
-            </AppButton>
-          </View>
-        ) : (
-          Object.entries(grouped).map(([category, items]) => (
-            <View key={category} style={styles.categoryBlock}>
-              <AppText
-                variant="label"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                }}
-              >
-                {category}
-              </AppText>
-              <View style={styles.chipRow}>
-                {items.map(interest => (
-                  <InterestChip
-                    key={interest.id}
-                    label={interest.name}
-                    icon={interest.icon ?? undefined}
-                    selected={selectedIds.includes(interest.id)}
-                    onPress={() => toggleInterest(interest.id)}
-                  />
-                ))}
-              </View>
-            </View>
-          ))
-        )}
-
-        {!canFinish && selectedIds.length > 0 ? (
-          <>
-            <Spacer spacing={Spacing.SPACING_PADDING_8} />
-            <AppText
-              variant="caption"
-              style={{
-                color: theme.colors.error,
-              }}
+            <AppButton
+              variant="outlined"
+              onPress={() => router.push(MISSING_ROUTE[missing])}
             >
-              {t(Translations.ONBOARDING_INTERESTS_MIN)}
-            </AppText>
+              {t(Translations.ONBOARDING_GO_BACK)}
+            </AppButton>
+            <Spacer spacing={Spacing.SPACING_PADDING_12} />
           </>
         ) : null}
 
-        <Spacer spacing={Spacing.SPACING_PADDING_24} />
-
-        <TextInput
-          label={t(Translations.ONBOARDING_BIO_LABEL)}
-          placeholder={t(Translations.ONBOARDING_BIO_PLACEHOLDER)}
-          value={bio}
-          onChangeText={setBio}
-          mode="outlined"
-          multiline
-          numberOfLines={4}
-          style={styles.bioInput}
-        />
-
-        <View style={styles.bottomSection}>
-          {missing ? (
-            <>
-              <AppText
-                variant="body"
-                style={{
-                  color: theme.colors.error,
-                  textAlign: 'center',
-                }}
-              >
-                {t(MISSING_MESSAGE[missing])}
-              </AppText>
-              <Spacer spacing={Spacing.SPACING_PADDING_12} />
-              <AppButton
-                variant="outlined"
-                onPress={() => router.push(MISSING_ROUTE[missing])}
-              >
-                {t(Translations.ONBOARDING_GO_BACK)}
-              </AppButton>
-              <Spacer spacing={Spacing.SPACING_PADDING_12} />
-            </>
-          ) : null}
-
-          {finishFailed ? (
-            <>
-              <AppText
-                variant="body"
-                style={{
-                  color: theme.colors.error,
-                  textAlign: 'center',
-                }}
-              >
-                {errorMessage(
-                  finishError,
-                  Translations.ONBOARDING_FINISH_ERROR,
-                )}
-              </AppText>
-              <Spacer spacing={Spacing.SPACING_PADDING_12} />
-            </>
-          ) : null}
-
-          {isPending ? (
-            <ActivityIndicator size="large" />
-          ) : (
-            <AppButton
-              variant="primary"
-              onPress={onFinish}
-              disabled={!canFinish}
+        {finishFailed ? (
+          <>
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.error,
+                textAlign: 'center',
+              }}
             >
-              {finishFailed
-                ? t(Translations.ONBOARDING_RETRY)
-                : t(Translations.ONBOARDING_FINISH)}
-            </AppButton>
-          )}
-        </View>
-      </ScrollView>
-    </View>
+              {errorMessage(finishError, Translations.ONBOARDING_FINISH_ERROR)}
+            </AppText>
+            <Spacer spacing={Spacing.SPACING_PADDING_12} />
+          </>
+        ) : null}
+
+        {isPending ? <ActivityIndicator size="large" /> : null}
+      </View>
+    </OnboardingShell>
   );
 };
 
 export default InterestsScreen;
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
+  fieldLabel: {
+    marginBottom: Layout.FIELD_LABEL_GAP,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_24,
-    paddingBottom: Spacing.SPACING_PADDING_32,
+  notices: {
+    alignItems: 'center',
   },
   categoryBlock: {
     marginBottom: Spacing.SPACING_PADDING_16,
@@ -377,10 +365,13 @@ const styles = StyleSheet.create({
     marginVertical: Spacing.SPACING_PADDING_32,
   },
   bioInput: {
-    maxHeight: 120,
-  },
-  bottomSection: {
-    marginTop: 'auto',
-    paddingTop: Spacing.SPACING_PADDING_32,
+    minHeight: Layout.FIELD_HEIGHT * 2,
+    maxHeight: Layout.FIELD_HEIGHT * 3,
+    borderRadius: Layout.FIELD_RADIUS,
+    borderWidth: 1,
+    paddingHorizontal: Layout.FIELD_PADDING_H,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
+    textAlignVertical: 'top',
   },
 });

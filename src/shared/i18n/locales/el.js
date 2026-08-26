@@ -21,6 +21,8 @@ export default {
   a11yProfilePhoto: 'Φωτογραφία του χρήστη {{name}}',
   a11yPhotoOfTotal: 'Φωτογραφία {{index}} από {{total}}',
   a11yRemovePhotoHint: 'Παρατεταμένο πάτημα για αφαίρεση της φωτογραφίας',
+  a11yChangePhoto: 'Αλλαγή φωτογραφίας',
   a11yAddPhoto: 'Προσθήκη φωτογραφίας',
   a11yOnboardingProgress: 'Βήμα {{step}} από {{total}}',
+  commonStepCount: '{{step}} από {{total}}',
 };

@@ -1,19 +1,28 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Chip } from 'react-native-paper';
+import { StyleSheet, View, Pressable } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import AppText from '@shared/components/AppText';
 import { useAppTheme } from '@theme/paper';
 import { BorderRadius } from '@theme/constants/BorderRadius';
+import { Layout } from '@theme/constants/Layout';
+
+type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 type Props = {
   label: string;
+  // 'frosted' sits on a photo; without a variant the chip is a selectable
+  // control on an ordinary surface.
   variant?: 'frosted' | 'tonal';
   icon?: string;
   selected?: boolean;
   onPress?: () => void;
 };
 
+// Selected reuses the surfaceSelected/outlineSelected pair rather than
+// inventing a fourth "chosen" look. That pair already means "this one is
+// picked out" on unread match rows and on shared interests, and one
+// meaning per colour is the only way a reader learns it.
 const InterestChip = ({
   label,
   variant,
@@ -35,13 +44,16 @@ const InterestChip = ({
           styles.pill,
           {
             backgroundColor: frosted
-              ? theme.colors.WHITE_A20
+              ? theme.colors.chipOnPhoto
+              : theme.colors.secondaryContainer,
+            borderColor: frosted
+              ? theme.colors.chipOnPhotoBorder
               : theme.colors.secondaryContainer,
           },
         ]}
       >
         <AppText
-          variant="caption"
+          variant="micro"
           style={{
             color: frosted
               ? theme.colors.ON_PHOTO
@@ -55,20 +67,44 @@ const InterestChip = ({
   }
 
   return (
-    <Chip
-      mode={selected ? 'flat' : 'outlined'}
-      selected={selected}
+    <Pressable
       onPress={onPress}
-      icon={icon}
       // Whether a chip is chosen is shown by fill colour alone. Without
-      // this, a screen reader reads every chip identically and the user
-      // cannot tell what they have already picked.
+      // this, a reader hears every chip identically and cannot tell what
+      // they have already picked.
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      compact
+      accessibilityLabel={label}
+      style={[
+        styles.chip,
+        {
+          backgroundColor: selected
+            ? theme.colors.surfaceSelected
+            : theme.colors.surfaceElevated,
+          borderColor: selected
+            ? theme.colors.outlineSelected
+            : theme.colors.outlineVariant,
+        },
+      ]}
     >
-      {label}
-    </Chip>
+      {icon ? (
+        <MaterialCommunityIcons
+          name={icon as IconName}
+          size={16}
+          color={selected ? theme.colors.primary : theme.colors.onSurfaceFaint}
+        />
+      ) : null}
+      <AppText
+        variant={selected ? 'bodySmallStrong' : 'bodySmall'}
+        style={{
+          color: selected
+            ? theme.colors.primary
+            : theme.colors.onSurfaceVariant,
+        }}
+      >
+        {label}
+      </AppText>
+    </Pressable>
   );
 };
 
@@ -78,7 +114,17 @@ const styles = StyleSheet.create({
   pill: {
     alignSelf: 'flex-start',
     borderRadius: BorderRadius.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    borderWidth: 1,
+    paddingHorizontal: Layout.CHIP_PADDING_H,
+    paddingVertical: Layout.CHIP_PADDING_V,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.PROGRESS_BAR_GAP + 1,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+    paddingHorizontal: Layout.CHIP_PADDING_H + 3,
+    paddingVertical: Layout.CHIP_PADDING_V + 3,
   },
 });
