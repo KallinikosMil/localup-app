@@ -6,4 +6,13 @@ export default {
   matchesEmptyTitle: 'No matches yet',
   matchesEmptySubtitle: 'Start swiping to find people who share your interests',
   matchesSayHello: 'Say hello',
+  matchesSectionNew: 'New matches',
+  matchesSectionMessages: 'Messages',
+  matchesCountNew: '{{count}} NEW',
+  matchesCountUnread: '{{count}} UNREAD',
+  matchesNewMatch: 'New match',
+  matchesTimeNow: 'now',
+  matchesTimeMinutes: '{{count}}m',
+  matchesTimeHours: '{{count}}h',
+  matchesTimeYesterday: 'Yesterday',
 };

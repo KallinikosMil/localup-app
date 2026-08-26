@@ -221,7 +221,7 @@ const ProfileHero = ({
               color={theme.colors.onHeaderPill}
             />
             <AppText
-              variant="caption"
+              variant="microStrong"
               style={[
                 styles.countText,
                 {
@@ -290,12 +290,9 @@ const ProfileHero = ({
 
         <AppText
           variant="displayLg"
-          style={[
-            styles.name,
-            {
-              color: theme.colors.ON_PHOTO,
-            },
-          ]}
+          style={{
+            color: theme.colors.ON_PHOTO,
+          }}
         >
           {age != null
             ? t(Translations.PROFILE_NAME_AGE, {
@@ -317,8 +314,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   heroEdgeLight: {
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    borderBottomLeftRadius: Layout.HERO_EDGE_RADIUS,
+    borderBottomRightRadius: Layout.HERO_EDGE_RADIUS,
   },
   image: {
     width: '100%',
@@ -347,17 +344,17 @@ const styles = StyleSheet.create({
     left: Spacing.lg,
     right: Spacing.lg,
     flexDirection: 'row',
-    gap: 5,
+    gap: Layout.PROGRESS_BAR_GAP,
   },
   progressBar: {
     flex: 1,
-    height: 3,
-    borderRadius: 2,
+    height: Layout.PROGRESS_BAR_HEIGHT,
+    borderRadius: Layout.PROGRESS_BAR_RADIUS,
   },
   headerRow: {
     position: 'absolute',
-    left: 20,
-    right: 20,
+    left: Layout.SCREEN_PADDING,
+    right: Layout.SCREEN_PADDING,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -365,14 +362,13 @@ const styles = StyleSheet.create({
   countPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    height: 32,
-    paddingHorizontal: 12,
+    gap: Layout.PROGRESS_BAR_GAP,
+    height: Layout.PILL_HEIGHT_SM,
+    paddingHorizontal: Layout.PILL_PADDING_H,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
   },
   countText: {
-    fontWeight: '600',
     fontVariant: ['tabular-nums'],
   },
   pillShadow: {
@@ -387,9 +383,9 @@ const styles = StyleSheet.create({
   },
   info: {
     position: 'absolute',
-    left: 20,
-    right: 20,
-    bottom: 80,
+    left: Layout.SCREEN_PADDING,
+    right: Layout.SCREEN_PADDING,
+    bottom: Layout.HERO_INFO_BOTTOM,
     gap: Spacing.sm,
   },
   metaRow: {
@@ -401,17 +397,14 @@ const styles = StyleSheet.create({
   modePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    gap: Layout.PROGRESS_BAR_GAP,
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.pill,
   },
   cityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-  },
-  name: {
-    letterSpacing: -0.9,
+    gap: Layout.PROGRESS_BAR_GAP,
   },
 });

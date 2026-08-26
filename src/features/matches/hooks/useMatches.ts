@@ -12,6 +12,10 @@ export type Match = {
   display_name: string;
   avatar_url: string | null;
   home_city: string | null;
+  // Derived server-side, same rule as the deck: mode_override if the
+  // person set one, otherwise home-within-50km-of-here. null when we
+  // cannot tell, so the row says nothing rather than guessing.
+  match_mode: 'local' | 'traveler' | null;
   // Thread for this match (null until the
   // first message creates it). Passed to the
   // chat screen so it skips the thread lookup

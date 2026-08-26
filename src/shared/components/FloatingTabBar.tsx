@@ -117,13 +117,10 @@ const FloatingTabBar = ({
                   color={theme.colors.onTabActive}
                 />
                 <AppText
-                  variant="label"
-                  style={[
-                    styles.activeLabel,
-                    {
-                      color: theme.colors.onTabActive,
-                    },
-                  ]}
+                  variant="labelStrong"
+                  style={{
+                    color: theme.colors.onTabActive,
+                  }}
                 >
                   {label}
                 </AppText>
@@ -202,13 +199,10 @@ const FloatingTabBar = ({
                     style={StyleSheet.absoluteFill}
                   />
                   <AppText
-                    variant="overline"
-                    style={[
-                      styles.badgeText,
-                      {
-                        color: theme.colors.onGradient,
-                      },
-                    ]}
+                    variant="microStrong"
+                    style={{
+                      color: theme.colors.onGradient,
+                    }}
                   >
                     {String(badge)}
                   </AppText>
@@ -235,9 +229,9 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: Layout.TAB_BAR_GAP,
     padding: Layout.TAB_BAR_PADDING,
-    borderRadius: 32,
+    borderRadius: Layout.TAB_BAR_RADIUS,
     borderWidth: 1,
   },
   barShadow: {
@@ -253,14 +247,10 @@ const styles = StyleSheet.create({
   activeSegment: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    gap: Layout.CHIP_GAP,
     height: SEGMENT_HEIGHT,
-    paddingHorizontal: 18,
-    borderRadius: 26,
-  },
-  activeLabel: {
-    fontWeight: '700',
-    letterSpacing: 0,
+    paddingHorizontal: Layout.TAB_SEGMENT_PADDING_H,
+    borderRadius: Layout.BUTTON_LG_RADIUS,
   },
   inactiveSegment: {
     width: SEGMENT_HEIGHT,
@@ -273,18 +263,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 2,
     right: 0,
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
+    minWidth: Layout.BADGE_TAB,
+    height: Layout.BADGE_TAB,
+    borderRadius: Layout.BADGE_TAB / 2,
+    borderWidth: Layout.BADGE_BORDER,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  badgeText: {
-    // The count is a number, not a label — no tracking, no uppercasing.
-    letterSpacing: 0,
-    fontWeight: '800',
+    paddingHorizontal: Layout.BADGE_PADDING_TAB,
   },
 });

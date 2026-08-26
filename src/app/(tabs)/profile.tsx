@@ -234,13 +234,10 @@ function ProfileScreenContent() {
                   color={theme.colors.onGradient}
                 />
                 <AppText
-                  variant="h3"
-                  style={[
-                    styles.editLabel,
-                    {
-                      color: theme.colors.onGradient,
-                    },
-                  ]}
+                  variant="buttonLg"
+                  style={{
+                    color: theme.colors.onGradient,
+                  }}
                 >
                   {t(Translations.PROFILE_EDIT_FULL)}
                 </AppText>
@@ -289,7 +286,7 @@ function ProfileScreenContent() {
             {t(Translations.PROFILE_SECTION_ABOUT)}
           </AppText>
           <AppText
-            variant="body"
+            variant="bodyLg"
             style={[
               styles.bio,
               {
@@ -370,13 +367,10 @@ function ProfileScreenContent() {
                 <ActivityIndicator size={16} />
               ) : (
                 <AppText
-                  variant="label"
-                  style={[
-                    styles.footerAction,
-                    {
-                      color: theme.colors.onSurfaceVariant,
-                    },
-                  ]}
+                  variant="labelStrong"
+                  style={{
+                    color: theme.colors.onSurfaceVariant,
+                  }}
                 >
                   {t(Translations.PROFILE_LOGOUT)}
                 </AppText>
@@ -500,39 +494,34 @@ const styles = StyleSheet.create({
   body: {
     // Fills whatever the hero leaves, so the spacer below can do its job.
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: Layout.SCREEN_PADDING,
     // Pulls the action row up over the tail of the hero, so the gradient
     // button overlaps the fade instead of starting after a gap. In light
     // the hero ends on a hard rounded edge, and the same overlap reads as
     // the button sitting on the card.
-    marginTop: -16,
+    marginTop: Layout.HERO_CONTENT_OVERLAP,
   },
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: Spacing.sm + 2,
   },
   editButton: {
     flex: 1,
-    borderRadius: 26,
+    borderRadius: Layout.BUTTON_LG_RADIUS,
     overflow: 'hidden',
   },
   editButtonFill: {
-    height: 52,
+    height: Layout.BUTTON_LG,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
   },
-  editLabel: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '700',
-  },
   photosButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: Layout.BUTTON_LG,
+    height: Layout.BUTTON_LG,
+    borderRadius: Layout.BUTTON_LG_RADIUS,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -541,18 +530,17 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xl,
   },
   bio: {
-    lineHeight: 21,
-    marginTop: 7,
+    marginTop: Layout.CHIP_GAP,
   },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 7,
-    marginTop: 9,
+    gap: Layout.CHIP_GAP,
+    marginTop: Spacing.sm + 1,
   },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: Layout.CHIP_PADDING_H,
+    paddingVertical: Layout.CHIP_PADDING_V,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
   },
@@ -563,10 +551,7 @@ const styles = StyleSheet.create({
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
-  },
-  footerAction: {
-    fontWeight: '600',
+    gap: Layout.SCREEN_PADDING,
   },
   modalText: {
     textAlign: 'center',

@@ -405,13 +405,10 @@ export default function DiscoverScreen() {
         pointerEvents="box-none"
       >
         <AppText
-          variant="h3"
-          style={[
-            styles.brand,
-            {
-              color: theme.colors.ON_PHOTO,
-            },
-          ]}
+          variant="wordmark"
+          style={{
+            color: theme.colors.ON_PHOTO,
+          }}
         >
           {t(Translations.DISCOVER_TITLE)}
         </AppText>
@@ -433,7 +430,7 @@ export default function DiscoverScreen() {
               color={theme.colors.onHeaderPill}
             />
             <AppText
-              variant="caption"
+              variant="microStrong"
               style={[
                 styles.headerPillText,
                 {
@@ -506,7 +503,7 @@ export default function DiscoverScreen() {
 
         <GradientButton
           onPress={handleSwipeRight}
-          circleSize={72}
+          circleSize={Layout.ACTION_YES_SIZE}
           accessibilityLabel={t(Common.A11Y_LIKE)}
         >
           {/* The pin, solid, inside the gradient — see YesMark. No
@@ -544,34 +541,27 @@ const styles = StyleSheet.create({
   // site — the design's 66px assumes one particular status bar.
   header: {
     position: 'absolute',
-    left: 20,
-    right: 20,
+    left: Layout.SCREEN_PADDING,
+    right: Layout.SCREEN_PADDING,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  brand: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 19,
-    lineHeight: 25,
-    letterSpacing: -0.3,
-  },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: Spacing.sm + 2,
   },
   headerPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    height: 34,
-    paddingHorizontal: 12,
+    gap: Layout.PROGRESS_BAR_GAP,
+    height: Layout.PILL_HEIGHT,
+    paddingHorizontal: Layout.PILL_PADDING_H,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
   },
   headerPillText: {
-    fontWeight: '600',
     fontVariant: ['tabular-nums'],
   },
   headerPillShadow: {
@@ -585,9 +575,9 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   headerBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: Layout.ICON_BUTTON_SM,
+    height: Layout.ICON_BUTTON_SM,
+    borderRadius: Layout.ICON_BUTTON_SM / 2,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -621,12 +611,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 26,
+    gap: Layout.BADGE_MD,
   },
   passBtn: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: Layout.ACTION_PASS_SIZE,
+    height: Layout.ACTION_PASS_SIZE,
+    borderRadius: Layout.ACTION_PASS_SIZE / 2,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',

@@ -3,6 +3,15 @@ import { TextStyle } from 'react-native';
 export type TypographyVariant =
   | 'displayLg'
   | 'display'
+  | 'wordmark'
+  | 'rowTitle'
+  | 'rowTitleQuiet'
+  | 'bodySmallStrong'
+  | 'microStrong'
+  | 'buttonLg'
+  | 'labelStrong'
+  | 'micro'
+  | 'nano'
   | 'h1'
   | 'h2'
   | 'h3'
@@ -45,6 +54,7 @@ export const Typography: Record<TypographyVariant, TypographyDef> = {
       fontFamily: 'PlusJakartaSans_800ExtraBold',
       fontSize: 34,
       lineHeight: 40,
+      letterSpacing: -0.9,
     },
   },
   display: {
@@ -53,6 +63,45 @@ export const Typography: Record<TypographyVariant, TypographyDef> = {
       fontFamily: 'PlusJakartaSans_800ExtraBold',
       fontSize: 32,
       lineHeight: 38,
+      letterSpacing: -0.8,
+    },
+  },
+  // The LocalUp wordmark over a photo. Smaller than h1 and tighter,
+  // because it is a mark rather than a heading.
+  wordmark: {
+    paperVariant: 'titleLarge',
+    style: {
+      fontFamily: 'PlusJakartaSans_800ExtraBold',
+      fontSize: 19,
+      lineHeight: 25,
+      letterSpacing: -0.3,
+    },
+  },
+  // A name at the head of a list row.
+  rowTitle: {
+    paperVariant: 'titleMedium',
+    style: {
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontSize: 16,
+      lineHeight: 22,
+    },
+  },
+  // The same size, one weight down: a row you have already read.
+  rowTitleQuiet: {
+    paperVariant: 'titleMedium',
+    style: {
+      fontFamily: 'PlusJakartaSans_600SemiBold',
+      fontSize: 16,
+      lineHeight: 22,
+    },
+  },
+  // The label inside a large primary button.
+  buttonLg: {
+    paperVariant: 'labelLarge',
+    style: {
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontSize: 15,
+      lineHeight: 20,
     },
   },
   h1: {
@@ -113,6 +162,53 @@ export const Typography: Record<TypographyVariant, TypographyDef> = {
       textTransform: 'uppercase',
     },
   },
+  // Timestamps, counters and the names under the new-match avatars.
+  micro: {
+    paperVariant: 'labelSmall',
+    style: {
+      fontFamily: 'Inter_400Regular',
+      fontSize: 11,
+      lineHeight: 15,
+    },
+  },
+  // The smallest thing in the app: the mode chip on a list row. Never
+  // used for anything a reader has to read at length.
+  nano: {
+    paperVariant: 'labelSmall',
+    style: {
+      fontFamily: 'Inter_700Bold',
+      fontSize: 9,
+      lineHeight: 13,
+      letterSpacing: 0.7,
+      textTransform: 'uppercase',
+    },
+  },
+  // `label` with the tracking removed and the weight up: a tab pill and
+  // a footer action are words, not small-caps labels.
+  labelStrong: {
+    paperVariant: 'labelLarge',
+    style: {
+      fontFamily: 'Inter_700Bold',
+      fontSize: 13,
+      lineHeight: 18,
+    },
+  },
+  bodySmallStrong: {
+    paperVariant: 'bodyMedium',
+    style: {
+      fontFamily: 'Inter_600SemiBold',
+      fontSize: 13,
+      lineHeight: 19,
+    },
+  },
+  microStrong: {
+    paperVariant: 'labelSmall',
+    style: {
+      fontFamily: 'Inter_700Bold',
+      fontSize: 11,
+      lineHeight: 15,
+    },
+  },
   // ---- legacy variants (pre-redesign call sites) ----
   title: {
     paperVariant: 'titleLarge',
@@ -130,12 +226,14 @@ export const Typography: Record<TypographyVariant, TypographyDef> = {
       lineHeight: 22,
     },
   },
+  // 13/19 since the redesign — it is the message-preview line on a list
+  // row, and 18 crowded a descender against the name above it.
   bodySmall: {
     paperVariant: 'bodyMedium',
     style: {
       fontFamily: 'Inter_400Regular',
       fontSize: 13,
-      lineHeight: 18,
+      lineHeight: 19,
     },
   },
   label: {

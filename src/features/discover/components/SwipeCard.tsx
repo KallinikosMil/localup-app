@@ -306,12 +306,9 @@ const SwipeCard = ({
 
           <AppText
             variant="displayLg"
-            style={[
-              styles.name,
-              {
-                color: theme.colors.ON_PHOTO,
-              },
-            ]}
+            style={{
+              color: theme.colors.ON_PHOTO,
+            }}
           >
             {t(Translations.DISCOVER_NAME_AGE, {
               name: candidate.display_name,
@@ -322,12 +319,9 @@ const SwipeCard = ({
           {candidate.bio ? (
             <AppText
               variant="body"
-              style={[
-                styles.bio,
-                {
-                  color: theme.colors.WHITE_A85,
-                },
-              ]}
+              style={{
+                color: theme.colors.WHITE_A85,
+              }}
               numberOfLines={3}
             >
               {candidate.bio}
@@ -354,15 +348,12 @@ const SwipeCard = ({
                     ]}
                   >
                     <AppText
-                      variant="caption"
-                      style={[
-                        isShared ? styles.chipSharedText : null,
-                        {
-                          color: isShared
-                            ? theme.colors.onChipShared
-                            : theme.colors.ON_PHOTO,
-                        },
-                      ]}
+                      variant={isShared ? 'microStrong' : 'micro'}
+                      style={{
+                        color: isShared
+                          ? theme.colors.onChipShared
+                          : theme.colors.ON_PHOTO,
+                      }}
                     >
                       {tag}
                     </AppText>
@@ -473,23 +464,23 @@ const styles = StyleSheet.create({
   },
   progressRow: {
     position: 'absolute',
-    left: Spacing.md,
-    right: Spacing.md,
+    left: Spacing.lg,
+    right: Spacing.lg,
     flexDirection: 'row',
-    gap: 5,
+    gap: Layout.PROGRESS_BAR_GAP,
   },
   progressBar: {
     flex: 1,
-    height: 3,
-    borderRadius: 2,
+    height: Layout.PROGRESS_BAR_HEIGHT,
+    borderRadius: Layout.PROGRESS_BAR_RADIUS,
   },
   info: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
-    gap: 9,
+    paddingHorizontal: Layout.SCREEN_PADDING,
+    gap: Spacing.sm + 1,
   },
   metaRow: {
     flexDirection: 'row',
@@ -500,36 +491,27 @@ const styles = StyleSheet.create({
   modePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    gap: Layout.PROGRESS_BAR_GAP,
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.pill,
   },
   cityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-  },
-  name: {
-    letterSpacing: -0.9,
-  },
-  bio: {
-    lineHeight: 21,
+    gap: Layout.PROGRESS_BAR_GAP,
   },
   tagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 3,
+    gap: Layout.CHIP_PADDING_V,
+    marginTop: Spacing.xs - 1,
   },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: Layout.CHIP_PADDING_H,
+    paddingVertical: Layout.CHIP_PADDING_V,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
-  },
-  chipSharedText: {
-    fontWeight: '700',
   },
   stamp: {
     position: 'absolute',

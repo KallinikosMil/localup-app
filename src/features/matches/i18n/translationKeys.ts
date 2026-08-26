@@ -6,4 +6,13 @@ export enum Translations {
   MATCHES_EMPTY_TITLE = 'matchesEmptyTitle',
   MATCHES_EMPTY_SUBTITLE = 'matchesEmptySubtitle',
   MATCHES_SAY_HELLO = 'matchesSayHello',
+  MATCHES_SECTION_NEW = 'matchesSectionNew',
+  MATCHES_SECTION_MESSAGES = 'matchesSectionMessages',
+  MATCHES_COUNT_NEW = 'matchesCountNew',
+  MATCHES_COUNT_UNREAD = 'matchesCountUnread',
+  MATCHES_NEW_MATCH = 'matchesNewMatch',
+  MATCHES_TIME_NOW = 'matchesTimeNow',
+  MATCHES_TIME_MINUTES = 'matchesTimeMinutes',
+  MATCHES_TIME_HOURS = 'matchesTimeHours',
+  MATCHES_TIME_YESTERDAY = 'matchesTimeYesterday',
 }

@@ -38,10 +38,6 @@ const lightBase = {
   GREY_600: '#49454F',
   GREY_900: '#1E1A1F',
 
-  // The ambient blob behind the hero. Same violet in both themes; the
-  // ALPHA is the whole difference — at dark's 0.42 a light page turns
-  // lilac, so light runs it at roughly a quarter.
-  VIOLET_GLOW: 'rgba(101,63,212,0.12)',
   VIOLET_025: '#F5EFFF',
   VIOLET_050: '#F3E8FF',
   VIOLET_100: '#EDE7FE',
@@ -101,6 +97,11 @@ const lightBase = {
   HEADER_PILL_BORDER: 'transparent',
   PASS_BTN_BG: '#FFFFFF',
   PASS_BTN_BORDER: 'transparent',
+  // The small tinted counters beside a section label — '2 NEW',
+  // '3 UNREAD' — and the NEW MATCH chip on a row. Quieter than a solid
+  // badge because they label a group rather than demand a tap.
+  COUNT_PILL_BG: '#F3E8FF',
+  COUNT_PILL_BORDER: '#D9C6F5',
   TAB_SURFACE: '#FFFFFF',
   TAB_BORDER: 'transparent',
   TAB_INACTIVE: '#79747E',
@@ -125,7 +126,6 @@ const darkBase: typeof lightBase = {
   GREY_600: '#CAC4D0',
   GREY_900: '#E6E1E5',
 
-  VIOLET_GLOW: 'rgba(101,63,212,0.42)',
   VIOLET_025: '#2A2434',
   VIOLET_050: '#4F378B',
   VIOLET_100: '#4F378B',
@@ -166,6 +166,8 @@ const darkBase: typeof lightBase = {
   HEADER_PILL_BORDER: 'rgba(255,255,255,0.2)',
   PASS_BTN_BG: 'rgba(255,255,255,0.12)',
   PASS_BTN_BORDER: 'rgba(255,255,255,0.24)',
+  COUNT_PILL_BG: 'rgba(208,188,255,0.18)',
+  COUNT_PILL_BORDER: 'rgba(208,188,255,0.4)',
   TAB_SURFACE: 'rgba(255,255,255,0.13)',
   TAB_BORDER: 'rgba(255,255,255,0.18)',
   TAB_INACTIVE: 'rgba(255,255,255,0.75)',
@@ -251,11 +253,12 @@ export const lightColors = {
   passButton: lightBase.PASS_BTN_BG,
   passButtonBorder: lightBase.PASS_BTN_BORDER,
   onPassButton: lightBase.RED_500,
+  countPill: lightBase.COUNT_PILL_BG,
+  countPillBorder: lightBase.COUNT_PILL_BORDER,
   tabBarSurface: lightBase.TAB_SURFACE,
   tabBarBorder: lightBase.TAB_BORDER,
   onTabInactive: lightBase.TAB_INACTIVE,
 
-  glow: lightBase.VIOLET_GLOW,
   // The active tab segment is the one place light is not a token swap:
   // light paints a violet gradient pill (white label), dark a solid
   // white pill (deep violet label). A white pill on a white surface is
@@ -332,11 +335,12 @@ export const darkColors: typeof lightColors = {
   passButton: darkBase.PASS_BTN_BG,
   passButtonBorder: darkBase.PASS_BTN_BORDER,
   onPassButton: darkBase.ON_PHOTO,
+  countPill: darkBase.COUNT_PILL_BG,
+  countPillBorder: darkBase.COUNT_PILL_BORDER,
   tabBarSurface: darkBase.TAB_SURFACE,
   tabBarBorder: darkBase.TAB_BORDER,
   onTabInactive: darkBase.TAB_INACTIVE,
 
-  glow: darkBase.VIOLET_GLOW,
   onTabActive: darkBase.VIOLET_990,
   tabActiveSurface: darkBase.ON_PHOTO,
 
