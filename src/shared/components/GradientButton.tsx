@@ -93,7 +93,7 @@ const GradientButton = ({
             <AppText
               variant="h3"
               style={{
-                color: theme.colors.onPrimary,
+                color: theme.colors.onGradient,
               }}
             >
               {children}

@@ -1,6 +1,7 @@
 import { TextStyle } from 'react-native';
 
 export type TypographyVariant =
+  | 'displayLg'
   | 'display'
   | 'h1'
   | 'h2'
@@ -35,6 +36,17 @@ type TypographyDef = {
 };
 
 export const Typography: Record<TypographyVariant, TypographyDef> = {
+  // Screen titles in the redesign, one step above h1. Paper has no
+  // variant this large, so it borrows displayMedium's role and the
+  // style below does the actual work.
+  displayLg: {
+    paperVariant: 'displayMedium',
+    style: {
+      fontFamily: 'PlusJakartaSans_800ExtraBold',
+      fontSize: 34,
+      lineHeight: 40,
+    },
+  },
   display: {
     paperVariant: 'displayMedium',
     style: {

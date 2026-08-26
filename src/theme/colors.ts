@@ -27,12 +27,25 @@ const lightBase = {
   // one keeps only a trace of the same hue, enough to belong to the
   // palette and not enough to be seen as a colour.
   GREY_200: '#E8E6EC',
+  // Empty photo slots are drawn with a dashed border, which needs to be
+  // visibly heavier than a hairline (GREY_200) and lighter than body text
+  // — a dashed line at hairline weight just looks like a rendering fault.
+  GREY_300: '#D3CFDA',
+  // Field hints, counters and placeholder copy: quieter than
+  // onSurfaceVariant, still above the WCAG floor on both grounds.
+  GREY_350: '#8F8B96',
   GREY_400: '#79747E',
   GREY_600: '#49454F',
   GREY_900: '#1E1A1F',
 
+  // The ambient blob behind the hero. Same violet in both themes; the
+  // ALPHA is the whole difference — at dark's 0.42 a light page turns
+  // lilac, so light runs it at roughly a quarter.
+  VIOLET_GLOW: 'rgba(101,63,212,0.12)',
+  VIOLET_025: '#F5EFFF',
   VIOLET_050: '#F3E8FF',
   VIOLET_100: '#EDE7FE',
+  VIOLET_200: '#CDBAF7',
   VIOLET_300: '#A78BFA',
   VIOLET_350: '#A78BFA',
   VIOLET_450: '#653FD4',
@@ -44,6 +57,8 @@ const lightBase = {
 
   GREEN_500: '#00C853',
   GREEN_700: '#228B60',
+  RED_050: '#FDECEA',
+  RED_200: '#F3C9C6',
   RED_500: '#EF4444',
   RED_700: '#B3261E',
   RED_900: '#601410',
@@ -52,6 +67,18 @@ const lightBase = {
 
   // on-photo / overlay — mode-constant
   ON_PHOTO: '#FFFFFF',
+  // The brand gradient, 140°. Mode-CONSTANT on purpose: it is the one
+  // surface where violet is the paint rather than the light, so it has to
+  // read as the same brand mark in both themes. It used to resolve
+  // through VIOLET_450/350, which meant dark mode quietly ran a
+  // different, paler gradient than light.
+  GRADIENT_FROM: '#A78BFA',
+  GRADIENT_TO: '#653FD4',
+  // Hero scrims. Not black — a near-black violet, so the fade lands on
+  // the dark ground instead of greying the photo out on the way down.
+  SCRIM_00: 'rgba(14,12,20,0)',
+  SCRIM_45: 'rgba(14,12,20,0.45)',
+  SCRIM_82: 'rgba(14,12,20,0.82)',
   WHITE_A85: 'rgba(255,255,255,0.85)',
   WHITE_A20: 'rgba(255,255,255,0.2)',
   WHITE_A10: 'rgba(255,255,255,0.1)',
@@ -67,12 +94,17 @@ const darkBase: typeof lightBase = {
   // Dark-mode counterpart: a hairline has to sit just above the ground,
   // not halfway to the text, or it reads as a border instead of a seam.
   GREY_200: '#35323B',
+  GREY_300: '#4A4552',
+  GREY_350: '#79747E',
   GREY_400: '#938F99',
   GREY_600: '#CAC4D0',
   GREY_900: '#E6E1E5',
 
+  VIOLET_GLOW: 'rgba(101,63,212,0.42)',
+  VIOLET_025: '#2A2434',
   VIOLET_050: '#4F378B',
   VIOLET_100: '#4F378B',
+  VIOLET_200: '#4A3A6B',
   VIOLET_300: '#CCC2FF',
   VIOLET_350: '#B79CFF',
   VIOLET_450: '#7C5CE0',
@@ -84,6 +116,8 @@ const darkBase: typeof lightBase = {
 
   GREEN_500: '#00E676',
   GREEN_700: '#34D399',
+  RED_050: '#2E1F1F',
+  RED_200: '#5C3B39',
   RED_500: '#F87171',
   RED_700: '#F2B8B5',
   RED_900: '#601410',
@@ -92,6 +126,11 @@ const darkBase: typeof lightBase = {
 
   // on-photo / overlay — mode-constant
   ON_PHOTO: '#FFFFFF',
+  GRADIENT_FROM: '#A78BFA',
+  GRADIENT_TO: '#653FD4',
+  SCRIM_00: 'rgba(14,12,20,0)',
+  SCRIM_45: 'rgba(14,12,20,0.45)',
+  SCRIM_82: 'rgba(14,12,20,0.82)',
   WHITE_A85: 'rgba(255,255,255,0.85)',
   WHITE_A20: 'rgba(255,255,255,0.2)',
   WHITE_A10: 'rgba(255,255,255,0.1)',
@@ -134,10 +173,39 @@ export const lightColors = {
   modeTraveler: lightBase.VIOLET_500,
   like: lightBase.GREEN_500,
   pass: lightBase.RED_500,
-  gradientStart: lightBase.VIOLET_450,
-  gradientEnd: lightBase.VIOLET_350,
+  gradientStart: lightBase.GRADIENT_FROM,
+  gradientEnd: lightBase.GRADIENT_TO,
   surfaceElevated: lightBase.WHITE,
   imageInset: lightBase.BLACK_A10,
+
+  // Redesign §2. Semantic names live here, never in the base — the base
+  // says what a colour IS, this layer says what it is FOR.
+  surfaceSelected: lightBase.VIOLET_025,
+  outlineSelected: lightBase.VIOLET_200,
+  onSurfaceFaint: lightBase.GREY_350,
+  outlineDashed: lightBase.GREY_300,
+  // MD3 already owns these two names; Paper's own error surfaces pick
+  // them up, which is the intent — one error colour, not two.
+  errorContainer: lightBase.RED_050,
+  errorOutline: lightBase.RED_200,
+
+  // Foreground on the brand gradient. Mode-constant for the same
+  // reason the gradient is: dark's onPrimary is #381E72, which on a
+  // #653FD4 gradient is violet on violet. This is the ON_PHOTO rule —
+  // the gradient is paint, so what sits on it is not themed.
+  onGradient: lightBase.ON_PHOTO,
+  glow: lightBase.VIOLET_GLOW,
+  // The active tab segment is the one place light is not a token swap:
+  // light paints a violet gradient pill (white label), dark a solid
+  // white pill (deep violet label). A white pill on a white surface is
+  // invisible, so the SHAPE differs per mode and the component picks it
+  // from resolvedMode — only the label colour is a token.
+  onTabActive: lightBase.ON_PHOTO,
+  tabActiveSurface: lightBase.ON_PHOTO,
+
+  scrimTransparent: lightBase.SCRIM_00,
+  scrimMid: lightBase.SCRIM_45,
+  scrimStrong: lightBase.SCRIM_82,
 };
 
 export const darkColors: typeof lightColors = {
@@ -174,8 +242,24 @@ export const darkColors: typeof lightColors = {
   modeTraveler: darkBase.VIOLET_500,
   like: darkBase.GREEN_500,
   pass: darkBase.RED_500,
-  gradientStart: darkBase.VIOLET_450,
-  gradientEnd: darkBase.VIOLET_350,
+  gradientStart: darkBase.GRADIENT_FROM,
+  gradientEnd: darkBase.GRADIENT_TO,
   surfaceElevated: darkBase.WHITE,
   imageInset: darkBase.WHITE_A10,
+
+  surfaceSelected: darkBase.VIOLET_025,
+  outlineSelected: darkBase.VIOLET_200,
+  onSurfaceFaint: darkBase.GREY_350,
+  outlineDashed: darkBase.GREY_300,
+  errorContainer: darkBase.RED_050,
+  errorOutline: darkBase.RED_200,
+
+  onGradient: darkBase.ON_PHOTO,
+  glow: darkBase.VIOLET_GLOW,
+  onTabActive: darkBase.VIOLET_990,
+  tabActiveSurface: darkBase.ON_PHOTO,
+
+  scrimTransparent: darkBase.SCRIM_00,
+  scrimMid: darkBase.SCRIM_45,
+  scrimStrong: darkBase.SCRIM_82,
 };
