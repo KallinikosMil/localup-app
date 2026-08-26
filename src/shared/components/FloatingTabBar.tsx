@@ -1,0 +1,261 @@
+import React from 'react';
+import { StyleSheet, View, Pressable } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+
+import AppText from '@shared/components/AppText';
+import { useAppTheme } from '@theme/paper';
+import { Spacing } from '@theme/constants/Spacing';
+import { Layout } from '@theme/constants/Layout';
+
+// The redesign floats the tab bar over the photo instead of docking a bar
+// at the bottom of the window, so the hero really does run to the edge.
+//
+// This is the clearest case of "light mode is not a token swap" in the
+// whole design: the active segment is a SOLID WHITE pill in dark and a
+// VIOLET GRADIENT pill in light. Swapping tokens alone would paint a
+// white pill on a white bar, which is invisible — so the shape itself
+// branches on the resolved theme, and only the label colour is a token.
+
+const ICON_ACTIVE = 20;
+const ICON_INACTIVE = 21;
+// Shared with Discover, which has to reserve exactly this much room —
+// the bar floats over the content instead of taking layout space.
+const SEGMENT_HEIGHT = Layout.TAB_SEGMENT_HEIGHT;
+
+type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+
+const ICONS: Record<string, IconName> = {
+  discover: 'compass-outline',
+  matches: 'chat-outline',
+  profile: 'account-outline',
+};
+
+const FloatingTabBar = ({
+  state,
+  descriptors,
+  navigation,
+}: BottomTabBarProps) => {
+  const theme = useAppTheme();
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View
+      style={[
+        styles.wrap,
+        {
+          // The design's 24px sits above the gesture bar, not under it.
+          paddingBottom: insets.bottom + Spacing.lg,
+        },
+      ]}
+      pointerEvents="box-none"
+    >
+      <View
+        style={[
+          styles.bar,
+          {
+            backgroundColor: theme.colors.tabBarSurface,
+            borderColor: theme.colors.tabBarBorder,
+          },
+          // Light gets a cast shadow because its bar is opaque and needs
+          // to lift off the photo; dark's frosting already separates it.
+          theme.dark ? null : styles.barShadow,
+        ]}
+      >
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const focused = state.index === index;
+          const label =
+            typeof options.title === 'string' ? options.title : route.name;
+          const badge = options.tabBarBadge;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!focused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          if (focused) {
+            const content = (
+              <>
+                <MaterialCommunityIcons
+                  name={ICONS[route.name] ?? 'circle-outline'}
+                  size={ICON_ACTIVE}
+                  color={theme.colors.onTabActive}
+                />
+                <AppText
+                  variant="label"
+                  style={[
+                    styles.activeLabel,
+                    {
+                      color: theme.colors.onTabActive,
+                    },
+                  ]}
+                >
+                  {label}
+                </AppText>
+              </>
+            );
+
+            return (
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                accessibilityRole="tab"
+                accessibilityLabel={label}
+                accessibilityState={{ selected: true }}
+              >
+                {theme.dark ? (
+                  <View
+                    style={[
+                      styles.activeSegment,
+                      {
+                        backgroundColor: theme.colors.tabActiveSurface,
+                      },
+                    ]}
+                  >
+                    {content}
+                  </View>
+                ) : (
+                  <LinearGradient
+                    colors={[
+                      theme.colors.gradientStart,
+                      theme.colors.gradientEnd,
+                    ]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.activeSegment}
+                  >
+                    {content}
+                  </LinearGradient>
+                )}
+              </Pressable>
+            );
+          }
+
+          return (
+            <Pressable
+              key={route.key}
+              onPress={onPress}
+              accessibilityRole="tab"
+              accessibilityLabel={label}
+              accessibilityState={{ selected: false }}
+              style={styles.inactiveSegment}
+            >
+              <MaterialCommunityIcons
+                name={ICONS[route.name] ?? 'circle-outline'}
+                size={ICON_INACTIVE}
+                color={theme.colors.onTabInactive}
+              />
+              {badge ? (
+                <View
+                  style={[
+                    styles.badge,
+                    {
+                      borderColor: theme.colors.badgeRing,
+                    },
+                  ]}
+                >
+                  <LinearGradient
+                    colors={[
+                      theme.colors.gradientStart,
+                      theme.colors.gradientEnd,
+                    ]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <AppText
+                    variant="overline"
+                    style={[
+                      styles.badgeText,
+                      {
+                        color: theme.colors.onGradient,
+                      },
+                    ]}
+                  >
+                    {String(badge)}
+                  </AppText>
+                </View>
+              ) : null}
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+};
+
+export default FloatingTabBar;
+
+const styles = StyleSheet.create({
+  wrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+  },
+  bar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: Layout.TAB_BAR_PADDING,
+    borderRadius: 32,
+    borderWidth: 1,
+  },
+  barShadow: {
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 26,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    elevation: 12,
+  },
+  activeSegment: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    height: SEGMENT_HEIGHT,
+    paddingHorizontal: 18,
+    borderRadius: 26,
+  },
+  activeLabel: {
+    fontWeight: '700',
+    letterSpacing: 0,
+  },
+  inactiveSegment: {
+    width: SEGMENT_HEIGHT,
+    height: SEGMENT_HEIGHT,
+    borderRadius: SEGMENT_HEIGHT / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: 2,
+    right: 0,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  badgeText: {
+    // The count is a number, not a label — no tracking, no uppercasing.
+    letterSpacing: 0,
+    fontWeight: '800',
+  },
+});

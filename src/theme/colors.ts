@@ -57,6 +57,9 @@ const lightBase = {
 
   GREEN_500: '#00C853',
   GREEN_700: '#228B60',
+  // Mode-constant green, for the LOCAL pill when it sits on a photo. The
+  // themed GREEN_700 flips to a mint in dark, which a photo does not.
+  GREEN_ON_PHOTO: '#228B60',
   RED_050: '#FDECEA',
   RED_200: '#F3C9C6',
   RED_500: '#EF4444',
@@ -79,6 +82,31 @@ const lightBase = {
   SCRIM_00: 'rgba(14,12,20,0)',
   SCRIM_45: 'rgba(14,12,20,0.45)',
   SCRIM_82: 'rgba(14,12,20,0.82)',
+  // Chips, pills and bars drawn ON a photo. Mode-VARYING despite sitting
+  // on an image: the light hero runs a lighter scrim, so the frosting has
+  // to be denser to keep the same weight against it.
+  CHIP_PHOTO_BG: 'rgba(255,255,255,0.18)',
+  CHIP_PHOTO_BORDER: 'rgba(255,255,255,0.28)',
+  // A shared interest is the reason these two people are being shown to
+  // each other, so it is the one chip that gets a solid fill.
+  CHIP_SHARED_BG: '#FFFFFF',
+  CHIP_SHARED_BORDER: '#FFFFFF',
+  PROGRESS_IDLE: 'rgba(255,255,255,0.35)',
+  // The floating tab bar. Light gives it a solid card with a shadow;
+  // dark frosts it so the photo keeps showing through.
+  // Header pills and the pass button also sit on the photo. Light
+  // makes them solid white cards with a cast shadow; dark frosts them,
+  // because a solid white chip on a dark hero reads as a sticker.
+  HEADER_PILL_BG: '#FFFFFF',
+  HEADER_PILL_BORDER: 'transparent',
+  PASS_BTN_BG: '#FFFFFF',
+  PASS_BTN_BORDER: 'transparent',
+  TAB_SURFACE: '#FFFFFF',
+  TAB_BORDER: 'transparent',
+  TAB_INACTIVE: '#79747E',
+  // The ring that separates a badge from whatever is behind it — the bar
+  // in light, the photo-lit frosting in dark.
+  BADGE_RING: '#FFFFFF',
   WHITE_A85: 'rgba(255,255,255,0.85)',
   WHITE_A20: 'rgba(255,255,255,0.2)',
   WHITE_A10: 'rgba(255,255,255,0.1)',
@@ -116,6 +144,7 @@ const darkBase: typeof lightBase = {
 
   GREEN_500: '#00E676',
   GREEN_700: '#34D399',
+  GREEN_ON_PHOTO: '#228B60',
   RED_050: '#2E1F1F',
   RED_200: '#5C3B39',
   RED_500: '#F87171',
@@ -131,6 +160,19 @@ const darkBase: typeof lightBase = {
   SCRIM_00: 'rgba(14,12,20,0)',
   SCRIM_45: 'rgba(14,12,20,0.45)',
   SCRIM_82: 'rgba(14,12,20,0.82)',
+  CHIP_PHOTO_BG: 'rgba(255,255,255,0.14)',
+  CHIP_PHOTO_BORDER: 'rgba(255,255,255,0.2)',
+  CHIP_SHARED_BG: 'rgba(208,188,255,0.26)',
+  CHIP_SHARED_BORDER: 'rgba(208,188,255,0.55)',
+  PROGRESS_IDLE: 'rgba(255,255,255,0.32)',
+  HEADER_PILL_BG: 'rgba(255,255,255,0.16)',
+  HEADER_PILL_BORDER: 'rgba(255,255,255,0.2)',
+  PASS_BTN_BG: 'rgba(255,255,255,0.12)',
+  PASS_BTN_BORDER: 'rgba(255,255,255,0.24)',
+  TAB_SURFACE: 'rgba(255,255,255,0.13)',
+  TAB_BORDER: 'rgba(255,255,255,0.18)',
+  TAB_INACTIVE: 'rgba(255,255,255,0.75)',
+  BADGE_RING: 'rgba(30,26,31,0.95)',
   WHITE_A85: 'rgba(255,255,255,0.85)',
   WHITE_A20: 'rgba(255,255,255,0.2)',
   WHITE_A10: 'rgba(255,255,255,0.1)',
@@ -194,6 +236,30 @@ export const lightColors = {
   // #653FD4 gradient is violet on violet. This is the ON_PHOTO rule —
   // the gradient is paint, so what sits on it is not themed.
   onGradient: lightBase.ON_PHOTO,
+
+  // The hero's furniture. The mode pills go mode-constant here because
+  // they sit on an image; the themed modeLocal/modeTraveler are for
+  // surfaces, where flipping is correct.
+  modeLocalOnPhoto: lightBase.GREEN_ON_PHOTO,
+  modeTravelerOnPhoto: lightBase.GRADIENT_TO,
+  chipOnPhoto: lightBase.CHIP_PHOTO_BG,
+  chipOnPhotoBorder: lightBase.CHIP_PHOTO_BORDER,
+  chipShared: lightBase.CHIP_SHARED_BG,
+  chipSharedBorder: lightBase.CHIP_SHARED_BORDER,
+  onChipShared: lightBase.VIOLET_850,
+  progressIdle: lightBase.PROGRESS_IDLE,
+  headerPill: lightBase.HEADER_PILL_BG,
+  headerPillBorder: lightBase.HEADER_PILL_BORDER,
+  onHeaderPill: lightBase.VIOLET_850,
+  onHeaderPillIcon: lightBase.GRADIENT_TO,
+  passButton: lightBase.PASS_BTN_BG,
+  passButtonBorder: lightBase.PASS_BTN_BORDER,
+  onPassButton: lightBase.RED_500,
+  tabBarSurface: lightBase.TAB_SURFACE,
+  tabBarBorder: lightBase.TAB_BORDER,
+  onTabInactive: lightBase.TAB_INACTIVE,
+  badgeRing: lightBase.BADGE_RING,
+
   glow: lightBase.VIOLET_GLOW,
   // The active tab segment is the one place light is not a token swap:
   // light paints a violet gradient pill (white label), dark a solid
@@ -255,6 +321,27 @@ export const darkColors: typeof lightColors = {
   errorOutline: darkBase.RED_200,
 
   onGradient: darkBase.ON_PHOTO,
+
+  modeLocalOnPhoto: darkBase.GREEN_ON_PHOTO,
+  modeTravelerOnPhoto: darkBase.GRADIENT_TO,
+  chipOnPhoto: darkBase.CHIP_PHOTO_BG,
+  chipOnPhotoBorder: darkBase.CHIP_PHOTO_BORDER,
+  chipShared: darkBase.CHIP_SHARED_BG,
+  chipSharedBorder: darkBase.CHIP_SHARED_BORDER,
+  onChipShared: darkBase.ON_PHOTO,
+  progressIdle: darkBase.PROGRESS_IDLE,
+  headerPill: darkBase.HEADER_PILL_BG,
+  headerPillBorder: darkBase.HEADER_PILL_BORDER,
+  onHeaderPill: darkBase.ON_PHOTO,
+  onHeaderPillIcon: darkBase.ON_PHOTO,
+  passButton: darkBase.PASS_BTN_BG,
+  passButtonBorder: darkBase.PASS_BTN_BORDER,
+  onPassButton: darkBase.ON_PHOTO,
+  tabBarSurface: darkBase.TAB_SURFACE,
+  tabBarBorder: darkBase.TAB_BORDER,
+  onTabInactive: darkBase.TAB_INACTIVE,
+  badgeRing: darkBase.BADGE_RING,
+
   glow: darkBase.VIOLET_GLOW,
   onTabActive: darkBase.VIOLET_990,
   tabActiveSurface: darkBase.ON_PHOTO,

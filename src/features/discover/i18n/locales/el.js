@@ -14,4 +14,8 @@ export default {
   discoverDistanceKm: '{{km}} χλμ',
   discoverStampLike: 'ΓΝΩΡΙΜΙΑ',
   discoverStampNope: 'ΠΑΣΟ',
+  discoverNameAge: '{{name}}, {{age}}',
+  discoverA11yNextPhoto:
+    'Φωτογραφία {{current}} από {{total}}. Πάτησε για αλλαγή.',
+  discoverFilters: 'Φίλτρα',
 };

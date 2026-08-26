@@ -14,4 +14,7 @@ export enum Translations {
   DISCOVER_DISTANCE_KM = 'discoverDistanceKm',
   DISCOVER_STAMP_LIKE = 'discoverStampLike',
   DISCOVER_STAMP_NOPE = 'discoverStampNope',
+  DISCOVER_NAME_AGE = 'discoverNameAge',
+  DISCOVER_A11Y_NEXT_PHOTO = 'discoverA11yNextPhoto',
+  DISCOVER_FILTERS = 'discoverFilters',
 }

@@ -5,8 +5,11 @@ import {
   Pressable,
   ScrollView,
   RefreshControl,
+  StatusBar,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { ActivityIndicator, Portal, Modal, Snackbar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +22,7 @@ import YesMark from '@shared/components/YesMark';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
 import SwipeCard from '@features/discover/components/SwipeCard';
+import { formatDistance } from '@features/discover/utils/format';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import {
@@ -30,6 +34,7 @@ import {
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
+import { Layout } from '@theme/constants/Layout';
 import { Translations } from '@features/discover/i18n/translationKeys';
 import { Translations as Common } from '@shared/i18n/translationKeys';
 
@@ -37,6 +42,8 @@ const FILTERS_ENABLED = false;
 
 export default function DiscoverScreen() {
   const theme = useAppTheme();
+  const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { t } = useTranslation();
   // GPS is background refinement only — the deck is computed
   // from the swiper's persisted location server-side, and the
@@ -58,6 +65,16 @@ export default function DiscoverScreen() {
     dataUpdatedAt,
   } = useCandidates();
   const swipe = useSwipe();
+
+  // Everything floating over the bottom of the photo, so the card knows
+  // how much of its own text would otherwise sit behind the buttons.
+  const chromeHeight =
+    insets.bottom +
+    Spacing.lg +
+    Layout.TAB_BAR_HEIGHT +
+    Layout.ACTION_GAP +
+    Layout.ACTION_ROW_HEIGHT +
+    Layout.ACTION_GAP;
   const errorMessage = useErrorMessage();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -326,37 +343,6 @@ export default function DiscoverScreen() {
         },
       ]}
     >
-      <View style={styles.header}>
-        <AppText
-          variant="h2"
-          style={{
-            color: theme.colors.primary,
-          }}
-        >
-          {t(Translations.DISCOVER_TITLE)}
-        </AppText>
-        {/* V16: the refresh icon that used to live here is gone —
-            refreshing the deck is pull-to-refresh now, below. */}
-        <View style={styles.headerActions}>
-          {FILTERS_ENABLED ? (
-            <Pressable
-              style={[
-                styles.headerBtn,
-                {
-                  borderColor: theme.colors.outline,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="tune-variant"
-                size={20}
-                color={theme.colors.onSurface}
-              />
-            </Pressable>
-          ) : null}
-        </View>
-      </View>
-
       {/* The deck rides in a ScrollView purely to carry the
           RefreshControl — the content is exactly one screen tall
           (flexGrow, no overflow), so it never actually scrolls. The pull
@@ -378,6 +364,7 @@ export default function DiscoverScreen() {
             <View style={styles.backCard} key={next.user_id}>
               <SwipeCard
                 candidate={next}
+                bottomInset={chromeHeight}
                 onSwipeLeft={() => {}}
                 onSwipeRight={() => {}}
               />
@@ -386,23 +373,125 @@ export default function DiscoverScreen() {
           <SwipeCard
             key={current.user_id}
             candidate={current}
+            bottomInset={chromeHeight}
             onSwipeLeft={handleSwipeLeft}
             onSwipeRight={handleSwipeRight}
           />
         </View>
       </ScrollView>
 
-      <View style={styles.actionRow}>
+      {/* Shell picks the bar style from the THEME, which is right for a
+          screen with a themed background and wrong for this one: in light
+          mode it asked for dark icons, and they then sat on somebody's
+          photo. The top scrim exists precisely so the clock and the
+          battery stay readable, and it only darkens — so the icons are
+          light here regardless of theme.
+          Gated on FOCUS, not mount: tab screens stay mounted when you
+          switch away, so an unconditional StatusBar left white icons on
+          the white Profile screen, where they were invisible. */}
+      {isFocused ? <StatusBar barStyle="light-content" /> : null}
+
+      {/* Header and actions float OVER the photo now — they are screen
+          chrome, so they must not travel with the card as it is dragged
+          away. `box-none` on the containers keeps the swipe gesture
+          reachable in the gaps between them. */}
+      <View
+        style={[
+          styles.header,
+          {
+            top: insets.top + Layout.HEADER_TOP_OFFSET,
+          },
+        ]}
+        pointerEvents="box-none"
+      >
+        <AppText
+          variant="h3"
+          style={[
+            styles.brand,
+            {
+              color: theme.colors.ON_PHOTO,
+            },
+          ]}
+        >
+          {t(Translations.DISCOVER_TITLE)}
+        </AppText>
+
+        <View style={styles.headerActions}>
+          <View
+            style={[
+              styles.headerPill,
+              {
+                backgroundColor: theme.colors.headerPill,
+                borderColor: theme.colors.headerPillBorder,
+              },
+              theme.dark ? null : styles.headerPillShadow,
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="map-marker-outline"
+              size={13}
+              color={theme.colors.onHeaderPill}
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.headerPillText,
+                {
+                  color: theme.colors.onHeaderPill,
+                },
+              ]}
+            >
+              {formatDistance(current.distance_km, t)}
+            </AppText>
+          </View>
+
+          {FILTERS_ENABLED ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t(Translations.DISCOVER_FILTERS)}
+              style={[
+                styles.headerBtn,
+                {
+                  backgroundColor: theme.colors.headerPill,
+                  borderColor: theme.colors.headerPillBorder,
+                },
+                theme.dark ? null : styles.headerPillShadow,
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="tune-variant"
+                size={17}
+                color={theme.colors.onHeaderPillIcon}
+              />
+            </Pressable>
+          ) : null}
+        </View>
+      </View>
+
+      <View
+        style={[
+          styles.actionRow,
+          {
+            bottom:
+              insets.bottom +
+              Spacing.lg +
+              Layout.TAB_BAR_HEIGHT +
+              Layout.ACTION_GAP,
+          },
+        ]}
+        pointerEvents="box-none"
+      >
         <Pressable
           onPress={handleSwipeLeft}
           accessibilityRole="button"
           accessibilityLabel={t(Common.A11Y_PASS)}
           style={({ pressed }) => [
-            styles.actionBtn,
-            styles.actionBtnSmall,
+            styles.passBtn,
             {
-              backgroundColor: theme.colors.surfaceElevated,
+              backgroundColor: theme.colors.passButton,
+              borderColor: theme.colors.passButtonBorder,
             },
+            theme.dark ? null : styles.passBtnShadow,
             pressed && {
               transform: [{ scale: 0.96 }],
             },
@@ -410,14 +499,14 @@ export default function DiscoverScreen() {
         >
           <MaterialCommunityIcons
             name="close"
-            size={28}
-            color={theme.colors.pass}
+            size={24}
+            color={theme.colors.onPassButton}
           />
         </Pressable>
 
         <GradientButton
           onPress={handleSwipeRight}
-          circleSize={68}
+          circleSize={72}
           accessibilityLabel={t(Common.A11Y_LIKE)}
         >
           {/* The pin, solid, inside the gradient — see YesMark. No
@@ -450,22 +539,55 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.xl,
   },
+  // Absolute, because the header floats over the photo rather than
+  // sitting above it. `top` comes from the safe-area inset at the call
+  // site — the design's 66px assumes one particular status bar.
   header: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+  },
+  brand: {
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    fontSize: 19,
+    lineHeight: 25,
+    letterSpacing: -0.3,
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: 10,
+  },
+  headerPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    height: 34,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+  },
+  headerPillText: {
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  headerPillShadow: {
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    elevation: 6,
   },
   headerBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -482,37 +604,42 @@ const styles = StyleSheet.create({
   deckContent: {
     flexGrow: 1,
   },
+  // No padding and no centring any more: the cards are full-bleed and
+  // position themselves, so the stack is just the space they live in.
   cardStack: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: Spacing.lg,
   },
   backCard: {
+    ...StyleSheet.absoluteFillObject,
     transform: [{ scale: 0.95 }],
     opacity: 0.7,
   },
   actionRow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: Spacing.xl,
-    paddingVertical: Spacing.lg,
-    paddingBottom: Spacing.xl,
+    gap: 26,
   },
-  actionBtn: {
+  passBtn: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
-  actionBtnSmall: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  passBtnShadow: {
+    shadowColor: '#000',
+    shadowOpacity: 0.24,
+    shadowRadius: 20,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    elevation: 8,
   },
   matchModal: {
     alignItems: 'center',

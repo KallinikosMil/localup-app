@@ -5,10 +5,9 @@ import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import useLocation from '@shared/hooks/useLocation';
 import { useSyncLocation } from '@features/profile/hooks/useProfile';
 import { useUnreadMatches } from '@features/matches/hooks/useReadTracking';
-import { useAppTheme } from '@theme/paper';
+import FloatingTabBar from '@shared/components/FloatingTabBar';
 
 export default function TabLayout() {
-  const theme = useAppTheme();
   const { latitude, longitude } = useLocation();
   useSyncLocation(latitude, longitude);
 
@@ -18,15 +17,14 @@ export default function TabLayout() {
   const { count: unreadCount } = useUnreadMatches();
 
   return (
+    // The redesign floats the bar OVER the content instead of docking
+    // it, so the hero photo can run to the bottom edge. Colours, the
+    // active pill and the badge all live in FloatingTabBar now — the
+    // tabBar* screenOptions no longer apply to anything.
     <Tabs
+      tabBar={props => <FloatingTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.outlineVariant,
-        },
       }}
     >
       <Tabs.Screen
@@ -49,23 +47,12 @@ export default function TabLayout() {
           // undefined (not 0) so the badge disappears entirely when there
           // is nothing unread, rather than showing a "0".
           tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
-          // The container tone, NOT `primary`: the active tab tint IS
-          // `primary`, so a primary badge sat on the active tab in the
-          // exact colour of the icon under it and stopped reading as a
-          // separate "something wants you" marker.
-          //
-          // primaryContainer/onPrimaryContainer is a designed pair, so it
-          // stays legible in both themes on its own — pale lilac with a
-          // deep violet numeral in light, deep violet with a pale numeral
-          // in dark. It also never collides with the tint in EITHER mode,
-          // which a mid-light violet would: dark-mode `primary` is itself
-          // a light violet (#D0BCFF), so #CCC2FF would read as the same
-          // colour there.
-          tabBarBadgeStyle: {
-            backgroundColor: theme.colors.primaryContainer,
-            color: theme.colors.onPrimaryContainer,
-            fontWeight: '700',
-          },
+          // tabBarBadgeStyle is gone: FloatingTabBar draws the badge
+          // itself, in the brand gradient with a ring the colour of the
+          // bar behind it. The old style existed to stop a `primary`
+          // badge from disappearing into the `primary` active tint — the
+          // gradient plus the ring solves that on both themes without
+          // needing a second colour pair.
           tabBarIcon: ({ color, size, focused }) => (
             <Icon
               name={focused ? 'chat' : 'chat-outline'}

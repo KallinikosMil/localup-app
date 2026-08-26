@@ -4,10 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { supabase } from '@config/supabase';
 import { RootState } from '@store';
-import {
-  interestNamesFrom,
-  useProfile,
-} from '@features/profile/hooks/useProfile';
+import { useProfile } from '@features/profile/hooks/useProfile';
 import { haversineKm } from '@features/profile/utils/mode';
 import { publicPhotoUrls } from '@shared/utils/storage';
 
@@ -16,13 +13,16 @@ const STALE_GPS_KM_THRESHOLD = 5;
 // What the RPC actually sends. `photo_paths` holds bucket-relative
 // storage paths, NOT URLs — the mapping below turns them into public
 // URLs so nothing downstream has to know the bucket exists.
-type CandidateRow = Omit<Candidate, 'interests' | 'photo_urls'> & {
+type CandidateRow = Omit<Candidate, 'photo_urls'> & {
   photo_paths: string[] | null;
 };
 
 export type Candidate = {
   user_id: string;
   display_name: string;
+  // The card headline is "Elena, 27". Computed server-side — date_of_birth
+  // is more than the screen needs and does not leave the database.
+  age: number;
   bio: string | null;
   home_city: string | null;
   // The single photo the card used before the deck carried an ordered
@@ -32,6 +32,12 @@ export type Candidate = {
   // Ordered by `media.position`, capped at 6 server-side. Empty for a
   // candidate who finished onboarding without uploading.
   photo_urls: string[];
+  // Shared interests first, then alphabetical — the design leads with the
+  // highlighted chips, so the order is the server's job, not a sort here.
+  interest_names: string[];
+  // WHICH ones are shared, not how many. `shared_interests` is a count and
+  // you cannot colour a chip with a count.
+  shared_interest_names: string[];
   current_lat: number | null;
   current_lng: number | null;
   languages: string[];
@@ -40,9 +46,6 @@ export type Candidate = {
   candidate_mode: 'local' | 'traveler';
   shared_interests: number;
   rank_score: number;
-  // Display-only, enriched client-side from user_interests
-  // (RPC returns shared_interests count, not names).
-  interests: string[];
 };
 
 type MatchPrefs = {
@@ -112,36 +115,17 @@ export const useCandidates = () => {
       if (error) throw error;
 
       const rows = (data ?? []) as CandidateRow[];
-      if (rows.length === 0) return [];
 
-      // Enrich with interest names in one batch
-      // (RPC only returns the shared count).
-      const ids = rows.map(r => r.user_id);
-      // W12: swallowing this error made every candidate silently show
-      // ZERO interests — the deck looked fine, it just lied. Fail loudly
-      // so the screen's error branch can offer a retry.
-      const { data: ui, error: interestsError } = await supabase
-        .from('user_interests')
-        .select('user_id, interests(name)')
-        .in('user_id', ids);
-      if (interestsError) throw interestsError;
-
-      // H5: this was `(row.interests as any)?.name` — see
-      // interestNamesFrom. PostgREST hands back a to-one embed as an
-      // object and a to-many as an ARRAY, and `as any` meant the array
-      // shape would read `undefined` and drop every interest from every
-      // card without a single error.
-      const nameMap = new Map<string, string[]>();
-      for (const row of ui ?? []) {
-        const list = nameMap.get(row.user_id) ?? [];
-        list.push(...interestNamesFrom(row.interests));
-        nameMap.set(row.user_id, list);
-      }
-
+      // The second round trip that used to live here — a user_interests
+      // read with an embedded `interests(name)` — is gone: the RPC now
+      // returns the names itself. That retires both of its hazards. W12:
+      // swallowing its error showed ZERO interests on every card, so the
+      // deck looked fine and simply lied. H5: it read a PostgREST embed
+      // as an object when a to-many embed is an ARRAY, which had already
+      // dropped every interest from every card once, silently.
       return rows.map(({ photo_paths, ...r }) => ({
         ...r,
         photo_urls: publicPhotoUrls(photo_paths),
-        interests: nameMap.get(r.user_id) ?? [],
       }));
     },
   });
