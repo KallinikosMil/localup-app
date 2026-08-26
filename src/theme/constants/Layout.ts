@@ -28,6 +28,12 @@ export const Layout = {
   ACTION_ROW_HEIGHT: 72,
   // Vertical breathing room between the stacked floating pieces.
   ACTION_GAP: 20,
+  // How much of the screen the profile hero takes. The artboards draw
+  // it at 452/844 in dark and 430/844 in light — dark is taller only
+  // because its scrim needs the extra room to finish dissolving into the
+  // page. One ratio for both; the 22px difference is not perceptible and
+  // two would be one more thing to keep in step.
+  HERO_HEIGHT_RATIO: 0.52,
   // Below the safe-area top: the screen header, and the photo pager's
   // progress bars just above it.
   HEADER_TOP_OFFSET: 22,

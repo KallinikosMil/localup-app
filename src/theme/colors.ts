@@ -104,9 +104,6 @@ const lightBase = {
   TAB_SURFACE: '#FFFFFF',
   TAB_BORDER: 'transparent',
   TAB_INACTIVE: '#79747E',
-  // The ring that separates a badge from whatever is behind it — the bar
-  // in light, the photo-lit frosting in dark.
-  BADGE_RING: '#FFFFFF',
   WHITE_A85: 'rgba(255,255,255,0.85)',
   WHITE_A20: 'rgba(255,255,255,0.2)',
   WHITE_A10: 'rgba(255,255,255,0.1)',
@@ -172,7 +169,6 @@ const darkBase: typeof lightBase = {
   TAB_SURFACE: 'rgba(255,255,255,0.13)',
   TAB_BORDER: 'rgba(255,255,255,0.18)',
   TAB_INACTIVE: 'rgba(255,255,255,0.75)',
-  BADGE_RING: 'rgba(30,26,31,0.95)',
   WHITE_A85: 'rgba(255,255,255,0.85)',
   WHITE_A20: 'rgba(255,255,255,0.2)',
   WHITE_A10: 'rgba(255,255,255,0.1)',
@@ -258,7 +254,6 @@ export const lightColors = {
   tabBarSurface: lightBase.TAB_SURFACE,
   tabBarBorder: lightBase.TAB_BORDER,
   onTabInactive: lightBase.TAB_INACTIVE,
-  badgeRing: lightBase.BADGE_RING,
 
   glow: lightBase.VIOLET_GLOW,
   // The active tab segment is the one place light is not a token swap:
@@ -340,7 +335,6 @@ export const darkColors: typeof lightColors = {
   tabBarSurface: darkBase.TAB_SURFACE,
   tabBarBorder: darkBase.TAB_BORDER,
   onTabInactive: darkBase.TAB_INACTIVE,
-  badgeRing: darkBase.BADGE_RING,
 
   glow: darkBase.VIOLET_GLOW,
   onTabActive: darkBase.VIOLET_990,

@@ -27,6 +27,11 @@ export enum Translations {
   // Profile tab
   PROFILE_TITLE = 'profileTitle',
   PROFILE_EDIT_ACTION = 'profileEditAction',
+  PROFILE_EDIT_FULL = 'profileEditFull',
+  PROFILE_PHOTO_COUNT = 'profilePhotoCount',
+  PROFILE_MANAGE_PHOTOS = 'profileManagePhotos',
+  PROFILE_SETTINGS = 'profileSettings',
+  PROFILE_NAME_AGE = 'profileNameAge',
   PROFILE_NO_NAME = 'profileNoName',
   PROFILE_SECTION_ABOUT = 'profileSectionAbout',
   PROFILE_BIO_EMPTY = 'profileBioEmpty',

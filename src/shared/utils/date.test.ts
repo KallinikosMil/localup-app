@@ -1,4 +1,4 @@
-import { toISODate } from './date';
+import { toISODate, ageFromISODate } from './date';
 
 describe('toISODate', () => {
   it('returns the calendar date the user picked', () => {
@@ -35,5 +35,44 @@ describe('toISODate', () => {
 
   it('handles a leap day', () => {
     expect(toISODate(new Date(2000, 1, 29))).toBe('2000-02-29');
+  });
+});
+
+describe('ageFromISODate', () => {
+  // A fixed "today" so these never depend on when they are run.
+  const today = new Date(2026, 7, 26); // 2026-08-26
+
+  it('counts whole years for a birthday already passed this year', () => {
+    expect(ageFromISODate('1997-03-14', today)).toBe(29);
+  });
+
+  it('does NOT count the year when the birthday is still ahead', () => {
+    expect(ageFromISODate('1997-12-01', today)).toBe(28);
+  });
+
+  // The bug a millisecond-difference implementation gets wrong: on the
+  // birthday itself the person has just turned that age.
+  it('counts the birthday itself', () => {
+    expect(ageFromISODate('1997-08-26', today)).toBe(29);
+  });
+
+  it('does not count the day before the birthday', () => {
+    expect(ageFromISODate('1997-08-27', today)).toBe(28);
+  });
+
+  it('handles a leap-day birthday in a non-leap year', () => {
+    expect(ageFromISODate('2000-02-29', today)).toBe(26);
+  });
+
+  it('returns null rather than NaN for missing or malformed input', () => {
+    expect(ageFromISODate(null, today)).toBeNull();
+    expect(ageFromISODate(undefined, today)).toBeNull();
+    expect(ageFromISODate('', today)).toBeNull();
+    expect(ageFromISODate('not-a-date', today)).toBeNull();
+    expect(ageFromISODate('1997-13-01', today)).toBeNull();
+  });
+
+  it('returns null for a date in the future', () => {
+    expect(ageFromISODate('2030-01-01', today)).toBeNull();
   });
 });

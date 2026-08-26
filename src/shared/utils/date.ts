@@ -12,3 +12,36 @@ export const toISODate = (date: Date): string => {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
+
+// Age in whole years, for the "Dimitris, 29" headline.
+//
+// The same calendar-vs-instant care as above: the stored value is a
+// YYYY-MM-DD string, so it is compared field by field rather than by
+// subtracting timestamps. Dividing a millisecond difference by 365.25
+// days is off by one for anyone whose birthday is near today, which is
+// roughly 1 in 180 users on any given day.
+//
+// `null` for a missing or unparseable date — the caller renders the name
+// alone rather than "Dimitris, NaN".
+export const ageFromISODate = (
+  iso: string | null | undefined,
+  today: Date = new Date(),
+): number | null => {
+  if (!iso) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+  if (!m) return null;
+
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+  let age = today.getFullYear() - year;
+  const monthNow = today.getMonth() + 1;
+  const dayNow = today.getDate();
+  // Birthday has not happened yet this year.
+  if (monthNow < month || (monthNow === month && dayNow < day)) {
+    age -= 1;
+  }
+  return age >= 0 ? age : null;
+};

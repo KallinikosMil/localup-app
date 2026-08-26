@@ -22,6 +22,10 @@ export type Profile = {
   current_lat: number | null;
   current_lng: number | null;
   bio: string | null;
+  // Your own row only, and only to render your age on your own card.
+  // The deck never receives anybody else's: discover_candidates computes
+  // the number server-side precisely so birth dates stay in the database.
+  date_of_birth: string | null;
   avatar_url: string | null;
   mode_override: ProfileMode | null;
   interests: string[];
@@ -79,7 +83,7 @@ export const useProfile = () => {
       const { data: profile, error } = await supabase
         .from('profiles')
         .select(
-          'user_id, display_name, home_city, home_lat, home_lng, current_lat, current_lng, bio, avatar_url, mode_override',
+          'user_id, display_name, home_city, home_lat, home_lng, current_lat, current_lng, bio, date_of_birth, avatar_url, mode_override',
         )
         .eq('user_id', uid!)
         .single();

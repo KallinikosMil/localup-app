@@ -16,6 +16,11 @@ export default {
 
   profileTitle: 'Profile',
   profileEditAction: 'Edit',
+  profileEditFull: 'Edit profile',
+  profilePhotoCount: '{{current}} of {{total}}',
+  profileManagePhotos: 'Manage photos',
+  profileSettings: 'Settings',
+  profileNameAge: '{{name}}, {{age}}',
   profileNoName: '—',
   profileSectionAbout: 'About',
   profileBioEmpty: 'Tell people a bit about yourself — tap Edit to add a bio.',

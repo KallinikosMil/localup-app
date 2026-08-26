@@ -33,6 +33,20 @@ const ICONS: Record<string, IconName> = {
   profile: 'account-outline',
 };
 
+// Which tabs put a PHOTO behind THE BAR. Over an image the bar frosts so
+// the photo keeps showing through; over an ordinary page it becomes a
+// solid card with a hairline, because frosted glass on a flat surface
+// just looks like a mistake.
+//
+// Note this is not the same question as "is the screen full-bleed".
+// Profile's hero runs edge to edge too, but the bar sits far below it on
+// the page background — so Profile is NOT in this list.
+//
+// Keyed by route name rather than read from screen options: React
+// Navigation has no typed slot for a custom option, and one list of names
+// beats casting `options` to `any` at the read site.
+const PHOTO_BACKED_TABS = ['discover'];
+
 const FloatingTabBar = ({
   state,
   descriptors,
@@ -40,6 +54,17 @@ const FloatingTabBar = ({
 }: BottomTabBarProps) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
+
+  const onPhoto = PHOTO_BACKED_TABS.includes(state.routes[state.index].name);
+  const barSurface = onPhoto
+    ? theme.colors.tabBarSurface
+    : theme.colors.surfaceElevated;
+  const barBorder = onPhoto
+    ? theme.colors.tabBarBorder
+    : theme.colors.outlineVariant;
+  const inactiveTint = onPhoto
+    ? theme.colors.onTabInactive
+    : theme.colors.outline;
 
   return (
     <View
@@ -56,11 +81,12 @@ const FloatingTabBar = ({
         style={[
           styles.bar,
           {
-            backgroundColor: theme.colors.tabBarSurface,
-            borderColor: theme.colors.tabBarBorder,
+            backgroundColor: barSurface,
+            borderColor: barBorder,
           },
-          // Light gets a cast shadow because its bar is opaque and needs
-          // to lift off the photo; dark's frosting already separates it.
+          // Light gets a cast shadow because its bar is opaque and has to
+          // lift off what is behind it; in dark the bar is already either
+          // frosted or a raised surface, and a shadow adds nothing.
           theme.dark ? null : styles.barShadow,
         ]}
       >
@@ -152,14 +178,17 @@ const FloatingTabBar = ({
               <MaterialCommunityIcons
                 name={ICONS[route.name] ?? 'circle-outline'}
                 size={ICON_INACTIVE}
-                color={theme.colors.onTabInactive}
+                color={inactiveTint}
               />
               {badge ? (
                 <View
                   style={[
                     styles.badge,
                     {
-                      borderColor: theme.colors.badgeRing,
+                      // The ring hides the badge's seam against whatever
+                      // the bar itself is painted in, so it tracks the
+                      // bar rather than being its own token.
+                      borderColor: barSurface,
                     },
                   ]}
                 >

@@ -2,49 +2,57 @@ import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
-  Image,
   ScrollView,
   Pressable,
   RefreshControl,
+  StatusBar,
 } from 'react-native';
-import { ActivityIndicator, Chip, Snackbar } from 'react-native-paper';
+import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
-import ScreenSafeArea from '@shared/components/ScreenSafeArea';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
-import useLocation from '@shared/hooks/useLocation';
-import { useErrorMessage } from '@shared/hooks/useErrorMessage';
-import { useLogout } from '@features/auth/hooks/useAuth';
-import { useDeleteAccount } from '@features/auth/hooks/useDeleteAccount';
 import CustomModal from '@shared/components/CustomModal';
 import AppButton from '@shared/components/AppButton';
+import useLocation from '@shared/hooks/useLocation';
+import { useErrorMessage } from '@shared/hooks/useErrorMessage';
+import { ageFromISODate } from '@shared/utils/date';
+import { useLogout } from '@features/auth/hooks/useAuth';
+import { useDeleteAccount } from '@features/auth/hooks/useDeleteAccount';
+import ProfileHero from '@features/profile/components/ProfileHero';
 import { useProfile, usePhotos } from '@features/profile/hooks/useProfile';
 import { computeMode } from '@features/profile/utils/mode';
 import { useAppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
-import { Translations as Common } from '@shared/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
+import { Layout } from '@theme/constants/Layout';
+
+// Your own profile, rebuilt as the card a swiper sees. The old Gallery
+// section is gone: photos ARE the hero now, paged, and all photo
+// management moved into Edit profile. Two places showing the same photos
+// differently was the thing that made this screen feel unfinished.
 
 function ProfileScreenContent() {
   const theme = useAppTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const logout = useLogout();
   const deleteAccount = useDeleteAccount();
   const {
     data: profile,
-    // isPending (not isLoading): true while the query is still
-    // disabled (uid not in the store yet) — otherwise the ghost
-    // profile below would render for those frames.
+    // isPending (not isLoading): true while the query is still disabled
+    // (uid not in the store yet) — otherwise the ghost profile below
+    // would render for those frames.
     isPending,
     isError,
     error,
@@ -53,17 +61,18 @@ function ProfileScreenContent() {
   } = useProfile();
   const {
     data: photos,
-    isError: photosError,
     refetch: refetchPhotos,
     isRefetching: photosRefetching,
   } = usePhotos(profile?.user_id);
 
   // Logout can fail (offline, server). Without this the button just
-  // un-spun and the user stayed silently signed in, thinking they'd left.
+  // un-spun and the user stayed silently signed in, thinking they had
+  // left.
   const [logoutError, setLogoutError] = useState<string | null>(null);
-  // Deleting is irreversible, so it is gated behind an explicit confirmation
-  // rather than a single tap. On success there is nothing to navigate to —
-  // the hook clears the session and AppGuard routes to login by itself.
+  // Deleting is irreversible, so it is gated behind an explicit
+  // confirmation rather than a single tap. On success there is nothing to
+  // navigate to — the hook clears the session and AppGuard routes to
+  // login by itself.
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleRefresh = async () => {
@@ -83,7 +92,7 @@ function ProfileScreenContent() {
     return () => clearTimeout(timer);
   }, [isPending]);
 
-  // null === "we can't tell yet" (no home and/or no current coords).
+  // null === "we cannot tell yet" (no home and/or no current coords).
   const mode = computeMode(
     profile,
     profile?.current_lat ?? latitude,
@@ -95,12 +104,6 @@ function ProfileScreenContent() {
       : mode === 'local'
         ? Translations.PROFILE_BADGE_LOCAL
         : Translations.PROFILE_BADGE_LOCATING;
-  const modeIcon =
-    mode === 'traveler'
-      ? 'airplane'
-      : mode === 'local'
-        ? 'home-variant-outline'
-        : 'map-marker-question-outline';
 
   if (isPending) {
     return (
@@ -109,6 +112,7 @@ function ProfileScreenContent() {
           styles.center,
           {
             backgroundColor: theme.colors.background,
+            paddingTop: insets.top,
           },
         ]}
       >
@@ -116,11 +120,12 @@ function ProfileScreenContent() {
         {slowLoading ? (
           <AppText
             variant="body"
-            style={{
-              color: theme.colors.onSurfaceVariant,
-              textAlign: 'center',
-              marginTop: Spacing.SPACING_PADDING_16,
-            }}
+            style={[
+              styles.centerNote,
+              {
+                color: theme.colors.onSurfaceVariant,
+              },
+            ]}
           >
             {t(Translations.PROFILE_WAKING)}
           </AppText>
@@ -129,28 +134,10 @@ function ProfileScreenContent() {
     );
   }
 
-  // H2: a failed profile read used to render a GHOST profile — name
-  // "—", "add a bio", badge LOCAL, no photos — which reads as an empty
-  // account, not a failure. And pull-to-refresh lives inside the
-  // ScrollView below, which never rendered on a hang, so there was no
-  // way to retry at all. Say what happened; give them the button.
-  //
-  // V13 — two fixes, both about the error state being EXCLUSIVE:
-  //
-  //  1. The icon was `account-alert-outline`. That glyph is an avatar
-  //     WITH an exclamation mark welded to it, so the failure screen
-  //     rendered a profile icon and an error icon side by side and read
-  //     as "here is your profile, and also something is broken". It's
-  //     `alert-circle-outline` now — the same icon Matches uses, which
-  //     says one thing: this failed.
-  //
-  //  2. `isError` alone yanked the whole screen away even when RQ still
-  //     held a perfectly good cached profile (a failed pull-to-refresh
-  //     kept the data but flipped the flag). Gate on `!profile` too, so
-  //     the error branch takes the frame only when there is genuinely
-  //     nothing to show — mirroring Discover's `isError && !current`.
-  //     When we DO show it, it owns the frame: no header, no avatar, no
-  //     content above or below it.
+  // H2/V13: a failed read must not render a GHOST profile — name "—",
+  // "add a bio", badge LOCAL — which reads as an empty account rather
+  // than a failure. Gated on `!profile` too, so a failed pull-to-refresh
+  // that still holds good cached data keeps showing it.
   if (isError && !profile) {
     return (
       <View
@@ -158,6 +145,7 @@ function ProfileScreenContent() {
           styles.center,
           {
             backgroundColor: theme.colors.background,
+            paddingTop: insets.top,
           },
         ]}
       >
@@ -168,11 +156,12 @@ function ProfileScreenContent() {
         />
         <AppText
           variant="body"
-          style={{
-            color: theme.colors.onSurfaceVariant,
-            textAlign: 'center',
-            marginTop: Spacing.SPACING_PADDING_12,
-          }}
+          style={[
+            styles.centerNote,
+            {
+              color: theme.colors.onSurfaceVariant,
+            },
+          ]}
         >
           {errorMessage(error, Translations.PROFILE_ERROR)}
         </AppText>
@@ -184,20 +173,30 @@ function ProfileScreenContent() {
     );
   }
 
-  const surfaceLow = blendSurface(
-    theme.colors.background,
-    theme.colors.primaryContainer,
-    0.18,
-  );
-
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView
-        style={{
-          flex: 1,
+    <View
+      style={[
+        styles.root,
+        {
           backgroundColor: theme.colors.background,
-        }}
-        contentContainerStyle={styles.content}
+        },
+      ]}
+    >
+      {/* The hero runs under the status bar, so its icons have to be
+          light here regardless of theme — same reasoning as Discover, and
+          gated on focus for the same reason (tab screens stay mounted, so
+          an unconditional override followed you to the next tab). */}
+      {isFocused ? <StatusBar barStyle="light-content" /> : null}
+
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            // The tab bar floats over the page and takes no layout space.
+            paddingBottom:
+              insets.bottom + Spacing.lg + Layout.TAB_BAR_HEIGHT + Spacing.lg,
+          },
+        ]}
         refreshControl={
           <RefreshControl
             refreshing={profileRefetching || photosRefetching}
@@ -205,310 +204,245 @@ function ProfileScreenContent() {
           />
         }
       >
-        {/* Hero: full-bleed photo (or a tonal fallback) with a bottom
-            scrim, the identity overlaid, and a floating Edit pill — the
-            same visual language as the Discover card, so a profile reads
-            as "your own card". */}
-        <View style={styles.hero}>
-          {profile?.avatar_url ? (
-            <Image
-              source={{ uri: profile.avatar_url }}
-              style={styles.heroImage}
-            />
-          ) : (
-            <LinearGradient
-              colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
-              style={[styles.heroImage, styles.heroFallback]}
+        <ProfileHero
+          photoUrls={(photos ?? []).map(p => p.url)}
+          fallbackUrl={profile?.avatar_url}
+          displayName={profile?.display_name ?? t(Translations.PROFILE_NO_NAME)}
+          age={ageFromISODate(profile?.date_of_birth)}
+          city={profile?.home_city}
+          mode={mode}
+          modeLabel={t(modeLabel)}
+        />
+
+        <View style={styles.body}>
+          <View style={styles.actionRow}>
+            <Pressable
+              onPress={() => router.push('/profile/edit')}
+              accessibilityRole="button"
+              accessibilityLabel={t(Translations.PROFILE_EDIT_FULL)}
+              style={styles.editButton}
+            >
+              <LinearGradient
+                colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.editButtonFill}
+              >
+                <MaterialCommunityIcons
+                  name="pencil-outline"
+                  size={18}
+                  color={theme.colors.onGradient}
+                />
+                <AppText
+                  variant="h3"
+                  style={[
+                    styles.editLabel,
+                    {
+                      color: theme.colors.onGradient,
+                    },
+                  ]}
+                >
+                  {t(Translations.PROFILE_EDIT_FULL)}
+                </AppText>
+              </LinearGradient>
+            </Pressable>
+
+            {/* A shortcut into the same screen, not a second destination:
+                photo management lives inside Edit now, and this lands on
+                its grid rather than making the user hunt for it. */}
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: '/profile/edit',
+                  params: {
+                    focus: 'photos',
+                  },
+                })
+              }
+              accessibilityRole="button"
+              accessibilityLabel={t(Translations.PROFILE_MANAGE_PHOTOS)}
+              style={[
+                styles.photosButton,
+                {
+                  backgroundColor: theme.colors.surfaceElevated,
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
             >
               <MaterialCommunityIcons
-                name="account"
-                size={96}
-                color={theme.colors.ON_PHOTO}
-                style={{ opacity: 0.9 }}
+                name="camera-outline"
+                size={20}
+                color={theme.colors.onSurfaceVariant}
               />
-            </LinearGradient>
-          )}
+            </Pressable>
+          </View>
 
-          <LinearGradient
-            colors={[
-              'transparent',
-              theme.colors.BLACK_A35,
-              theme.colors.BLACK_A75,
-            ]}
-            style={styles.heroScrim}
-          />
-
-          <Pressable
-            onPress={() => router.push('/profile/edit')}
-            accessibilityRole="button"
-            accessibilityLabel={t(Common.A11Y_EDIT_PROFILE)}
-            hitSlop={12}
+          <AppText
+            variant="overline"
             style={[
-              styles.editPill,
-              { backgroundColor: theme.colors.BLACK_A35, top: insets.top + 8 },
+              styles.sectionLabel,
+              {
+                color: theme.colors.onSurfaceFaint,
+              },
             ]}
           >
-            <MaterialCommunityIcons
-              name="pencil-outline"
-              size={14}
-              color={theme.colors.ON_PHOTO}
-            />
-            <AppText
-              variant="caption"
-              style={{
-                color: theme.colors.ON_PHOTO,
-                fontWeight: '700',
-                marginLeft: 6,
-              }}
-            >
-              {t(Translations.PROFILE_EDIT_ACTION)}
-            </AppText>
-          </Pressable>
+            {t(Translations.PROFILE_SECTION_ABOUT)}
+          </AppText>
+          <AppText
+            variant="body"
+            style={[
+              styles.bio,
+              {
+                color: theme.colors.onSurfaceVariant,
+              },
+            ]}
+          >
+            {profile?.bio?.trim() || t(Translations.PROFILE_BIO_EMPTY)}
+          </AppText>
 
-          <View style={styles.heroInfo}>
-            <AppText variant="h1" style={{ color: theme.colors.ON_PHOTO }}>
-              {profile?.display_name ?? t(Translations.PROFILE_NO_NAME)}
-            </AppText>
-            <View style={styles.heroMeta}>
-              {profile?.home_city ? (
-                <View style={styles.cityRow}>
-                  <MaterialCommunityIcons
-                    name="map-marker-outline"
-                    size={14}
-                    color={theme.colors.ON_PHOTO}
-                  />
-                  <AppText
-                    variant="caption"
-                    style={{ color: theme.colors.ON_PHOTO, marginLeft: 4 }}
-                  >
-                    {profile.home_city}
-                  </AppText>
-                </View>
-              ) : null}
-              {/* Mode badge. H5: `mode` is null until coords land — a
-                  neutral badge says "we don't know yet" instead of
-                  guessing LOCAL. */}
-              <View
+          {profile?.interests && profile.interests.length > 0 ? (
+            <>
+              <AppText
+                variant="overline"
                 style={[
-                  styles.modeBadge,
+                  styles.sectionLabel,
                   {
-                    backgroundColor:
-                      mode === 'traveler'
-                        ? theme.colors.modeTraveler
-                        : mode === 'local'
-                          ? theme.colors.modeLocal
-                          : theme.colors.BLACK_A35,
+                    color: theme.colors.onSurfaceFaint,
                   },
                 ]}
               >
-                <MaterialCommunityIcons
-                  name={modeIcon}
-                  size={13}
-                  color={theme.colors.ON_PHOTO}
-                />
-                <AppText
-                  variant="caption"
-                  style={{
-                    color: theme.colors.ON_PHOTO,
-                    fontWeight: '700',
-                    marginLeft: 6,
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  {t(modeLabel)}
-                </AppText>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Body */}
-        <View style={styles.body}>
-          {/* About */}
-          <Section
-            title={t(Translations.PROFILE_SECTION_ABOUT)}
-            bg={theme.colors.surface}
-          >
-            <AppText
-              variant="body"
-              style={{
-                color: theme.colors.onSurface,
-                lineHeight: 22,
-              }}
-            >
-              {profile?.bio?.trim() || t(Translations.PROFILE_BIO_EMPTY)}
-            </AppText>
-          </Section>
-
-          {/* Photos. A failed read must not masquerade as an empty gallery
-          (the PR-H2 rule): show it only as empty when the read actually
-          succeeded with zero photos; surface an error otherwise. A
-          stale-but-usable list keeps rendering even if a refetch errors. */}
-          {photos && photos.length > 0 ? (
-            <>
-              <Spacer spacing={Spacing.SPACING_PADDING_16} />
-              <Section
-                title={t(Translations.PROFILE_SECTION_GALLERY)}
-                bg={theme.colors.surface}
-              >
-                <View>
-                  {photos.map(p => (
-                    <View
-                      key={p.id}
-                      style={[
-                        styles.photoFull,
-                        {
-                          backgroundColor: surfaceLow,
-                        },
-                      ]}
-                    >
-                      <Image source={{ uri: p.url }} style={styles.photoImg} />
-                    </View>
-                  ))}
-                </View>
-              </Section>
-            </>
-          ) : photosError ? (
-            <>
-              <Spacer spacing={Spacing.SPACING_PADDING_16} />
-              <Section
-                title={t(Translations.PROFILE_SECTION_GALLERY)}
-                bg={theme.colors.surface}
-              >
-                <AppText
-                  variant="body"
-                  style={{ color: theme.colors.onSurfaceVariant }}
-                >
-                  {t(Translations.PROFILE_GALLERY_ERROR)}
-                </AppText>
-              </Section>
-            </>
-          ) : null}
-
-          {/* Interests */}
-          {profile?.interests && profile.interests.length > 0 ? (
-            <>
-              <Spacer spacing={Spacing.SPACING_PADDING_16} />
-              <Section
-                title={t(Translations.PROFILE_SECTION_INTERESTS)}
-                bg={theme.colors.surface}
-              >
-                <View style={styles.chips}>
-                  {profile.interests.map(interest => (
-                    <Chip
-                      key={interest}
-                      style={[
-                        styles.chip,
-                        {
-                          backgroundColor: surfaceLow,
-                        },
-                      ]}
-                      textStyle={{
-                        color: theme.colors.onSurface,
+                {t(Translations.PROFILE_SECTION_INTERESTS)}
+              </AppText>
+              <View style={styles.chips}>
+                {profile.interests.map(interest => (
+                  <View
+                    key={interest}
+                    style={[
+                      styles.chip,
+                      {
+                        backgroundColor: theme.colors.surfaceElevated,
+                        borderColor: theme.colors.outlineVariant,
+                      },
+                    ]}
+                  >
+                    <AppText
+                      variant="caption"
+                      style={{
+                        color: theme.colors.onSurfaceVariant,
                       }}
                     >
                       {interest}
-                    </Chip>
-                  ))}
-                </View>
-              </Section>
+                    </AppText>
+                  </View>
+                ))}
+              </View>
             </>
           ) : null}
 
-          <Spacer spacing={Spacing.SPACING_PADDING_32} />
+          {/* Pushes the footer to the bottom of the page rather than
+              letting it hang under the interests. On a sparse profile
+              that left a big void below two small links and made the
+              screen look unfinished. */}
+          <View style={styles.spacer} />
 
-          {/* Quiet, low-emphasis log out — deliberately not a primary
-              button (it competed with Edit before). */}
-          <Pressable
-            onPress={() =>
-              logout.mutate(undefined, {
-                onError: err =>
-                  setLogoutError(
-                    errorMessage(err, Translations.PROFILE_LOGOUT_ERROR),
-                  ),
-              })
-            }
-            hitSlop={8}
-            disabled={logout.isPending}
-            accessibilityRole="button"
-            accessibilityLabel={t(Translations.PROFILE_LOGOUT)}
-            accessibilityState={{ disabled: logout.isPending }}
-            style={styles.logout}
-          >
-            {logout.isPending ? (
-              <ActivityIndicator size={16} />
-            ) : (
-              <MaterialCommunityIcons
-                name="logout"
-                size={16}
-                color={theme.colors.onSurfaceVariant}
-              />
-            )}
-            <AppText
-              variant="body"
-              style={{
-                color: theme.colors.onSurfaceVariant,
-                fontWeight: '600',
-                marginLeft: 6,
-              }}
+          {/* Both quiet, and side by side rather than stacked as buttons:
+              neither is something the screen wants you to do. Delete is
+              findable because Google Play requires it to be, and tinted
+              with the error colour so it can never be mistaken for the
+              one beside it. */}
+          <View style={styles.footerRow}>
+            <Pressable
+              onPress={() =>
+                logout.mutate(undefined, {
+                  onError: err =>
+                    setLogoutError(
+                      errorMessage(err, Translations.PROFILE_LOGOUT_ERROR),
+                    ),
+                })
+              }
+              hitSlop={12}
+              disabled={logout.isPending}
+              accessibilityRole="button"
+              accessibilityLabel={t(Translations.PROFILE_LOGOUT)}
+              accessibilityState={{ disabled: logout.isPending }}
             >
-              {t(Translations.PROFILE_LOGOUT)}
-            </AppText>
-          </Pressable>
+              {logout.isPending ? (
+                <ActivityIndicator size={16} />
+              ) : (
+                <AppText
+                  variant="label"
+                  style={[
+                    styles.footerAction,
+                    {
+                      color: theme.colors.onSurfaceVariant,
+                    },
+                  ]}
+                >
+                  {t(Translations.PROFILE_LOGOUT)}
+                </AppText>
+              )}
+            </Pressable>
 
-          {/* Below logout and quieter still: destructive, so it must be
-              findable (Google Play requires it) without ever being the thing
-              a thumb lands on by accident. */}
-          <Pressable
-            onPress={() => setConfirmDelete(true)}
-            hitSlop={8}
-            disabled={deleteAccount.isPending}
-            accessibilityRole="button"
-            accessibilityLabel={t(Translations.PROFILE_DELETE_ACCOUNT)}
-            accessibilityHint={t(Translations.PROFILE_DELETE_BODY)}
-            accessibilityState={{ disabled: deleteAccount.isPending }}
-            style={styles.deleteAccount}
-          >
-            {deleteAccount.isPending ? (
-              <ActivityIndicator size={14} />
-            ) : (
-              <AppText
-                variant="bodySmall"
-                style={{ color: theme.colors.onSurfaceVariant }}
-              >
-                {t(Translations.PROFILE_DELETE_ACCOUNT)}
-              </AppText>
-            )}
-          </Pressable>
+            <Pressable
+              onPress={() => setConfirmDelete(true)}
+              hitSlop={12}
+              disabled={deleteAccount.isPending}
+              accessibilityRole="button"
+              accessibilityLabel={t(Translations.PROFILE_DELETE_ACCOUNT)}
+              accessibilityHint={t(Translations.PROFILE_DELETE_BODY)}
+              accessibilityState={{ disabled: deleteAccount.isPending }}
+            >
+              {deleteAccount.isPending ? (
+                <ActivityIndicator size={16} />
+              ) : (
+                <AppText
+                  variant="label"
+                  style={{
+                    color: theme.colors.error,
+                  }}
+                >
+                  {t(Translations.PROFILE_DELETE_ACCOUNT)}
+                </AppText>
+              )}
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
+
       <CustomModal
         visible={confirmDelete}
         onDismiss={() => setConfirmDelete(false)}
       >
         <AppText
           variant="h3"
-          style={{ color: theme.colors.onSurface, textAlign: 'center' }}
+          style={[
+            styles.modalText,
+            {
+              color: theme.colors.onSurface,
+            },
+          ]}
         >
           {t(Translations.PROFILE_DELETE_TITLE)}
         </AppText>
-        <Spacer spacing={Spacing.SPACING_PADDING_8} />
+        <Spacer spacing={Spacing.sm} />
         <AppText
           variant="body"
-          style={{
-            color: theme.colors.onSurfaceVariant,
-            textAlign: 'center',
-          }}
+          style={[
+            styles.modalText,
+            {
+              color: theme.colors.onSurfaceVariant,
+            },
+          ]}
         >
           {t(Translations.PROFILE_DELETE_BODY)}
         </AppText>
-        <Spacer spacing={Spacing.SPACING_PADDING_24} />
+        <Spacer spacing={Spacing.xl} />
         {/* The safe choice is the prominent one. The destructive choice is
             reachable but never the default. */}
         <AppButton variant="primary" onPress={() => setConfirmDelete(false)}>
           {t(Translations.PROFILE_DELETE_CANCEL)}
         </AppButton>
-        <Spacer spacing={Spacing.SPACING_PADDING_12} />
+        <Spacer spacing={Spacing.md} />
         <AppButton
           variant="link"
           onPress={() => {
@@ -520,7 +454,9 @@ function ProfileScreenContent() {
                 ),
             });
           }}
-          labelStyle={{ color: theme.colors.error }}
+          labelStyle={{
+            color: theme.colors.error,
+          }}
         >
           {t(Translations.PROFILE_DELETE_CONFIRM)}
         </AppButton>
@@ -537,172 +473,102 @@ function ProfileScreenContent() {
   );
 }
 
-const Section = ({
-  title,
-  bg,
-  children,
-}: {
-  title: string;
-  bg: string;
-  children: React.ReactNode;
-}) => {
-  const theme = useAppTheme();
-  return (
-    <View>
-      <AppText
-        variant="caption"
-        style={{
-          color: theme.colors.onSurfaceVariant,
-          letterSpacing: 1.2,
-          textTransform: 'uppercase',
-          fontSize: 11,
-          marginBottom: 8,
-          marginLeft: 4,
-          fontWeight: '600',
-        }}
-      >
-        {title}
-      </AppText>
-      <View style={[styles.sectionCard, { backgroundColor: bg }]}>
-        {children}
-      </View>
-    </View>
-  );
-};
-
-const blendSurface = (base: string, tint: string, t: number) => {
-  const b = hexToRgb(base);
-  const tt = hexToRgb(tint);
-  if (!b || !tt) return base;
-  const r = Math.round(b.r + (tt.r - b.r) * t);
-  const g = Math.round(b.g + (tt.g - b.g) * t);
-  const bl = Math.round(b.b + (tt.b - b.b) * t);
-  return `rgb(${r}, ${g}, ${bl})`;
-};
-
-const hexToRgb = (hex: string) => {
-  const m = /^#?([a-f0-9]{6})$/i.exec(hex);
-  if (!m) return null;
-  const n = parseInt(m[1], 16);
-  return {
-    r: (n >> 16) & 255,
-    g: (n >> 8) & 255,
-    b: n & 255,
-  };
-};
-
-// The app-level SafeAreaView is gone (see Shell) so Discover can run
-// edge to edge. This screen still wants the inset, and it has several
-// top-level returns (loading, error, content) — wrapping the export is
-// one place instead of three.
+// No ScreenSafeArea: the hero is full-bleed and runs under the status
+// bar. The loading and error branches take the top inset themselves, and
+// the scroll content reserves room for the floating tab bar.
 export default function ProfileScreen() {
-  return (
-    <ScreenSafeArea reserveTabBar>
-      <ProfileScreenContent />
-    </ScreenSafeArea>
-  );
+  return <ProfileScreenContent />;
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.xl,
+  },
+  centerNote: {
+    textAlign: 'center',
+    marginTop: Spacing.md,
   },
   content: {
-    paddingBottom: Spacing.SPACING_PADDING_32,
-  },
-  hero: {
-    height: 460,
-    width: '100%',
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  heroImage: {
-    ...StyleSheet.absoluteFillObject,
-    width: '100%',
-    height: '100%',
-  },
-  heroFallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  heroScrim: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: '65%',
-  },
-  editPill: {
-    position: 'absolute',
-    right: Spacing.SPACING_PADDING_16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.pill,
-  },
-  heroInfo: {
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingBottom: Spacing.SPACING_PADDING_24,
-  },
-  heroMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: Spacing.SPACING_PADDING_8,
-  },
-  cityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  modeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.pill,
+    flexGrow: 1,
   },
   body: {
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_24,
+    // Fills whatever the hero leaves, so the spacer below can do its job.
+    flex: 1,
+    paddingHorizontal: 20,
+    // Pulls the action row up over the tail of the hero, so the gradient
+    // button overlaps the fade instead of starting after a gap. In light
+    // the hero ends on a hard rounded edge, and the same overlap reads as
+    // the button sitting on the card.
+    marginTop: -16,
   },
-  deleteAccount: {
+  actionRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.SPACING_PADDING_16,
+    gap: 10,
   },
-  logout: {
+  editButton: {
+    flex: 1,
+    borderRadius: 26,
+    overflow: 'hidden',
+  },
+  editButtonFill: {
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing.SPACING_PADDING_12,
+    gap: Spacing.sm,
   },
-  sectionCard: {
-    padding: Spacing.SPACING_PADDING_16,
-    borderRadius: BorderRadius.xxl,
+  editLabel: {
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '700',
   },
-  // Full width, portrait, stacked — the same treatment a match's profile
-  // gets, so your own profile shows you exactly what they see.
-  photoFull: {
-    width: '100%',
-    aspectRatio: 4 / 5,
-    borderRadius: BorderRadius.xl,
-    overflow: 'hidden',
-    marginBottom: Spacing.SPACING_PADDING_12,
+  photosButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  photoImg: {
-    width: '100%',
-    height: '100%',
+  sectionLabel: {
+    marginTop: Spacing.xl,
+  },
+  bio: {
+    lineHeight: 21,
+    marginTop: 7,
   },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 7,
+    marginTop: 9,
   },
   chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+  },
+  spacer: {
+    flex: 1,
+    minHeight: Spacing.xxl,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  footerAction: {
+    fontWeight: '600',
+  },
+  modalText: {
+    textAlign: 'center',
   },
 });

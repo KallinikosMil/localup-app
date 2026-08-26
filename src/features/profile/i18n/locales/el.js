@@ -12,6 +12,11 @@ export default {
 
   profileTitle: 'Προφίλ',
   profileEditAction: 'Επεξεργασία',
+  profileEditFull: 'Επεξεργασία προφίλ',
+  profilePhotoCount: '{{current}} από {{total}}',
+  profileManagePhotos: 'Διαχείριση φωτογραφιών',
+  profileSettings: 'Ρυθμίσεις',
+  profileNameAge: '{{name}}, {{age}}',
   profileNoName: '—',
   profileSectionAbout: 'Σχετικά',
   profileBioEmpty:
