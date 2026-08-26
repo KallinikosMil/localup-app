@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@config/supabase';
 import { store } from '@store';
 import { setOnboardingComplete } from '@features/auth/slices/authSlice';
+import { PHOTO_BUCKET } from '@shared/utils/storage';
 
 type OnboardingData = {
   displayName: string;
@@ -14,13 +15,6 @@ type OnboardingData = {
   interestIds: string[];
   bio?: string;
 };
-
-// The only bucket that exists in this project is `user-photos`
-// (public). The old code uploaded to `avatars`, which DOES NOT EXIST —
-// storage answered "Bucket not found" and onboarding died on step 1.
-// Every test user is seeded straight into the DB, so the flow was never
-// actually exercised. Keep this in sync with useUploadPhoto.
-const PHOTO_BUCKET = 'user-photos';
 
 const ALLOWED_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'heic'];
 

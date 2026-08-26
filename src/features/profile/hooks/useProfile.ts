@@ -6,6 +6,7 @@ import { supabase } from '@config/supabase';
 import { RootState } from '@store';
 import { haversineKm } from '@features/profile/utils/mode';
 import type { ProfileMode } from '@features/profile/utils/mode';
+import { PHOTO_BUCKET, publicPhotoUrl } from '@shared/utils/storage';
 
 // The mode rule and its type live in utils/mode.ts — it is pure arithmetic
 // and belongs outside a hooks file. Re-exported so existing imports still
@@ -29,7 +30,12 @@ export type Profile = {
 export type Photo = {
   id: string;
   url: string;
-  is_primary: boolean;
+  // Slot in the grid. Position 0 IS the main photo — there is no separate
+  // is_primary flag any more, because two sources of truth for "which one is
+  // first" is how they drift apart. (The old flag was written only on the
+  // type='avatar' row, which this query never returns, so no photo was ever
+  // marked primary.)
+  position: number;
 };
 
 // PostgREST returns an embedded relation as an OBJECT when it infers a
@@ -196,25 +202,23 @@ export const usePhotos = (userId: string | null | undefined) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('media')
-        .select('id, storage_path, is_primary')
+        .select('id, storage_path, position')
         .eq('user_id', userId!)
         .eq('type', 'photo')
-        .order('created_at', {
+        .order('position', {
           ascending: true,
         });
 
       if (error) throw error;
 
-      return (data ?? []).map(m => {
-        const { data: urlData } = supabase.storage
-          .from('user-photos')
-          .getPublicUrl(m.storage_path);
-        return {
-          id: m.id,
-          url: urlData.publicUrl,
-          is_primary: m.is_primary ?? false,
-        } as Photo;
-      });
+      return (data ?? []).map(
+        m =>
+          ({
+            id: m.id,
+            url: publicPhotoUrl(m.storage_path),
+            position: m.position,
+          }) as Photo,
+      );
     },
   });
 };
@@ -240,7 +244,7 @@ export const useUploadPhoto = () => {
       const arrayBuffer = await new Response(blob).arrayBuffer();
 
       const { error: upErr } = await supabase.storage
-        .from('user-photos')
+        .from(PHOTO_BUCKET)
         .upload(path, arrayBuffer, {
           contentType: mimeType,
           upsert: false,
@@ -248,10 +252,12 @@ export const useUploadPhoto = () => {
 
       if (upErr) throw upErr;
 
-      const { error: dbErr } = await supabase.from('media').insert({
-        user_id: uid,
-        type: 'photo',
-        storage_path: path,
+      // Through an RPC rather than a plain insert: the new row needs the next
+      // free position, and only the server can read the current maximum and
+      // write the row in the same statement. Computing it here from what the
+      // client last saw would let two uploads claim the same slot.
+      const { error: dbErr } = await supabase.rpc('append_photo', {
+        p_storage_path: path,
       });
 
       if (dbErr) throw dbErr;
@@ -260,6 +266,54 @@ export const useUploadPhoto = () => {
       queryClient.invalidateQueries({
         queryKey: ['photos', uid],
       });
+    },
+  });
+};
+
+// Drag-to-reorder in the edit grid.
+//
+// The whole order goes in one call, not one call per moved photo: N updates can
+// fail halfway and leave the grid in an arrangement nobody chose, and every
+// intermediate state has two photos sharing a slot. The RPC rewrites them in a
+// single statement, and it refuses a partial list rather than renumbering some
+// photos and leaving the rest on stale positions.
+export const useReorderPhotos = () => {
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      const { error } = await supabase.rpc('reorder_photos', {
+        p_ids: orderedIds,
+      });
+      if (error) throw error;
+    },
+    // Optimistic: a drag that snaps back while the round trip completes reads
+    // as a failed drag. Put the new order on screen immediately and roll back
+    // only if the server actually refuses.
+    onMutate: async (orderedIds: string[]) => {
+      const key = ['photos', uid];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Photo[]>(key);
+      if (previous) {
+        const byId = new Map(previous.map(photo => [photo.id, photo]));
+        const next = orderedIds
+          .map((id, index) => {
+            const photo = byId.get(id);
+            return photo ? { ...photo, position: index } : null;
+          })
+          .filter((photo): photo is Photo => photo !== null);
+        queryClient.setQueryData(key, next);
+      }
+      return { previous };
+    },
+    onError: (_err, _ids, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['photos', uid], context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['photos', uid] });
     },
   });
 };
@@ -284,7 +338,7 @@ export const useDeletePhoto = () => {
       // and only drop the row once storage confirms; if storage fails we
       // keep the row, surface the error, and the user can retry.
       const { error: rmErr } = await supabase.storage
-        .from('user-photos')
+        .from(PHOTO_BUCKET)
         .remove([media.storage_path]);
       if (rmErr) throw rmErr;
 

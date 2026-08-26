@@ -9,15 +9,29 @@ import {
   useProfile,
 } from '@features/profile/hooks/useProfile';
 import { haversineKm } from '@features/profile/utils/mode';
+import { publicPhotoUrls } from '@shared/utils/storage';
 
 const STALE_GPS_KM_THRESHOLD = 5;
+
+// What the RPC actually sends. `photo_paths` holds bucket-relative
+// storage paths, NOT URLs — the mapping below turns them into public
+// URLs so nothing downstream has to know the bucket exists.
+type CandidateRow = Omit<Candidate, 'interests' | 'photo_urls'> & {
+  photo_paths: string[] | null;
+};
 
 export type Candidate = {
   user_id: string;
   display_name: string;
   bio: string | null;
   home_city: string | null;
+  // The single photo the card used before the deck carried an ordered
+  // set. Kept as the fallback for a profile whose media rows predate
+  // `position`, so an old account never renders a blank hero.
   avatar_url: string | null;
+  // Ordered by `media.position`, capped at 6 server-side. Empty for a
+  // candidate who finished onboarding without uploading.
+  photo_urls: string[];
   current_lat: number | null;
   current_lng: number | null;
   languages: string[];
@@ -97,7 +111,7 @@ export const useCandidates = () => {
       });
       if (error) throw error;
 
-      const rows = (data ?? []) as Omit<Candidate, 'interests'>[];
+      const rows = (data ?? []) as CandidateRow[];
       if (rows.length === 0) return [];
 
       // Enrich with interest names in one batch
@@ -124,8 +138,9 @@ export const useCandidates = () => {
         nameMap.set(row.user_id, list);
       }
 
-      return rows.map(r => ({
+      return rows.map(({ photo_paths, ...r }) => ({
         ...r,
+        photo_urls: publicPhotoUrls(photo_paths),
         interests: nameMap.get(r.user_id) ?? [],
       }));
     },
