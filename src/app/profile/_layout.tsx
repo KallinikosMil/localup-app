@@ -1,18 +1,17 @@
 import React from 'react';
 import { Stack } from 'expo-router';
 
-import ScreenSafeArea from '@shared/components/ScreenSafeArea';
-
-// Covers /profile/edit and /profile/[userId]. Same reason as the auth
-// layout: the inset lives per-screen now, and both of these want it.
+// No ScreenSafeArea here any more. It covered both routes in this group,
+// which was fine while both were ordinary pages — but /profile/[userId]
+// is a full-bleed hero now and a parent inset makes that impossible. The
+// inset moved into /profile/edit, which is the only route in the group
+// that still wants one.
 export default function ProfileDetailLayout() {
   return (
-    <ScreenSafeArea>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
-    </ScreenSafeArea>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    />
   );
 }

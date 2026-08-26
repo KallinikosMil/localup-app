@@ -32,6 +32,8 @@ export enum Translations {
   PROFILE_MANAGE_PHOTOS = 'profileManagePhotos',
   PROFILE_SETTINGS = 'profileSettings',
   PROFILE_NAME_AGE = 'profileNameAge',
+  PROFILE_VIEW_MESSAGE = 'profileViewMessage',
+  PROFILE_VIEW_IN_COMMON = 'profileViewInCommon',
   PROFILE_NO_NAME = 'profileNoName',
   PROFILE_SECTION_ABOUT = 'profileSectionAbout',
   PROFILE_BIO_EMPTY = 'profileBioEmpty',

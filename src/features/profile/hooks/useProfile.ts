@@ -123,36 +123,46 @@ export const useProfile = () => {
 // `media` is owner-only PLUS an active-match policy, so usePhotos(otherId)
 // returns rows only while you are actually matched — enforced in the
 // database, not here.
+// Someone else's profile.
+//
+// An RPC, not a table read, for one reason above all: the screen shows
+// "Elena, 27" and a plain select would have to hand the phone a full
+// date_of_birth to compute that. The server does the arithmetic and the
+// date stays where it belongs. See get_public_profile.
+//
+// It also answers what the client cannot: distance (needs both people's
+// positions), mode (same 50km rule as the deck) and WHICH interests are
+// shared. And it removes the separate user_interests read, whose failure
+// rendered a profile with no interests — indistinguishable from someone
+// who chose none.
+export type PublicProfile = {
+  user_id: string;
+  display_name: string | null;
+  age: number | null;
+  bio: string | null;
+  home_city: string | null;
+  avatar_url: string | null;
+  interest_names: string[];
+  shared_interest_names: string[];
+  profile_mode: ProfileMode | null;
+  distance_km: number | null;
+};
+
 export const useUserProfile = (userId: string | null | undefined) => {
   return useQuery({
     queryKey: ['user-profile', userId],
     enabled: !!userId,
     staleTime: 60_000,
-    queryFn: async () => {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select(
-          'user_id, display_name, home_city, home_lat, home_lng, current_lat, current_lng, bio, avatar_url, mode_override',
-        )
-        .eq('user_id', userId!)
-        .single();
-
+    queryFn: async (): Promise<PublicProfile | null> => {
+      const { data, error } = await supabase.rpc('get_public_profile', {
+        p_user_id: userId!,
+      });
       if (error) throw error;
-
-      const { data: userInterests, error: interestsError } = await supabase
-        .from('user_interests')
-        .select('interest_id, interests(name)')
-        .eq('user_id', userId!);
-
-      // Same rule as useProfile: a failed interests read must not present
-      // as "this person picked none".
-      if (interestsError) throw interestsError;
-
-      const interests = (userInterests ?? []).flatMap(ui =>
-        interestNamesFrom(ui.interests),
-      );
-
-      return { ...profile, interests } as Profile;
+      // The RPC returns NO ROW for a blocked pair, deliberately: a blocked
+      // user must not be able to confirm the account still exists. null
+      // here is a real answer, not a failure.
+      const rows = (data ?? []) as PublicProfile[];
+      return rows[0] ?? null;
     },
   });
 };

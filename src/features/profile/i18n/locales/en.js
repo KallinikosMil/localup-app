@@ -21,6 +21,8 @@ export default {
   profileManagePhotos: 'Manage photos',
   profileSettings: 'Settings',
   profileNameAge: '{{name}}, {{age}}',
+  profileViewMessage: 'Message {{name}}',
+  profileViewInCommon: '{{count}} in common',
   profileNoName: '—',
   profileSectionAbout: 'About',
   profileBioEmpty: 'Tell people a bit about yourself — tap Edit to add a bio.',

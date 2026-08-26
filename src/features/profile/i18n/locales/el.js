@@ -17,6 +17,8 @@ export default {
   profileManagePhotos: 'Διαχείριση φωτογραφιών',
   profileSettings: 'Ρυθμίσεις',
   profileNameAge: '{{name}}, {{age}}',
+  profileViewMessage: 'Μήνυμα στον/στην {{name}}',
+  profileViewInCommon: '{{count}} κοινά',
   profileNoName: '—',
   profileSectionAbout: 'Σχετικά',
   profileBioEmpty:

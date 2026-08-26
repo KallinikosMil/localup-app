@@ -45,9 +45,16 @@ type ProfileHeroProps = {
   // pill says so rather than guessing LOCAL.
   mode: 'local' | 'traveler' | null;
   modeLabel: string;
-  // The control in the top-right: a settings gear on your own profile, a
-  // back button or an overflow menu on someone else's.
+  // How far away they are right now. Only ever shown on someone else's
+  // profile — your own distance from yourself is not information.
+  distanceLabel?: string | null;
+  // The control in the top-right: a settings gear on your own profile, an
+  // overflow menu on someone else's.
   rightAction?: React.ReactNode;
+  // The top-LEFT slot. On your own profile the photo counter lives there;
+  // pass a back button and it takes that place instead, because the two
+  // would otherwise collide.
+  leftAction?: React.ReactNode;
 };
 
 const ProfileHero = ({
@@ -58,7 +65,9 @@ const ProfileHero = ({
   city,
   mode,
   modeLabel,
+  distanceLabel,
   rightAction,
+  leftAction,
 }: ProfileHeroProps) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -204,42 +213,43 @@ const ProfileHero = ({
         ]}
         pointerEvents="box-none"
       >
-        {paged ? (
-          <View
-            style={[
-              styles.countPill,
-              {
-                backgroundColor: theme.colors.headerPill,
-                borderColor: theme.colors.headerPillBorder,
-              },
-              theme.dark ? null : styles.pillShadow,
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="camera-outline"
-              size={12}
-              color={theme.colors.onHeaderPill}
-            />
-            <AppText
-              variant="microStrong"
+        {leftAction ??
+          (paged ? (
+            <View
               style={[
-                styles.countText,
+                styles.countPill,
                 {
-                  color: theme.colors.onHeaderPill,
+                  backgroundColor: theme.colors.headerPill,
+                  borderColor: theme.colors.headerPillBorder,
                 },
+                theme.dark ? null : styles.pillShadow,
               ]}
             >
-              {t(Translations.PROFILE_PHOTO_COUNT, {
-                current: index + 1,
-                total: photos.length,
-              })}
-            </AppText>
-          </View>
-        ) : (
-          // Keeps the right-hand control pinned right when there is no
-          // count pill to push it there.
-          <View />
-        )}
+              <MaterialCommunityIcons
+                name="camera-outline"
+                size={12}
+                color={theme.colors.onHeaderPill}
+              />
+              <AppText
+                variant="microStrong"
+                style={[
+                  styles.countText,
+                  {
+                    color: theme.colors.onHeaderPill,
+                  },
+                ]}
+              >
+                {t(Translations.PROFILE_PHOTO_COUNT, {
+                  current: index + 1,
+                  total: photos.length,
+                })}
+              </AppText>
+            </View>
+          ) : (
+            // Keeps the right-hand control pinned right when there is no
+            // count pill to push it there.
+            <View />
+          ))}
 
         {rightAction}
       </View>
@@ -272,7 +282,7 @@ const ProfileHero = ({
           {city ? (
             <View style={styles.cityRow}>
               <MaterialCommunityIcons
-                name="map-marker-outline"
+                name="home-outline"
                 size={13}
                 color={theme.colors.WHITE_A85}
               />
@@ -283,6 +293,24 @@ const ProfileHero = ({
                 }}
               >
                 {city}
+              </AppText>
+            </View>
+          ) : null}
+
+          {distanceLabel ? (
+            <View style={styles.cityRow}>
+              <MaterialCommunityIcons
+                name="map-marker-outline"
+                size={13}
+                color={theme.colors.WHITE_A85}
+              />
+              <AppText
+                variant="caption"
+                style={{
+                  color: theme.colors.WHITE_A85,
+                }}
+              >
+                {distanceLabel}
               </AppText>
             </View>
           ) : null}

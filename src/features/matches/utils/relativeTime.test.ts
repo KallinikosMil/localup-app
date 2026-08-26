@@ -85,15 +85,17 @@ describe('relativeTime', () => {
 
 describe('sameCalendarDay', () => {
   it('is true for two times on the same day', () => {
-    expect(sameCalendarDay(iso(2026, 7, 26, 0, 1), iso(2026, 7, 26, 23, 59)))
-      .toBe(true);
+    expect(
+      sameCalendarDay(iso(2026, 7, 26, 0, 1), iso(2026, 7, 26, 23, 59)),
+    ).toBe(true);
   });
 
   // A minute apart, two different days: the case a millisecond diff gets
   // wrong and the reason a separator belongs between them.
   it('is false across midnight even one minute apart', () => {
-    expect(sameCalendarDay(iso(2026, 7, 25, 23, 59), iso(2026, 7, 26, 0, 1)))
-      .toBe(false);
+    expect(
+      sameCalendarDay(iso(2026, 7, 25, 23, 59), iso(2026, 7, 26, 0, 1)),
+    ).toBe(false);
   });
 
   it('is false when either side is missing or unparseable', () => {

@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 
 import AppText from '@shared/components/AppText';
+import ScreenSafeArea from '@shared/components/ScreenSafeArea';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
 import GalleryPhoto from '@features/profile/components/GalleryPhoto';
@@ -39,7 +40,7 @@ const PHOTO_SIZE = 100;
 const MAX_PHOTOS = 6;
 const BIO_LIMIT = 240;
 
-export default function EditProfileScreen() {
+function EditProfileScreenContent() {
   const theme = useAppTheme();
   const router = useRouter();
   const { t } = useTranslation();
@@ -902,6 +903,18 @@ const hexToRgb = (hex: string) => {
     b: n & 255,
   };
 };
+
+// The group layout no longer insets this route — /profile/[userId] in
+// the same group is a full-bleed hero and could not opt out of a parent
+// inset. Edit is an ordinary form page and still wants one, so it takes
+// it here, around all of its top-level returns at once.
+export default function EditProfileScreen() {
+  return (
+    <ScreenSafeArea>
+      <EditProfileScreenContent />
+    </ScreenSafeArea>
+  );
+}
 
 const styles = StyleSheet.create({
   center: {
