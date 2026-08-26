@@ -73,6 +73,12 @@ const lightBase = {
   // different, paler gradient than light.
   GRADIENT_FROM: '#A78BFA',
   GRADIENT_TO: '#653FD4',
+  // A SENT chat bubble, and only that. Mode-constant like the brand
+  // gradient, but darker at both ends: a bubble is a small block of
+  // white text, and the brand gradient is light enough at its top end
+  // that a short message sitting there loses contrast.
+  BUBBLE_FROM: '#7C5CE0',
+  BUBBLE_TO: '#5B36C4',
   // Hero scrims. Not black — a near-black violet, so the fade lands on
   // the dark ground instead of greying the photo out on the way down.
   SCRIM_00: 'rgba(14,12,20,0)',
@@ -154,6 +160,8 @@ const darkBase: typeof lightBase = {
   ON_PHOTO: '#FFFFFF',
   GRADIENT_FROM: '#A78BFA',
   GRADIENT_TO: '#653FD4',
+  BUBBLE_FROM: '#7C5CE0',
+  BUBBLE_TO: '#5B36C4',
   SCRIM_00: 'rgba(14,12,20,0)',
   SCRIM_45: 'rgba(14,12,20,0.45)',
   SCRIM_82: 'rgba(14,12,20,0.82)',
@@ -234,6 +242,8 @@ export const lightColors = {
   // #653FD4 gradient is violet on violet. This is the ON_PHOTO rule —
   // the gradient is paint, so what sits on it is not themed.
   onGradient: lightBase.ON_PHOTO,
+  bubbleStart: lightBase.BUBBLE_FROM,
+  bubbleEnd: lightBase.BUBBLE_TO,
 
   // The hero's furniture. The mode pills go mode-constant here because
   // they sit on an image; the themed modeLocal/modeTraveler are for
@@ -319,6 +329,8 @@ export const darkColors: typeof lightColors = {
   errorOutline: darkBase.RED_200,
 
   onGradient: darkBase.ON_PHOTO,
+  bubbleStart: darkBase.BUBBLE_FROM,
+  bubbleEnd: darkBase.BUBBLE_TO,
 
   modeLocalOnPhoto: darkBase.GREEN_ON_PHOTO,
   modeTravelerOnPhoto: darkBase.GRADIENT_TO,

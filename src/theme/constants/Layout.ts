@@ -122,6 +122,25 @@ export const Layout = {
   ICON_BUTTON: 36,
   ICON_BUTTON_SM: 34,
 
+  // ---- chat ----
+  CHAT_HEADER_HEIGHT: 62,
+  CHAT_AVATAR: 38,
+  CHAT_AVATAR_RING: 1.5,
+  // A bubble never spans the full width, so the reader can always tell
+  // which side it came from at a glance.
+  BUBBLE_MAX_WIDTH: '78%',
+  BUBBLE_RADIUS: 20,
+  // The corner nearest the sender stays small — that notch is what says
+  // who is speaking, and it is the only asymmetry in the shape.
+  BUBBLE_TAIL_RADIUS: 6,
+  BUBBLE_PADDING_V: 12,
+  BUBBLE_PADDING_H: 15,
+  BUBBLE_GAP: 9,
+  COMPOSER_HEIGHT: 50,
+  COMPOSER_RADIUS: 26,
+  COMPOSER_PADDING_H: 18,
+  STATUS_DOT: 6,
+
   // ---- ambient ----
   // The violet blob behind the top-left corner (§3.3).
   // SVG stop-color does NOT carry alpha — an rgba() there is read as
@@ -131,6 +150,9 @@ export const Layout = {
   GLOW_OPACITY_DARK: 0.42,
   GLOW_OPACITY_LIGHT: 0.12,
   GLOW_SIZE: 340,
+  // Chat runs a slightly smaller blob, from the opposite corner.
+  GLOW_SIZE_SM: 320,
+  GLOW_OPACITY_DARK_SM: 0.34,
   GLOW_OFFSET_X: -80,
   GLOW_OFFSET_Y: -120,
 } as const;

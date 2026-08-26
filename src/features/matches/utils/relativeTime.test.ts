@@ -1,4 +1,4 @@
-import { relativeTime } from './relativeTime';
+import { relativeTime, sameCalendarDay } from './relativeTime';
 
 // Local time throughout: the rule is about the reader's calendar, and
 // `new Date(y, m, d, h, min)` builds a local instant, which is exactly
@@ -80,5 +80,25 @@ describe('relativeTime', () => {
     expect(relativeTime(null, now)).toEqual({ kind: 'none' });
     expect(relativeTime(undefined, now)).toEqual({ kind: 'none' });
     expect(relativeTime('not-a-date', now)).toEqual({ kind: 'none' });
+  });
+});
+
+describe('sameCalendarDay', () => {
+  it('is true for two times on the same day', () => {
+    expect(sameCalendarDay(iso(2026, 7, 26, 0, 1), iso(2026, 7, 26, 23, 59)))
+      .toBe(true);
+  });
+
+  // A minute apart, two different days: the case a millisecond diff gets
+  // wrong and the reason a separator belongs between them.
+  it('is false across midnight even one minute apart', () => {
+    expect(sameCalendarDay(iso(2026, 7, 25, 23, 59), iso(2026, 7, 26, 0, 1)))
+      .toBe(false);
+  });
+
+  it('is false when either side is missing or unparseable', () => {
+    expect(sameCalendarDay(null, iso(2026, 7, 26))).toBe(false);
+    expect(sameCalendarDay(iso(2026, 7, 26), undefined)).toBe(false);
+    expect(sameCalendarDay('nope', iso(2026, 7, 26))).toBe(false);
   });
 });

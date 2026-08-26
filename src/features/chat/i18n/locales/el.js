@@ -1,4 +1,6 @@
 export default {
+  chatDayToday: 'Σήμερα',
+  chatDayYesterday: 'Χθες',
   chatTitleFallback: 'Συνομιλία',
   chatWaking: 'Ξυπνάει ο διακομιστής…',
   chatError: 'Δεν φορτώθηκε η συνομιλία.',

@@ -9,7 +9,8 @@ import {
   Pressable,
   Image,
 } from 'react-native';
-import { useTheme, ActivityIndicator, Snackbar } from 'react-native-paper';
+import { ActivityIndicator, Snackbar } from 'react-native-paper';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -17,7 +18,6 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
-import CircleIconButton from '@shared/components/CircleIconButton';
 import RetryButton from '@shared/components/RetryButton';
 import { RootState } from '@store';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
@@ -30,11 +30,19 @@ import { useMarkMatchRead } from '@features/matches/hooks/useReadTracking';
 import { useMatches } from '@features/matches/hooks/useMatches';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
+import { useAppTheme } from '@theme/paper';
+import { Layout } from '@theme/constants/Layout';
+import { Typography } from '@theme/typography';
+import AmbientGlow from '@shared/components/AmbientGlow';
+import {
+  relativeTime,
+  sameCalendarDay,
+} from '@features/matches/utils/relativeTime';
 import { Translations } from '@features/chat/i18n/translationKeys';
 import { Translations as Common } from '@shared/i18n/translationKeys';
 
 export default function ChatScreen() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const router = useRouter();
   const {
     matchId,
@@ -79,6 +87,9 @@ export default function ChatScreen() {
   const name = nameParam ?? fromList?.display_name;
   const userId = userIdParam ?? fromList?.user_id;
   const avatar = avatarParam ?? fromList?.avatar_url ?? undefined;
+  // Only ever from the cached matches list — a deep link has no mode and
+  // the subtitle simply does not render.
+  const mode = fromList?.match_mode ?? null;
 
   const { messages, isLoading, isError, error, refetch } = useChat(
     matchId,
@@ -134,41 +145,111 @@ export default function ChatScreen() {
     });
   };
 
-  const renderMessage = ({ item }: { item: ChatMessage }) => {
+  // Reuses the list's relative-time rules so a conversation and the
+  // Matches row above it never disagree about what day something was.
+  // Anything from today reads "Today" — the hour is on the row, not here.
+  const dayLabel = (iso: string) => {
+    const r = relativeTime(iso);
+    switch (r.kind) {
+      case 'now':
+      case 'minutes':
+      case 'hours':
+        return t(Translations.CHAT_DAY_TODAY);
+      case 'yesterday':
+        return t(Translations.CHAT_DAY_YESTERDAY);
+      case 'weekday':
+        return r.date.toLocaleDateString(undefined, { weekday: 'long' });
+      case 'date':
+        return r.date.toLocaleDateString(undefined, {
+          day: 'numeric',
+          month: 'long',
+        });
+      case 'none':
+        return '';
+    }
+  };
+
+  const renderMessage = ({
+    item,
+    index,
+  }: {
+    item: ChatMessage;
+    index: number;
+  }) => {
     const isMine = item.sender_id === uid;
-    return (
+    // Oldest first (the list scrolls to the end, it is not inverted), so
+    // the previous index is the older message and a separator belongs
+    // ABOVE the first message of each day.
+    const older = messages?.[index - 1];
+    const showDay =
+      !older || !sameCalendarDay(item.created_at, older.created_at);
+
+    const bubble = (
       <View
         style={[
           styles.bubble,
           isMine
-            ? [
-                styles.bubbleMine,
-                {
-                  backgroundColor: theme.colors.primary,
-                },
-              ]
+            ? styles.bubbleMine
             : [
                 styles.bubbleTheirs,
                 {
-                  // White with a hairline, not a fill. surfaceVariant is
-                  // #E6E0F6 — violet enough that their messages competed
-                  // with the accent on ours, and the whole thread read as
-                  // one voice. The accent should mean "me" and nothing else.
-                  backgroundColor: theme.colors.surface,
+                  // A surface with a hairline, not a fill. surfaceVariant is
+                  // violet enough that their messages competed with the
+                  // accent on ours and the whole thread read as one voice.
+                  // The accent means "me" and nothing else.
+                  backgroundColor: theme.colors.surfaceElevated,
                   borderColor: theme.colors.outlineVariant,
                 },
               ],
         ]}
       >
+        {/* A sent bubble gets its own gradient, darker than the brand one
+            at both ends: a bubble is a small block of white text, and the
+            brand gradient is light enough at its top end that a short
+            message sitting there loses contrast. */}
+        {isMine ? (
+          <LinearGradient
+            colors={[theme.colors.bubbleStart, theme.colors.bubbleEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        ) : null}
         <AppText
-          variant="body"
+          variant="message"
           style={{
-            color: isMine ? theme.colors.onPrimary : theme.colors.onSurface,
+            color: isMine ? theme.colors.onGradient : theme.colors.onSurface,
           }}
         >
           {item.body}
         </AppText>
       </View>
+    );
+
+    if (!showDay) return bubble;
+
+    return (
+      <>
+        <View
+          style={[
+            styles.dayPill,
+            {
+              backgroundColor: theme.colors.surfaceElevated,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          <AppText
+            variant="microStrong"
+            style={{
+              color: theme.colors.onSurfaceFaint,
+            }}
+          >
+            {dayLabel(item.created_at)}
+          </AppText>
+        </View>
+        {bubble}
+      </>
     );
   };
 
@@ -192,18 +273,26 @@ export default function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : insets.top}
     >
-      {/* Header. Same background as the conversation itself, not a tinted
-          toolbar — a chat is a room you are in, not a screen you are
-          operating. A hairline does the separating instead of a fill, so
-          the name reads as a name and not as a title bar. It stays opaque
-          so messages scroll underneath rather than showing through. */}
+      {/* Mirrored to the top-RIGHT, so moving from Matches into a chat
+          does not look like the same page redrawn. */}
+      <AmbientGlow
+        size={Layout.GLOW_SIZE_SM}
+        x={Layout.GLOW_SIZE_SM / 2}
+        y={Layout.GLOW_OFFSET_Y}
+      />
+
+      {/* Header. Not a tinted toolbar — a chat is a room you are in, not
+          a screen you are operating, so a hairline does the separating and
+          nothing fills behind it. It has NO background: the header is a
+          sibling above the list, not an overlay, so messages can never
+          scroll under it, and an opaque fill only served to cut the
+          ambient glow in half. */}
       <View
         style={[
           styles.header,
           {
-            backgroundColor: theme.colors.background,
             borderBottomColor: theme.colors.outlineVariant,
-            paddingTop: insets.top + Spacing.SPACING_PADDING_8,
+            marginTop: insets.top,
           },
         ]}
       >
@@ -211,11 +300,11 @@ export default function ChatScreen() {
           onPress={() => router.back()}
           accessibilityRole="button"
           accessibilityLabel={t(Common.A11Y_BACK)}
-          hitSlop={12}
+          style={styles.backButton}
         >
           <MaterialCommunityIcons
-            name="arrow-left"
-            size={24}
+            name="chevron-left"
+            size={28}
             color={theme.colors.onBackground}
           />
         </Pressable>
@@ -245,13 +334,22 @@ export default function ChatScreen() {
           style={styles.headerTitle}
         >
           {avatar ? (
-            <Image source={{ uri: avatar }} style={styles.headerAvatar} />
+            <Image
+              source={{ uri: avatar }}
+              style={[
+                styles.headerAvatar,
+                { borderColor: theme.colors.outlineSelected },
+              ]}
+            />
           ) : (
             <View
               style={[
                 styles.headerAvatar,
                 styles.headerAvatarFallback,
-                { backgroundColor: theme.colors.surface },
+                {
+                  backgroundColor: theme.colors.surfaceElevated,
+                  borderColor: theme.colors.outlineSelected,
+                },
               ]}
             >
               <MaterialCommunityIcons
@@ -261,15 +359,35 @@ export default function ChatScreen() {
               />
             </View>
           )}
-          <AppText
-            variant="h3"
-            style={{
-              color: theme.colors.onBackground,
-              marginLeft: Spacing.SPACING_PADDING_8,
-            }}
-          >
-            {name ?? t(Translations.CHAT_TITLE_FALLBACK)}
-          </AppText>
+          <View style={styles.headerText}>
+            <AppText
+              variant="chatTitle"
+              numberOfLines={1}
+              style={{
+                color: theme.colors.onBackground,
+              }}
+            >
+              {name ?? t(Translations.CHAT_TITLE_FALLBACK)}
+            </AppText>
+            {/* The artboard also shows a green presence dot and a
+                distance. We track neither — there is no presence system,
+                and the chat has no coordinates — so the subtitle carries
+                only what is actually known. Inventing an "online" light
+                would be a lie the user would rely on. */}
+            {mode ? (
+              <AppText
+                variant="micro"
+                numberOfLines={1}
+                style={{
+                  color: theme.colors.onSurfaceFaint,
+                }}
+              >
+                {mode === 'traveler'
+                  ? t(Common.COMMON_MODE_TRAVELER)
+                  : t(Common.COMMON_MODE_LOCAL)}
+              </AppText>
+            ) : null}
+          </View>
         </Pressable>
       </View>
 
@@ -346,50 +464,67 @@ export default function ChatScreen() {
           styles.inputRow,
           {
             backgroundColor: theme.colors.background,
-            borderTopColor: theme.colors.outlineVariant,
+            paddingBottom: insets.bottom + Spacing.md,
           },
         ]}
       >
         <TextInput
           style={[
             styles.input,
+            Typography.message.style,
             {
-              backgroundColor: theme.colors.surface,
+              backgroundColor: theme.colors.surfaceElevated,
               borderColor: theme.colors.outlineVariant,
               color: theme.colors.onSurface,
             },
           ]}
           placeholder={t(Translations.CHAT_INPUT_PLACEHOLDER)}
-          placeholderTextColor={theme.colors.onSurfaceVariant}
+          placeholderTextColor={theme.colors.onSurfaceFaint}
           value={text}
           onChangeText={setText}
           multiline
           maxLength={1000}
         />
-        <CircleIconButton
-          size={40}
+        {/* Gradient only when there is something to send. A disabled
+            brand gradient reads as an enabled button you cannot press;
+            a flat surface reads as what it is. */}
+        <Pressable
           onPress={handleSend}
           disabled={!text.trim() || sendMessage.isPending}
+          accessibilityRole="button"
           accessibilityLabel={t(Common.A11Y_SEND)}
+          accessibilityState={{
+            disabled: !text.trim() || sendMessage.isPending,
+          }}
           style={[
             styles.sendBtn,
-            {
-              backgroundColor: text.trim()
-                ? theme.colors.primary
-                : theme.colors.outlineVariant,
-            },
+            text.trim()
+              ? null
+              : {
+                  backgroundColor: theme.colors.surfaceElevated,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outlineVariant,
+                },
           ]}
         >
+          {text.trim() ? (
+            <LinearGradient
+              colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+          ) : null}
           <MaterialCommunityIcons
             name="send"
-            size={20}
+            size={21}
             color={
               text.trim()
-                ? theme.colors.onPrimary
-                : theme.colors.onSurfaceVariant
+                ? theme.colors.onGradient
+                : theme.colors.onSurfaceFaint
             }
           />
-        </CircleIconButton>
+        </Pressable>
       </View>
 
       <Snackbar
@@ -405,18 +540,25 @@ export default function ChatScreen() {
 
 const styles = StyleSheet.create({
   headerAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: Layout.CHAT_AVATAR,
+    height: Layout.CHAT_AVATAR,
+    borderRadius: Layout.CHAT_AVATAR / 2,
+    borderWidth: Layout.CHAT_AVATAR_RING,
   },
   headerAvatarFallback: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: Spacing.SPACING_PADDING_16,
+    gap: Spacing.sm + 2,
+  },
+  headerText: {
+    flex: 1,
+    minWidth: 0,
   },
   root: {
     flex: 1,
@@ -424,9 +566,32 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.SPACING_PADDING_16,
-    paddingBottom: Spacing.SPACING_PADDING_16,
+    gap: Spacing.sm + 2,
+    height: Layout.CHAT_HEADER_HEIGHT,
+    paddingRight: Spacing.lg,
     borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  backButton: {
+    width: Layout.TAB_SEGMENT_HEIGHT,
+    height: Layout.TAB_SEGMENT_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuButton: {
+    width: Layout.ICON_BUTTON + 4,
+    height: Layout.ICON_BUTTON + 4,
+    borderRadius: (Layout.ICON_BUTTON + 4) / 2,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayPill: {
+    alignSelf: 'center',
+    paddingHorizontal: Layout.CARD_INNER_GAP,
+    paddingVertical: Layout.PROGRESS_BAR_GAP,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+    marginVertical: Spacing.sm,
   },
   center: {
     flex: 1,
@@ -436,41 +601,55 @@ const styles = StyleSheet.create({
   },
   list: {
     flexGrow: 1,
-    paddingHorizontal: Spacing.SPACING_PADDING_16,
-    paddingVertical: Spacing.SPACING_PADDING_8,
+    paddingHorizontal: Layout.CHAT_AVATAR / 2,
+    paddingTop: Layout.CHAT_AVATAR / 2,
+    paddingBottom: Spacing.sm,
   },
   bubble: {
-    maxWidth: '78%',
-    paddingHorizontal: Spacing.SPACING_PADDING_16,
-    paddingVertical: Spacing.SPACING_PADDING_8,
-    borderRadius: BorderRadius.lg,
-    marginVertical: 4,
+    maxWidth: Layout.BUBBLE_MAX_WIDTH,
+    paddingHorizontal: Layout.BUBBLE_PADDING_H,
+    paddingVertical: Layout.BUBBLE_PADDING_V,
+    borderRadius: Layout.BUBBLE_RADIUS,
+    // Half the design gap on each bubble adds up to the full gap between
+    // any two of them.
+    marginVertical: Layout.BUBBLE_GAP / 2,
+    overflow: 'hidden',
   },
+  // The small corner is the one nearest its sender. It is the only
+  // asymmetry in the shape, and it is what says who is speaking without a
+  // label or an avatar on every line.
   bubbleMine: {
     alignSelf: 'flex-end',
-    borderBottomRightRadius: 4,
+    borderBottomRightRadius: Layout.BUBBLE_TAIL_RADIUS,
   },
   bubbleTheirs: {
     alignSelf: 'flex-start',
-    borderBottomLeftRadius: 4,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderBottomLeftRadius: Layout.BUBBLE_TAIL_RADIUS,
+    borderWidth: 1,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: Spacing.SPACING_PADDING_8,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: Spacing.sm + 2,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm + 2,
   },
   input: {
     flex: 1,
-    borderRadius: BorderRadius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: Spacing.SPACING_PADDING_16,
-    paddingVertical: Spacing.SPACING_PADDING_8,
-    maxHeight: 100,
-    fontSize: 16,
+    minHeight: Layout.COMPOSER_HEIGHT,
+    maxHeight: Layout.COMPOSER_HEIGHT * 2,
+    borderRadius: Layout.COMPOSER_RADIUS,
+    borderWidth: 1,
+    paddingHorizontal: Layout.COMPOSER_PADDING_H,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
   },
   sendBtn: {
-    marginLeft: Spacing.SPACING_PADDING_8,
+    width: Layout.COMPOSER_HEIGHT,
+    height: Layout.COMPOSER_HEIGHT,
+    borderRadius: Layout.COMPOSER_HEIGHT / 2,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

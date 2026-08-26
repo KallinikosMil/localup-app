@@ -53,3 +53,18 @@ export const relativeTime = (
   if (dayGap < 7) return { kind: 'weekday', date: then };
   return { kind: 'date', date: then };
 };
+
+// Whether two timestamps fall on the same calendar day for the reader.
+// Used to decide where a day separator goes in a conversation — and, like
+// everything above, it compares dates rather than subtracting instants,
+// so 23:59 and 00:01 are correctly two different days.
+export const sameCalendarDay = (
+  a: string | null | undefined,
+  b: string | null | undefined,
+): boolean => {
+  if (!a || !b) return false;
+  const da = new Date(a);
+  const db = new Date(b);
+  if (Number.isNaN(da.getTime()) || Number.isNaN(db.getTime())) return false;
+  return startOfDay(da) === startOfDay(db);
+};

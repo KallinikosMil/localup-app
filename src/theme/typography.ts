@@ -5,6 +5,8 @@ export type TypographyVariant =
   | 'display'
   | 'wordmark'
   | 'rowTitle'
+  | 'chatTitle'
+  | 'message'
   | 'rowTitleQuiet'
   | 'bodySmallStrong'
   | 'microStrong'
@@ -84,6 +86,26 @@ export const Typography: Record<TypographyVariant, TypographyDef> = {
       fontFamily: 'PlusJakartaSans_700Bold',
       fontSize: 16,
       lineHeight: 22,
+    },
+  },
+  // The name in a chat header. Between h3 and rowTitle, because it sits
+  // beside a 38px avatar and has a subtitle under it.
+  chatTitle: {
+    paperVariant: 'titleMedium',
+    style: {
+      fontFamily: 'PlusJakartaSans_600SemiBold',
+      fontSize: 17,
+      lineHeight: 22,
+    },
+  },
+  // Message text, and the composer that produces it. Deliberately larger
+  // than body: it is the thing the screen exists for.
+  message: {
+    paperVariant: 'bodyLarge',
+    style: {
+      fontFamily: 'Inter_400Regular',
+      fontSize: 15,
+      lineHeight: 21,
     },
   },
   // The same size, one weight down: a row you have already read.

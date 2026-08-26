@@ -1,4 +1,6 @@
 export default {
+  chatDayToday: 'Today',
+  chatDayYesterday: 'Yesterday',
   chatTitleFallback: 'Chat',
   chatWaking: 'Waking the server…',
   chatError: "Couldn't load this conversation.",
