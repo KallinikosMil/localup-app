@@ -7,7 +7,6 @@ import {
   RefreshControl,
   StatusBar,
 } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 import { ActivityIndicator, Portal, Modal, Snackbar } from 'react-native-paper';
@@ -335,7 +334,7 @@ export default function DiscoverScreen() {
   }
 
   return (
-    <GestureHandlerRootView
+    <View
       style={[
         styles.root,
         {
@@ -522,7 +521,7 @@ export default function DiscoverScreen() {
       >
         {errorMessage(swipe.error, Translations.DISCOVER_SWIPE_ERROR)}
       </Snackbar>
-    </GestureHandlerRootView>
+    </View>
   );
 }
 

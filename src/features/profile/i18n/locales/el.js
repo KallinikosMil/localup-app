@@ -15,6 +15,12 @@ export default {
   profileEditFull: 'Επεξεργασία προφίλ',
   profilePhotoCount: '{{current}} από {{total}}',
   profileManagePhotos: 'Διαχείριση φωτογραφιών',
+  profilePhotoMain: 'Κύρια',
+  profilePhotoRemove: 'Αφαίρεση φωτογραφίας',
+  profilePhotoCountOf: '{{count}} από {{max}}',
+  profilePhotoReorderHint:
+    'Σύρε για αναδιάταξη. Η πρώτη φωτογραφία είναι αυτή που βλέπουν στο Discover.',
+  profileReorderError: 'Η νέα σειρά δεν αποθηκεύτηκε. Δοκίμασε ξανά.',
   profileSettings: 'Ρυθμίσεις',
   profileNameAge: '{{name}}, {{age}}',
   profileViewMessage: 'Μήνυμα στον/στην {{name}}',

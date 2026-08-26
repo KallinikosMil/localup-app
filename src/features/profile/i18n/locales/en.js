@@ -19,6 +19,12 @@ export default {
   profileEditFull: 'Edit profile',
   profilePhotoCount: '{{current}} of {{total}}',
   profileManagePhotos: 'Manage photos',
+  profilePhotoMain: 'Main',
+  profilePhotoRemove: 'Remove photo',
+  profilePhotoCountOf: '{{count}} of {{max}}',
+  profilePhotoReorderHint:
+    'Drag to reorder. The first photo is the one people see in Discover.',
+  profileReorderError: 'The new order was not saved. Please try again.',
   profileSettings: 'Settings',
   profileNameAge: '{{name}}, {{age}}',
   profileViewMessage: 'Message {{name}}',

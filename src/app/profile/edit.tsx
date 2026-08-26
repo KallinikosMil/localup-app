@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
-  Image,
   ScrollView,
   Pressable,
   Alert,
@@ -18,7 +17,6 @@ import AppText from '@shared/components/AppText';
 import ScreenSafeArea from '@shared/components/ScreenSafeArea';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
-import GalleryPhoto from '@features/profile/components/GalleryPhoto';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import {
@@ -27,15 +25,17 @@ import {
   usePhotos,
   useUploadPhoto,
   useDeletePhoto,
+  useReorderPhotos,
+  type Photo,
 } from '@features/profile/hooks/useProfile';
 import { computeMode, type ProfileMode } from '@features/profile/utils/mode';
+import PhotoGrid from '@features/profile/components/PhotoGrid';
 import { useAppTheme, AppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Translations as Common } from '@shared/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
-const AVATAR_SIZE = 112;
 const PHOTO_SIZE = 100;
 const MAX_PHOTOS = 6;
 const BIO_LIMIT = 240;
@@ -58,6 +58,7 @@ function EditProfileScreenContent() {
   const updateProfile = useUpdateProfile();
   const uploadPhoto = useUploadPhoto();
   const deletePhoto = useDeletePhoto();
+  const reorderPhotos = useReorderPhotos();
   const { latitude, longitude } = useLocation();
 
   const [name, setName] = useState('');
@@ -240,7 +241,6 @@ function EditProfileScreenContent() {
   };
 
   const photoCount = photos?.length ?? 0;
-  const canAddPhoto = photoCount < MAX_PHOTOS;
 
   // H2: both of these branches used to be one `if (isLoading ||
   // !profile)` that rendered a bare spinner with NO app bar and NO
@@ -458,35 +458,10 @@ function EditProfileScreenContent() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Avatar */}
-        <View style={styles.avatarWrap}>
-          {profile.avatar_url ? (
-            <Image
-              source={{
-                uri: profile.avatar_url,
-              }}
-              style={styles.avatar}
-            />
-          ) : (
-            <View
-              style={[
-                styles.avatar,
-                styles.avatarPlaceholder,
-                {
-                  backgroundColor: surfaceLow,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="account"
-                size={56}
-                color={theme.colors.onSurfaceVariant}
-              />
-            </View>
-          )}
-        </View>
-
-        <Spacer spacing={Spacing.SPACING_PADDING_24} />
+        {/* The circular avatar that used to sit here is gone. Photos ARE
+            the grid below, and slot 1 IS the avatar — showing both raised
+            the question of which one wins, which was exactly the
+            confusion the position column was added to end. */}
 
         {/* Basic info card */}
         <Section
@@ -548,83 +523,46 @@ function EditProfileScreenContent() {
         <Section
           title={t(Translations.PROFILE_SECTION_YOUR_GALLERY)}
           bg={surfaceLowest}
+          trailing={t(Translations.PROFILE_PHOTO_COUNT_OF, {
+            count: photoCount,
+            max: MAX_PHOTOS,
+          })}
         >
           {/* A failed read must not present as "you have no photos" (the
               PR-H2 rule) — that invites the user to re-upload photos they
               already have. Only shown when the read failed AND nothing is
               cached; a stale-but-usable list still renders below. */}
           {photosError && !photos?.length ? (
-            <AppText
-              variant="body"
-              style={{
-                color: theme.colors.onSurfaceVariant,
-                marginBottom: Spacing.SPACING_PADDING_8,
-              }}
-            >
+            <AppText variant="body" style={styles.photoNotice}>
               {t(Translations.PROFILE_GALLERY_ERROR)}
             </AppText>
           ) : null}
-          <View style={styles.photoGrid}>
-            {(photos ?? []).map((p, index) => (
-              <GalleryPhoto
-                key={p.id}
-                uri={p.url}
-                size={PHOTO_SIZE}
-                background={surfaceLow}
-                onRemove={() => confirmDelete(p.id)}
-                // Position is the only thing that distinguishes one tile from
-                // another without sight, so it is the label.
-                accessibilityLabel={t(Common.A11Y_PHOTO_OF_TOTAL, {
-                  index: index + 1,
-                  total: photos?.length ?? 0,
-                })}
-                accessibilityHint={t(Common.A11Y_REMOVE_PHOTO_HINT)}
-              />
-            ))}
-            {canAddPhoto ? (
-              <Pressable
-                onPress={pickPhoto}
-                disabled={uploadPhoto.isPending}
-                accessibilityRole="button"
-                accessibilityLabel={t(Common.A11Y_ADD_PHOTO)}
-                accessibilityState={{ disabled: uploadPhoto.isPending }}
-                style={[
-                  styles.photoCell,
-                  styles.photoAdd,
-                  {
-                    borderColor: theme.colors.primary,
-                  },
-                ]}
-              >
-                {uploadPhoto.isPending ? (
-                  <ActivityIndicator animating size="small" />
-                ) : (
-                  <MaterialCommunityIcons
-                    name="plus"
-                    size={32}
-                    color={theme.colors.primary}
-                  />
-                )}
-              </Pressable>
-            ) : null}
-          </View>
-          {/* Only once there is something to remove. On an empty gallery
-              the hint described a gesture with no target, right under a
-              lone "+" — it read as an instruction for the button. */}
-          {photos?.length ? (
-            <>
-              <Spacer spacing={Spacing.SPACING_PADDING_8} />
-              <AppText
-                variant="caption"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  fontStyle: 'italic',
-                }}
-              >
-                {t(Translations.PROFILE_PHOTO_HINT)}
-              </AppText>
-            </>
-          ) : null}
+
+          <AppText
+            variant="caption"
+            style={[
+              styles.photoHint,
+              {
+                color: theme.colors.onSurfaceFaint,
+              },
+            ]}
+          >
+            {t(Translations.PROFILE_PHOTO_REORDER_HINT)}
+          </AppText>
+
+          <PhotoGrid
+            photos={photos ?? []}
+            maxSlots={MAX_PHOTOS}
+            busy={uploadPhoto.isPending || reorderPhotos.isPending}
+            onAdd={pickPhoto}
+            onRemove={(photo: Photo) => confirmDelete(photo.id)}
+            onReorder={(ids: string[]) =>
+              reorderPhotos.mutate(ids, {
+                onError: () =>
+                  setErrorMsg(t(Translations.PROFILE_REORDER_ERROR)),
+              })
+            }
+          />
         </Section>
 
         <Spacer spacing={Spacing.SPACING_PADDING_16} />
@@ -774,29 +712,39 @@ function EditProfileScreenContent() {
 const Section = ({
   title,
   bg,
+  trailing,
   children,
 }: {
   title: string;
   bg: string;
+  // A counter or status on the right of the section label — '3 of 6',
+  // '6 of 10 selected'. Baseline-aligned with the label, not centred.
+  trailing?: string;
   children: React.ReactNode;
 }) => {
   const theme = useAppTheme();
   return (
     <View>
-      <AppText
-        variant="caption"
-        style={{
-          color: theme.colors.onSurfaceVariant,
-          letterSpacing: 1.2,
-          textTransform: 'uppercase',
-          fontSize: 11,
-          marginBottom: 8,
-          marginLeft: 4,
-          fontWeight: '600',
-        }}
-      >
-        {title}
-      </AppText>
+      <View style={styles.sectionHeader}>
+        <AppText
+          variant="overline"
+          style={{
+            color: theme.colors.onSurfaceFaint,
+          }}
+        >
+          {title}
+        </AppText>
+        {trailing ? (
+          <AppText
+            variant="micro"
+            style={{
+              color: theme.colors.onSurfaceFaint,
+            }}
+          >
+            {trailing}
+          </AppText>
+        ) : null}
+      </View>
       <View style={[styles.sectionCard, { backgroundColor: bg }]}>
         {children}
       </View>
@@ -956,18 +904,6 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.SPACING_PADDING_24,
     paddingBottom: Spacing.SPACING_PADDING_32,
   },
-  avatarWrap: {
-    alignItems: 'center',
-  },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-  },
-  avatarPlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   sectionCard: {
     padding: Spacing.SPACING_PADDING_16,
     borderRadius: BorderRadius.xxl,
@@ -988,6 +924,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlignVertical: 'top',
     padding: 0,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+  },
+  photoNotice: {
+    marginBottom: Spacing.sm,
+  },
+  photoHint: {
+    marginBottom: Spacing.md,
   },
   photoGrid: {
     flexDirection: 'row',
