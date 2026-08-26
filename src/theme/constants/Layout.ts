@@ -122,6 +122,24 @@ export const Layout = {
   ICON_BUTTON: 36,
   ICON_BUTTON_SM: 34,
 
+  // ---- forms ----
+  FIELD_HEIGHT: 56,
+  FIELD_RADIUS: 16,
+  FIELD_ICON: 19,
+  FIELD_PADDING_H: 16,
+  // Between a field's icon and its text, and between the icon and the
+  // reveal button on the other side.
+  FIELD_INNER_GAP: 11,
+  FIELD_LABEL_GAP: 7,
+  // The tall pill actions on auth screens — taller and rounder than the
+  // 52px buttons inside the app, because an auth screen has one thing to
+  // do and the button should look like it.
+  BUTTON_XL: 56,
+  BUTTON_XL_RADIUS: 28,
+  // The app mark above an auth title.
+  LOGO_MARK: 52,
+  LOGO_RADIUS: 17,
+
   // ---- chat ----
   CHAT_HEADER_HEIGHT: 62,
   CHAT_AVATAR: 38,
@@ -152,6 +170,11 @@ export const Layout = {
   GLOW_SIZE: 340,
   // Chat runs a slightly smaller blob, from the opposite corner.
   GLOW_SIZE_SM: 320,
+  // Auth screens carry two blobs, a bigger one from the top-left and a
+  // paler one from the bottom-right, so an empty form still has depth.
+  GLOW_SIZE_LG: 380,
+  GLOW_OPACITY_DARK_LG: 0.5,
+  GLOW_OPACITY_LIGHT_LG: 0.16,
   GLOW_OPACITY_DARK_SM: 0.34,
   GLOW_OFFSET_X: -80,
   GLOW_OFFSET_Y: -120,

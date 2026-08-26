@@ -11,6 +11,7 @@ import AppText from '@shared/components/AppText';
 import { useAppTheme } from '@theme/paper';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Spacing } from '@theme/constants/Spacing';
+import { Layout } from '@theme/constants/Layout';
 
 type GradientButtonProps = {
   children: React.ReactNode;
@@ -18,6 +19,10 @@ type GradientButtonProps = {
   disabled?: boolean;
   // circle mode for icon-only CTAs (e.g. like button)
   circleSize?: number;
+  // 'xl' is the tall pill an auth screen uses. An auth screen has one
+  // thing to do, and its button should look like it — taller, rounder and
+  // a size up in type than the buttons inside the app.
+  size?: 'md' | 'xl';
   style?: ViewStyle;
   // Needed whenever children is an icon rather than a string — the circle
   // variant has no text for a screen reader to read.
@@ -29,6 +34,7 @@ const GradientButton = ({
   onPress,
   disabled = false,
   circleSize,
+  size = 'md',
   style,
   accessibilityLabel,
 }: GradientButtonProps) => {
@@ -77,6 +83,7 @@ const GradientButton = ({
           end={{ x: 1, y: 1 }}
           style={[
             styles.base,
+            size === 'xl' && !circleSize ? styles.xl : null,
             circleSize
               ? {
                   width: circleSize,
@@ -91,7 +98,7 @@ const GradientButton = ({
         >
           {isText ? (
             <AppText
-              variant="h3"
+              variant={size === 'xl' ? 'buttonXl' : 'h3'}
               style={{
                 color: theme.colors.onGradient,
               }}
@@ -117,6 +124,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     minHeight: 44,
+  },
+  xl: {
+    height: Layout.BUTTON_XL,
+    borderRadius: Layout.BUTTON_XL_RADIUS,
+    paddingVertical: 0,
   },
   disabled: {
     opacity: 0.5,

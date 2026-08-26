@@ -4,6 +4,8 @@ export type TypographyVariant =
   | 'displayLg'
   | 'display'
   | 'wordmark'
+  | 'wordmarkLg'
+  | 'buttonXl'
   | 'rowTitle'
   | 'chatTitle'
   | 'message'
@@ -77,6 +79,26 @@ export const Typography: Record<TypographyVariant, TypographyDef> = {
       fontSize: 19,
       lineHeight: 25,
       letterSpacing: -0.3,
+    },
+  },
+  // The same mark beside the app icon on an auth screen, where it is the
+  // only thing on the row and can afford to be bigger.
+  wordmarkLg: {
+    paperVariant: 'headlineLarge',
+    style: {
+      fontFamily: 'PlusJakartaSans_800ExtraBold',
+      fontSize: 22,
+      lineHeight: 28,
+      letterSpacing: -0.4,
+    },
+  },
+  // The label in a tall auth button.
+  buttonXl: {
+    paperVariant: 'labelLarge',
+    style: {
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontSize: 16,
+      lineHeight: 22,
     },
   },
   // A name at the head of a list row.

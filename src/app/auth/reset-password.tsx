@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import AppText from '@shared/components/AppText';
+import GradientButton from '@shared/components/GradientButton';
+import AuthShell from '@features/auth/components/AuthShell';
 import AppButton from '@shared/components/AppButton';
 import FullScreenLoader from '@shared/components/FullScreenLoader';
 import InputField from '@shared/components/InputField';
@@ -30,7 +31,6 @@ type ResetFormData = {
 const ResetPasswordScreen = () => {
   const { t } = useTranslation();
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const dispatch = useDispatch();
   const updatePassword = useUpdatePassword();
   const { modalProps, openModal, closeModal } = useModal();
@@ -69,87 +69,61 @@ const ResetPasswordScreen = () => {
 
   return (
     <>
-      <View
-        style={[
-          styles.root,
-          {
-            backgroundColor: theme.colors.background,
-            paddingTop: insets.top + Spacing.SPACING_PADDING_16,
-            paddingBottom: insets.bottom,
-          },
-        ]}
+      <AuthShell
+        title={t(Translations.AUTH_RESET_TITLE)}
+        subtitle={t(Translations.AUTH_RESET_SUBTITLE)}
       >
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
-          <AppText variant="h1" style={{ color: theme.colors.onBackground }}>
-            {t(Translations.AUTH_RESET_TITLE)}
-          </AppText>
-          <Spacer spacing={Spacing.SPACING_PADDING_8} />
-          <AppText
-            variant="body"
-            style={{ color: theme.colors.onSurfaceVariant }}
-          >
-            {t(Translations.AUTH_RESET_SUBTITLE)}
-          </AppText>
+        <FormProvider {...form}>
+          <InputField<ResetFormData>
+            name="password"
+            icon="lock-outline"
+            label={t(Translations.AUTH_RESET_NEW_PASSWORD)}
+            secureTextEntry
+            autoCapitalize="none"
+            autoComplete="new-password"
+            rules={{
+              required: {
+                value: true,
+                message: t(Translations.AUTH_PASSWORD_REQUIRED),
+              },
+              minLength: {
+                value: 8,
+                message: t(Translations.AUTH_PASSWORD_MIN),
+              },
+            }}
+          />
 
-          <Spacer spacing={Spacing.SPACING_PADDING_24} />
+          <InputField<ResetFormData>
+            name="confirmPassword"
+            icon="lock-check-outline"
+            label={t(Translations.AUTH_CONFIRM_PASSWORD_LABEL)}
+            secureTextEntry
+            autoCapitalize="none"
+            autoComplete="new-password"
+            returnKeyType="done"
+            rules={{
+              required: {
+                value: true,
+                message: t(Translations.AUTH_PASSWORD_REQUIRED),
+              },
+              validate: value =>
+                value === watch('password') ||
+                t(Translations.AUTH_PASSWORD_MISMATCH),
+            }}
+          />
+        </FormProvider>
 
-          <FormProvider {...form}>
-            <InputField<ResetFormData>
-              name="password"
-              label={t(Translations.AUTH_RESET_NEW_PASSWORD)}
-              secureTextEntry
-              autoCapitalize="none"
-              autoComplete="new-password"
-              rules={{
-                required: {
-                  value: true,
-                  message: t(Translations.AUTH_PASSWORD_REQUIRED),
-                },
-                minLength: {
-                  value: 8,
-                  message: t(Translations.AUTH_PASSWORD_MIN),
-                },
-              }}
-            />
-
-            <Spacer spacing={Spacing.SPACING_PADDING_16} />
-
-            <InputField<ResetFormData>
-              name="confirmPassword"
-              label={t(Translations.AUTH_CONFIRM_PASSWORD_LABEL)}
-              secureTextEntry
-              autoCapitalize="none"
-              autoComplete="new-password"
-              returnKeyType="done"
-              rules={{
-                required: {
-                  value: true,
-                  message: t(Translations.AUTH_PASSWORD_REQUIRED),
-                },
-                validate: value =>
-                  value === watch('password') ||
-                  t(Translations.AUTH_PASSWORD_MISMATCH),
-              }}
-            />
-          </FormProvider>
-
-          <Spacer spacing={Spacing.SPACING_PADDING_24} />
-
-          <AppButton variant="primary" onPress={onSubmit} disabled={!isValid}>
-            {t(Translations.AUTH_RESET_SUBMIT)}
-          </AppButton>
-        </ScrollView>
-      </View>
+        <GradientButton size="xl" onPress={onSubmit} disabled={!isValid}>
+          {t(Translations.AUTH_RESET_SUBMIT)}
+        </GradientButton>
+      </AuthShell>
 
       {/* CustomModal already centres its children, so the wrapper only
           repeated what the modal does. */}
       <CustomModal {...modalProps} onDismiss={closeModal}>
         <AppText
           variant="body"
-          style={{ color: theme.colors.error, textAlign: 'center' }}
+          style={[styles.modalText, { color: theme.colors.error }]}
         >
           {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
         </AppText>
@@ -165,10 +139,7 @@ const ResetPasswordScreen = () => {
 export default ResetPasswordScreen;
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  content: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
+  modalText: {
+    textAlign: 'center',
   },
 });

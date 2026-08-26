@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
-import { useTheme } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -9,17 +7,21 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
+import GradientButton from '@shared/components/GradientButton';
 import FullScreenLoader from '@shared/components/FullScreenLoader';
 import InputField from '@shared/components/InputField';
 import Spacer from '@shared/components/Spacer';
 import CustomModal from '@shared/components/CustomModal';
+import AuthShell from '@features/auth/components/AuthShell';
 import useModal from '@shared/hooks/useModal';
 import {
   useRequestPasswordReset,
   authErrorKey,
 } from '@features/auth/hooks/useAuth';
 import { Translations } from '@features/auth/i18n/translationKeys';
+import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
+import { Layout } from '@theme/constants/Layout';
 
 type ForgotFormData = { email: string };
 
@@ -28,8 +30,7 @@ type ForgotFormData = { email: string };
 // triggers PASSWORD_RECOVERY, which AppGuard turns into the reset screen.
 const ForgotPasswordScreen = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   const requestReset = useRequestPasswordReset();
   const { modalProps, openModal, closeModal } = useModal();
   const [modalMessage, setModalMessage] = useState('');
@@ -59,121 +60,99 @@ const ForgotPasswordScreen = () => {
   });
 
   // The same loader login and register use, rather than a third centred
-  // spinner with its own wrapper — the pending frame used to shift depending
-  // on which auth screen you were on.
+  // spinner with its own wrapper — the pending frame used to shift
+  // depending on which auth screen you were on.
   if (requestReset.isPending) {
     return <FullScreenLoader />;
   }
 
   return (
     <>
-      <View
-        style={[
-          styles.root,
-          {
-            backgroundColor: theme.colors.background,
-            paddingTop: insets.top + Spacing.SPACING_PADDING_16,
-            paddingBottom: insets.bottom,
-          },
-        ]}
-      >
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
-          {sent ? (
-            <View style={styles.sentWrap}>
-              <MaterialCommunityIcons
-                name="email-check-outline"
-                size={56}
-                color={theme.colors.primary}
-              />
-              <Spacer spacing={Spacing.SPACING_PADDING_16} />
-              <AppText
-                variant="h2"
-                style={{
-                  color: theme.colors.onBackground,
-                  textAlign: 'center',
-                }}
-              >
-                {t(Translations.AUTH_FORGOT_SENT_TITLE)}
-              </AppText>
-              <Spacer spacing={Spacing.SPACING_PADDING_8} />
-              <AppText
-                variant="body"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  textAlign: 'center',
-                }}
-              >
-                {t(Translations.AUTH_FORGOT_SENT_BODY)}
-              </AppText>
-            </View>
-          ) : (
-            <>
-              <AppText
-                variant="h1"
-                style={{ color: theme.colors.onBackground }}
-              >
-                {t(Translations.AUTH_FORGOT_TITLE)}
-              </AppText>
-              <Spacer spacing={Spacing.SPACING_PADDING_8} />
-              <AppText
-                variant="body"
-                style={{ color: theme.colors.onSurfaceVariant }}
-              >
-                {t(Translations.AUTH_FORGOT_SUBTITLE)}
-              </AppText>
-
-              <Spacer spacing={Spacing.SPACING_PADDING_24} />
-
-              <FormProvider {...form}>
-                <InputField<ForgotFormData>
-                  name="email"
-                  label={t(Translations.AUTH_EMAIL_LABEL)}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  returnKeyType="done"
-                  rules={{
-                    required: {
-                      value: true,
-                      message: t(Translations.AUTH_EMAIL_REQUIRED),
-                    },
-                  }}
-                />
-              </FormProvider>
-
-              <Spacer spacing={Spacing.SPACING_PADDING_24} />
-
-              <AppButton
-                variant="primary"
-                onPress={onSubmit}
-                disabled={!isValid}
-              >
-                {t(Translations.AUTH_FORGOT_SEND)}
-              </AppButton>
-            </>
-          )}
-
-          <Spacer spacing={Spacing.SPACING_PADDING_16} />
-
-          <AppButton variant="link" onPress={() => router.back()}>
+      <AuthShell
+        title={t(
+          sent
+            ? Translations.AUTH_FORGOT_SENT_TITLE
+            : Translations.AUTH_FORGOT_TITLE,
+        )}
+        subtitle={t(
+          sent
+            ? Translations.AUTH_FORGOT_SENT_BODY
+            : Translations.AUTH_FORGOT_SUBTITLE,
+        )}
+        footer={
+          <AppText
+            variant="body"
+            onPress={() => router.back()}
+            accessibilityRole="link"
+            style={{
+              color: theme.colors.primary,
+            }}
+          >
             {t(Translations.AUTH_FORGOT_BACK)}
-          </AppButton>
-        </ScrollView>
-      </View>
+          </AppText>
+        }
+      >
+        {sent ? (
+          // The form is gone, not disabled: there is nothing left to do on
+          // this screen and leaving a dead field behind invites a second
+          // submit that would only send a second email.
+          <View
+            style={[
+              styles.sentWell,
+              {
+                backgroundColor: theme.colors.surfaceSelected,
+                borderColor: theme.colors.outlineSelected,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="email-check-outline"
+              size={40}
+              color={theme.colors.primary}
+            />
+          </View>
+        ) : (
+          <>
+            <FormProvider {...form}>
+              <InputField<ForgotFormData>
+                name="email"
+                icon="email-outline"
+                label={t(Translations.AUTH_EMAIL_LABEL)}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                returnKeyType="done"
+                rules={{
+                  required: {
+                    value: true,
+                    message: t(Translations.AUTH_EMAIL_REQUIRED),
+                  },
+                }}
+              />
+            </FormProvider>
+
+            <GradientButton size="xl" onPress={onSubmit} disabled={!isValid}>
+              {t(Translations.AUTH_FORGOT_SEND)}
+            </GradientButton>
+          </>
+        )}
+      </AuthShell>
 
       {/* CustomModal already centres its children, so the wrapper only
           repeated what the modal does. */}
       <CustomModal {...modalProps} onDismiss={closeModal}>
         <AppText
           variant="body"
-          style={{ color: theme.colors.error, textAlign: 'center' }}
+          style={[
+            styles.modalText,
+            {
+              color: theme.colors.error,
+            },
+          ]}
         >
           {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
         </AppText>
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+        <Spacer spacing={Spacing.lg} />
         <AppButton variant="primary" onPress={closeModal}>
           {t(Translations.AUTH_DISMISS)}
         </AppButton>
@@ -185,11 +164,16 @@ const ForgotPasswordScreen = () => {
 export default ForgotPasswordScreen;
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  content: {
-    flexGrow: 1,
+  sentWell: {
+    alignSelf: 'center',
+    width: Layout.GLOW_SIZE / 4,
+    height: Layout.GLOW_SIZE / 4,
+    borderRadius: Layout.GLOW_SIZE / 8,
+    borderWidth: 1,
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
   },
-  sentWrap: { alignItems: 'center' },
+  modalText: {
+    textAlign: 'center',
+  },
 });

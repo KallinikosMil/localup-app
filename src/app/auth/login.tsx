@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
-import { Divider, IconButton, useTheme } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, View, Pressable } from 'react-native';
+import { IconButton } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
 import AppText from '@shared/components/AppText';
-import AppButton from '@shared/components/AppButton';
+import GradientButton from '@shared/components/GradientButton';
 import FullScreenLoader from '@shared/components/FullScreenLoader';
-import Spacer from '@shared/components/Spacer';
 import InputField from '@shared/components/InputField';
 import CustomModal from '@shared/components/CustomModal';
+import AuthShell from '@features/auth/components/AuthShell';
 import { useLogin, authErrorKey } from '@features/auth/hooks/useAuth';
 import { useGoogleSignIn } from '@features/auth/hooks/useGoogleSignIn';
 import useModal from '@shared/hooks/useModal';
+import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
+import { Layout } from '@theme/constants/Layout';
 import { Translations } from '@features/auth/i18n/translationKeys';
 import { useThemeMode } from '@theme/ThemeModeProvider';
 
@@ -26,8 +28,7 @@ type LoginFormData = {
 
 const LoginScreen = () => {
   const { t } = useTranslation();
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   const { setMode, resolvedMode } = useThemeMode();
   const login = useLogin();
   const google = useGoogleSignIn();
@@ -74,8 +75,8 @@ const LoginScreen = () => {
   };
 
   // Cancelling is a choice, not a failure: openAuthSessionAsync resolves
-  // 'cancel'/'dismiss' and the hook maps those to 'cancelled', so nothing is
-  // shown. AppGuard does the navigating on success.
+  // 'cancel'/'dismiss' and the hook maps those to 'cancelled', so nothing
+  // is shown. AppGuard does the navigating on success.
   const onGoogle = () => {
     google.mutate(undefined, {
       onError: err => {
@@ -85,187 +86,49 @@ const LoginScreen = () => {
     });
   };
 
-  const goToRegister = () => {
-    router.push('/auth/register');
-  };
-
   // V1: the SAME component AppGuard renders while it resolves the
-  // onboarding status. sign-in resolves → this screen unmounts →
-  // AppGuard takes the frame; identical pixels on both sides of that
-  // handoff, so it reads as one continuous loader instead of two.
-  // The system browser covers the screen for the Google leg, so the same
-  // loader sits behind it — and is what the user lands back on if they
-  // cancel, rather than a blank frame.
+  // onboarding status. Sign-in resolves → this screen unmounts → AppGuard
+  // takes the frame; identical pixels on both sides of that handoff, so it
+  // reads as one continuous loader instead of two. The system browser
+  // covers the screen for the Google leg, so the same loader sits behind
+  // it — and is what the user lands back on if they cancel, rather than a
+  // blank frame.
   if (login.isPending || google.isPending) {
     return <FullScreenLoader />;
   }
 
   return (
     <>
-      <View
-        style={[
-          styles.root,
-          {
-            backgroundColor: theme.colors.background,
-            paddingBottom: insets.bottom,
-          },
-        ]}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.themeRow}>
-            <IconButton
-              icon={
-                resolvedMode === 'dark'
-                  ? 'white-balance-sunny'
-                  : 'moon-waning-crescent'
-              }
-              size={24}
-              onPress={toggleTheme}
-            />
-          </View>
-
-          <View style={styles.heroSection}>
-            <AppText
-              variant="h1"
-              style={{
-                color: theme.colors.primary,
-              }}
-            >
-              {t(Translations.AUTH_HEADER_TEXT)}
-            </AppText>
-            <Spacer spacing={Spacing.SPACING_PADDING_8} />
-            <AppText
-              variant="h3"
-              style={{
-                color: theme.colors.onBackground,
-              }}
-            >
-              {t(Translations.AUTH_WELCOME_TEXT)}
-            </AppText>
-            <Spacer spacing={Spacing.SPACING_PADDING_8} />
+      <AuthShell
+        title={t(Translations.AUTH_WELCOME_TEXT)}
+        subtitle={t(Translations.AUTH_SUBTITLE_TEXT)}
+        headerAction={
+          <IconButton
+            icon={
+              resolvedMode === 'dark'
+                ? 'white-balance-sunny'
+                : 'moon-waning-crescent'
+            }
+            size={24}
+            onPress={toggleTheme}
+          />
+        }
+        footer={
+          <>
             <AppText
               variant="body"
               style={{
-                color: theme.colors.onSurfaceVariant,
-                textAlign: 'center',
-              }}
-            >
-              {t(Translations.AUTH_SUBTITLE_TEXT)}
-            </AppText>
-          </View>
-
-          <Spacer spacing={Spacing.SPACING_PADDING_32} />
-
-          <View style={styles.formSection}>
-            <FormProvider {...form}>
-              <InputField
-                name="email"
-                label={t(Translations.AUTH_EMAIL_LABEL)}
-                rules={{
-                  required: {
-                    value: true,
-                    message: t(Translations.AUTH_EMAIL_REQUIRED),
-                  },
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: t(Translations.AUTH_EMAIL_INVALID),
-                  },
-                }}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                returnKeyType="next"
-              />
-              <Spacer spacing={Spacing.SPACING_PADDING_16} />
-              <InputField
-                name="password"
-                label={t(Translations.AUTH_PASSWORD_LABEL)}
-                rules={{
-                  required: {
-                    value: true,
-                    message: t(Translations.AUTH_PASSWORD_REQUIRED),
-                  },
-                }}
-                secureTextEntry
-                returnKeyType="done"
-              />
-            </FormProvider>
-
-            <View style={styles.forgotRow}>
-              <AppButton
-                variant="link"
-                compact
-                onPress={() => router.push('/auth/forgot-password')}
-                contentStyle={null}
-                labelStyle={styles.forgotLabel}
-              >
-                {t(Translations.AUTH_FORGOT_PASSWORD)}
-              </AppButton>
-            </View>
-
-            <Spacer spacing={Spacing.SPACING_PADDING_24} />
-
-            <AppButton
-              variant="primary"
-              onPress={onSubmit}
-              disabled={login.isPending || !isValid}
-            >
-              {t(Translations.AUTH_LOGIN_BUTTON)}
-            </AppButton>
-
-            <Spacer spacing={Spacing.SPACING_PADDING_24} />
-
-            <View style={styles.dividerRow}>
-              <Divider
-                style={[
-                  styles.dividerLine,
-                  {
-                    backgroundColor: theme.colors.outlineVariant,
-                  },
-                ]}
-              />
-              <AppText
-                variant="caption"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  paddingHorizontal: Spacing.SPACING_PADDING_16,
-                }}
-              >
-                {t(Translations.AUTH_OR_DIVIDER)}
-              </AppText>
-              <Divider
-                style={[
-                  styles.dividerLine,
-                  {
-                    backgroundColor: theme.colors.outlineVariant,
-                  },
-                ]}
-              />
-            </View>
-
-            <Spacer spacing={Spacing.SPACING_PADDING_24} />
-
-            <AppButton variant="google" icon="google" onPress={onGoogle}>
-              {t(Translations.AUTH_GOOGLE_SIGN_IN)}
-            </AppButton>
-          </View>
-
-          <View style={styles.registerRow}>
-            <AppText
-              variant="bodySmall"
-              style={{
-                color: theme.colors.onSurfaceVariant,
+                color: theme.colors.onSurfaceFaint,
               }}
             >
               {t(Translations.AUTH_NO_ACCOUNT)}
             </AppText>
             <AppText
-              variant="bodySmall"
-              onPress={goToRegister}
+              variant="body"
+              onPress={() => router.push('/auth/register')}
+              accessibilityRole="link"
               style={[
-                styles.authLink,
+                styles.link,
                 {
                   color: theme.colors.primary,
                 },
@@ -273,28 +136,138 @@ const LoginScreen = () => {
             >
               {t(Translations.AUTH_REGISTER)}
             </AppText>
-          </View>
-        </ScrollView>
-      </View>
+          </>
+        }
+      >
+        <FormProvider {...form}>
+          <InputField
+            name="email"
+            icon="email-outline"
+            label={t(Translations.AUTH_EMAIL_LABEL)}
+            rules={{
+              required: {
+                value: true,
+                message: t(Translations.AUTH_EMAIL_REQUIRED),
+              },
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: t(Translations.AUTH_EMAIL_INVALID),
+              },
+            }}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            returnKeyType="next"
+          />
+          <InputField
+            name="password"
+            icon="lock-outline"
+            label={t(Translations.AUTH_PASSWORD_LABEL)}
+            rules={{
+              required: {
+                value: true,
+                message: t(Translations.AUTH_PASSWORD_REQUIRED),
+              },
+            }}
+            secureTextEntry
+            returnKeyType="done"
+          />
+        </FormProvider>
 
-      {/* CustomModal already centres and pads by 24 — the wrapper used to pad
-          another 24 on top of that, so this modal sat noticeably chunkier than
-          the identical one on forgot-password. AppText, not Paper's Text, for
-          the same reason every other string in the app uses it. */}
+        <AppText
+          variant="labelStrong"
+          onPress={() => router.push('/auth/forgot-password')}
+          accessibilityRole="link"
+          style={[
+            styles.forgot,
+            {
+              color: theme.colors.primary,
+            },
+          ]}
+        >
+          {t(Translations.AUTH_FORGOT_PASSWORD)}
+        </AppText>
+
+        <GradientButton
+          size="xl"
+          onPress={onSubmit}
+          disabled={login.isPending || !isValid}
+        >
+          {t(Translations.AUTH_LOGIN_BUTTON)}
+        </GradientButton>
+
+        <View style={styles.dividerRow}>
+          <View
+            style={[
+              styles.dividerLine,
+              {
+                backgroundColor: theme.colors.outlineVariant,
+              },
+            ]}
+          />
+          <AppText
+            variant="caption"
+            style={{
+              color: theme.colors.onSurfaceFaint,
+            }}
+          >
+            {t(Translations.AUTH_OR_DIVIDER)}
+          </AppText>
+          <View
+            style={[
+              styles.dividerLine,
+              {
+                backgroundColor: theme.colors.outlineVariant,
+              },
+            ]}
+          />
+        </View>
+
+        {/* Google's mark must keep its own colours — their brand rules
+            forbid tinting it — so this button is a surface, never the
+            gradient. */}
+        <Pressable
+          onPress={onGoogle}
+          accessibilityRole="button"
+          accessibilityLabel={t(Translations.AUTH_GOOGLE_SIGN_IN)}
+          style={[
+            styles.googleButton,
+            {
+              backgroundColor: theme.colors.surfaceElevated,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name="google"
+            size={19}
+            color={theme.colors.onSurface}
+          />
+          <AppText
+            variant="bodySmallStrong"
+            style={{
+              color: theme.colors.onSurface,
+            }}
+          >
+            {t(Translations.AUTH_GOOGLE_SIGN_IN)}
+          </AppText>
+        </Pressable>
+      </AuthShell>
+
+      {/* CustomModal already centres and pads — the wrapper used to pad
+          again on top of that, so this modal sat noticeably chunkier than
+          the identical one on forgot-password. */}
       <CustomModal {...modalProps} onDismiss={handleDismiss}>
         <AppText
           variant="body"
-          style={{
-            color: theme.colors.error,
-            textAlign: 'center',
-          }}
+          style={[
+            styles.modalText,
+            {
+              color: theme.colors.error,
+            },
+          ]}
         >
-          {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
+          {modalMessage}
         </AppText>
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
-        <AppButton variant="primary" onPress={handleDismiss}>
-          {t(Translations.AUTH_DISMISS)}
-        </AppButton>
       </CustomModal>
     </>
   );
@@ -303,50 +276,31 @@ const LoginScreen = () => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
+  forgot: {
+    alignSelf: 'flex-end',
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-  },
-  themeRow: {
-    width: '100%',
-    alignItems: 'flex-end',
-    paddingTop: Spacing.SPACING_PADDING_8,
-  },
-  heroSection: {
-    alignItems: 'center',
-    marginTop: Spacing.SPACING_PADDING_24,
-  },
-  formSection: {
-    width: '100%',
-    maxWidth: 360,
-    alignSelf: 'center',
-  },
-  forgotRow: {
-    alignItems: 'flex-end',
-    marginTop: Spacing.SPACING_PADDING_8 / 2,
-  },
-  forgotLabel: {
-    fontSize: 13,
+  link: {
+    fontFamily: 'Inter_700Bold',
   },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.lg - 2,
   },
   dividerLine: {
     flex: 1,
     height: 1,
   },
-  registerRow: {
+  googleButton: {
+    height: Layout.BUTTON_XL,
+    borderRadius: Layout.BUTTON_XL_RADIUS,
+    borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing.SPACING_PADDING_16,
+    gap: Layout.FIELD_INNER_GAP,
   },
-  authLink: {
-    marginLeft: Spacing.SPACING_PADDING_8 / 2,
-    fontWeight: '600',
+  modalText: {
+    textAlign: 'center',
   },
 });
