@@ -10,7 +10,7 @@ export default {
   a11yBack: 'Go back',
   a11yClose: 'Close',
   a11yRefresh: 'Refresh',
-  a11yLike: 'Like',
+  a11yLike: 'Want to meet',
   a11yPass: 'Pass',
   a11ySend: 'Send message',
   a11yThemeToggle: 'Switch between light and dark theme',

@@ -25,6 +25,7 @@ import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useUserProfile, usePhotos } from '@features/profile/hooks/useProfile';
 import { computeMode } from '@features/profile/utils/mode';
 import { useUnmatch } from '@features/matches/hooks/useUnmatch';
+import YesMark from '@shared/components/YesMark';
 import { useBlockUser } from '@features/matches/hooks/useBlockUser';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Translations as Common } from '@shared/i18n/translationKeys';
@@ -356,9 +357,9 @@ export default function UserProfileScreen() {
               {unmatch.isPending ? (
                 <ActivityIndicator size={16} />
               ) : (
-                <MaterialCommunityIcons
-                  name="account-remove-outline"
-                  size={16}
+                <YesMark
+                  size={19}
+                  struck
                   color={theme.colors.onSurfaceVariant}
                 />
               )}

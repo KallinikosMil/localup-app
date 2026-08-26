@@ -7,13 +7,13 @@ export default {
   discoverError: "Couldn't load people near you.",
   discoverRetry: 'Retry',
   discoverMatchTitle: "It's a Match!",
-  discoverMatchBody: 'You and {{name}} liked each other',
+  discoverMatchBody: 'You and {{name}} both want to meet',
   discoverMatchCta: 'Keep Swiping',
   // V10: "— check your connection" is commonErrorOffline's job now, and
   // it's only shown when the error actually says so.
   discoverSwipeError: "Swipe didn't go through. Please try again.",
   discoverDistanceNearby: 'nearby',
   discoverDistanceKm: '{{km}} km',
-  discoverStampLike: 'LIKE',
-  discoverStampNope: 'NOPE',
+  discoverStampLike: 'MEET',
+  discoverStampNope: 'PASS',
 };

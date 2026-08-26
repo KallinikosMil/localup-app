@@ -15,6 +15,7 @@ import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
 import EmptyState from '@shared/components/EmptyState';
 import GradientButton from '@shared/components/GradientButton';
+import YesMark from '@shared/components/YesMark';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
 import SwipeCard from '@features/discover/components/SwipeCard';
@@ -180,11 +181,7 @@ export default function DiscoverScreen() {
           },
         ]}
       >
-        <MaterialCommunityIcons
-          name="party-popper"
-          size={56}
-          color={theme.colors.primary}
-        />
+        <YesMark size={30} color={theme.colors.primary} />
         <Spacer spacing={Spacing.SPACING_PADDING_16} />
         <AppText
           variant="h2"
@@ -423,15 +420,10 @@ export default function DiscoverScreen() {
           circleSize={68}
           accessibilityLabel={t(Common.A11Y_LIKE)}
         >
-          <MaterialCommunityIcons
-            name="heart"
-            size={32}
-            color={theme.colors.onPrimary}
-            // optical centering — the
-            // heart glyph sits high in
-            // its em box
-            style={{ marginTop: 2 }}
-          />
+          {/* The pin, solid, inside the gradient — see YesMark. No
+              marginTop nudge: unlike the heart glyph, the pin is drawn
+              centred in its own 24x24 viewBox. */}
+          <YesMark size={34} color={theme.colors.onGradient} />
         </GradientButton>
       </View>
 

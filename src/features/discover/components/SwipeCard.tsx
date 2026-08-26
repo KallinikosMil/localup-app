@@ -17,6 +17,7 @@ import type { TFunction } from 'i18next';
 import AppText from '@shared/components/AppText';
 import ModeBadge from '@shared/components/ModeBadge';
 import InterestChip from '@shared/components/InterestChip';
+import YesMark from '@shared/components/YesMark';
 import { type Candidate } from '../hooks/useDiscover';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
@@ -55,6 +56,13 @@ const SwipeCard = ({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const overflow = Math.max(candidate.interests.length - MAX_CHIPS, 0);
+
+  // The deck now carries every photo in position order, but the paged
+  // hero (and its progress bars) belongs to the Discover redesign — one
+  // image here until then, because four bars drawn over a single photo
+  // is worse than no bars. `avatar_url` still backs a profile whose
+  // media rows predate `position`.
+  const heroUri = candidate.photo_urls[0] ?? candidate.avatar_url;
 
   // V16. The deck now lives inside a ScrollView so it can carry a
   // RefreshControl, and an unconstrained Pan claims every drag —
@@ -123,10 +131,10 @@ const SwipeCard = ({
   return (
     <GestureDetector gesture={pan}>
       <Animated.View style={[styles.card, cardStyle]}>
-        {candidate.avatar_url ? (
+        {heroUri ? (
           <Image
             source={{
-              uri: candidate.avatar_url,
+              uri: heroUri,
             }}
             // On a dating app the photo IS the content, so unlike the small
             // avatars elsewhere this one is named rather than hidden.
@@ -155,11 +163,24 @@ const SwipeCard = ({
           </View>
         )}
 
+        {/* Top scrim. Added after seeing a real upload: the distance pill
+            sat over a white radiator and its white text nearly vanished.
+            A bright photo behind white text is THE failure mode of a
+            photo-led card, and the bottom gradient alone does nothing for
+            anything in the top quarter. */}
+        <LinearGradient
+          colors={[theme.colors.scrimMid, theme.colors.scrimTransparent]}
+          style={styles.scrimTop}
+        />
+
+        {/* Bottom scrim, now on the spec's tokens rather than flat black:
+            a near-black VIOLET, so the photo fades into the ground instead
+            of greying out on the way down. */}
         <LinearGradient
           colors={[
-            'transparent',
-            theme.colors.BLACK_A35,
-            theme.colors.BLACK_A75,
+            theme.colors.scrimTransparent,
+            theme.colors.scrimMid,
+            theme.colors.scrimStrong,
           ]}
           style={styles.gradient}
         />
@@ -258,6 +279,7 @@ const SwipeCard = ({
             likeOpacity,
           ]}
         >
+          <YesMark size={40} color={theme.colors.like} />
           <AppText
             variant="h2"
             style={{
@@ -317,6 +339,13 @@ const styles = StyleSheet.create({
     right: 0,
     height: '50%',
   },
+  scrimTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '25%',
+  },
   distancePill: {
     position: 'absolute',
     top: Spacing.lg,
@@ -366,6 +395,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     paddingHorizontal: 12,
     paddingVertical: 4,
+    // The like stamp carries the mark beside the word; a column would
+    // stack them and double the stamp's height mid-drag.
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   likeStamp: {
     left: 24,
