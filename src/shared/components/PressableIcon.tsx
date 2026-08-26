@@ -10,6 +10,12 @@ type Props = {
   containerStyle?: React.ComponentProps<typeof Pressable>['style'];
   iconStyle?: React.ComponentProps<typeof Ionicons>['style'];
   onPress: () => void;
+  // REQUIRED, not optional. An icon carries no text, so without this a
+  // screen reader announces the control as just "button" and the user has
+  // to guess. Making it part of the type is what stops the next icon-only
+  // button from shipping silent.
+  accessibilityLabel: string;
+  accessibilityHint?: string;
 };
 
 const PressableIcon = (props: Props) => {
@@ -21,10 +27,18 @@ const PressableIcon = (props: Props) => {
     containerStyle,
     iconStyle,
     onPress,
+    accessibilityLabel,
+    accessibilityHint,
   } = props;
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      // A 24px glyph is well under the 44px anyone can reliably hit, and
+      // the people who need the padding most are the least able to aim.
+      hitSlop={12}
       style={
         containerStyle
           ? containerStyle

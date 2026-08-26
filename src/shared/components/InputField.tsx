@@ -1,5 +1,8 @@
 import React from 'react';
 import { TextInput, HelperText } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
+
+import { Translations as Common } from '@shared/i18n/translationKeys';
 import {
   useFormContext,
   useController,
@@ -30,6 +33,7 @@ const InputField = <T extends FieldValues>({
   ...rest
 }: InputFieldProps<T>) => {
   const { control, trigger } = useFormContext<T>();
+  const { t } = useTranslation();
 
   const {
     field: { onChange, onBlur, value, ref },
@@ -48,6 +52,12 @@ const InputField = <T extends FieldValues>({
       <TextInput.Icon
         icon={isVisible ? 'eye-off' : 'eye'}
         onPress={() => setIsVisible(v => !v)}
+        // The glyph flips between an eye and a crossed-out eye; both are
+        // announced as "button" without this, so the control that reveals a
+        // password is indistinguishable from any other icon.
+        accessibilityLabel={t(
+          isVisible ? Common.A11Y_HIDE_PASSWORD : Common.A11Y_SHOW_PASSWORD,
+        )}
         forceTextInputFocus={false}
       />
     ) : (

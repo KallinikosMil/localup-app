@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, useTheme } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import AppText from '@shared/components/AppText';
+import RetryButton from '@shared/components/RetryButton';
 import Spacer from '@shared/components/Spacer';
 import { RootState } from '@store';
 import { retryAuthBootstrap } from '@features/auth/hooks/useAuthSession';
 import { Translations as Common } from '@shared/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
-import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/auth/i18n/translationKeys';
 
 export default function AuthErrorScreen() {
@@ -75,34 +75,12 @@ export default function AuthErrorScreen() {
           ? t(Common.COMMON_ERROR_OFFLINE)
           : t(Common.COMMON_ERROR_GENERIC)}
       </AppText>
-      <Pressable
+      <RetryButton
+        label={t(Translations.AUTH_BOOTSTRAP_RETRY)}
         onPress={onRetry}
-        disabled={retrying}
-        hitSlop={8}
-        style={[
-          styles.retryBtn,
-          {
-            backgroundColor: theme.colors.primary,
-            opacity: retrying ? 0.6 : 1,
-          },
-        ]}
-      >
-        {retrying ? (
-          <ActivityIndicator size="small" color={theme.colors.onPrimary} />
-        ) : (
-          <AppText
-            variant="body"
-            style={[
-              styles.retryLabel,
-              {
-                color: theme.colors.onPrimary,
-              },
-            ]}
-          >
-            {t(Translations.AUTH_BOOTSTRAP_RETRY)}
-          </AppText>
-        )}
-      </Pressable>
+        busy={retrying}
+        minWidth={140}
+      />
     </View>
   );
 }
@@ -116,17 +94,5 @@ const styles = StyleSheet.create({
   },
   centerText: {
     textAlign: 'center',
-  },
-  retryBtn: {
-    marginTop: Spacing.xl,
-    minWidth: 140,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.pill,
-  },
-  retryLabel: {
-    fontWeight: '600',
   },
 });

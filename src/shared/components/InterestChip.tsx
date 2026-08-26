@@ -27,6 +27,10 @@ const InterestChip = ({
     const frosted = variant === 'frosted';
     return (
       <View
+        // The frosted/tonal pill is a label, not a control: group it so it
+        // is read as one phrase instead of stray characters.
+        accessible
+        accessibilityLabel={label}
         style={[
           styles.pill,
           {
@@ -56,6 +60,11 @@ const InterestChip = ({
       selected={selected}
       onPress={onPress}
       icon={icon}
+      // Whether a chip is chosen is shown by fill colour alone. Without
+      // this, a screen reader reads every chip identically and the user
+      // cannot tell what they have already picked.
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
       compact
     >
       {label}

@@ -12,6 +12,7 @@ import Spacer from '@shared/components/Spacer';
 import OnboardingProgress from '@shared/components/OnboardingProgress';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 
 const PHOTO_SIZE = 200;
@@ -80,6 +81,8 @@ const PhotoScreen = () => {
           ) : (
             <Pressable
               onPress={pickImage}
+              accessibilityRole="button"
+              accessibilityLabel={t(Common.A11Y_ADD_PHOTO)}
               style={[
                 styles.uploadArea,
                 {

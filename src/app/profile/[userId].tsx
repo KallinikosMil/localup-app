@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
+import CircleIconButton from '@shared/components/CircleIconButton';
 import Spacer from '@shared/components/Spacer';
 import CustomModal from '@shared/components/CustomModal';
 import AppButton from '@shared/components/AppButton';
@@ -26,6 +27,7 @@ import { computeMode } from '@features/profile/utils/mode';
 import { useUnmatch } from '@features/matches/hooks/useUnmatch';
 import { useBlockUser } from '@features/matches/hooks/useBlockUser';
 import { Translations } from '@features/profile/i18n/translationKeys';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 import { useAppTheme, AppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
@@ -189,9 +191,10 @@ export default function UserProfileScreen() {
             style={styles.heroScrim}
           />
 
-          <Pressable
+          <CircleIconButton
+            size={36}
             onPress={() => router.back()}
-            hitSlop={12}
+            accessibilityLabel={t(Common.A11Y_BACK)}
             style={[
               styles.backPill,
               { backgroundColor: theme.colors.BLACK_A35, top: insets.top + 8 },
@@ -202,7 +205,7 @@ export default function UserProfileScreen() {
               size={20}
               color={theme.colors.ON_PHOTO}
             />
-          </Pressable>
+          </CircleIconButton>
 
           <View style={styles.heroInfo}>
             <AppText variant="h1" style={{ color: theme.colors.ON_PHOTO }}>
@@ -276,10 +279,15 @@ export default function UserProfileScreen() {
               column. Each one opens full-screen. */}
           {photos && photos.length > 0 ? (
             <View>
-              {photos.map(p => (
+              {photos.map((p, i) => (
                 <Pressable
                   key={p.id}
                   onPress={() => setViewerUrl(p.url)}
+                  accessibilityRole="imagebutton"
+                  accessibilityLabel={t(Common.A11Y_PHOTO_OF_TOTAL, {
+                    index: i + 1,
+                    total: photos?.length ?? 0,
+                  })}
                   style={styles.photoFull}
                 >
                   <Image source={{ uri: p.url }} style={styles.photoImg} />
@@ -336,6 +344,11 @@ export default function UserProfileScreen() {
                 setPendingAction('unmatch');
                 openModal();
               }}
+              accessibilityRole="button"
+              accessibilityLabel={t(Translations.PROFILE_VIEW_UNMATCH)}
+              accessibilityState={{
+                disabled: unmatch.isPending || block.isPending,
+              }}
               hitSlop={8}
               disabled={unmatch.isPending || block.isPending}
               style={styles.destructive}
@@ -370,6 +383,11 @@ export default function UserProfileScreen() {
             onPress={() => {
               setPendingAction('block');
               openModal();
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.PROFILE_VIEW_BLOCK)}
+            accessibilityState={{
+              disabled: unmatch.isPending || block.isPending,
             }}
             hitSlop={8}
             disabled={unmatch.isPending || block.isPending}
@@ -454,7 +472,12 @@ export default function UserProfileScreen() {
         onRequestClose={() => setViewerUrl(null)}
         statusBarTranslucent
       >
-        <Pressable style={styles.viewer} onPress={() => setViewerUrl(null)}>
+        <Pressable
+          style={styles.viewer}
+          accessibilityRole="button"
+          accessibilityLabel={t(Common.A11Y_CLOSE)}
+          onPress={() => setViewerUrl(null)}
+        >
           {viewerUrl ? (
             <Image
               source={{ uri: viewerUrl }}
@@ -464,6 +487,8 @@ export default function UserProfileScreen() {
           ) : null}
           <Pressable
             onPress={() => setViewerUrl(null)}
+            accessibilityRole="button"
+            accessibilityLabel={t(Common.A11Y_CLOSE)}
             hitSlop={12}
             style={[styles.viewerClose, { top: insets.top + 8 }]}
           >
@@ -549,11 +574,6 @@ const styles = StyleSheet.create({
   backPill: {
     position: 'absolute',
     left: Spacing.SPACING_PADDING_16,
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: BorderRadius.pill,
   },
   heroInfo: {
     paddingHorizontal: Spacing.SPACING_PADDING_24,

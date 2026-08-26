@@ -16,6 +16,7 @@ import AppButton from '@shared/components/AppButton';
 import EmptyState from '@shared/components/EmptyState';
 import GradientButton from '@shared/components/GradientButton';
 import Spacer from '@shared/components/Spacer';
+import RetryButton from '@shared/components/RetryButton';
 import SwipeCard from '@features/discover/components/SwipeCard';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
@@ -29,6 +30,7 @@ import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/discover/i18n/translationKeys';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 
 const FILTERS_ENABLED = false;
 
@@ -245,26 +247,10 @@ export default function DiscoverScreen() {
           >
             {errorMessage(error, Translations.DISCOVER_ERROR)}
           </AppText>
-          <Pressable
+          <RetryButton
+            label={t(Translations.DISCOVER_RETRY)}
             onPress={() => refetch()}
-            hitSlop={8}
-            style={[
-              styles.retryBtn,
-              {
-                backgroundColor: theme.colors.primary,
-              },
-            ]}
-          >
-            <AppText
-              variant="body"
-              style={{
-                color: theme.colors.onPrimary,
-                fontWeight: '600',
-              }}
-            >
-              {t(Translations.DISCOVER_RETRY)}
-            </AppText>
-          </Pressable>
+          />
         </View>
         {celebration}
       </>
@@ -412,6 +398,8 @@ export default function DiscoverScreen() {
       <View style={styles.actionRow}>
         <Pressable
           onPress={handleSwipeLeft}
+          accessibilityRole="button"
+          accessibilityLabel={t(Common.A11Y_PASS)}
           style={({ pressed }) => [
             styles.actionBtn,
             styles.actionBtnSmall,
@@ -430,7 +418,11 @@ export default function DiscoverScreen() {
           />
         </Pressable>
 
-        <GradientButton onPress={handleSwipeRight} circleSize={68}>
+        <GradientButton
+          onPress={handleSwipeRight}
+          circleSize={68}
+          accessibilityLabel={t(Common.A11Y_LIKE)}
+        >
           <MaterialCommunityIcons
             name="heart"
             size={32}
@@ -465,12 +457,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.xl,
-  },
-  retryBtn: {
-    marginTop: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.pill,
   },
   header: {
     flexDirection: 'row',

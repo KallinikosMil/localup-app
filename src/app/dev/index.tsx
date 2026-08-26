@@ -145,6 +145,8 @@ const ScreenLink = ({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
       style={[
         styles.card,
         {

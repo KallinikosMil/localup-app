@@ -19,6 +19,13 @@ export default {
   profileSectionGallery: 'Συλλογή',
   profileSectionInterests: 'Ενδιαφέροντα',
   profileLogout: 'Αποσύνδεση',
+  profileDeleteAccount: 'Διαγραφή λογαριασμού',
+  profileDeleteTitle: 'Διαγραφή του λογαριασμού σου;',
+  profileDeleteBody:
+    'Θα διαγραφούν οριστικά το προφίλ, οι φωτογραφίες, τα ταιριάσματα και τα μηνύματά σου. Η ενέργεια δεν αναιρείται.',
+  profileDeleteConfirm: 'Οριστική διαγραφή',
+  profileDeleteCancel: 'Να μείνει ο λογαριασμός',
+  profileDeleteError: 'Η διαγραφή απέτυχε. Δοκίμασε ξανά.',
 
   profileBadgeTraveler: 'ΤΑΞΙΔΙΩΤΗΣ',
   profileBadgeLocal: 'ΝΤΟΠΙΟΣ',

@@ -33,6 +33,12 @@ export enum Translations {
   PROFILE_SECTION_GALLERY = 'profileSectionGallery',
   PROFILE_SECTION_INTERESTS = 'profileSectionInterests',
   PROFILE_LOGOUT = 'profileLogout',
+  PROFILE_DELETE_ACCOUNT = 'profileDeleteAccount',
+  PROFILE_DELETE_TITLE = 'profileDeleteTitle',
+  PROFILE_DELETE_BODY = 'profileDeleteBody',
+  PROFILE_DELETE_CONFIRM = 'profileDeleteConfirm',
+  PROFILE_DELETE_CANCEL = 'profileDeleteCancel',
+  PROFILE_DELETE_ERROR = 'profileDeleteError',
 
   // Mode badge. LOCATING is the "we don't know yet" state, which used to
   // masquerade as LOCAL because computeMode returned 'local' for unknown

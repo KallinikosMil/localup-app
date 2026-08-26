@@ -16,13 +16,18 @@ import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
+import RetryButton from '@shared/components/RetryButton';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useLogout } from '@features/auth/hooks/useAuth';
+import { useDeleteAccount } from '@features/auth/hooks/useDeleteAccount';
+import CustomModal from '@shared/components/CustomModal';
+import AppButton from '@shared/components/AppButton';
 import { useProfile, usePhotos } from '@features/profile/hooks/useProfile';
 import { computeMode } from '@features/profile/utils/mode';
 import { useAppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
@@ -33,6 +38,7 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const logout = useLogout();
+  const deleteAccount = useDeleteAccount();
   const {
     data: profile,
     // isPending (not isLoading): true while the query is still
@@ -54,6 +60,10 @@ export default function ProfileScreen() {
   // Logout can fail (offline, server). Without this the button just
   // un-spun and the user stayed silently signed in, thinking they'd left.
   const [logoutError, setLogoutError] = useState<string | null>(null);
+  // Deleting is irreversible, so it is gated behind an explicit confirmation
+  // rather than a single tap. On success there is nothing to navigate to —
+  // the hook clears the session and AppGuard routes to login by itself.
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleRefresh = async () => {
     await Promise.all([refetchProfile(), refetchPhotos()]);
@@ -165,26 +175,10 @@ export default function ProfileScreen() {
         >
           {errorMessage(error, Translations.PROFILE_ERROR)}
         </AppText>
-        <Pressable
+        <RetryButton
+          label={t(Translations.PROFILE_RETRY)}
           onPress={() => refetchProfile()}
-          hitSlop={8}
-          style={[
-            styles.retryBtn,
-            {
-              backgroundColor: theme.colors.primary,
-            },
-          ]}
-        >
-          <AppText
-            variant="body"
-            style={{
-              color: theme.colors.onPrimary,
-              fontWeight: '600',
-            }}
-          >
-            {t(Translations.PROFILE_RETRY)}
-          </AppText>
-        </Pressable>
+        />
       </View>
     );
   }
@@ -245,6 +239,8 @@ export default function ProfileScreen() {
 
           <Pressable
             onPress={() => router.push('/profile/edit')}
+            accessibilityRole="button"
+            accessibilityLabel={t(Common.A11Y_EDIT_PROFILE)}
             hitSlop={12}
             style={[
               styles.editPill,
@@ -433,6 +429,9 @@ export default function ProfileScreen() {
             }
             hitSlop={8}
             disabled={logout.isPending}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.PROFILE_LOGOUT)}
+            accessibilityState={{ disabled: logout.isPending }}
             style={styles.logout}
           >
             {logout.isPending ? (
@@ -455,8 +454,77 @@ export default function ProfileScreen() {
               {t(Translations.PROFILE_LOGOUT)}
             </AppText>
           </Pressable>
+
+          {/* Below logout and quieter still: destructive, so it must be
+              findable (Google Play requires it) without ever being the thing
+              a thumb lands on by accident. */}
+          <Pressable
+            onPress={() => setConfirmDelete(true)}
+            hitSlop={8}
+            disabled={deleteAccount.isPending}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.PROFILE_DELETE_ACCOUNT)}
+            accessibilityHint={t(Translations.PROFILE_DELETE_BODY)}
+            accessibilityState={{ disabled: deleteAccount.isPending }}
+            style={styles.deleteAccount}
+          >
+            {deleteAccount.isPending ? (
+              <ActivityIndicator size={14} />
+            ) : (
+              <AppText
+                variant="bodySmall"
+                style={{ color: theme.colors.onSurfaceVariant }}
+              >
+                {t(Translations.PROFILE_DELETE_ACCOUNT)}
+              </AppText>
+            )}
+          </Pressable>
         </View>
       </ScrollView>
+      <CustomModal
+        visible={confirmDelete}
+        onDismiss={() => setConfirmDelete(false)}
+      >
+        <AppText
+          variant="h3"
+          style={{ color: theme.colors.onSurface, textAlign: 'center' }}
+        >
+          {t(Translations.PROFILE_DELETE_TITLE)}
+        </AppText>
+        <Spacer spacing={Spacing.SPACING_PADDING_8} />
+        <AppText
+          variant="body"
+          style={{
+            color: theme.colors.onSurfaceVariant,
+            textAlign: 'center',
+          }}
+        >
+          {t(Translations.PROFILE_DELETE_BODY)}
+        </AppText>
+        <Spacer spacing={Spacing.SPACING_PADDING_24} />
+        {/* The safe choice is the prominent one. The destructive choice is
+            reachable but never the default. */}
+        <AppButton variant="primary" onPress={() => setConfirmDelete(false)}>
+          {t(Translations.PROFILE_DELETE_CANCEL)}
+        </AppButton>
+        <Spacer spacing={Spacing.SPACING_PADDING_12} />
+        <AppButton
+          variant="link"
+          onPress={() => {
+            setConfirmDelete(false);
+            deleteAccount.mutate(undefined, {
+              onError: err =>
+                setLogoutError(
+                  errorMessage(err, Translations.PROFILE_DELETE_ERROR),
+                ),
+            });
+          }}
+          labelStyle={{ color: theme.colors.error }}
+        >
+          {t(Translations.PROFILE_DELETE_CONFIRM)}
+        </AppButton>
+      </CustomModal>
+
       <Snackbar
         visible={!!logoutError}
         onDismiss={() => setLogoutError(null)}
@@ -529,12 +597,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.SPACING_PADDING_24,
   },
-  retryBtn: {
-    marginTop: Spacing.SPACING_PADDING_16,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingVertical: Spacing.SPACING_PADDING_8,
-    borderRadius: BorderRadius.pill,
-  },
   content: {
     paddingBottom: Spacing.SPACING_PADDING_32,
   },
@@ -593,6 +655,11 @@ const styles = StyleSheet.create({
   body: {
     paddingHorizontal: Spacing.SPACING_PADDING_24,
     paddingTop: Spacing.SPACING_PADDING_24,
+  },
+  deleteAccount: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.SPACING_PADDING_16,
   },
   logout: {
     flexDirection: 'row',

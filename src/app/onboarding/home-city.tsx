@@ -135,6 +135,8 @@ const HomeCityScreen = () => {
   const renderItem = ({ item }: { item: CityResult }) => (
     <Pressable
       onPress={() => onSelectCity(item)}
+      accessibilityRole="button"
+      accessibilityLabel={item.display_name}
       style={[
         styles.resultItem,
         {

@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
+import RetryButton from '@shared/components/RetryButton';
 import GalleryPhoto from '@features/profile/components/GalleryPhoto';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
@@ -29,6 +30,7 @@ import {
 import { computeMode, type ProfileMode } from '@features/profile/utils/mode';
 import { useAppTheme, AppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
@@ -256,6 +258,8 @@ export default function EditProfileScreen() {
     >
       <Pressable
         onPress={() => router.back()}
+        accessibilityRole="button"
+        accessibilityLabel={t(Common.A11Y_BACK)}
         hitSlop={12}
         style={[
           styles.pillGhost,
@@ -330,26 +334,10 @@ export default function EditProfileScreen() {
           >
             {errorMessage(error, Translations.PROFILE_EDIT_ERROR)}
           </AppText>
-          <Pressable
+          <RetryButton
+            label={t(Translations.PROFILE_RETRY)}
             onPress={() => refetch()}
-            hitSlop={8}
-            style={[
-              styles.retryBtn,
-              {
-                backgroundColor: theme.colors.primary,
-              },
-            ]}
-          >
-            <AppText
-              variant="body"
-              style={{
-                color: theme.colors.onPrimary,
-                fontWeight: '600',
-              }}
-            >
-              {t(Translations.PROFILE_RETRY)}
-            </AppText>
-          </Pressable>
+          />
         </View>
       </View>
     );
@@ -381,6 +369,8 @@ export default function EditProfileScreen() {
       >
         <Pressable
           onPress={handleCancel}
+          accessibilityRole="button"
+          accessibilityLabel={t(Translations.PROFILE_CANCEL)}
           hitSlop={12}
           style={[
             styles.pillGhost,
@@ -422,6 +412,13 @@ export default function EditProfileScreen() {
           onPress={handleSave}
           disabled={updateProfile.isPending}
           hitSlop={12}
+          accessibilityRole="button"
+          // The label deliberately does not change (see the note above), so
+          // the busy state has to be carried here instead.
+          accessibilityState={{
+            disabled: updateProfile.isPending,
+            busy: updateProfile.isPending,
+          }}
           accessibilityLabel={
             updateProfile.isPending
               ? t(Translations.PROFILE_SAVING)
@@ -567,19 +564,29 @@ export default function EditProfileScreen() {
             </AppText>
           ) : null}
           <View style={styles.photoGrid}>
-            {(photos ?? []).map(p => (
+            {(photos ?? []).map((p, index) => (
               <GalleryPhoto
                 key={p.id}
                 uri={p.url}
                 size={PHOTO_SIZE}
                 background={surfaceLow}
                 onRemove={() => confirmDelete(p.id)}
+                // Position is the only thing that distinguishes one tile from
+                // another without sight, so it is the label.
+                accessibilityLabel={t(Common.A11Y_PHOTO_OF_TOTAL, {
+                  index: index + 1,
+                  total: photos?.length ?? 0,
+                })}
+                accessibilityHint={t(Common.A11Y_REMOVE_PHOTO_HINT)}
               />
             ))}
             {canAddPhoto ? (
               <Pressable
                 onPress={pickPhoto}
                 disabled={uploadPhoto.isPending}
+                accessibilityRole="button"
+                accessibilityLabel={t(Common.A11Y_ADD_PHOTO)}
+                accessibilityState={{ disabled: uploadPhoto.isPending }}
                 style={[
                   styles.photoCell,
                   styles.photoAdd,
@@ -666,6 +673,8 @@ export default function EditProfileScreen() {
           <Spacer spacing={Spacing.SPACING_PADDING_12} />
           <Pressable
             onPress={setHomeHere}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.PROFILE_SET_HOME)}
             style={[
               styles.pillPrimary,
               {
@@ -900,12 +909,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.SPACING_PADDING_24,
-  },
-  retryBtn: {
-    marginTop: Spacing.SPACING_PADDING_16,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingVertical: Spacing.SPACING_PADDING_8,
-    borderRadius: BorderRadius.pill,
   },
   appBar: {
     flexDirection: 'row',

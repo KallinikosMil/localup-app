@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
 import Spacer from '@shared/components/Spacer';
+import RetryButton from '@shared/components/RetryButton';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useMatches, type Match } from '@features/matches/hooks/useMatches';
 import { useUnreadMatches } from '@features/matches/hooks/useReadTracking';
@@ -22,6 +23,7 @@ import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/matches/i18n/translationKeys';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 
 const AVATAR_SIZE = 60;
 
@@ -56,6 +58,12 @@ export default function MatchesScreen() {
     const unread = isUnread(item);
     return (
       <Pressable
+        // The row is one destination, so it is announced as one item. The
+        // unread state is a coloured dot and a bolder preview — neither of
+        // which a reader can see, hence the explicit state.
+        accessibilityRole="button"
+        accessibilityLabel={item.display_name ?? ''}
+        accessibilityState={{ selected: unread }}
         style={[
           styles.card,
           {
@@ -99,6 +107,9 @@ export default function MatchesScreen() {
               },
             })
           }
+          accessibilityRole="button"
+          accessibilityLabel={item.display_name ?? ''}
+          accessibilityHint={t(Common.A11Y_OPEN_PROFILE)}
           hitSlop={4}
         >
           {item.avatar_url ? (
@@ -227,26 +238,10 @@ export default function MatchesScreen() {
           >
             {errorMessage(error, Translations.MATCHES_ERROR)}
           </AppText>
-          <Pressable
+          <RetryButton
+            label={t(Translations.MATCHES_RETRY)}
             onPress={() => refetch()}
-            hitSlop={8}
-            style={[
-              styles.retryBtn,
-              {
-                backgroundColor: theme.colors.primary,
-              },
-            ]}
-          >
-            <AppText
-              variant="body"
-              style={{
-                color: theme.colors.onPrimary,
-                fontWeight: '600',
-              }}
-            >
-              {t(Translations.MATCHES_RETRY)}
-            </AppText>
-          </Pressable>
+          />
         </View>
       ) : !matches?.length ? (
         <ScrollView
@@ -306,12 +301,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.SPACING_PADDING_24,
-  },
-  retryBtn: {
-    marginTop: Spacing.SPACING_PADDING_16,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingVertical: Spacing.SPACING_PADDING_8,
-    borderRadius: BorderRadius.pill,
   },
   header: {
     paddingHorizontal: Spacing.SPACING_PADDING_24,

@@ -140,7 +140,14 @@ const NameAgeScreen = () => {
             shape and the error state for free; the calendar icon is what says
             it opens a picker. pointerEvents="none" keeps the taps on the
             Pressable instead of the (non-editable) field swallowing them. */}
-        <Pressable onPress={() => setShowPicker(true)}>
+        <Pressable
+          onPress={() => setShowPicker(true)}
+          // The field inside is pointerEvents="none", so the Pressable is the
+          // control a reader lands on; it has to carry the field's identity.
+          accessibilityRole="button"
+          accessibilityLabel={t(Translations.ONBOARDING_DOB_LABEL)}
+          accessibilityValue={{ text: dob ? formatDate(dob) : '' }}
+        >
           <View pointerEvents="none">
             <TextInput
               label={t(Translations.ONBOARDING_DOB_LABEL)}

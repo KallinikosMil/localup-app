@@ -4,8 +4,11 @@ import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
+import { useTranslation } from 'react-i18next';
+
 import AppText from './AppText';
 import { Spacing } from '@theme/constants/Spacing';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 
 type OnboardingProgressProps = {
   step: number;
@@ -21,13 +24,19 @@ const OnboardingProgress = ({
   showBack = true,
 }: OnboardingProgressProps) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const segments = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
         {showBack ? (
-          <Pressable onPress={() => router.back()} hitSlop={12}>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel={t(Common.A11Y_BACK)}
+            hitSlop={12}
+          >
             <MaterialCommunityIcons
               name="arrow-left"
               size={24}
@@ -49,7 +58,18 @@ const OnboardingProgress = ({
       {/* Above the title, not below it. Every screen follows the header with
           its own subtitle, so a bar sitting between the two cut the heading
           block in half and read as a divider rather than as progress. */}
-      <View style={styles.segmentRow}>
+      <View
+        // Four coloured slivers convey progress visually and nothing
+        // otherwise. One grouped label says where you are.
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityLabel={t(Common.A11Y_ONBOARDING_PROGRESS, {
+          step,
+          total: totalSteps,
+        })}
+        accessibilityValue={{ min: 0, max: totalSteps, now: step }}
+        style={styles.segmentRow}
+      >
         {segments.map(i => (
           <View
             key={i}

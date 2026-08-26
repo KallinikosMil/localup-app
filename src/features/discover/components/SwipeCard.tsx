@@ -22,6 +22,7 @@ import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '../i18n/translationKeys';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 
 const MAX_CHIPS = 3;
 
@@ -127,6 +128,13 @@ const SwipeCard = ({
             source={{
               uri: candidate.avatar_url,
             }}
+            // On a dating app the photo IS the content, so unlike the small
+            // avatars elsewhere this one is named rather than hidden.
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={t(Common.A11Y_PROFILE_PHOTO, {
+              name: candidate.display_name ?? '',
+            })}
             style={styles.image}
           />
         ) : (

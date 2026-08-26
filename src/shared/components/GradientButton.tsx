@@ -19,6 +19,9 @@ type GradientButtonProps = {
   // circle mode for icon-only CTAs (e.g. like button)
   circleSize?: number;
   style?: ViewStyle;
+  // Needed whenever children is an icon rather than a string — the circle
+  // variant has no text for a screen reader to read.
+  accessibilityLabel?: string;
 };
 
 const GradientButton = ({
@@ -27,6 +30,7 @@ const GradientButton = ({
   disabled = false,
   circleSize,
   style,
+  accessibilityLabel,
 }: GradientButtonProps) => {
   const theme = useAppTheme();
   const scale = useSharedValue(1);
@@ -41,6 +45,14 @@ const GradientButton = ({
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      accessibilityRole="button"
+      // A string child already reads itself; only the icon variant needs
+      // telling. accessibilityState carries "dimmed" through to the reader —
+      // opacity alone communicates nothing to someone who cannot see it.
+      accessibilityLabel={
+        accessibilityLabel ?? (isText ? (children as string) : undefined)
+      }
+      accessibilityState={{ disabled }}
       onPressIn={() => {
         scale.value = withSpring(0.96, {
           damping: 20,

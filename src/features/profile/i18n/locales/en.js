@@ -22,6 +22,13 @@ export default {
   profileSectionGallery: 'Gallery',
   profileSectionInterests: 'Interests',
   profileLogout: 'Logout',
+  profileDeleteAccount: 'Delete account',
+  profileDeleteTitle: 'Delete your account?',
+  profileDeleteBody:
+    'This removes your profile, photos, matches and messages permanently. It cannot be undone.',
+  profileDeleteConfirm: 'Delete permanently',
+  profileDeleteCancel: 'Keep my account',
+  profileDeleteError: "Couldn't delete your account. Please try again.",
 
   profileBadgeTraveler: 'TRAVELER',
   profileBadgeLocal: 'LOCAL',

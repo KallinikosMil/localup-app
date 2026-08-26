@@ -17,6 +17,8 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
+import CircleIconButton from '@shared/components/CircleIconButton';
+import RetryButton from '@shared/components/RetryButton';
 import { RootState } from '@store';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import {
@@ -29,6 +31,7 @@ import { useMatches } from '@features/matches/hooks/useMatches';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Translations } from '@features/chat/i18n/translationKeys';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 
 export default function ChatScreen() {
   const theme = useTheme();
@@ -204,7 +207,12 @@ export default function ChatScreen() {
           },
         ]}
       >
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t(Common.A11Y_BACK)}
+          hitSlop={12}
+        >
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
@@ -226,6 +234,13 @@ export default function ChatScreen() {
               : undefined
           }
           disabled={!userId}
+          // One target, so announce it as one thing. Without a label the
+          // reader would read the avatar and the name as two stray items and
+          // never say that tapping opens the profile.
+          accessibilityRole="button"
+          accessibilityLabel={name ?? ''}
+          accessibilityHint={t(Common.A11Y_OPEN_PROFILE)}
+          accessibilityState={{ disabled: !userId }}
           hitSlop={8}
           style={styles.headerTitle}
         >
@@ -292,26 +307,10 @@ export default function ChatScreen() {
           >
             {errorMessage(error, Translations.CHAT_ERROR)}
           </AppText>
-          <Pressable
+          <RetryButton
+            label={t(Translations.CHAT_RETRY)}
             onPress={() => refetch()}
-            hitSlop={8}
-            style={[
-              styles.retryBtn,
-              {
-                backgroundColor: theme.colors.primary,
-              },
-            ]}
-          >
-            <AppText
-              variant="body"
-              style={{
-                color: theme.colors.onPrimary,
-                fontWeight: '600',
-              }}
-            >
-              {t(Translations.CHAT_RETRY)}
-            </AppText>
-          </Pressable>
+          />
         </View>
       ) : (
         <FlatList
@@ -367,9 +366,11 @@ export default function ChatScreen() {
           multiline
           maxLength={1000}
         />
-        <Pressable
+        <CircleIconButton
+          size={40}
           onPress={handleSend}
           disabled={!text.trim() || sendMessage.isPending}
+          accessibilityLabel={t(Common.A11Y_SEND)}
           style={[
             styles.sendBtn,
             {
@@ -388,7 +389,7 @@ export default function ChatScreen() {
                 : theme.colors.onSurfaceVariant
             }
           />
-        </Pressable>
+        </CircleIconButton>
       </View>
 
       <Snackbar
@@ -433,12 +434,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.SPACING_PADDING_24,
   },
-  retryBtn: {
-    marginTop: Spacing.SPACING_PADDING_16,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingVertical: Spacing.SPACING_PADDING_8,
-    borderRadius: BorderRadius.pill,
-  },
   list: {
     flexGrow: 1,
     paddingHorizontal: Spacing.SPACING_PADDING_16,
@@ -476,11 +471,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginLeft: Spacing.SPACING_PADDING_8,
   },
 });

@@ -25,6 +25,11 @@ const Avatar = ({ uri, size, ring = false, fallbackLabel }: AvatarProps) => {
   const face = uri ? (
     <Image
       source={{ uri }}
+      // The name is almost always rendered right beside the avatar, so
+      // announcing the photo too would just say everything twice. Hidden
+      // from the reader rather than given a redundant label.
+      accessibilityElementsHidden
+      importantForAccessibility="no"
       style={{
         width: size,
         height: size,

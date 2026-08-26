@@ -15,6 +15,11 @@ type Props = {
   size: number;
   background: string;
   onRemove: () => void;
+  // What the reader announces, and what holding does. Required, because a
+  // photo tile has no text at all: without these it is announced as an
+  // unlabelled button and the hold-to-remove gesture is undiscoverable.
+  accessibilityLabel: string;
+  accessibilityHint: string;
 };
 
 export default function GalleryPhoto({
@@ -22,6 +27,8 @@ export default function GalleryPhoto({
   size,
   background,
   onRemove,
+  accessibilityLabel,
+  accessibilityHint,
 }: Props) {
   const theme = useTheme();
   const progress = useRef(new Animated.Value(0)).current;
@@ -52,6 +59,9 @@ export default function GalleryPhoto({
 
   return (
     <Pressable
+      accessibilityRole="imagebutton"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
       onPressIn={startHold}
       onPressOut={cancelHold}
       delayLongPress={HOLD_TO_REMOVE_MS}
