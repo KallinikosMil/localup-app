@@ -27,17 +27,9 @@ type AuthShellProps = {
   // Pinned to the bottom of the screen rather than the end of the form:
   // "Don't have an account?" belongs to the page, not to the last field.
   footer?: React.ReactNode;
-  // The theme toggle, on the screens that offer one.
-  headerAction?: React.ReactNode;
 };
 
-const AuthShell = ({
-  title,
-  subtitle,
-  children,
-  footer,
-  headerAction,
-}: AuthShellProps) => {
+const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
@@ -66,10 +58,6 @@ const AuthShell = ({
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        {headerAction ? (
-          <View style={styles.headerRow}>{headerAction}</View>
-        ) : null}
-
         <View style={styles.brandRow}>
           <LinearGradient
             colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
@@ -141,10 +129,6 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
   brandRow: {
     flexDirection: 'row',

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
-import { IconButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +18,6 @@ import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { Layout } from '@theme/constants/Layout';
 import { Translations } from '@features/auth/i18n/translationKeys';
-import { useThemeMode } from '@theme/ThemeModeProvider';
 
 type LoginFormData = {
   email: string;
@@ -29,15 +27,10 @@ type LoginFormData = {
 const LoginScreen = () => {
   const { t } = useTranslation();
   const theme = useAppTheme();
-  const { setMode, resolvedMode } = useThemeMode();
   const login = useLogin();
   const google = useGoogleSignIn();
   const { modalProps, openModal, closeModal } = useModal();
   const [modalMessage, setModalMessage] = useState('');
-
-  const toggleTheme = () => {
-    setMode(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
 
   const form = useForm<LoginFormData>({
     defaultValues: {
@@ -102,17 +95,6 @@ const LoginScreen = () => {
       <AuthShell
         title={t(Translations.AUTH_WELCOME_TEXT)}
         subtitle={t(Translations.AUTH_SUBTITLE_TEXT)}
-        headerAction={
-          <IconButton
-            icon={
-              resolvedMode === 'dark'
-                ? 'white-balance-sunny'
-                : 'moon-waning-crescent'
-            }
-            size={24}
-            onPress={toggleTheme}
-          />
-        }
         footer={
           <>
             <AppText
