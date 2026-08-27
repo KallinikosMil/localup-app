@@ -11,7 +11,7 @@ type OnboardingData = {
   homeCity: string;
   homeLat: number;
   homeLng: number;
-  photoUri: string;
+  photoUris: string[];
   interestIds: string[];
   bio?: string;
 };
@@ -23,14 +23,36 @@ const ALLOWED_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'heic'];
 // an INSERT policy but NO UPDATE policy, which means `upsert: true`
 // fails with 403 on any path that already exists — so every upload gets
 // a fresh, unique name (exactly what useUploadPhoto does).
-const buildPhotoPath = (userId: string, photoUri: string) => {
+const buildPhotoPath = (userId: string, photoUri: string, index: number) => {
   const rawExt = photoUri.split('?')[0].split('.').pop()?.toLowerCase() ?? '';
   const ext = ALLOWED_EXTS.includes(rawExt) ? rawExt : 'jpg';
   const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
+  // The index is part of the name, not decoration: six uploads in a loop
+  // can land inside the same millisecond, and two identical names means
+  // the second upload 403s (the bucket has an INSERT policy and no
+  // UPDATE one, so upsert cannot save it).
   return {
-    path: `${userId}/${Date.now()}.${ext}`,
+    path: `${userId}/${Date.now()}-${index}.${ext}`,
     contentType,
   };
+};
+
+// Fetch the local file into an ArrayBuffer (RN-safe) and put it in the
+// bucket under an owner-scoped path.
+const uploadPhoto = async (userId: string, uri: string, index: number) => {
+  const { path, contentType } = buildPhotoPath(userId, uri, index);
+  const response = await fetch(uri);
+  const blob = await response.blob();
+  const arrayBuffer = await new Response(blob).arrayBuffer();
+
+  const { error } = await supabase.storage
+    .from(PHOTO_BUCKET)
+    .upload(path, arrayBuffer, {
+      contentType,
+      upsert: false,
+    });
+  if (error) throw error;
+  return path;
 };
 
 export function useCompleteOnboarding() {
@@ -56,29 +78,19 @@ export function useCompleteOnboarding() {
       if (!Number.isFinite(data.homeLat) || !Number.isFinite(data.homeLng)) {
         throw new Error('home coordinates are required to complete onboarding');
       }
-      if (!data.photoUri) {
+      if (data.photoUris.length === 0) {
         throw new Error('a photo is required to complete onboarding');
       }
       if (data.interestIds.length === 0) {
         throw new Error('at least one interest is required');
       }
 
-      // 1. Upload the avatar. Mirrors useUploadPhoto: fetch the local
-      //    file into an ArrayBuffer (RN-safe) and upload with an
-      //    explicit contentType.
-      const { path, contentType } = buildPhotoPath(user.id, data.photoUri);
-
-      const response = await fetch(data.photoUri);
-      const blob = await response.blob();
-      const arrayBuffer = await new Response(blob).arrayBuffer();
-
-      const { error: uploadError } = await supabase.storage
-        .from(PHOTO_BUCKET)
-        .upload(path, arrayBuffer, {
-          contentType,
-          upsert: false,
-        });
-      if (uploadError) throw uploadError;
+      // 1. Upload the avatar — the FIRST photo, which is the one the
+      //    deck and the profile hero lead with. The rest wait until the
+      //    profile exists, because there is nothing for them to hang off
+      //    until then.
+      const [avatarUri, ...extraUris] = data.photoUris;
+      const path = await uploadPhoto(user.id, avatarUri, 0);
 
       // 2. Public URL — NOT a signed one. The old code persisted a
       //    1-year signed URL into profiles.avatar_url, so every avatar
@@ -126,7 +138,28 @@ export function useCompleteOnboarding() {
         throw rpcError;
       }
 
-      // 4. Only now is the user really onboarded.
+      // 4. The optional photos. Deliberately AFTER the transaction and
+      //    deliberately not fatal: the account is already complete and
+      //    correct with one photo, and failing the whole of onboarding
+      //    over a fifth picture — forcing the user to redo four screens —
+      //    would be a far worse outcome than arriving with fewer photos
+      //    than they picked. Anything that does not land here can be
+      //    added from Edit profile, which is the same append_photo call.
+      for (const [i, uri] of extraUris.entries()) {
+        try {
+          const extraPath = await uploadPhoto(user.id, uri, i + 1);
+          const { error: appendError } = await supabase.rpc('append_photo', {
+            p_storage_path: extraPath,
+          });
+          if (appendError) throw appendError;
+        } catch (err) {
+          if (__DEV__) {
+            console.warn('[onboarding] extra photo not saved:', err);
+          }
+        }
+      }
+
+      // 5. Only now is the user really onboarded.
       store.dispatch(setOnboardingComplete(true));
 
       return { userId: user.id };

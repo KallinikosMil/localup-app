@@ -145,7 +145,7 @@ const InterestsScreen = () => {
     // so the rule can be tested instead of trusted.
     const dob = onboardingData.dateOfBirth;
     const dateOfBirth = dob ? toISODate(dob) : '';
-    const { homeLat, homeLng, photoUri } = onboardingData;
+    const { homeLat, homeLng, photoUris } = onboardingData;
 
     if (!dateOfBirth) {
       setMissing('dob');
@@ -155,7 +155,7 @@ const InterestsScreen = () => {
       setMissing('city');
       return;
     }
-    if (!photoUri) {
+    if (photoUris.length === 0) {
       setMissing('photo');
       return;
     }
@@ -171,7 +171,7 @@ const InterestsScreen = () => {
       homeCity: onboardingData.homeCity,
       homeLat,
       homeLng,
-      photoUri,
+      photoUris,
       interestIds: selectedIds,
       bio,
     });

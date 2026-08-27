@@ -12,7 +12,10 @@ export type OnboardingData = {
   homeCity: string;
   homeLat: number | null;
   homeLng: number | null;
-  photoUri: string | null;
+  // Ordered, and the first one is the avatar — the same rule the deck
+  // and the profile hero already follow. One is required; the rest are
+  // optional and can equally be added later from Edit profile.
+  photoUris: string[];
   interestIds: string[];
   bio: string;
 };
@@ -28,7 +31,7 @@ const initialData: OnboardingData = {
   homeCity: '',
   homeLat: null,
   homeLng: null,
-  photoUri: null,
+  photoUris: [],
   interestIds: [],
   bio: '',
 };

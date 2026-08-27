@@ -20,7 +20,7 @@ export default {
     step3Title: 'Add a photo',
     step3Subtitle: 'One good photo of your face is all you need to start.',
     photoSource: 'Camera or library',
-    photoMoreLater: 'Add up to five more later, from your profile.',
+    photoMoreLater: 'Add up to five more — here, or later from your profile.',
     uploadPhoto: 'Upload Photo',
     changePhoto: 'Change Photo',
     step4Title: 'What are you into?',

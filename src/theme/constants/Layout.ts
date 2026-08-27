@@ -141,6 +141,15 @@ export const Layout = {
   // reads thinner than it is; dark uses a muted tint that does not need
   // the extra weight. The artboards differ here on purpose.
   FIELD_BORDER_ERROR_LIGHT: 1.5,
+
+  // Onboarding step 3. The large card is the avatar — the photo the
+  // deck leads with — and the row under it holds the optional five.
+  PHOTO_SLOT_LG_W: 238,
+  PHOTO_SLOT_LG_H: 302,
+  // 42 while these were decoration. They take taps now, so they take
+  // the 44pt floor with them; below it they are a target people miss.
+  PHOTO_SLOT_SM: 52,
+  PHOTO_SLOT_GAP: 9,
   // The tall pill actions on auth screens — taller and rounder than the
   // 52px buttons inside the app, because an auth screen has one thing to
   // do and the button should look like it.
