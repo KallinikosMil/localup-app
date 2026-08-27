@@ -26,9 +26,11 @@ import { ageFromISODate } from '@shared/utils/date';
 import { useLogout } from '@features/auth/hooks/useAuth';
 import { useDeleteAccount } from '@features/auth/hooks/useDeleteAccount';
 import ProfileHero from '@features/profile/components/ProfileHero';
+import { ModeSegments } from '@features/profile/components/EditField';
 import { useProfile, usePhotos } from '@features/profile/hooks/useProfile';
 import { computeMode } from '@features/profile/utils/mode';
 import { useAppTheme } from '@theme/paper';
+import { useThemeMode } from '@theme/ThemeModeProvider';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
@@ -41,6 +43,7 @@ import { Layout } from '@theme/constants/Layout';
 
 function ProfileScreenContent() {
   const theme = useAppTheme();
+  const { mode: themeMode, setMode: setThemeMode } = useThemeMode();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
@@ -342,6 +345,43 @@ function ProfileScreenContent() {
               screen look unfinished. */}
           <View style={styles.spacer} />
 
+          {/* The theme control used to be a lone icon on the login
+              screen: a one-way flip out of following the system, with
+              nothing anywhere to get back, sitting on the one screen you
+              stop seeing the moment you have an account. It belongs
+              here, with all three options visible — including the
+              default, which was previously unreachable once left. */}
+          <View style={styles.appearance}>
+            <AppText
+              variant="labelStrong"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+              }}
+            >
+              {t(Translations.PROFILE_APPEARANCE)}
+            </AppText>
+            <ModeSegments
+              theme={theme}
+              options={[
+                {
+                  label: t(Translations.PROFILE_THEME_SYSTEM),
+                  active: themeMode === 'system',
+                  onPress: () => setThemeMode('system'),
+                },
+                {
+                  label: t(Translations.PROFILE_THEME_LIGHT),
+                  active: themeMode === 'light',
+                  onPress: () => setThemeMode('light'),
+                },
+                {
+                  label: t(Translations.PROFILE_THEME_DARK),
+                  active: themeMode === 'dark',
+                  onPress: () => setThemeMode('dark'),
+                },
+              ]}
+            />
+          </View>
+
           {/* Blocking was one-way until this screen existed — you could
               cut someone off and never change your mind, which is hard to
               defend when the copy also says they are never told. It sits
@@ -574,6 +614,10 @@ const styles = StyleSheet.create({
   spacer: {
     flex: 1,
     minHeight: Spacing.xxl,
+  },
+  appearance: {
+    gap: Layout.FIELD_LABEL_GAP,
+    marginBottom: Spacing.lg,
   },
   blockedLink: {
     alignSelf: 'flex-start',

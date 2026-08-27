@@ -25,6 +25,10 @@ export default {
   profilePhotoReorderHint:
     'Drag to reorder. The first photo is the one people see in Discover.',
   profileBlockedShort: 'Blocked',
+  profileAppearance: 'Appearance',
+  profileThemeSystem: 'System',
+  profileThemeLight: 'Light',
+  profileThemeDark: 'Dark',
   profileBlockedTitle: 'Blocked people',
   profileBlockedBody:
     'You will not see each other anywhere in LocalUp. They were never told, and they will not be told if you unblock.',

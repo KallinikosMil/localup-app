@@ -21,6 +21,10 @@ export default {
   profilePhotoReorderHint:
     'Σύρε για αναδιάταξη. Η πρώτη φωτογραφία είναι αυτή που βλέπουν στο Discover.',
   profileBlockedShort: 'Αποκλεισμένοι',
+  profileAppearance: 'Εμφάνιση',
+  profileThemeSystem: 'Συστήματος',
+  profileThemeLight: 'Φωτεινή',
+  profileThemeDark: 'Σκοτεινή',
   profileBlockedTitle: 'Αποκλεισμένα άτομα',
   profileBlockedBody:
     'Δεν θα βλέπετε ο ένας τον άλλον πουθενά στο LocalUp. Δεν ειδοποιήθηκαν, ούτε θα ειδοποιηθούν αν άρεις τον αποκλεισμό.',
