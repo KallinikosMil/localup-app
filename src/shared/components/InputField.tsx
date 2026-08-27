@@ -73,10 +73,17 @@ const InputField = <T extends FieldValues>({
   }, [onBlur, validateOnBlur, trigger, name]);
 
   const borderColor = error
-    ? theme.colors.error
+    ? theme.colors.errorFieldOutline
     : focused
       ? theme.colors.outlineSelected
       : theme.colors.outlineVariant;
+
+  // Light draws the error border heavier than dark does — see
+  // FIELD_BORDER_ERROR_LIGHT for why the two modes differ.
+  const borderWidth =
+    error && !theme.dark
+      ? Layout.FIELD_BORDER_ERROR_LIGHT
+      : Layout.FIELD_BORDER;
 
   return (
     <View>
@@ -100,6 +107,7 @@ const InputField = <T extends FieldValues>({
           {
             backgroundColor: theme.colors.surfaceElevated,
             borderColor,
+            borderWidth,
           },
         ]}
       >
@@ -154,19 +162,28 @@ const InputField = <T extends FieldValues>({
       </View>
 
       {error?.message || helper ? (
-        <AppText
-          variant="caption"
-          style={[
-            styles.helper,
-            {
-              color: error?.message
-                ? theme.colors.error
-                : theme.colors.onSurfaceFaint,
-            },
-          ]}
-        >
-          {error?.message ?? helper}
-        </AppText>
+        <View style={styles.helper}>
+          {error?.message ? (
+            <MaterialCommunityIcons
+              name="alert-circle-outline"
+              size={Layout.FIELD_ERROR_ICON}
+              color={theme.colors.error}
+            />
+          ) : null}
+          <AppText
+            variant="caption"
+            style={[
+              styles.helperText,
+              {
+                color: error?.message
+                  ? theme.colors.error
+                  : theme.colors.onSurfaceFaint,
+              },
+            ]}
+          >
+            {error?.message ?? helper}
+          </AppText>
+        </View>
       ) : null}
     </View>
   );
@@ -185,7 +202,6 @@ const styles = StyleSheet.create({
     gap: Layout.FIELD_INNER_GAP,
     paddingHorizontal: Layout.FIELD_PADDING_H,
     borderRadius: Layout.FIELD_RADIUS,
-    borderWidth: 1,
   },
   input: {
     flex: 1,
@@ -194,6 +210,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   helper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.FIELD_ERROR_GAP,
     marginTop: Layout.FIELD_LABEL_GAP,
+  },
+  helperText: {
+    // Wrap inside the row rather than pushing the glyph off the edge: a
+    // translated message is routinely longer than the English one.
+    flex: 1,
   },
 });

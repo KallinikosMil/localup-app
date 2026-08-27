@@ -59,6 +59,7 @@ const lightBase = {
   RED_050: '#FDECEA',
   RED_200: '#F3C9C6',
   RED_500: '#EF4444',
+  RED_600: '#B3261E',
   RED_700: '#B3261E',
   RED_900: '#601410',
   AMBER_500: '#F59E0B',
@@ -151,6 +152,7 @@ const darkBase: typeof lightBase = {
   RED_050: '#2E1F1F',
   RED_200: '#5C3B39',
   RED_500: '#F87171',
+  RED_600: '#6E4242',
   RED_700: '#F2B8B5',
   RED_900: '#601410',
   AMBER_500: '#FFD740',
@@ -210,6 +212,9 @@ export const lightColors = {
   outline: lightBase.GREY_400,
   outlineVariant: lightBase.GREY_200,
   error: lightBase.RED_700,
+  // The border of a form field that failed validation. Distinct from
+  // errorOutline, which rings the large error medallion.
+  errorFieldOutline: lightBase.RED_600,
   onError: lightBase.WHITE,
 
   success: lightBase.GREEN_500,
@@ -305,6 +310,7 @@ export const darkColors: typeof lightColors = {
   outline: darkBase.GREY_400,
   outlineVariant: darkBase.GREY_200,
   error: darkBase.RED_700,
+  errorFieldOutline: darkBase.RED_600,
   onError: darkBase.RED_900,
 
   success: darkBase.GREEN_500,

@@ -131,6 +131,16 @@ export const Layout = {
   // reveal button on the other side.
   FIELD_INNER_GAP: 11,
   FIELD_LABEL_GAP: 7,
+  // The alert glyph that sits before a validation message, and the gap
+  // between it and the words. Smaller than FIELD_ICON: it annotates the
+  // message, it is not a control.
+  FIELD_ERROR_ICON: 14,
+  FIELD_ERROR_GAP: 6,
+  FIELD_BORDER: 1,
+  // Light only. #B3261E on white is a dark line on a bright ground and
+  // reads thinner than it is; dark uses a muted tint that does not need
+  // the extra weight. The artboards differ here on purpose.
+  FIELD_BORDER_ERROR_LIGHT: 1.5,
   // The tall pill actions on auth screens — taller and rounder than the
   // 52px buttons inside the app, because an auth screen has one thing to
   // do and the button should look like it.
