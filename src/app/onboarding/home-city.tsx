@@ -7,18 +7,16 @@ import { router } from 'expo-router';
 import AppText from '@shared/components/AppText';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
+import {
+  toCityOptions,
+  type CityOption,
+  type NominatimPlace,
+} from '@features/onboarding/utils/cityOptions';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
 import { Typography } from '@theme/typography';
 import { Spacing } from '@theme/constants/Spacing';
 import { Layout } from '@theme/constants/Layout';
-
-type CityResult = {
-  place_id: number;
-  display_name: string;
-  lat: string;
-  lon: string;
-};
 
 const DEBOUNCE_MS = 300;
 // Shorter than the app's 15s Supabase budget: this is a type-ahead, and a
@@ -26,12 +24,13 @@ const DEBOUNCE_MS = 300;
 const SEARCH_TIMEOUT_MS = 8000;
 
 const HomeCityScreen = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useAppTheme();
   const { data, update } = useOnboardingData();
+  const language = i18n.language;
 
   const [query, setQuery] = useState(data.homeCity);
-  const [results, setResults] = useState<CityResult[]>([]);
+  const [results, setResults] = useState<CityOption[]>([]);
   const [selectedCity, setSelectedCity] = useState(data.homeCity);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inFlightRef = useRef<AbortController | null>(null);
@@ -55,43 +54,55 @@ const HomeCityScreen = () => {
   // Aborting the previous request on every new search fixes both: the stale
   // response is cancelled rather than raced, and the timeout gives the
   // request an upper bound.
-  const searchCities = useCallback(async (text: string) => {
-    inFlightRef.current?.abort();
+  const searchCities = useCallback(
+    async (text: string) => {
+      inFlightRef.current?.abort();
 
-    if (text.length < 2) {
-      setResults([]);
-      return;
-    }
-
-    const controller = new AbortController();
-    inFlightRef.current = controller;
-    const timeout = setTimeout(() => controller.abort(), SEARCH_TIMEOUT_MS);
-
-    try {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&limit=5&addressdetails=1&featuretype=city`;
-      const res = await fetch(url, {
-        headers: {
-          'User-Agent': 'LocalUp/1.0',
-        },
-        signal: controller.signal,
-      });
-      const json: CityResult[] = await res.json();
-      // A newer search started while this one was in flight — its results
-      // are the truth, so drop these rather than overwriting.
-      if (controller.signal.aborted) return;
-      setResults(json);
-    } catch {
-      // An abort is expected (superseded or timed out) and must NOT wipe the
-      // list the newer search is about to fill.
-      if (controller.signal.aborted) return;
-      setResults([]);
-    } finally {
-      clearTimeout(timeout);
-      if (inFlightRef.current === controller) {
-        inFlightRef.current = null;
+      if (text.length < 2) {
+        setResults([]);
+        return;
       }
-    }
-  }, []);
+
+      const controller = new AbortController();
+      inFlightRef.current = controller;
+      const timeout = setTimeout(() => controller.abort(), SEARCH_TIMEOUT_MS);
+
+      try {
+        // featureType, NOT featuretype. Nominatim ignores the lowercase
+        // spelling silently, so this filter was never applied and a search
+        // for "Λαρισα" offered a mountain peak near Argos as its second
+        // result. accept-language keeps the labels in one language rather
+        // than whatever each OSM object happens to carry.
+        const url =
+          'https://nominatim.openstreetmap.org/search' +
+          `?q=${encodeURIComponent(text)}` +
+          '&format=json&limit=6&addressdetails=1&featureType=city' +
+          `&accept-language=${encodeURIComponent(language)}`;
+        const res = await fetch(url, {
+          headers: {
+            'User-Agent': 'LocalUp/1.0',
+          },
+          signal: controller.signal,
+        });
+        const json: NominatimPlace[] = await res.json();
+        // A newer search started while this one was in flight — its results
+        // are the truth, so drop these rather than overwriting.
+        if (controller.signal.aborted) return;
+        setResults(toCityOptions(json));
+      } catch {
+        // An abort is expected (superseded or timed out) and must NOT wipe the
+        // list the newer search is about to fill.
+        if (controller.signal.aborted) return;
+        setResults([]);
+      } finally {
+        clearTimeout(timeout);
+        if (inFlightRef.current === controller) {
+          inFlightRef.current = null;
+        }
+      }
+    },
+    [language],
+  );
 
   const onChangeText = useCallback(
     (text: string) => {
@@ -107,16 +118,18 @@ const HomeCityScreen = () => {
     [searchCities],
   );
 
+  // The city ALONE is what gets stored and shown from here on. It used
+  // to be Nominatim's display_name, so a profile read "Λάρισα, Δημοτική
+  // Ενότητα Λαρισαίων, …, 422 22, Ελλάς" where it meant "Λάρισα".
   const onSelectCity = useCallback(
-    (item: CityResult) => {
-      const name = item.display_name;
-      setQuery(name);
-      setSelectedCity(name);
+    (item: CityOption) => {
+      setQuery(item.name);
+      setSelectedCity(item.name);
       setResults([]);
       update({
-        homeCity: name,
-        homeLat: parseFloat(item.lat),
-        homeLng: parseFloat(item.lon),
+        homeCity: item.name,
+        homeLat: item.lat,
+        homeLng: item.lng,
       });
     },
     [update],
@@ -126,11 +139,13 @@ const HomeCityScreen = () => {
     router.push('/onboarding/photo');
   };
 
-  const renderItem = ({ item }: { item: CityResult }) => (
+  // Two lines, as drawn: the place, then only as much of where it is as
+  // is needed to tell it from the row above.
+  const renderItem = ({ item }: { item: CityOption }) => (
     <Pressable
       onPress={() => onSelectCity(item)}
       accessibilityRole="button"
-      accessibilityLabel={item.display_name}
+      accessibilityLabel={`${item.name}, ${item.region}`}
       style={[
         styles.resultItem,
         {
@@ -139,13 +154,25 @@ const HomeCityScreen = () => {
       ]}
     >
       <AppText
-        variant="body"
+        variant="rowTitleQuiet"
+        numberOfLines={1}
         style={{
           color: theme.colors.onSurface,
         }}
       >
-        {item.display_name}
+        {item.name}
       </AppText>
+      {item.region ? (
+        <AppText
+          variant="caption"
+          numberOfLines={1}
+          style={{
+            color: theme.colors.onSurfaceFaint,
+          }}
+        >
+          {item.region}
+        </AppText>
+      ) : null}
     </Pressable>
   );
 
@@ -215,7 +242,7 @@ const HomeCityScreen = () => {
         >
           <FlatList
             data={results}
-            keyExtractor={item => String(item.place_id)}
+            keyExtractor={item => String(item.placeId)}
             renderItem={renderItem}
             keyboardShouldPersistTaps="handled"
             scrollEnabled={false}
@@ -252,7 +279,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   resultItem: {
-    paddingVertical: Spacing.lg,
+    gap: 2,
+    paddingVertical: Spacing.md + 2,
     paddingHorizontal: Layout.FIELD_PADDING_H,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
