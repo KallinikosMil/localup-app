@@ -24,6 +24,12 @@ import { Layout } from '@theme/constants/Layout';
 const MIN_INTERESTS = 3;
 const MAX_INTERESTS = 5;
 
+// category and is_active are NOT NULL in the database as of the
+// interests_category_and_is_active_not_null migration. They were nullable
+// before while this type said otherwise, and `data as Interest[]` below
+// hid the mismatch from the compiler — a null category would have grouped
+// under the string "null" and rendered a heading reading exactly that.
+// icon stays optional because it genuinely is.
 type Interest = {
   id: string;
   name: string;

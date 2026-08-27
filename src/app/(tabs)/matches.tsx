@@ -59,52 +59,19 @@ const timeLabel = (iso: string | null, t: TFunction) => {
 };
 
 // A match nobody has written in yet. NOT the same thing as unread: this
-// one has no conversation at all, so the design gives it its own chip and
-// a "Say hello" prompt instead of a message preview.
+// one has no conversation at all, so the row shows a "Say hello" prompt
+// in the accent colour instead of a message preview.
 const isNewMatch = (m: Match) => !m.last_message;
 
-// The small tinted counter beside a section label.
-const CountPill = ({ label, theme }: { label: string; theme: AppTheme }) => (
-  <View
-    style={[
-      styles.countPill,
-      {
-        backgroundColor: theme.colors.countPill,
-        borderColor: theme.colors.countPillBorder,
-      },
-    ]}
+const SectionLabel = ({ title, theme }: { title: string; theme: AppTheme }) => (
+  <AppText
+    variant="overline"
+    style={{
+      color: theme.colors.onSurfaceFaint,
+    }}
   >
-    <AppText
-      variant="nano"
-      style={{
-        color: theme.colors.primary,
-      }}
-    >
-      {label}
-    </AppText>
-  </View>
-);
-
-const SectionLabel = ({
-  title,
-  count,
-  theme,
-}: {
-  title: string;
-  count: string | null;
-  theme: AppTheme;
-}) => (
-  <View style={styles.sectionRow}>
-    <AppText
-      variant="overline"
-      style={{
-        color: theme.colors.onSurfaceFaint,
-      }}
-    >
-      {title}
-    </AppText>
-    {count ? <CountPill label={count} theme={theme} /> : null}
-  </View>
+    {title}
+  </AppText>
 );
 
 function MatchesScreenContent() {
@@ -137,7 +104,6 @@ function MatchesScreenContent() {
 
   const all = matches ?? [];
   const fresh = all.filter(isNewMatch);
-  const unreadCount = all.filter(isUnread).length;
 
   const openChat = (item: Match) =>
     router.push({
@@ -203,15 +169,7 @@ function MatchesScreenContent() {
   // is something here for you" means one thing across the app.
   const NewMatchesStrip = () => (
     <View style={styles.stripBlock}>
-      <SectionLabel
-        title={t(Translations.MATCHES_SECTION_NEW)}
-        count={
-          fresh.length > 0
-            ? t(Translations.MATCHES_COUNT_NEW, { count: fresh.length })
-            : null
-        }
-        theme={theme}
-      />
+      <SectionLabel title={t(Translations.MATCHES_SECTION_NEW)} theme={theme} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -369,26 +327,7 @@ function MatchesScreenContent() {
               {item.display_name}
             </AppText>
 
-            {brandNew ? (
-              <View
-                style={[
-                  styles.tinyChip,
-                  {
-                    backgroundColor: theme.colors.countPill,
-                    borderColor: theme.colors.countPillBorder,
-                  },
-                ]}
-              >
-                <AppText
-                  variant="nano"
-                  style={{
-                    color: theme.colors.primary,
-                  }}
-                >
-                  {t(Translations.MATCHES_NEW_MATCH)}
-                </AppText>
-              </View>
-            ) : modeChip ? (
+            {modeChip ? (
               <View
                 style={[
                   styles.tinyChip,
@@ -436,25 +375,6 @@ function MatchesScreenContent() {
           >
             {timeLabel(item.last_message_at ?? item.created_at, t)}
           </AppText>
-
-          {item.unread_count > 0 ? (
-            <View style={styles.unreadBadge}>
-              <LinearGradient
-                colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
-              />
-              <AppText
-                variant="microStrong"
-                style={{
-                  color: theme.colors.onGradient,
-                }}
-              >
-                {String(item.unread_count)}
-              </AppText>
-            </View>
-          ) : null}
         </View>
       </Pressable>
     );
@@ -481,24 +401,6 @@ function MatchesScreenContent() {
         >
           {t(Translations.MATCHES_TITLE)}
         </AppText>
-        {all.length > 0 ? (
-          <View style={styles.totalBadge}>
-            <LinearGradient
-              colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-            <AppText
-              variant="labelStrong"
-              style={{
-                color: theme.colors.onGradient,
-              }}
-            >
-              {String(all.length)}
-            </AppText>
-          </View>
-        ) : null}
       </View>
 
       {isLoading ? (
@@ -590,13 +492,6 @@ function MatchesScreenContent() {
               {fresh.length > 0 ? <NewMatchesStrip /> : null}
               <SectionLabel
                 title={t(Translations.MATCHES_SECTION_MESSAGES)}
-                count={
-                  unreadCount > 0
-                    ? t(Translations.MATCHES_COUNT_UNREAD, {
-                        count: unreadCount,
-                      })
-                    : null
-                }
                 theme={theme}
               />
             </>
