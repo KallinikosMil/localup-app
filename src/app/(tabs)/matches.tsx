@@ -74,6 +74,158 @@ const SectionLabel = ({ title, theme }: { title: string; theme: AppTheme }) => (
   </AppText>
 );
 
+// Module scope, NOT inside the screen. Declared in the body it was a
+// new component type on every render, which remounts the subtree and
+// re-decodes the image each time.
+const Avatar = ({
+  item,
+  size,
+  theme,
+}: {
+  item: Match;
+  size: number;
+  theme: AppTheme;
+}) =>
+  item.avatar_url ? (
+    <Image
+      source={{
+        uri: item.avatar_url,
+      }}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+      }}
+    />
+  ) : (
+    <View
+      style={[
+        styles.avatarPlaceholder,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: theme.colors.surfaceVariant,
+        },
+      ]}
+    >
+      <MaterialCommunityIcons
+        name="account"
+        size={size / 2}
+        color={theme.colors.onSurfaceVariant}
+      />
+    </View>
+  );
+
+// The strip of matches nobody has written in yet. A gradient ring marks
+// the ones still unseen — the same ring the chat avatar uses, so "there
+// is something here for you" means one thing across the app.
+const NewMatchesStrip = ({
+  fresh,
+  isUnread,
+  openChat,
+  theme,
+  t,
+}: {
+  fresh: Match[];
+  isUnread: (m: Match) => boolean;
+  openChat: (m: Match) => void;
+  theme: AppTheme;
+  t: ReturnType<typeof useTranslation>['t'];
+}) => (
+  <View style={styles.stripBlock}>
+    <SectionLabel title={t(Translations.MATCHES_SECTION_NEW)} theme={theme} />
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.strip}
+    >
+      {fresh.map(item => {
+        const unseen = isUnread(item);
+        const face = (
+          <View
+            style={[
+              styles.ringInner,
+              {
+                borderColor: theme.colors.background,
+              },
+            ]}
+          >
+            <Avatar
+              item={item}
+              theme={theme}
+              size={
+                Layout.AVATAR_STRIP -
+                (Layout.AVATAR_RING_WIDTH + Layout.AVATAR_RING_GAP) * 2
+              }
+            />
+          </View>
+        );
+
+        return (
+          <Pressable
+            key={item.id}
+            onPress={() => openChat(item)}
+            accessibilityRole="button"
+            accessibilityLabel={item.display_name}
+            accessibilityState={{ selected: unseen }}
+            style={styles.stripItem}
+          >
+            <View style={styles.ringWrap}>
+              {unseen ? (
+                <LinearGradient
+                  colors={[
+                    theme.colors.gradientStart,
+                    theme.colors.gradientEnd,
+                  ]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.ring}
+                >
+                  {face}
+                </LinearGradient>
+              ) : (
+                <View
+                  style={[
+                    styles.ring,
+                    {
+                      backgroundColor: theme.colors.outlineVariant,
+                    },
+                  ]}
+                >
+                  {face}
+                </View>
+              )}
+              {unseen ? (
+                <View
+                  style={[
+                    styles.unseenDot,
+                    {
+                      backgroundColor: theme.colors.primary,
+                      borderColor: theme.colors.background,
+                    },
+                  ]}
+                />
+              ) : null}
+            </View>
+            <AppText
+              variant={unseen ? 'microStrong' : 'micro'}
+              numberOfLines={1}
+              style={{
+                color: unseen
+                  ? theme.colors.onSurface
+                  : theme.colors.onSurfaceFaint,
+              }}
+            >
+              {item.display_name}
+            </AppText>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  </View>
+);
+
 function MatchesScreenContent() {
   const theme = useAppTheme();
   const router = useRouter();
@@ -132,134 +284,6 @@ function MatchesScreenContent() {
       },
     });
 
-  const Avatar = ({ item, size }: { item: Match; size: number }) =>
-    item.avatar_url ? (
-      <Image
-        source={{
-          uri: item.avatar_url,
-        }}
-        style={{
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-        }}
-      />
-    ) : (
-      <View
-        style={[
-          styles.avatarPlaceholder,
-          {
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            backgroundColor: theme.colors.surfaceVariant,
-          },
-        ]}
-      >
-        <MaterialCommunityIcons
-          name="account"
-          size={size / 2}
-          color={theme.colors.onSurfaceVariant}
-        />
-      </View>
-    );
-
-  // The strip of matches nobody has written in yet. A gradient ring marks
-  // the ones still unseen — the same ring the chat avatar uses, so "there
-  // is something here for you" means one thing across the app.
-  const NewMatchesStrip = () => (
-    <View style={styles.stripBlock}>
-      <SectionLabel title={t(Translations.MATCHES_SECTION_NEW)} theme={theme} />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.strip}
-      >
-        {fresh.map(item => {
-          const unseen = isUnread(item);
-          const face = (
-            <View
-              style={[
-                styles.ringInner,
-                {
-                  borderColor: theme.colors.background,
-                },
-              ]}
-            >
-              <Avatar
-                item={item}
-                size={
-                  Layout.AVATAR_STRIP -
-                  (Layout.AVATAR_RING_WIDTH + Layout.AVATAR_RING_GAP) * 2
-                }
-              />
-            </View>
-          );
-
-          return (
-            <Pressable
-              key={item.id}
-              onPress={() => openChat(item)}
-              accessibilityRole="button"
-              accessibilityLabel={item.display_name}
-              accessibilityState={{ selected: unseen }}
-              style={styles.stripItem}
-            >
-              <View style={styles.ringWrap}>
-                {unseen ? (
-                  <LinearGradient
-                    colors={[
-                      theme.colors.gradientStart,
-                      theme.colors.gradientEnd,
-                    ]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.ring}
-                  >
-                    {face}
-                  </LinearGradient>
-                ) : (
-                  <View
-                    style={[
-                      styles.ring,
-                      {
-                        backgroundColor: theme.colors.outlineVariant,
-                      },
-                    ]}
-                  >
-                    {face}
-                  </View>
-                )}
-                {unseen ? (
-                  <View
-                    style={[
-                      styles.unseenDot,
-                      {
-                        backgroundColor: theme.colors.primary,
-                        borderColor: theme.colors.background,
-                      },
-                    ]}
-                  />
-                ) : null}
-              </View>
-              <AppText
-                variant={unseen ? 'microStrong' : 'micro'}
-                numberOfLines={1}
-                style={{
-                  color: unseen
-                    ? theme.colors.onSurface
-                    : theme.colors.onSurfaceFaint,
-                }}
-              >
-                {item.display_name}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-    </View>
-  );
-
   const renderItem = ({ item }: { item: Match }) => {
     const unread = isUnread(item);
     const brandNew = isNewMatch(item);
@@ -307,7 +331,7 @@ function MatchesScreenContent() {
           accessibilityHint={t(Common.A11Y_OPEN_PROFILE)}
           hitSlop={4}
         >
-          <Avatar item={item} size={Layout.AVATAR_ROW} />
+          <Avatar item={item} size={Layout.AVATAR_ROW} theme={theme} />
         </Pressable>
 
         <View style={styles.rowBody}>
@@ -489,7 +513,15 @@ function MatchesScreenContent() {
           renderItem={renderItem}
           ListHeaderComponent={
             <>
-              {fresh.length > 0 ? <NewMatchesStrip /> : null}
+              {fresh.length > 0 ? (
+                <NewMatchesStrip
+                  fresh={fresh}
+                  isUnread={isUnread}
+                  openChat={openChat}
+                  theme={theme}
+                  t={t}
+                />
+              ) : null}
               <SectionLabel
                 title={t(Translations.MATCHES_SECTION_MESSAGES)}
                 theme={theme}
