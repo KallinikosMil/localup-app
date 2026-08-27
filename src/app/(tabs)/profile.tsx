@@ -342,6 +342,33 @@ function ProfileScreenContent() {
               screen look unfinished. */}
           <View style={styles.spacer} />
 
+          {/* Blocking was one-way until this screen existed — you could
+              cut someone off and never change your mind, which is hard to
+              defend when the copy also says they are never told. It sits
+              with the other account actions rather than behind a settings
+              gear that has nothing else in it yet. */}
+          <Pressable
+            onPress={() => router.push('/profile/blocked')}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.PROFILE_BLOCKED_TITLE)}
+            style={styles.blockedLink}
+          >
+            <MaterialCommunityIcons
+              name="account-cancel-outline"
+              size={17}
+              color={theme.colors.onSurfaceVariant}
+            />
+            <AppText
+              variant="labelStrong"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+              }}
+            >
+              {t(Translations.PROFILE_BLOCKED_TITLE)}
+            </AppText>
+          </Pressable>
+
           {/* Both quiet, and side by side rather than stacked as buttons:
               neither is something the screen wants you to do. Delete is
               findable because Google Play requires it to be, and tinted
@@ -547,6 +574,13 @@ const styles = StyleSheet.create({
   spacer: {
     flex: 1,
     minHeight: Spacing.xxl,
+  },
+  blockedLink: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.CHIP_GAP,
+    marginBottom: Spacing.lg,
   },
   footerRow: {
     flexDirection: 'row',

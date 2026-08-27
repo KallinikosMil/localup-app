@@ -20,6 +20,18 @@ export default {
   profilePhotoCountOf: '{{count}} από {{max}}',
   profilePhotoReorderHint:
     'Σύρε για αναδιάταξη. Η πρώτη φωτογραφία είναι αυτή που βλέπουν στο Discover.',
+  profileBlockedShort: 'Αποκλεισμένοι',
+  profileBlockedTitle: 'Αποκλεισμένα άτομα',
+  profileBlockedBody:
+    'Δεν θα βλέπετε ο ένας τον άλλον πουθενά στο LocalUp. Δεν ειδοποιήθηκαν, ούτε θα ειδοποιηθούν αν άρεις τον αποκλεισμό.',
+  profileBlockedOn: 'Αποκλείστηκε {{date}}',
+  profileBlockedEmpty: 'Δεν έχεις αποκλείσει κανέναν',
+  profileBlockedError: 'Η λίστα αποκλεισμένων δεν φορτώθηκε.',
+  profileUnblock: 'Άρση',
+  profileUnblockName: 'Άρση αποκλεισμού για {{name}}',
+  profileUnblockNote:
+    'Η άρση δεν επαναφέρει ταίριασμα ή συνομιλία. Αν κάνετε ξανά swipe και οι δύο, θα ταιριάξετε ξανά.',
+  profileUnblockError: 'Η άρση απέτυχε. Δοκίμασε ξανά.',
   profileReorderError: 'Η νέα σειρά δεν αποθηκεύτηκε. Δοκίμασε ξανά.',
   profileSettings: 'Ρυθμίσεις',
   profileNameAge: '{{name}}, {{age}}',

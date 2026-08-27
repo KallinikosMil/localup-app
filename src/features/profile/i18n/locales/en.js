@@ -24,6 +24,18 @@ export default {
   profilePhotoCountOf: '{{count}} of {{max}}',
   profilePhotoReorderHint:
     'Drag to reorder. The first photo is the one people see in Discover.',
+  profileBlockedShort: 'Blocked',
+  profileBlockedTitle: 'Blocked people',
+  profileBlockedBody:
+    'You will not see each other anywhere in LocalUp. They were never told, and they will not be told if you unblock.',
+  profileBlockedOn: 'Blocked {{date}}',
+  profileBlockedEmpty: 'You have not blocked anyone',
+  profileBlockedError: 'The blocked list did not load.',
+  profileUnblock: 'Unblock',
+  profileUnblockName: 'Unblock {{name}}',
+  profileUnblockNote:
+    'Unblocking does not restore a match or a conversation. If you both swipe again, you will match again.',
+  profileUnblockError: 'Unblocking failed. Please try again.',
   profileReorderError: 'The new order was not saved. Please try again.',
   profileSettings: 'Settings',
   profileNameAge: '{{name}}, {{age}}',
