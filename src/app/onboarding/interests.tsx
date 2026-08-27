@@ -64,6 +64,10 @@ const InterestsScreen = () => {
   );
   const [bio, setBio] = useState(onboardingData.bio);
   const [missing, setMissing] = useState<MissingField | null>(null);
+  const [progress, setProgress] = useState<{
+    done: number;
+    total: number;
+  } | null>(null);
 
   // H2: `isError` is the whole point here. The Finish mutation had no
   // onError and no error UI — on failure the spinner just stopped and
@@ -133,6 +137,7 @@ const InterestsScreen = () => {
     // retry is in flight.
     resetFinish();
     setMissing(null);
+    setProgress(null);
 
     // H3 — NULL ISLAND. This used to be `homeLat: ?? 0, homeLng: ?? 0,
     // photoUri: ?? ''`: missing coordinates were silently written as
@@ -174,6 +179,7 @@ const InterestsScreen = () => {
       photoUris,
       interestIds: selectedIds,
       bio,
+      onProgress: (done, total) => setProgress({ done, total }),
     });
   };
 
@@ -336,7 +342,30 @@ const InterestsScreen = () => {
           </>
         ) : null}
 
-        {isPending ? <ActivityIndicator size="large" /> : null}
+        {isPending ? (
+          <>
+            <ActivityIndicator size="large" />
+            {/* A bare spinner here was fine while finishing meant one
+                upload. It can now mean six, and a spinner that says
+                nothing for twenty seconds is indistinguishable from a
+                hang — the same reason the cold-start loader got a
+                message rather than a shorter timeout. */}
+            {progress ? (
+              <>
+                <Spacer spacing={Spacing.SPACING_PADDING_12} />
+                <AppText
+                  variant="caption"
+                  style={{
+                    color: theme.colors.onSurfaceFaint,
+                    textAlign: 'center',
+                  }}
+                >
+                  {t(Translations.ONBOARDING_UPLOADING, progress)}
+                </AppText>
+              </>
+            ) : null}
+          </>
+        ) : null}
       </View>
     </OnboardingShell>
   );

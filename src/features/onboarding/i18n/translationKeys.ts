@@ -20,6 +20,7 @@ export const Translations = {
   ONBOARDING_PHOTO_SOURCE: 'onboarding.photoSource',
   ONBOARDING_PHOTO_MORE_LATER: 'onboarding.photoMoreLater',
   ONBOARDING_UPLOAD_PHOTO: 'onboarding.uploadPhoto',
+  ONBOARDING_UPLOADING: 'onboarding.uploading',
   ONBOARDING_CHANGE_PHOTO: 'onboarding.changePhoto',
   ONBOARDING_STEP_4_TITLE: 'onboarding.step4Title',
   ONBOARDING_STEP_4_SUBTITLE: 'onboarding.step4Subtitle',

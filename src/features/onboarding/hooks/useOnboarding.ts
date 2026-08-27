@@ -14,6 +14,10 @@ type OnboardingData = {
   photoUris: string[];
   interestIds: string[];
   bio?: string;
+  // Called as each photo starts uploading. Finishing used to be one
+  // upload behind a bare spinner; with up to six it is long enough that
+  // an unlabelled spinner reads as a hang.
+  onProgress?: (done: number, total: number) => void;
 };
 
 const ALLOWED_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'heic'];
@@ -90,6 +94,8 @@ export function useCompleteOnboarding() {
       //    profile exists, because there is nothing for them to hang off
       //    until then.
       const [avatarUri, ...extraUris] = data.photoUris;
+      const total = data.photoUris.length;
+      data.onProgress?.(1, total);
       const path = await uploadPhoto(user.id, avatarUri, 0);
 
       // 2. Public URL — NOT a signed one. The old code persisted a
@@ -146,6 +152,7 @@ export function useCompleteOnboarding() {
       //    than they picked. Anything that does not land here can be
       //    added from Edit profile, which is the same append_photo call.
       for (const [i, uri] of extraUris.entries()) {
+        data.onProgress?.(i + 2, total);
         try {
           const extraPath = await uploadPhoto(user.id, uri, i + 1);
           const { error: appendError } = await supabase.rpc('append_photo', {

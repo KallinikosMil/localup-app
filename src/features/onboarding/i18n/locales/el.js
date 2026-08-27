@@ -22,8 +22,9 @@ export default {
     photoSource: 'Κάμερα ή συλλογή',
     photoMoreLater:
       'Πρόσθεσε ως πέντε ακόμη — εδώ ή αργότερα από το προφίλ σου.',
-    uploadPhoto: 'Ανέβασε Φωτογραφία',
-    changePhoto: 'Άλλαξε Φωτογραφία',
+    uploadPhoto: 'Ανέβασε φωτογραφία',
+    uploading: 'Ανεβαίνει {{done}} από {{total}}…',
+    changePhoto: 'Άλλαξε φωτογραφία',
     step4Title: 'Τι σε ενδιαφέρει;',
     step4Subtitle:
       'Τα κοινά ενδιαφέροντα σε ανεβάζουν ψηλά στην τράπουλα κάποιου.',

@@ -21,8 +21,9 @@ export default {
     step3Subtitle: 'One good photo of your face is all you need to start.',
     photoSource: 'Camera or library',
     photoMoreLater: 'Add up to five more — here, or later from your profile.',
-    uploadPhoto: 'Upload Photo',
-    changePhoto: 'Change Photo',
+    uploadPhoto: 'Upload photo',
+    uploading: 'Uploading {{done}} of {{total}}…',
+    changePhoto: 'Change photo',
     step4Title: 'What are you into?',
     step4Subtitle:
       "Shared interests are what put you near the top of someone's deck.",
