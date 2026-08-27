@@ -30,13 +30,20 @@ import {
 } from '@features/profile/hooks/useProfile';
 import { computeMode, type ProfileMode } from '@features/profile/utils/mode';
 import PhotoGrid from '@features/profile/components/PhotoGrid';
-import { useAppTheme, AppTheme } from '@theme/paper';
+import { useAppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Translations as Common } from '@shared/i18n/translationKeys';
+import {
+  Section,
+  SectionRule,
+  LabelledField,
+  ModeSegments,
+} from '@features/profile/components/EditField';
+import { Typography } from '@theme/typography';
 import { Spacing } from '@theme/constants/Spacing';
+import { Layout } from '@theme/constants/Layout';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 
-const PHOTO_SIZE = 100;
 const MAX_PHOTOS = 6;
 const BIO_LIMIT = 240;
 
@@ -344,13 +351,6 @@ function EditProfileScreenContent() {
     );
   }
 
-  const surfaceLow = blendSurface(
-    theme.colors.background,
-    theme.colors.primaryContainer,
-    0.18,
-  );
-  const surfaceLowest = theme.colors.surface;
-
   return (
     <View
       style={{
@@ -364,7 +364,7 @@ function EditProfileScreenContent() {
           styles.appBar,
           {
             backgroundColor: theme.colors.background,
-            borderBottomColor: surfaceLow,
+            borderBottomColor: theme.colors.outlineVariant,
           },
         ]}
       >
@@ -376,7 +376,7 @@ function EditProfileScreenContent() {
           style={[
             styles.pillGhost,
             {
-              backgroundColor: surfaceLow,
+              backgroundColor: theme.colors.surfaceVariant,
             },
           ]}
         >
@@ -461,68 +461,13 @@ function EditProfileScreenContent() {
         {/* The circular avatar that used to sit here is gone. Photos ARE
             the grid below, and slot 1 IS the avatar — showing both raised
             the question of which one wins, which was exactly the
-            confusion the position column was added to end. */}
+            confusion the position column was added to end.
 
-        {/* Basic info card */}
-        <Section
-          title={t(Translations.PROFILE_SECTION_BASICS)}
-          bg={surfaceLowest}
-        >
-          <FieldRow
-            icon="account-outline"
-            value={name}
-            onChange={markDirty(setName)}
-            placeholder={t(Translations.PROFILE_NAME_PLACEHOLDER)}
-            theme={theme}
-          />
-          <Divider />
-          <FieldRow
-            icon="map-marker-outline"
-            value={city}
-            onChange={markDirty(setCity)}
-            placeholder={t(Translations.PROFILE_CITY_PLACEHOLDER)}
-            theme={theme}
-          />
-        </Section>
-
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
-
-        {/* About */}
-        <Section
-          title={t(Translations.PROFILE_SECTION_ABOUT_YOU)}
-          bg={surfaceLowest}
-        >
-          <RNTextInput
-            value={bio}
-            onChangeText={markDirty(setBio)}
-            maxLength={BIO_LIMIT}
-            multiline
-            placeholder={t(Translations.PROFILE_BIO_PLACEHOLDER)}
-            placeholderTextColor={theme.colors.onSurfaceVariant}
-            style={[
-              styles.bioInput,
-              {
-                color: theme.colors.onSurface,
-              },
-            ]}
-          />
-          <AppText
-            variant="caption"
-            style={{
-              alignSelf: 'flex-end',
-              color: theme.colors.onSurfaceVariant,
-            }}
-          >
-            {bio.length} / {BIO_LIMIT}
-          </AppText>
-        </Section>
-
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
-
-        {/* Photos */}
+            Photos come FIRST now. They are the thing people actually open
+            this screen to change, and they were buried under two text
+            fields. */}
         <Section
           title={t(Translations.PROFILE_SECTION_YOUR_GALLERY)}
-          bg={surfaceLowest}
           trailing={t(Translations.PROFILE_PHOTO_COUNT_OF, {
             count: photoCount,
             max: MAX_PHOTOS,
@@ -533,7 +478,15 @@ function EditProfileScreenContent() {
               already have. Only shown when the read failed AND nothing is
               cached; a stale-but-usable list still renders below. */}
           {photosError && !photos?.length ? (
-            <AppText variant="body" style={styles.photoNotice}>
+            <AppText
+              variant="body"
+              style={[
+                styles.photoNotice,
+                {
+                  color: theme.colors.onSurfaceVariant,
+                },
+              ]}
+            >
               {t(Translations.PROFILE_GALLERY_ERROR)}
             </AppText>
           ) : null}
@@ -565,42 +518,61 @@ function EditProfileScreenContent() {
           />
         </Section>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+        <SectionRule />
 
-        {/* Home base */}
-        <Section
-          title={t(Translations.PROFILE_SECTION_HOME_BASE)}
-          bg={surfaceLowest}
-        >
-          <View style={styles.homeBaseRow}>
-            <View
-              style={[
-                styles.mapThumb,
-                {
-                  backgroundColor: surfaceLow,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="map-marker"
-                size={28}
-                color={theme.colors.primary}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
+        <Section title={t(Translations.PROFILE_SECTION_BASICS)}>
+          <View style={styles.fields}>
+            <LabelledField
+              label={t(Translations.PROFILE_NAME_PLACEHOLDER)}
+              icon="account-outline"
+              value={name}
+              onChange={markDirty(setName)}
+            />
+            <LabelledField
+              label={t(Translations.PROFILE_CITY_PLACEHOLDER)}
+              icon="map-marker-outline"
+              value={city}
+              onChange={markDirty(setCity)}
+            />
+          </View>
+        </Section>
+
+        <SectionRule />
+
+        {/* Home base is NOT in the artboards, and is kept anyway: it is
+            the only way to set home COORDINATES, and without them the
+            mode rule has nothing to compare against — you would sit at
+            "we cannot tell" forever. The design shows a home city field,
+            which is a label; this sets the position that label stands
+            for. */}
+        <Section title={t(Translations.PROFILE_SECTION_HOME_BASE)}>
+          <View
+            style={[
+              styles.homeBase,
+              {
+                backgroundColor: theme.colors.surfaceElevated,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="map-marker-outline"
+              size={Layout.FIELD_ICON}
+              color={theme.colors.onSurfaceFaint}
+            />
+            <View style={styles.homeBaseText}>
               <AppText
-                variant="body"
+                variant="bodySmallStrong"
                 style={{
                   color: theme.colors.onSurface,
-                  fontWeight: '600',
                 }}
               >
                 {profile.home_city ?? t(Translations.PROFILE_HOME_NOT_SET)}
               </AppText>
               <AppText
-                variant="caption"
+                variant="micro"
                 style={{
-                  color: theme.colors.onSurfaceVariant,
+                  color: theme.colors.onSurfaceFaint,
                 }}
               >
                 {profile.home_lat != null
@@ -609,30 +581,27 @@ function EditProfileScreenContent() {
               </AppText>
             </View>
           </View>
-          <Spacer spacing={Spacing.SPACING_PADDING_12} />
+
           <Pressable
             onPress={setHomeHere}
             accessibilityRole="button"
             accessibilityLabel={t(Translations.PROFILE_SET_HOME)}
             style={[
-              styles.pillPrimary,
+              styles.setHome,
               {
-                backgroundColor: theme.colors.primary,
-                alignSelf: 'flex-start',
+                borderColor: theme.colors.outlineSelected,
               },
             ]}
           >
             <MaterialCommunityIcons
-              name="home-map-marker"
+              name="crosshairs-gps"
               size={16}
-              color={theme.colors.onPrimary}
+              color={theme.colors.primary}
             />
             <AppText
-              variant="caption"
+              variant="bodySmallStrong"
               style={{
-                color: theme.colors.onPrimary,
-                fontWeight: '600',
-                marginLeft: 6,
+                color: theme.colors.primary,
               }}
             >
               {t(Translations.PROFILE_SET_HOME)}
@@ -640,46 +609,75 @@ function EditProfileScreenContent() {
           </Pressable>
         </Section>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+        <SectionRule />
 
-        {/* Mode */}
-        <Section
-          title={t(Translations.PROFILE_SECTION_MODE)}
-          bg={surfaceLowest}
-        >
-          <View style={styles.modeRow}>
-            <ModePill
-              label={t(Translations.PROFILE_MODE_AUTO)}
-              active={profile.mode_override === null}
-              onPress={() => setMode(null)}
-              theme={theme}
-              surface={surfaceLow}
-            />
-            <ModePill
-              label={t(Translations.PROFILE_MODE_LOCAL)}
-              active={profile.mode_override === 'local'}
-              onPress={() => setMode('local')}
-              theme={theme}
-              surface={surfaceLow}
-            />
-            <ModePill
-              label={t(Translations.PROFILE_MODE_TRAVELER)}
-              active={profile.mode_override === 'traveler'}
-              onPress={() => setMode('traveler')}
-              theme={theme}
-              surface={surfaceLow}
-            />
-          </View>
-          <Spacer spacing={Spacing.SPACING_PADDING_8} />
+        <Section title={t(Translations.PROFILE_SECTION_ABOUT_YOU)}>
+          <RNTextInput
+            value={bio}
+            onChangeText={markDirty(setBio)}
+            maxLength={BIO_LIMIT}
+            multiline
+            placeholder={t(Translations.PROFILE_BIO_PLACEHOLDER)}
+            placeholderTextColor={theme.colors.onSurfaceFaint}
+            style={[
+              styles.bioInput,
+              Typography.message.style,
+              {
+                backgroundColor: theme.colors.surfaceElevated,
+                borderColor: theme.colors.outlineVariant,
+                color: theme.colors.onSurface,
+              },
+            ]}
+          />
+          <AppText
+            variant="micro"
+            style={[
+              styles.counter,
+              {
+                color: theme.colors.onSurfaceFaint,
+              },
+            ]}
+          >
+            {bio.length} / {BIO_LIMIT}
+          </AppText>
+        </Section>
+
+        <SectionRule />
+
+        <Section title={t(Translations.PROFILE_SECTION_MODE)}>
+          <ModeSegments
+            theme={theme}
+            options={[
+              {
+                label: t(Translations.PROFILE_MODE_AUTO),
+                active: profile.mode_override === null,
+                onPress: () => setMode(null),
+              },
+              {
+                label: t(Translations.PROFILE_MODE_LOCAL),
+                active: profile.mode_override === 'local',
+                onPress: () => setMode('local'),
+              },
+              {
+                label: t(Translations.PROFILE_MODE_TRAVELER),
+                active: profile.mode_override === 'traveler',
+                onPress: () => setMode('traveler'),
+              },
+            ]}
+          />
+
           {/* Three sentences, not a concatenation: the mode name is
-              interpolated so translations can reorder it, and the
-              unknown case gets its own honest line instead of asserting
-              "Local" while we're still waiting for coordinates. */}
+              interpolated so translations can reorder it, and the unknown
+              case gets its own honest line instead of asserting "Local"
+              while we are still waiting for coordinates. */}
           <AppText
             variant="caption"
-            style={{
-              color: theme.colors.onSurface,
-            }}
+            style={[
+              styles.modeNote,
+              {
+                color: theme.colors.onSurfaceFaint,
+              },
+            ]}
           >
             {mode === null
               ? t(Translations.PROFILE_MODE_NOTE_UNKNOWN)
@@ -709,149 +707,6 @@ function EditProfileScreenContent() {
 
 // ─── helpers ─────────────────────────
 
-const Section = ({
-  title,
-  bg,
-  trailing,
-  children,
-}: {
-  title: string;
-  bg: string;
-  // A counter or status on the right of the section label — '3 of 6',
-  // '6 of 10 selected'. Baseline-aligned with the label, not centred.
-  trailing?: string;
-  children: React.ReactNode;
-}) => {
-  const theme = useAppTheme();
-  return (
-    <View>
-      <View style={styles.sectionHeader}>
-        <AppText
-          variant="overline"
-          style={{
-            color: theme.colors.onSurfaceFaint,
-          }}
-        >
-          {title}
-        </AppText>
-        {trailing ? (
-          <AppText
-            variant="micro"
-            style={{
-              color: theme.colors.onSurfaceFaint,
-            }}
-          >
-            {trailing}
-          </AppText>
-        ) : null}
-      </View>
-      <View style={[styles.sectionCard, { backgroundColor: bg }]}>
-        {children}
-      </View>
-    </View>
-  );
-};
-
-const FieldRow = ({
-  icon,
-  value,
-  onChange,
-  placeholder,
-  theme,
-}: {
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-  theme: AppTheme;
-}) => (
-  <View style={styles.fieldRow}>
-    <MaterialCommunityIcons
-      name={icon}
-      size={20}
-      color={theme.colors.onSurfaceVariant}
-    />
-    <RNTextInput
-      value={value}
-      onChangeText={onChange}
-      placeholder={placeholder}
-      placeholderTextColor={theme.colors.onSurfaceVariant}
-      style={[styles.fieldInput, { color: theme.colors.onSurface }]}
-    />
-  </View>
-);
-
-const Divider = () => {
-  const theme = useAppTheme();
-  return (
-    <View
-      style={{
-        height: 1,
-        backgroundColor: theme.colors.outlineVariant ?? 'rgba(0,0,0,0.05)',
-        marginLeft: 36,
-        opacity: 0.4,
-      }}
-    />
-  );
-};
-
-const ModePill = ({
-  label,
-  active,
-  onPress,
-  theme,
-  surface,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-  theme: AppTheme;
-  surface: string;
-}) => (
-  <Pressable
-    onPress={onPress}
-    style={[
-      styles.modePill,
-      {
-        backgroundColor: active ? theme.colors.primary : surface,
-      },
-    ]}
-  >
-    <AppText
-      variant="caption"
-      style={{
-        color: active ? theme.colors.onPrimary : theme.colors.onSurface,
-        fontWeight: active ? '700' : '500',
-      }}
-    >
-      {label}
-    </AppText>
-  </Pressable>
-);
-
-// Lerp between two hex colors. Used to
-// derive surface tiers from the theme.
-const blendSurface = (base: string, tint: string, t: number) => {
-  const b = hexToRgb(base);
-  const tt = hexToRgb(tint);
-  if (!b || !tt) return base;
-  const r = Math.round(b.r + (tt.r - b.r) * t);
-  const g = Math.round(b.g + (tt.g - b.g) * t);
-  const bl = Math.round(b.b + (tt.b - b.b) * t);
-  return `rgb(${r}, ${g}, ${bl})`;
-};
-
-const hexToRgb = (hex: string) => {
-  const m = /^#?([a-f0-9]{6})$/i.exec(hex);
-  if (!m) return null;
-  const n = parseInt(m[1], 16);
-  return {
-    r: (n >> 16) & 255,
-    g: (n >> 8) & 255,
-    b: n & 255,
-  };
-};
-
 // The group layout no longer insets this route — /profile/[userId] in
 // the same group is a full-bleed hero and could not opt out of a parent
 // inset. Edit is an ordinary form page and still wants one, so it takes
@@ -869,67 +724,38 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.xl,
   },
   appBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.SPACING_PADDING_16,
-    paddingTop: 56,
-    paddingBottom: 12,
+    height: Layout.CHAT_HEADER_HEIGHT,
+    paddingHorizontal: Spacing.lg,
     borderBottomWidth: 1,
   },
   pillGhost: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: Layout.PILL_PADDING_H,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.pill,
   },
   pillPrimary: {
-    flexDirection: 'row',
+    height: Layout.ICON_BUTTON,
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.pill,
+    justifyContent: 'center',
+    paddingHorizontal: Layout.FIELD_PADDING_H,
+    borderRadius: Layout.ICON_BUTTON / 2,
+    overflow: 'hidden',
   },
-  // Sits on top of the (transparent) Save label while the write is in
-  // flight, so the pill keeps the exact width it had (V14).
   pillSpinner: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
   },
   content: {
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_24,
-    paddingBottom: Spacing.SPACING_PADDING_32,
-  },
-  sectionCard: {
-    padding: Spacing.SPACING_PADDING_16,
-    borderRadius: BorderRadius.xxl,
-  },
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    gap: 12,
-  },
-  fieldInput: {
-    flex: 1,
-    fontSize: 16,
-    padding: 0,
-  },
-  bioInput: {
-    minHeight: 96,
-    fontSize: 16,
-    textAlignVertical: 'top',
-    padding: 0,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
+    paddingHorizontal: Layout.SCREEN_PADDING,
+    paddingTop: Layout.SECTION_GAP,
+    paddingBottom: Spacing.xxl,
   },
   photoNotice: {
     marginBottom: Spacing.sm,
@@ -937,48 +763,46 @@ const styles = StyleSheet.create({
   photoHint: {
     marginBottom: Spacing.md,
   },
-  photoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+  fields: {
+    gap: Layout.STRIP_GAP,
   },
-  photoCell: {
-    width: PHOTO_SIZE,
-    height: PHOTO_SIZE,
-    borderRadius: BorderRadius.lg,
-    overflow: 'hidden',
-  },
-  photoImg: {
-    width: '100%',
-    height: '100%',
-  },
-  photoAdd: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    backgroundColor: 'transparent',
-  },
-  homeBaseRow: {
+  homeBase: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.sm + 2,
+    paddingHorizontal: Layout.FIELD_PADDING_H,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: Layout.FIELD_RADIUS,
+    borderWidth: 1,
   },
-  mapThumb: {
-    width: 56,
-    height: 56,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modeRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  modePill: {
+  homeBaseText: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: BorderRadius.pill,
+  },
+  setHome: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: Layout.CHIP_GAP,
+    marginTop: Spacing.md,
+    paddingHorizontal: Layout.PILL_PADDING_H,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+  },
+  bioInput: {
+    minHeight: Layout.FIELD_HEIGHT * 2,
+    borderRadius: Layout.FIELD_RADIUS,
+    borderWidth: 1,
+    paddingHorizontal: Layout.FIELD_PADDING_H,
+    paddingTop: Layout.STRIP_GAP,
+    paddingBottom: Layout.STRIP_GAP,
+    textAlignVertical: 'top',
+  },
+  counter: {
+    alignSelf: 'flex-end',
+    marginTop: Spacing.xs + 2,
+  },
+  modeNote: {
+    marginTop: Spacing.sm,
   },
 });
