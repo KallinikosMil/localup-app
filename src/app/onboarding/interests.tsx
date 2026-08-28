@@ -196,6 +196,7 @@ const InterestsScreen = () => {
       }
       onAction={onFinish}
       actionDisabled={!canFinish || isPending}
+      backDisabled={isPending}
     >
       <AppText
         variant="caption"

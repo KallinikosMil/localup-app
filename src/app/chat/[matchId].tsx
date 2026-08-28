@@ -34,6 +34,7 @@ import { useAppTheme } from '@theme/paper';
 import { Layout } from '@theme/constants/Layout';
 import { Typography } from '@theme/typography';
 import AmbientGlow from '@shared/components/AmbientGlow';
+import { formatDate } from '@shared/utils/date';
 import {
   relativeTime,
   sameCalendarDay,
@@ -72,7 +73,8 @@ export default function ChatScreen() {
     avatar?: string;
   }>();
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
 
   const insets = useSafeAreaInsets();
   const errorMessage = useErrorMessage();
@@ -158,9 +160,9 @@ export default function ChatScreen() {
       case 'yesterday':
         return t(Translations.CHAT_DAY_YESTERDAY);
       case 'weekday':
-        return r.date.toLocaleDateString(undefined, { weekday: 'long' });
+        return formatDate(r.date, language, { weekday: 'long' });
       case 'date':
-        return r.date.toLocaleDateString(undefined, {
+        return formatDate(r.date, language, {
           day: 'numeric',
           month: 'long',
         });

@@ -192,6 +192,7 @@ export default function UserProfileScreen() {
               onPress={() => router.back()}
               accessibilityRole="button"
               accessibilityLabel={t(Common.A11Y_BACK)}
+              hitSlop={Layout.HIT_SLOP}
               style={[
                 styles.roundOnPhoto,
                 {

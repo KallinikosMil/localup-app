@@ -76,18 +76,22 @@ const ProfileHero = ({
 
   const photos =
     photoUrls.length > 0 ? photoUrls : fallbackUrl ? [fallbackUrl] : [];
-  const [index, setIndex] = useState(0);
+  const [rawIndex, setRawIndex] = useState(0);
   const paged = photos.length > 1;
-  const current = photos[Math.min(index, photos.length - 1)];
+  // Clamp ONCE, here, and let everything below read the clamped value.
+  const index = Math.min(rawIndex, Math.max(photos.length - 1, 0));
+  const current = photos[index];
 
   const heroHeight = screenHeight * Layout.HERO_HEIGHT_RATIO;
 
   const onTap = (x: number) => {
     if (!paged) return;
+    // From the clamped index, not the stored one, or a stale value that
+    // is past the end swallows the first few taps.
     if (x < SCREEN_WIDTH / 3) {
-      setIndex(i => Math.max(i - 1, 0));
+      setRawIndex(Math.max(index - 1, 0));
     } else {
-      setIndex(i => Math.min(i + 1, photos.length - 1));
+      setRawIndex(Math.min(index + 1, photos.length - 1));
     }
   };
 

@@ -1,4 +1,4 @@
-import { toISODate, ageFromISODate } from './date';
+import { toISODate, ageFromISODate, formatDate } from './date';
 
 describe('toISODate', () => {
   it('returns the calendar date the user picked', () => {
@@ -74,5 +74,21 @@ describe('ageFromISODate', () => {
 
   it('returns null for a date in the future', () => {
     expect(ageFromISODate('2030-01-01', today)).toBeNull();
+  });
+});
+
+describe('formatDate', () => {
+  const d = new Date(2026, 2, 12); // 12 March 2026, local
+
+  it('formats in the language it is given, not the device one', () => {
+    expect(formatDate(d, 'el', { month: 'long' })).toBe('Μαρτίου');
+    expect(formatDate(d, 'en', { month: 'long' })).toBe('March');
+  });
+
+  // The whole point of the helper: a list must not die because one date
+  // was handed a language tag Intl does not accept.
+  it('falls back instead of throwing on a malformed tag', () => {
+    expect(() => formatDate(d, 'not a tag', { month: 'long' })).not.toThrow();
+    expect(formatDate(d, 'not a tag', { month: 'long' })).not.toBe('');
   });
 });

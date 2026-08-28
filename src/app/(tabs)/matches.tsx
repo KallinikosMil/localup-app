@@ -24,6 +24,7 @@ import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { useMatches, type Match } from '@features/matches/hooks/useMatches';
 import { useUnreadMatches } from '@features/matches/hooks/useReadTracking';
 import { relativeTime } from '@features/matches/utils/relativeTime';
+import { formatDate } from '@shared/utils/date';
 import { useAppTheme, type AppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
@@ -35,7 +36,7 @@ import { Translations as Common } from '@shared/i18n/translationKeys';
 // is not stuck with English abbreviations. The weekday and date cases go
 // through toLocaleDateString, which knows every language's short day
 // names better than a lookup table would.
-const timeLabel = (iso: string | null, t: TFunction) => {
+const timeLabel = (iso: string | null, t: TFunction, language: string) => {
   const r = relativeTime(iso);
   switch (r.kind) {
     case 'none':
@@ -49,9 +50,9 @@ const timeLabel = (iso: string | null, t: TFunction) => {
     case 'yesterday':
       return t(Translations.MATCHES_TIME_YESTERDAY);
     case 'weekday':
-      return r.date.toLocaleDateString(undefined, { weekday: 'short' });
+      return formatDate(r.date, language, { weekday: 'short' });
     case 'date':
-      return r.date.toLocaleDateString(undefined, {
+      return formatDate(r.date, language, {
         day: 'numeric',
         month: 'short',
       });
@@ -230,7 +231,8 @@ function MatchesScreenContent() {
   const theme = useAppTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
   const errorMessage = useErrorMessage();
   const {
     data: matches,
@@ -397,7 +399,7 @@ function MatchesScreenContent() {
                 : theme.colors.onSurfaceFaint,
             }}
           >
-            {timeLabel(item.last_message_at ?? item.created_at, t)}
+            {timeLabel(item.last_message_at ?? item.created_at, t, language)}
           </AppText>
         </View>
       </Pressable>

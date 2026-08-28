@@ -33,6 +33,13 @@ type OnboardingShellProps = {
   onAction: () => void;
   actionDisabled?: boolean;
   showBack?: boolean;
+  // Step 4 only. Finishing can mean six uploads and two RPC round trips,
+  // and complete_onboarding OPENS with an unconditional
+  // "delete from media where user_id = …". That is safe as a retry
+  // primitive and not safe at all against a first run still appending —
+  // so while the mutation is in flight there must be no way back to a
+  // screen that can start a second one.
+  backDisabled?: boolean;
 };
 
 const OnboardingShell = ({
@@ -45,6 +52,7 @@ const OnboardingShell = ({
   onAction,
   actionDisabled = false,
   showBack = true,
+  backDisabled = false,
 }: OnboardingShellProps) => {
   const theme = useAppTheme();
   const { t } = useTranslation();
@@ -75,9 +83,12 @@ const OnboardingShell = ({
           {showBack ? (
             <Pressable
               onPress={() => router.back()}
+              disabled={backDisabled}
               accessibilityRole="button"
               accessibilityLabel={t(Common.A11Y_BACK)}
-              style={styles.back}
+              accessibilityState={{ disabled: backDisabled }}
+              hitSlop={Layout.HIT_SLOP}
+              style={[styles.back, backDisabled ? styles.backOff : null]}
             >
               <MaterialCommunityIcons
                 name="chevron-left"
@@ -200,6 +211,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Layout.STRIP_GAP,
+  },
+  backOff: {
+    opacity: 0.4,
   },
   back: {
     width: Layout.ICON_BUTTON + 4,

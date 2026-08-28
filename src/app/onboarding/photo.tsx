@@ -208,20 +208,26 @@ const PhotoScreen = () => {
         {t(Translations.ONBOARDING_PHOTO_MORE_LATER)}
       </AppText>
 
+      {/* A Pressable, not an AppText with onPress. Text takes its
+          height from the type — about 18pt here — so the tappable area
+          was less than half the 44pt floor, on the one control that
+          undoes a mistake. */}
       {first ? (
-        <AppText
-          variant="labelStrong"
+        <Pressable
           onPress={() => pickImage(0)}
           accessibilityRole="button"
-          style={[
-            styles.change,
-            {
-              color: theme.colors.primary,
-            },
-          ]}
+          accessibilityLabel={t(Translations.ONBOARDING_CHANGE_PHOTO)}
+          style={styles.change}
         >
-          {t(Translations.ONBOARDING_CHANGE_PHOTO)}
-        </AppText>
+          <AppText
+            variant="labelStrong"
+            style={{
+              color: theme.colors.primary,
+            }}
+          >
+            {t(Translations.ONBOARDING_CHANGE_PHOTO)}
+          </AppText>
+        </Pressable>
       ) : null}
     </OnboardingShell>
   );
@@ -277,6 +283,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   change: {
-    textAlign: 'center',
+    minHeight: Layout.TOUCH_MIN,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

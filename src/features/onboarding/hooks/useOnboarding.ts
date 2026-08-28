@@ -153,13 +153,31 @@ export function useCompleteOnboarding() {
       //    added from Edit profile, which is the same append_photo call.
       for (const [i, uri] of extraUris.entries()) {
         data.onProgress?.(i + 2, total);
+        let extraPath: string | null = null;
         try {
-          const extraPath = await uploadPhoto(user.id, uri, i + 1);
+          extraPath = await uploadPhoto(user.id, uri, i + 1);
           const { error: appendError } = await supabase.rpc('append_photo', {
             p_storage_path: extraPath,
           });
           if (appendError) throw appendError;
         } catch (err) {
+          // Swallowing the error is the right call; leaking the file is
+          // not part of it. If the upload landed and append_photo did
+          // not, the object sits in the bucket with no media row — and
+          // nothing can ever reach it, because useDeletePhoto finds a
+          // storage_path THROUGH a media row and the grid never lists
+          // it. Same cleanup the RPC-failure path above already does.
+          if (extraPath) {
+            const { error: cleanupError } = await supabase.storage
+              .from(PHOTO_BUCKET)
+              .remove([extraPath]);
+            if (cleanupError && __DEV__) {
+              console.warn(
+                '[onboarding] orphaned extra left behind:',
+                extraPath,
+              );
+            }
+          }
           if (__DEV__) {
             console.warn('[onboarding] extra photo not saved:', err);
           }

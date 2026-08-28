@@ -45,3 +45,28 @@ export const ageFromISODate = (
   }
   return age >= 0 ? age : null;
 };
+
+// Format a date in the language the APP is serving, not the one the
+// handset is set to.
+//
+// `toLocaleDateString(undefined, …)` resolves to the device locale, which
+// is independent of i18n.language. Every call site that did that sat
+// inside a switch whose other branches went through t() — so a Greek
+// handset running the app in English produced 'Yesterday' on one row and
+// 'Τρί' on the next, in the same column.
+//
+// Passing an unsupported or malformed tag makes Intl throw a RangeError,
+// which would take down a whole list to format one date. Fall back to the
+// device locale in that case: a date in the wrong language is a blemish,
+// a crash is not.
+export const formatDate = (
+  date: Date,
+  language: string,
+  options: Intl.DateTimeFormatOptions,
+): string => {
+  try {
+    return date.toLocaleDateString(language, options);
+  } catch {
+    return date.toLocaleDateString(undefined, options);
+  }
+};

@@ -35,6 +35,12 @@ export const useBlockUser = () => {
       queryClient.invalidateQueries({
         queryKey: ['discover-candidates', uid],
       });
+      // And the Blocked screen must LEARN them. useUnblockUser already
+      // invalidates this key in the other direction; without the pair,
+      // blocking someone and then opening Profile → Blocked inside the
+      // 5-minute staleTime serves a cached list they are absent from —
+      // and that screen is the only way to undo a block.
+      queryClient.invalidateQueries({ queryKey: ['blocked-users'] });
     },
   });
 };

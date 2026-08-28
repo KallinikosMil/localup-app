@@ -17,6 +17,7 @@ import {
   type BlockedUser,
 } from '@features/profile/hooks/useBlockedUsers';
 import { relativeTime } from '@features/matches/utils/relativeTime';
+import { formatDate } from '@shared/utils/date';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
@@ -34,7 +35,8 @@ export default function BlockedUsersScreen() {
   const theme = useAppTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
   const errorMessage = useErrorMessage();
   const { data, isPending, isError, error, refetch } = useBlockedUsers();
   const unblock = useUnblockUser();
@@ -50,7 +52,7 @@ export default function BlockedUsersScreen() {
     const r = relativeTime(iso);
     const date = r.kind === 'weekday' || r.kind === 'date' ? r.date : null;
     return t(Translations.PROFILE_BLOCKED_ON, {
-      date: (date ?? new Date(iso)).toLocaleDateString(undefined, {
+      date: formatDate(date ?? new Date(iso), language, {
         day: 'numeric',
         month: 'long',
       }),
@@ -140,6 +142,7 @@ export default function BlockedUsersScreen() {
             name: item.display_name ?? '',
           })}
           accessibilityState={{ disabled: busy, busy }}
+          hitSlop={Layout.HIT_SLOP}
           style={[
             styles.unblock,
             {

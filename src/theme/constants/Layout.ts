@@ -150,6 +150,14 @@ export const Layout = {
   // the 44pt floor with them; below it they are a target people miss.
   PHOTO_SLOT_SM: 52,
   PHOTO_SLOT_GAP: 9,
+
+  // Added to controls the design draws smaller than the 44pt minimum.
+  // hitSlop rather than a bigger box: the drawn size is what the artboard
+  // asked for, and growing it would push the layout around — what has to
+  // reach 44 is the area that responds to a finger, not the ink.
+  HIT_SLOP: 8,
+  // The floor itself, for controls that can simply be given the height.
+  TOUCH_MIN: 44,
   // The tall pill actions on auth screens — taller and rounder than the
   // 52px buttons inside the app, because an auth screen has one thing to
   // do and the button should look like it.
