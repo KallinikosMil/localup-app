@@ -4,9 +4,13 @@ import { supabase } from '@config/supabase';
 
 // The people you have blocked, and the way back.
 //
-// `get_blocked_users` is SECURITY INVOKER: RLS on `blocks` already scopes
-// rows to the blocker and profiles are readable by any authenticated
-// user, so nothing here needs elevated rights.
+// `get_blocked_users` is SECURITY DEFINER. It used to be INVOKER, which
+// worked only because profiles was readable by ANY authenticated user —
+// and that policy was the hole: the table carries home and current
+// coordinates and a full birthdate. profiles is owner-only now, so this
+// RPC needs the elevated rights to read the blocked person's name and
+// avatar at all. Its own `where b.blocker_id = auth.uid()` is what scopes
+// it; that predicate is load-bearing, not decorative.
 //
 // It returns avatar_url and NOT photos, deliberately. `media` is readable
 // by the owner or an ACTIVE MATCH, and blocking ends the match — making

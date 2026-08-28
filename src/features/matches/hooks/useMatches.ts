@@ -57,8 +57,11 @@ export const useMatches = () => {
       try {
         // One server-side JOIN instead of the old 4-RTT client
         // waterfall (matches → profiles → threads → messages).
-        // INVOKER RPC → RLS still scopes rows to the caller; its
-        // columns map 1:1 onto Match, so no remapping here.
+        // DEFINER RPC — it was INVOKER until profiles stopped being
+        // readable by every authenticated user. It scopes itself with
+        // `m.traveler_id = auth.uid() or m.host_id = auth.uid()` and
+        // returns a DERIVED match_mode, never a coordinate. Columns map
+        // 1:1 onto Match, so no remapping here.
         const { data, error } = await supabase
           .rpc('get_matches_overview')
           .abortSignal(controller.signal);
