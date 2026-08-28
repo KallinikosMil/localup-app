@@ -1,0 +1,36 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "jsx": "react-native",
+    "strict": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "types": ["react", "react-native", "expo", "jest"],
+    "baseUrl": ".",                         // project root
+    "paths": {
+      "@app/*": ["src/app/*"],              // Expo Router routes (in src/app)
+      "@features/*": ["src/features/*"],
+      "@shared/*": ["src/shared/*"],
+      "@providers/*": ["src/providers/*"],
+      "@store": ["src/store"],
+      "@store/*": ["src/store/*"],
+      "@config/*": ["src/config/*"],
+      "@theme": ["src/theme/index"],
+      "@theme/*": ["src/theme/*"]
+    }
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
+}

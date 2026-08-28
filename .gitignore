@@ -40,9 +40,10 @@ yarn-error.*
 /ios
 /android
 
-# Ignore local config files
-.prettierrc
-tsconfig.json
+# NOT ignored: .prettierrc and tsconfig.json. Both carry project rules —
+# strict mode, the path aliases, the style CLAUDE.md documents — and
+# neither holds anything machine-specific. Ignoring them meant a fresh
+# clone could not run npm run verify.
 
 #Enviroment variables
 .env
