@@ -7,6 +7,7 @@ import {
   AuthFailure,
   classifySignUp,
 } from '@features/auth/utils/authErrors';
+import { releasePushToken } from '@features/notifications/hooks/usePushRegistration';
 
 // The error taxonomy moved to utils/authErrors.ts — it is pure classification
 // and had no business living behind React imports. Re-exported here because
@@ -116,6 +117,15 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
+      // BEFORE signOut, while there is still a session to authorise it.
+      // Reacting to the session disappearing is too late — see
+      // releasePushToken. Not fatal: failing to release a token must not
+      // trap someone in an account they are trying to leave.
+      try {
+        await releasePushToken();
+      } catch {
+        // releasePushToken already logs; sign-out continues regardless.
+      }
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     },

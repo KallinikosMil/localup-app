@@ -1,5 +1,6 @@
 export enum Translations {
   DISCOVER_TITLE = 'discoverTitle',
+  DISCOVER_TAB_TITLE = 'discoverTabTitle',
   DISCOVER_EMPTY_TITLE = 'discoverEmptyTitle',
   DISCOVER_EMPTY_SUBTITLE = 'discoverEmptySubtitle',
   DISCOVER_REFRESH = 'discoverRefresh',

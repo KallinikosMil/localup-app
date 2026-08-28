@@ -1,13 +1,21 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { useTranslation } from 'react-i18next';
 
 import useLocation from '@shared/hooks/useLocation';
 import { useSyncLocation } from '@features/profile/hooks/useProfile';
 import { useUnreadMatches } from '@features/matches/hooks/useReadTracking';
 import FloatingTabBar from '@shared/components/FloatingTabBar';
+import { Translations as Discover } from '@features/discover/i18n/translationKeys';
+import { Translations as Matches } from '@features/matches/i18n/translationKeys';
+import { Translations as Profile } from '@features/profile/i18n/translationKeys';
 
 export default function TabLayout() {
+  // FloatingTabBar reads options.title for both the visible pill text and
+  // every tab's accessibilityLabel, so a literal here left the whole bar
+  // in English — on screen and to a screen reader.
+  const { t } = useTranslation();
   const { latitude, longitude } = useLocation();
   useSyncLocation(latitude, longitude);
 
@@ -30,7 +38,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="discover"
         options={{
-          title: 'Discover',
+          title: t(Discover.DISCOVER_TAB_TITLE),
           tabBarIcon: ({ color, size, focused }) => (
             <Icon
               name={focused ? 'compass' : 'compass-outline'}
@@ -43,7 +51,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="matches"
         options={{
-          title: 'Matches',
+          title: t(Matches.MATCHES_TITLE),
           // undefined (not 0) so the badge disappears entirely when there
           // is nothing unread, rather than showing a "0".
           tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
@@ -65,7 +73,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t(Profile.PROFILE_TITLE),
           tabBarIcon: ({ color, size, focused }) => (
             <Icon
               name={focused ? 'account' : 'account-outline'}

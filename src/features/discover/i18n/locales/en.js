@@ -1,5 +1,6 @@
 export default {
   discoverTitle: 'LocalUp',
+  discoverTabTitle: 'Discover',
   discoverEmptyTitle: 'No one nearby',
   discoverEmptySubtitle: 'Check back later for new people',
   discoverRefresh: 'Refresh',

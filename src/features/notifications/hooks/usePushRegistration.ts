@@ -82,6 +82,36 @@ const ensurePermission = async () => {
 // Registers this device against the signed-in account, and hands it over
 // on sign-out so the next person to use the handset does not receive the
 // previous one's messages.
+// Module scope, not a ref: sign-out has to release the token while the
+// session still exists, which means it happens in useLogout — a different
+// component tree from the hook that registered it.
+let currentToken: string | null = null;
+
+// Release THIS device's token. Must be awaited BEFORE supabase.auth.signOut().
+//
+// It used to fire reactively when `uid` went falsy, and that is too late:
+// auth-js calls _removeSession() before it notifies subscribers, so by the
+// time Redux cleared and the effect re-ran there was no session left. The
+// DELETE went out as `anon`, matched no policy on push_tokens (the only
+// DELETE policy is TO authenticated, USING auth.uid() = user_id), and
+// removed nothing — silently, because it was fired with `void` and no
+// error check, after the log line had already claimed success. The device
+// kept receiving notifications for an account that had signed out.
+export const releasePushToken = async () => {
+  const token = currentToken;
+  if (!token) return;
+  currentToken = null;
+  const { error } = await supabase
+    .from('push_tokens')
+    .delete()
+    .eq('token', token);
+  if (error) {
+    pushLog('failed to release this device:', error.message);
+    return;
+  }
+  pushLog('released this device');
+};
+
 export const usePushRegistration = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   // Survives the effect so sign-out can unregister the exact token that was
@@ -100,11 +130,13 @@ export const usePushRegistration = () => {
     // effect cleanup instead meant every re-run deleted the token that had
     // just been registered — and the auth bootstrap writes the session more
     // than once, so re-runs are normal rather than exceptional.
-    if (!uid && previousUid.current && tokenRef.current) {
-      const token = tokenRef.current;
+    // The release itself moved into releasePushToken(), called from
+    // useLogout while the session is still alive. All that is left here is
+    // forgetting the token locally, so a sign-out that bypassed useLogout
+    // cannot leave a stale one behind for the next account.
+    if (!uid && previousUid.current) {
       tokenRef.current = null;
-      pushLog('signed out → releasing this device');
-      void supabase.from('push_tokens').delete().eq('token', token);
+      currentToken = null;
     }
     previousUid.current = uid;
     if (!uid) return;
@@ -149,6 +181,7 @@ export const usePushRegistration = () => {
         );
         if (superseded()) return;
         tokenRef.current = token;
+        currentToken = token;
 
         // Through an RPC rather than a table write: claiming a token is a
         // handover, and the table has no UPDATE grant precisely so that a

@@ -1,5 +1,6 @@
 export default {
   discoverTitle: 'LocalUp',
+  discoverTabTitle: 'Ανακάλυψη',
   discoverEmptyTitle: 'Κανείς κοντά σου',
   discoverEmptySubtitle: 'Έλεγξε ξανά αργότερα για νέα άτομα',
   discoverRefresh: 'Ανανέωση',

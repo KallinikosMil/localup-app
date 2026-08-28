@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '@config/supabase';
 import { AuthErrorCode, AuthFailure } from '@features/auth/utils/authErrors';
@@ -14,6 +14,8 @@ import { AuthErrorCode, AuthFailure } from '@features/auth/utils/authErrors';
 // Nothing is passed here either: functions.invoke attaches the current session
 // automatically, which is exactly the identity we want it to act on.
 export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke<{
@@ -31,6 +33,17 @@ export function useDeleteAccount() {
       // Clear it locally: `scope: 'local'` because there is no longer a
       // server-side session to revoke, and asking to revoke one would fail.
       await supabase.auth.signOut({ scope: 'local' });
+    },
+    // The same reasoning as useLogout, which has done this since H4:
+    // signOut leaves the whole query cache in memory, and ['chat', matchId]
+    // and ['interests'] are not uid-scoped. Deleting an account and handing
+    // the phone to someone who signs in next must not show them the
+    // previous account's messages out of cache.
+    //
+    // push_tokens needs no release here: its user_id FK is ON DELETE
+    // CASCADE, so removing the auth user takes the device token with it.
+    onSuccess: () => {
+      queryClient.clear();
     },
   });
 }
