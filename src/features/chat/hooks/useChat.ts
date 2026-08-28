@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 
@@ -51,10 +52,40 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
   // open in the background otherwise silently stops receiving messages.
   const foregroundEpoch = useForegroundEpoch();
 
+  // Messages that arrived over realtime, kept OUTSIDE the query cache.
+  //
+  // Writing them straight in with setQueryData is not enough: react-query
+  // does not merge a manual write with an in-flight fetch, so when that
+  // fetch resolves it replaces the cache wholesale and the message
+  // vanishes. Refetches here are routine — every send invalidates this
+  // key, and returning to foreground refetches it — so the window is wide
+  // open, and nothing re-reads afterwards.
+  //
+  // Holding them here and merging on the way out survives any number of
+  // replacements. Capped so a long-lived screen cannot grow without
+  // bound; correctness comes from the id dedupe, not the cap.
+  const liveRef = useRef<Map<string, ChatMessage>>(new Map());
+
   const query = useQuery<ChatData>({
     queryKey: ['chat', matchId],
     enabled: !!uid && !!matchId,
     staleTime: 30_000,
+    // Merge, do not trust. Anything realtime delivered that this payload
+    // does not contain is added back and the whole list re-sorted — the
+    // append path never sorted, so an out-of-order arrival used to sit at
+    // the bottom regardless of its timestamp.
+    select: (data: ChatData): ChatData => {
+      if (liveRef.current.size === 0) return data;
+      const known = new Set(data.messages.map(m => m.id));
+      const extras = [...liveRef.current.values()].filter(
+        m => !known.has(m.id),
+      );
+      if (extras.length === 0) return data;
+      return {
+        ...data,
+        messages: [...data.messages, ...extras].sort(byCreatedAtAsc),
+      };
+    },
     // A hung socket (paused/cold DB) would otherwise spin forever
     // — one retry covers a DB that is mid-wake; past that we let
     // the error surface so the screen's Retry shows (V4).
@@ -127,8 +158,15 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
           filter: `thread_id=eq.${threadId}`,
         },
         payload => {
+          const next = payload.new as ChatMessage;
+          liveRef.current.set(next.id, next);
+          // Oldest out first, so the cap trims history rather than the
+          // message that just arrived.
+          if (liveRef.current.size > 100) {
+            const oldest = liveRef.current.keys().next().value;
+            if (oldest) liveRef.current.delete(oldest);
+          }
           queryClient.setQueryData<ChatData>(['chat', matchId], old => {
-            const next = payload.new as ChatMessage;
             const prev = old ?? {
               threadId,
               messages: [],
@@ -138,7 +176,7 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
             }
             return {
               threadId: prev.threadId ?? threadId,
-              messages: [...prev.messages, next],
+              messages: [...prev.messages, next].sort(byCreatedAtAsc),
             };
           });
         },

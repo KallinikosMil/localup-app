@@ -108,11 +108,16 @@ export default function ChatScreen() {
     (max, m) => Math.max(max, new Date(m.created_at).getTime()),
     0,
   );
+  // Only once the thread has actually LOADED. This used to fire on mount
+  // gated on matchId alone, so a failed or still-running fetch cleared the
+  // unread state anyway — and the watermark is one-way: match_reads has a
+  // no-rewind trigger and no DELETE policy, so a badge cleared for messages
+  // nobody saw can never come back. isLoading/isError are the difference
+  // between "you read it" and "we tried to show it to you".
   useEffect(() => {
-    if (matchId) {
-      void markRead(matchId, Math.max(Date.now(), newestActivity + 1));
-    }
-  }, [matchId, newestActivity, markRead]);
+    if (!matchId || isLoading || isError) return;
+    void markRead(matchId, Math.max(Date.now(), newestActivity + 1));
+  }, [matchId, isLoading, isError, newestActivity, markRead]);
 
   const [text, setText] = useState('');
   const listRef = useRef<FlatList>(null);
