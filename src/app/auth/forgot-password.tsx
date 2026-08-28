@@ -84,7 +84,12 @@ const ForgotPasswordScreen = () => {
             onPress={() => router.back()}
             accessibilityRole="link"
             accessibilityLabel={t(Translations.AUTH_FORGOT_BACK)}
-            hitSlop={Layout.HIT_SLOP}
+            hitSlop={{
+              top: Layout.HIT_SLOP_TEXT,
+              bottom: Layout.HIT_SLOP_TEXT,
+              left: Layout.HIT_SLOP,
+              right: Layout.HIT_SLOP,
+            }}
           >
             <AppText
               variant="body"

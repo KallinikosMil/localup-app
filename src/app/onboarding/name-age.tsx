@@ -10,6 +10,7 @@ import AppText from '@shared/components/AppText';
 import InputField from '@shared/components/InputField';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
+import { formatDate } from '@shared/utils/date';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
 import { Layout } from '@theme/constants/Layout';
@@ -24,15 +25,17 @@ const getMaxDate = () => {
   return d;
 };
 
-const formatDate = (date: Date) =>
-  date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
 const NameAgeScreen = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // The shared helper takes the language explicitly; this wrapper just
+  // pins the one option set this screen uses.
+  const shownDate = (d: Date) =>
+    formatDate(d, i18n.language, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   const theme = useAppTheme();
   const { data, update } = useOnboardingData();
 
@@ -131,14 +134,18 @@ const NameAgeScreen = () => {
           onPress={() => setShowPicker(true)}
           accessibilityRole="button"
           accessibilityLabel={t(Translations.ONBOARDING_DOB_LABEL)}
-          accessibilityValue={{ text: dob ? formatDate(dob) : '' }}
+          accessibilityValue={{ text: dob ? shownDate(dob) : '' }}
           style={[
             styles.box,
             {
               backgroundColor: theme.colors.surfaceElevated,
               borderColor: dobError
-                ? theme.colors.error
+                ? theme.colors.errorFieldOutline
                 : theme.colors.outlineVariant,
+              borderWidth:
+                dobError && !theme.dark
+                  ? Layout.FIELD_BORDER_ERROR_LIGHT
+                  : Layout.FIELD_BORDER,
             },
           ]}
         >
@@ -158,7 +165,7 @@ const NameAgeScreen = () => {
               },
             ]}
           >
-            {dob ? formatDate(dob) : t(Translations.ONBOARDING_DOB_PLACEHOLDER)}
+            {dob ? shownDate(dob) : t(Translations.ONBOARDING_DOB_PLACEHOLDER)}
           </AppText>
           <MaterialCommunityIcons
             name="chevron-right"
@@ -167,21 +174,31 @@ const NameAgeScreen = () => {
           />
         </Pressable>
 
-        <AppText
-          variant="caption"
-          style={[
-            styles.helper,
-            {
-              color: dobError
-                ? theme.colors.error
-                : theme.colors.onSurfaceFaint,
-            },
-          ]}
-        >
-          {/* The reassurance is the point: people hesitate over a birth
-              date, and it is true — only the age ever leaves the server. */}
-          {dobError || t(Translations.ONBOARDING_DOB_HELPER)}
-        </AppText>
+        <View style={styles.helper}>
+          {dobError ? (
+            <MaterialCommunityIcons
+              name="alert-circle-outline"
+              size={Layout.FIELD_ERROR_ICON}
+              color={theme.colors.error}
+            />
+          ) : null}
+          <AppText
+            variant="caption"
+            style={[
+              styles.helperText,
+              {
+                color: dobError
+                  ? theme.colors.error
+                  : theme.colors.onSurfaceFaint,
+              },
+            ]}
+          >
+            {/* The reassurance is the point: people hesitate over a birth
+                date, and it is true — only the age ever leaves the
+                server. */}
+            {dobError || t(Translations.ONBOARDING_DOB_HELPER)}
+          </AppText>
+        </View>
       </View>
 
       {showPicker ? (
@@ -224,6 +241,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   helper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.FIELD_ERROR_GAP,
     marginTop: Layout.FIELD_LABEL_GAP,
+  },
+  helperText: {
+    flex: 1,
   },
 });

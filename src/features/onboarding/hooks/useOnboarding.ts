@@ -163,17 +163,42 @@ export function useCompleteOnboarding() {
         } catch (err) {
           // Swallowing the error is the right call; leaking the file is
           // not part of it. If the upload landed and append_photo did
-          // not, the object sits in the bucket with no media row — and
-          // nothing can ever reach it, because useDeletePhoto finds a
-          // storage_path THROUGH a media row and the grid never lists
-          // it. Same cleanup the RPC-failure path above already does.
+          // not, the object sits in the bucket with no media row and
+          // nothing can reach it — useDeletePhoto finds a storage_path
+          // THROUGH a media row, and the grid never lists it.
+          //
+          // But a thrown appendError does NOT mean the insert failed. RPCs
+          // get the 15s budget (storage gets 60s — see timeoutFor), so a
+          // slow response, or a WiFi-to-mobile handover killing the socket,
+          // aborts the call AFTER Postgres has already committed. Deleting
+          // then removes an object a live media row points at, and the slot
+          // renders as a broken image with nothing saying why.
+          //
+          // So ask the database instead of guessing from the error. Only a
+          // definite "no row" earns a delete; if that read cannot answer
+          // either, keep the file. An unreferenced object costs storage, a
+          // missing one costs the user a photo.
           if (extraPath) {
-            const { error: cleanupError } = await supabase.storage
-              .from(PHOTO_BUCKET)
-              .remove([extraPath]);
-            if (cleanupError && __DEV__) {
+            const { data: landed, error: checkError } = await supabase
+              .from('media')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('storage_path', extraPath)
+              .maybeSingle();
+
+            if (!checkError && !landed) {
+              const { error: cleanupError } = await supabase.storage
+                .from(PHOTO_BUCKET)
+                .remove([extraPath]);
+              if (cleanupError && __DEV__) {
+                console.warn(
+                  '[onboarding] orphaned extra left behind:',
+                  extraPath,
+                );
+              }
+            } else if (__DEV__ && landed) {
               console.warn(
-                '[onboarding] orphaned extra left behind:',
+                '[onboarding] append_photo committed despite the error; file kept:',
                 extraPath,
               );
             }

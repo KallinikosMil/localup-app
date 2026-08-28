@@ -109,7 +109,12 @@ const LoginScreen = () => {
               onPress={() => router.push('/auth/register')}
               accessibilityRole="link"
               accessibilityLabel={t(Translations.AUTH_REGISTER)}
-              hitSlop={Layout.HIT_SLOP}
+              hitSlop={{
+                top: Layout.HIT_SLOP_TEXT,
+                bottom: Layout.HIT_SLOP_TEXT,
+                left: Layout.HIT_SLOP,
+                right: Layout.HIT_SLOP,
+              }}
             >
               <AppText
                 variant="body"
@@ -164,7 +169,12 @@ const LoginScreen = () => {
           onPress={() => router.push('/auth/forgot-password')}
           accessibilityRole="link"
           accessibilityLabel={t(Translations.AUTH_FORGOT_PASSWORD)}
-          hitSlop={Layout.HIT_SLOP}
+          hitSlop={{
+            top: Layout.HIT_SLOP_TEXT,
+            bottom: Layout.HIT_SLOP_TEXT,
+            left: Layout.HIT_SLOP,
+            right: Layout.HIT_SLOP,
+          }}
           style={styles.forgot}
         >
           <AppText

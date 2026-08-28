@@ -1,8 +1,14 @@
-import React from 'react';
-import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
+import React, { useEffect } from 'react';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Pressable,
+  BackHandler,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
@@ -55,7 +61,29 @@ const OnboardingShell = ({
   backDisabled = false,
 }: OnboardingShellProps) => {
   const theme = useAppTheme();
+  const navigation = useNavigation();
   const { t } = useTranslation();
+
+  // backDisabled greyed ONE chevron, which left the fix not doing the
+  // thing it was written for: on Android the hardware back button is the
+  // primary way out of a screen, and it went straight past this. Finishing
+  // can take six uploads, and complete_onboarding opens with an
+  // unconditional delete of the user's media — safe as a retry, not safe
+  // at all against a first run still appending.
+  //
+  // Returning true from the handler swallows the press. The listener only
+  // exists while the guard is on, so nothing is trapped the rest of the
+  // time.
+  useEffect(() => {
+    if (!backDisabled) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+    return () => sub.remove();
+  }, [backDisabled]);
+
+  // The same door on iOS, where back is an edge swipe rather than a button.
+  useEffect(() => {
+    navigation.setOptions({ gestureEnabled: !backDisabled });
+  }, [navigation, backDisabled]);
   const segments = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (

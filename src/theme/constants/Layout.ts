@@ -156,6 +156,11 @@ export const Layout = {
   // asked for, and growing it would push the layout around — what has to
   // reach 44 is the area that responds to a finger, not the ink.
   HIT_SLOP: 8,
+  // Vertical slop for a link whose box is the TYPE itself. HIT_SLOP was
+  // enough for controls with a drawn box (38, 34 and 40 became 54, 50 and
+  // 56) and nowhere near it for these: labelStrong is 18pt tall, so 8 a
+  // side gives 34. 13 a side gives exactly 44, and 46 for body at 20.
+  HIT_SLOP_TEXT: 13,
   // The floor itself, for controls that can simply be given the height.
   TOUCH_MIN: 44,
   // The tall pill actions on auth screens — taller and rounder than the
