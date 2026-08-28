@@ -4,8 +4,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
+import { Translations as Common } from '@shared/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { Layout } from '@theme/constants/Layout';
@@ -52,6 +54,7 @@ const FloatingTabBar = ({
   descriptors,
   navigation,
 }: BottomTabBarProps) => {
+  const { t } = useTranslation();
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
 
@@ -168,7 +171,19 @@ const FloatingTabBar = ({
               key={route.key}
               onPress={onPress}
               accessibilityRole="tab"
-              accessibilityLabel={label}
+              // The badge is drawn, never spoken — so the one piece of
+              // information the bar carries beyond navigation was
+              // invisible to a screen reader. It rides on the tab's own
+              // label rather than as a separate node, which would just be
+              // a stray number after the tab name.
+              accessibilityLabel={
+                badge
+                  ? t(Common.A11Y_TAB_WITH_UNREAD, {
+                      label,
+                      count: Number(badge),
+                    })
+                  : label
+              }
               accessibilityState={{ selected: false }}
               style={styles.inactiveSegment}
             >

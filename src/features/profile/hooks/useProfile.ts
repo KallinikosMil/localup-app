@@ -274,7 +274,31 @@ export const useUploadPhoto = () => {
         p_storage_path: path,
       });
 
-      if (dbErr) throw dbErr;
+      if (dbErr) {
+        // The object is already in the bucket. If no media row points at it
+        // nothing can ever reach it — useDeletePhoto finds a storage_path
+        // THROUGH a media row and the grid never lists it — so it would sit
+        // there billed and unreferenced, one more copy per retry.
+        //
+        // But a thrown error does NOT mean the insert failed: RPCs get the
+        // 15s budget while storage gets 60s, so a slow response or a network
+        // handover aborts the call after Postgres has committed. Deleting
+        // then removes a file a live row points at, and the slot renders as
+        // a broken image. So ask, rather than infer — and when the answer
+        // cannot be had, keep the file. Same reasoning as the onboarding
+        // extras loop.
+        const { data: landed, error: checkError } = await supabase
+          .from('media')
+          .select('id')
+          .eq('user_id', uid!)
+          .eq('storage_path', path)
+          .maybeSingle();
+
+        if (!checkError && !landed) {
+          await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+        }
+        throw dbErr;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

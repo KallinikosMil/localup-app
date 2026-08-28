@@ -73,6 +73,9 @@ const InterestChip = ({
       // this, a reader hears every chip identically and cannot tell what
       // they have already picked.
       accessibilityRole="button"
+      // Drawn at 39pt by the artboards. hitSlop rather than a taller box:
+      // these wrap into rows, and growing them would re-flow the grid.
+      hitSlop={Layout.HIT_SLOP}
       accessibilityState={{ selected }}
       accessibilityLabel={label}
       style={[

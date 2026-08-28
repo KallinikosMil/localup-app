@@ -17,6 +17,7 @@ export default {
   profileManagePhotos: 'Διαχείριση φωτογραφιών',
   profilePhotoMain: 'Κύρια',
   profilePhotoRemove: 'Αφαίρεση φωτογραφίας',
+  profilePhotoRemoveNth: 'Αφαίρεση φωτογραφίας {{position}} από {{total}}',
   profilePhotoCountOf: '{{count}} από {{max}}',
   profilePhotoReorderHint:
     'Σύρε για αναδιάταξη. Η πρώτη φωτογραφία είναι αυτή που βλέπουν στο Discover.',
@@ -78,6 +79,9 @@ export default {
   profilePhotoPermissionTitle: 'Απαιτείται άδεια',
   profilePhotoPermissionBody:
     'Δώσε πρόσβαση στη συλλογή φωτογραφιών για να προσθέσεις φωτογραφίες.',
+  profilePhotoLastTitle: 'Κράτα τουλάχιστον μία φωτογραφία',
+  profilePhotoLastBody:
+    'Είναι η μοναδική σου φωτογραφία. Πρόσθεσε άλλη μία πρώτα και μετά μπορείς να την αφαιρέσεις.',
   profilePhotoDeleteTitle: 'Διαγραφή φωτογραφίας;',
   profilePhotoDeleteBody: 'Η φωτογραφία θα αφαιρεθεί οριστικά.',
   profilePhotoDeleteConfirm: 'Διαγραφή',

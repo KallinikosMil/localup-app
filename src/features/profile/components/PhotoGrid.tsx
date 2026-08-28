@@ -273,7 +273,13 @@ const DraggableTile = ({
           onPress={onRemove}
           hitSlop={11}
           accessibilityRole="button"
-          accessibilityLabel={t(Translations.PROFILE_PHOTO_REMOVE)}
+          // Six identical "Remove photo" buttons tell a screen-reader
+          // user nothing about which one they are on. The tile already
+          // knows its index and the count.
+          accessibilityLabel={t(Translations.PROFILE_PHOTO_REMOVE_NTH, {
+            position: index + 1,
+            total: count,
+          })}
           style={[
             styles.remove,
             {

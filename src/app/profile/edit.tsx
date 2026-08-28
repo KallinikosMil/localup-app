@@ -224,6 +224,13 @@ function EditProfileScreenContent() {
   };
 
   const confirmDelete = (id: string) => {
+    if ((photos ?? []).length <= 1) {
+      Alert.alert(
+        t(Translations.PROFILE_PHOTO_LAST_TITLE),
+        t(Translations.PROFILE_PHOTO_LAST_BODY),
+      );
+      return;
+    }
     Alert.alert(
       t(Translations.PROFILE_PHOTO_DELETE_TITLE),
       t(Translations.PROFILE_PHOTO_DELETE_BODY),
@@ -509,6 +516,10 @@ function EditProfileScreenContent() {
             busy={uploadPhoto.isPending || reorderPhotos.isPending}
             onAdd={pickPhoto}
             onRemove={(photo: Photo) => confirmDelete(photo.id)}
+            /* Onboarding treats one photo as mandatory in three separate
+               places, and Edit let you drop below it — leaving a profile
+               with nothing for the deck to show. Explained rather than
+               silently disabled, so the button is not a dead control. */
             onReorder={(ids: string[]) =>
               reorderPhotos.mutate(ids, {
                 onError: () =>

@@ -22,6 +22,7 @@ export default {
   a11yPhotoOfTotal: 'Φωτογραφία {{index}} από {{total}}',
   a11yRemovePhotoHint: 'Παρατεταμένο πάτημα για αφαίρεση της φωτογραφίας',
   a11yChangePhoto: 'Αλλαγή φωτογραφίας',
+  a11yTabWithUnread: '{{label}}, {{count}} μη αναγνωσμένα',
   a11yAddPhoto: 'Προσθήκη φωτογραφίας',
   a11yOnboardingProgress: 'Βήμα {{step}} από {{total}}',
   commonStepCount: '{{step}} από {{total}}',

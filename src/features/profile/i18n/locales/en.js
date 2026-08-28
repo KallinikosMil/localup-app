@@ -21,6 +21,7 @@ export default {
   profileManagePhotos: 'Manage photos',
   profilePhotoMain: 'Main',
   profilePhotoRemove: 'Remove photo',
+  profilePhotoRemoveNth: 'Remove photo {{position}} of {{total}}',
   profilePhotoCountOf: '{{count}} of {{max}}',
   profilePhotoReorderHint:
     'Drag to reorder. The first photo is the one people see in Discover.',
@@ -80,6 +81,9 @@ export default {
   profilePhotoHint: 'Press and hold to remove',
   profilePhotoPermissionTitle: 'Permission needed',
   profilePhotoPermissionBody: 'Allow photo library access to add photos.',
+  profilePhotoLastTitle: 'Keep at least one photo',
+  profilePhotoLastBody:
+    'This is your only photo. Add another one first, then you can remove this.',
   profilePhotoDeleteTitle: 'Delete photo?',
   profilePhotoDeleteBody: 'This will permanently remove this photo.',
   profilePhotoDeleteConfirm: 'Delete',

@@ -33,6 +33,7 @@ export enum Translations {
   A11Y_PROFILE_PHOTO = 'a11yProfilePhoto',
   A11Y_PHOTO_OF_TOTAL = 'a11yPhotoOfTotal',
   A11Y_REMOVE_PHOTO_HINT = 'a11yRemovePhotoHint',
+  A11Y_TAB_WITH_UNREAD = 'a11yTabWithUnread',
   A11Y_ADD_PHOTO = 'a11yAddPhoto',
   A11Y_CHANGE_PHOTO = 'a11yChangePhoto',
   A11Y_ONBOARDING_PROGRESS = 'a11yOnboardingProgress',
