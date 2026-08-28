@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -48,7 +47,6 @@ const OnboardingShell = ({
   showBack = true,
 }: OnboardingShellProps) => {
   const theme = useAppTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const segments = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
@@ -67,8 +65,8 @@ const OnboardingShell = ({
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: insets.top + Spacing.sm,
-            paddingBottom: insets.bottom + Spacing.xl,
+            paddingTop: Spacing.sm,
+            paddingBottom: Spacing.xl,
           },
         ]}
         keyboardShouldPersistTaps="handled"

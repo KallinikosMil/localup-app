@@ -292,7 +292,6 @@ export default function ChatScreen() {
           styles.header,
           {
             borderBottomColor: theme.colors.outlineVariant,
-            marginTop: insets.top,
           },
         ]}
       >
@@ -464,7 +463,7 @@ export default function ChatScreen() {
           styles.inputRow,
           {
             backgroundColor: theme.colors.background,
-            paddingBottom: insets.bottom + Spacing.md,
+            paddingBottom: Spacing.md,
           },
         ]}
       >

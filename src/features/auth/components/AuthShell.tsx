@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
@@ -31,7 +30,6 @@ type AuthShellProps = {
 
 const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
   const theme = useAppTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
   return (
@@ -52,8 +50,8 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: insets.top + Spacing.xl,
-            paddingBottom: insets.bottom + Spacing.xxl,
+            paddingTop: Spacing.xl,
+            paddingBottom: Spacing.xxl,
           },
         ]}
         keyboardShouldPersistTaps="handled"
