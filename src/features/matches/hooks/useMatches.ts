@@ -1,5 +1,9 @@
 import { useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 
 import { supabase } from '@config/supabase';
@@ -80,80 +84,113 @@ export const useMatches = () => {
     retry: 1,
   });
 
-  // Subscribe to new matches and new
-  // messages to update list in real-time
+  // Subscribe to new matches and new messages to update the list live.
+  //
+  // The subscription is shared and REFCOUNTED. realtime-js does not create
+  // a channel per call: RealtimeClient.channel(topic) returns the existing
+  // channel for that topic. Four components mount this hook at once — the
+  // tab-bar badge, the matches screen, useUnreadMatches inside it, and the
+  // chat screen — so all four were handed the same object, and two things
+  // followed. Bindings added after the join never receive an id from the
+  // server ack, so only the FIRST subscriber's callbacks ever fired; and
+  // removeChannel is not refcounted, so the first unmount killed the
+  // channel for everyone still using it. Leaving chat re-broke live
+  // updates for the rest of the app until something forced a remount.
   useEffect(() => {
     if (!uid) return;
-
-    const channel = supabase
-      .channel(`matches-${uid}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'matches',
-        },
-        () => {
-          queryClient.invalidateQueries({
-            queryKey: ['matches', uid],
-          });
-        },
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-        },
-        payload => {
-          // Patch only the affected row's preview instead of
-          // refetching the whole list on every message (U4-a).
-          const msg = payload.new as {
-            thread_id: string;
-            body: string | null;
-            created_at: string;
-            sender_id: string | null;
-          };
-          const cached = queryClient.getQueryData<Match[]>(['matches', uid]);
-          const known = cached?.some(m => m.thread_id === msg.thread_id);
-          if (!known) {
-            // New thread we don't have yet (e.g. first message
-            // of a fresh match) — fall back to a refetch.
-            queryClient.invalidateQueries({
-              queryKey: ['matches', uid],
-            });
-            return;
-          }
-          // My own messages are never unread to me. Keeping the count in
-          // step here matters because the RPC only recomputes it on a
-          // refetch, and this patch exists precisely to avoid one.
-          const fromOther = msg.sender_id !== uid;
-          queryClient.setQueryData<Match[]>(['matches', uid], old =>
-            (old ?? []).map(m =>
-              m.thread_id === msg.thread_id
-                ? {
-                    ...m,
-                    last_message: msg.body ?? '',
-                    last_message_at: msg.created_at,
-                    unread_count: fromOther
-                      ? (m.unread_count ?? 0) + 1
-                      : m.unread_count,
-                  }
-                : m,
-            ),
-          );
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-    // foregroundEpoch is intentionally a dependency: bumping it tears the
-    // channel down through the cleanup above and subscribes a fresh one.
+    acquireMatchesChannel(uid, queryClient);
+    return () => releaseMatchesChannel(uid);
+    // foregroundEpoch is intentionally a dependency: React runs every
+    // destroy before any create, so a bump drops the count to zero, tears
+    // the channel down, and the re-run subscribes a fresh one.
   }, [uid, queryClient, foregroundEpoch]);
 
   return query;
+};
+
+type Entry = { channel: ReturnType<typeof supabase.channel>; count: number };
+const live = new Map<string, Entry>();
+
+const acquireMatchesChannel = (uid: string, queryClient: QueryClient) => {
+  const topic = `matches-${uid}`;
+  const existing = live.get(topic);
+  if (existing) {
+    existing.count += 1;
+    return;
+  }
+
+  const channel = supabase
+    .channel(topic)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'matches',
+      },
+      () => {
+        queryClient.invalidateQueries({
+          queryKey: ['matches', uid],
+        });
+      },
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+      },
+      payload => {
+        // Patch only the affected row's preview instead of
+        // refetching the whole list on every message (U4-a).
+        const msg = payload.new as {
+          thread_id: string;
+          body: string | null;
+          created_at: string;
+          sender_id: string | null;
+        };
+        const cached = queryClient.getQueryData<Match[]>(['matches', uid]);
+        const known = cached?.some(m => m.thread_id === msg.thread_id);
+        if (!known) {
+          // New thread we don't have yet (e.g. first message
+          // of a fresh match) — fall back to a refetch.
+          queryClient.invalidateQueries({
+            queryKey: ['matches', uid],
+          });
+          return;
+        }
+        // My own messages are never unread to me. Keeping the count in
+        // step here matters because the RPC only recomputes it on a
+        // refetch, and this patch exists precisely to avoid one.
+        const fromOther = msg.sender_id !== uid;
+        queryClient.setQueryData<Match[]>(['matches', uid], old =>
+          (old ?? []).map(m =>
+            m.thread_id === msg.thread_id
+              ? {
+                  ...m,
+                  last_message: msg.body ?? '',
+                  last_message_at: msg.created_at,
+                  unread_count: fromOther
+                    ? (m.unread_count ?? 0) + 1
+                    : m.unread_count,
+                }
+              : m,
+          ),
+        );
+      },
+    )
+    .subscribe();
+
+  live.set(topic, { channel, count: 1 });
+};
+
+const releaseMatchesChannel = (uid: string) => {
+  const topic = `matches-${uid}`;
+  const entry = live.get(topic);
+  if (!entry) return;
+  entry.count -= 1;
+  if (entry.count > 0) return;
+  live.delete(topic);
+  void supabase.removeChannel(entry.channel);
 };

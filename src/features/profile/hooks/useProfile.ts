@@ -280,6 +280,12 @@ export const useUploadPhoto = () => {
       queryClient.invalidateQueries({
         queryKey: ['photos', uid],
       });
+      // profiles.avatar_url is derived from the position-0 media row by a
+      // database trigger, so any change to the set can change it. Without
+      // this the screen keeps serving the previous avatar from cache.
+      queryClient.invalidateQueries({
+        queryKey: ['profile', uid],
+      });
     },
   });
 };
@@ -328,6 +334,10 @@ export const useReorderPhotos = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['photos', uid] });
+      // profiles.avatar_url is derived from the position-0 media row by a
+      // database trigger, so any change to the set can change it. Without
+      // this the screen keeps serving the previous avatar from cache.
+      queryClient.invalidateQueries({ queryKey: ['profile', uid] });
     },
   });
 };
@@ -365,6 +375,12 @@ export const useDeletePhoto = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['photos', uid],
+      });
+      // profiles.avatar_url is derived from the position-0 media row by a
+      // database trigger, so any change to the set can change it. Without
+      // this the screen keeps serving the previous avatar from cache.
+      queryClient.invalidateQueries({
+        queryKey: ['profile', uid],
       });
     },
   });
