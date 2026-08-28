@@ -249,13 +249,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Layout.STRIP_GAP,
-    // No overflow:'hidden'. With a rounded corner and no border, this view
-    // sits on a HARDWARE layer, and the rounded clip there does not draw a
-    // child that fills the bounds — the photo loaded (onLoad fired) and
-    // simply never appeared. The five small slots escape it only because
-    // their dashed border forces a software layer, and so does this card's
-    // own empty state, which is why the gradient and labels always drew.
-    // The image rounds itself (previewLg), so nothing needs clipping.
+    // No overflow:'hidden', deliberately. With it, the photo loaded —
+    // onLoad fired and the view hierarchy reported the ImageView at the
+    // full 624x792 — and was never painted. Removing it fixed that; the
+    // image rounds itself (previewLg) so nothing needs clipping anyway.
+    //
+    // What is NOT established is the mechanism. The obvious theory was
+    // that a rounded clip on a hardware layer drops a child that fills
+    // the bounds, and that the five small slots escape it because their
+    // dashed border forces a software layer. PhotoGrid's `tile` disproves
+    // it: same radius, same overflow, no border, an Image at 100%/100%,
+    // and it renders. The remaining difference here is that this card also
+    // centres its children and carries a gap. So: reproduced, fixed and
+    // verified, cause not pinned down. Do not reintroduce overflow here on
+    // the assumption that it is harmless.
   },
   preview: {
     width: '100%',
