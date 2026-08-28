@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -80,16 +80,21 @@ const ForgotPasswordScreen = () => {
             : Translations.AUTH_FORGOT_SUBTITLE,
         )}
         footer={
-          <AppText
-            variant="body"
+          <Pressable
             onPress={() => router.back()}
             accessibilityRole="link"
-            style={{
-              color: theme.colors.primary,
-            }}
+            accessibilityLabel={t(Translations.AUTH_FORGOT_BACK)}
+            hitSlop={Layout.HIT_SLOP}
           >
-            {t(Translations.AUTH_FORGOT_BACK)}
-          </AppText>
+            <AppText
+              variant="body"
+              style={{
+                color: theme.colors.primary,
+              }}
+            >
+              {t(Translations.AUTH_FORGOT_BACK)}
+            </AppText>
+          </Pressable>
         }
       >
         {sent ? (

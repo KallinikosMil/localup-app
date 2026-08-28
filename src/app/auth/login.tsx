@@ -105,19 +105,24 @@ const LoginScreen = () => {
             >
               {t(Translations.AUTH_NO_ACCOUNT)}
             </AppText>
-            <AppText
-              variant="body"
+            <Pressable
               onPress={() => router.push('/auth/register')}
               accessibilityRole="link"
-              style={[
-                styles.link,
-                {
-                  color: theme.colors.primary,
-                },
-              ]}
+              accessibilityLabel={t(Translations.AUTH_REGISTER)}
+              hitSlop={Layout.HIT_SLOP}
             >
-              {t(Translations.AUTH_REGISTER)}
-            </AppText>
+              <AppText
+                variant="body"
+                style={[
+                  styles.link,
+                  {
+                    color: theme.colors.primary,
+                  },
+                ]}
+              >
+                {t(Translations.AUTH_REGISTER)}
+              </AppText>
+            </Pressable>
           </>
         }
       >
@@ -155,19 +160,22 @@ const LoginScreen = () => {
           />
         </FormProvider>
 
-        <AppText
-          variant="labelStrong"
+        <Pressable
           onPress={() => router.push('/auth/forgot-password')}
           accessibilityRole="link"
-          style={[
-            styles.forgot,
-            {
-              color: theme.colors.primary,
-            },
-          ]}
+          accessibilityLabel={t(Translations.AUTH_FORGOT_PASSWORD)}
+          hitSlop={Layout.HIT_SLOP}
+          style={styles.forgot}
         >
-          {t(Translations.AUTH_FORGOT_PASSWORD)}
-        </AppText>
+          <AppText
+            variant="labelStrong"
+            style={{
+              color: theme.colors.primary,
+            }}
+          >
+            {t(Translations.AUTH_FORGOT_PASSWORD)}
+          </AppText>
+        </Pressable>
 
         <GradientButton
           size="xl"

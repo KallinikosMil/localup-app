@@ -118,19 +118,24 @@ const RegisterScreen = () => {
             >
               {t(Translations.AUTH_HAS_ACCOUNT)}
             </AppText>
-            <AppText
-              variant="body"
+            <Pressable
               onPress={goToLogin}
               accessibilityRole="link"
-              style={[
-                styles.authLink,
-                {
-                  color: theme.colors.primary,
-                },
-              ]}
+              accessibilityLabel={t(Translations.AUTH_LOGIN_LINK)}
+              hitSlop={Layout.HIT_SLOP}
             >
-              {t(Translations.AUTH_LOGIN_LINK)}
-            </AppText>
+              <AppText
+                variant="body"
+                style={[
+                  styles.authLink,
+                  {
+                    color: theme.colors.primary,
+                  },
+                ]}
+              >
+                {t(Translations.AUTH_LOGIN_LINK)}
+              </AppText>
+            </Pressable>
           </>
         }
       >
