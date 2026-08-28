@@ -118,7 +118,16 @@ function EditProfileScreenContent() {
       ? t(Translations.PROFILE_MODE_TRAVELER)
       : t(Translations.PROFILE_MODE_LOCAL);
 
+  // Saving a blank name persisted '', not NULL — and the server-side
+  // guard is coalesce(display_name, 'User'), which only catches NULL. So
+  // an empty string went straight through to the matches list, and the
+  // deck does not coalesce at all. Refused here, and the button is
+  // disabled, so the two agree.
   const handleSave = () => {
+    if (!name.trim()) {
+      setErrorMsg(t(Translations.PROFILE_NAME_REQUIRED));
+      return;
+    }
     updateProfile.mutate(
       {
         display_name: name.trim(),
@@ -418,7 +427,7 @@ function EditProfileScreenContent() {
             every language. */}
         <Pressable
           onPress={handleSave}
-          disabled={updateProfile.isPending}
+          disabled={updateProfile.isPending || !name.trim()}
           hitSlop={12}
           accessibilityRole="button"
           // The label deliberately does not change (see the note above), so

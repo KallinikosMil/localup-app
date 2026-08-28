@@ -81,6 +81,7 @@ export default {
   profilePhotoHint: 'Press and hold to remove',
   profilePhotoPermissionTitle: 'Permission needed',
   profilePhotoPermissionBody: 'Allow photo library access to add photos.',
+  profileNameRequired: 'Your name cannot be empty.',
   profilePhotoLastTitle: 'Keep at least one photo',
   profilePhotoLastBody:
     'This is your only photo. Add another one first, then you can remove this.',

@@ -138,6 +138,13 @@ export default function DiscoverScreen() {
     }
   }, [deckConsumed, isFetching, isError, refetch]);
 
+  // A re-packed deck is a new context; a failure from the previous one
+  // must not be waiting to pop over it.
+  useEffect(() => {
+    if (swipe.isError) swipe.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataUpdatedAt]);
+
   const current = candidates?.[currentIndex] ?? null;
   const next = candidates?.[currentIndex + 1] ?? null;
 
@@ -199,6 +206,23 @@ export default function DiscoverScreen() {
   // (`!current` / `deckConsumed`) and UNMOUNT the Portal → the modal
   // flashed and vanished. Rendering it here, in every branch, decouples
   // it from deck state so nothing but dismissMatch can close it.
+  // Same defect the celebration above was hoisted to fix, on the control
+  // that reports failure. Swiping the LAST card of a page always pushes
+  // currentIndex to the deck length, which makes deckConsumed true — so
+  // the screen is on the spinner branch at exactly the moment that
+  // swipe's RPC comes back, and the failure had nowhere to render. Worse,
+  // the only reset() was this Snackbar's own onDismiss, so isError stayed
+  // true and it popped open later over an unrelated card.
+  const failureNotice = (
+    <Snackbar
+      visible={swipe.isError}
+      onDismiss={() => swipe.reset()}
+      duration={3000}
+    >
+      {errorMessage(swipe.error, Translations.DISCOVER_SWIPE_ERROR)}
+    </Snackbar>
+  );
+
   const celebration = (
     <Portal>
       <Modal
@@ -280,6 +304,7 @@ export default function DiscoverScreen() {
           />
         </View>
         {celebration}
+        {failureNotice}
       </>
     );
   }
@@ -310,6 +335,7 @@ export default function DiscoverScreen() {
           ) : null}
         </View>
         {celebration}
+        {failureNotice}
       </>
     );
   }
@@ -343,6 +369,7 @@ export default function DiscoverScreen() {
           />
         </ScrollView>
         {celebration}
+        {failureNotice}
       </>
     );
   }
@@ -527,14 +554,7 @@ export default function DiscoverScreen() {
       </View>
 
       {celebration}
-
-      <Snackbar
-        visible={swipe.isError}
-        onDismiss={() => swipe.reset()}
-        duration={3000}
-      >
-        {errorMessage(swipe.error, Translations.DISCOVER_SWIPE_ERROR)}
-      </Snackbar>
+      {failureNotice}
     </View>
   );
 }

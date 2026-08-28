@@ -79,6 +79,7 @@ export default {
   profilePhotoPermissionTitle: 'Απαιτείται άδεια',
   profilePhotoPermissionBody:
     'Δώσε πρόσβαση στη συλλογή φωτογραφιών για να προσθέσεις φωτογραφίες.',
+  profileNameRequired: 'Το όνομά σου δεν μπορεί να είναι κενό.',
   profilePhotoLastTitle: 'Κράτα τουλάχιστον μία φωτογραφία',
   profilePhotoLastBody:
     'Είναι η μοναδική σου φωτογραφία. Πρόσθεσε άλλη μία πρώτα και μετά μπορείς να την αφαιρέσεις.',

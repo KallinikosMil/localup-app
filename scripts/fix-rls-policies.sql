@@ -57,6 +57,21 @@ CREATE POLICY
   FOR ALL
   USING (auth.uid() = user_id);
 
+-- RLS cannot say "these columns only", so the column grant does it.
+-- interest_ids is a denormalised cache the user_interests trigger owns —
+-- discover_candidates SCORES on it, so a direct write is a way to inflate
+-- your own shared-interest count. onboarding_complete is the gate AppGuard
+-- routes on; writing it true skips onboarding and puts a profile with no
+-- photo and no coordinates into the deck. Neither is the user's to write.
+-- The nine below are exactly what the client updates: six through
+-- ProfileUpdate, three through useSyncLocation.
+REVOKE UPDATE ON public.profiles FROM authenticated;
+GRANT  UPDATE (
+  display_name, bio, home_city, home_lat, home_lng, mode_override,
+  current_lat, current_lng, last_location_at
+) ON public.profiles TO authenticated;
+REVOKE UPDATE ON public.profiles FROM anon;
+
 -- ----- USER INTERESTS -----
 DROP POLICY IF EXISTS
   "User interests viewable by owner"
