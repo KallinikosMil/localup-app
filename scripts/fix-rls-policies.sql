@@ -102,13 +102,12 @@ CREATE POLICY
   FOR SELECT
   USING (auth.uid() = swiper_id);
 
-CREATE POLICY
-  "Swipes target readable"
-  ON public.swipes
-  FOR SELECT
-  USING (
-    auth.uid() = swiped_id
-  );
+-- DELIBERATELY NOT RECREATED: "Swipes target readable", which was
+-- USING (auth.uid() = swiped_id). It let every user read every swipe aimed
+-- at them — who liked them before any match existed, and who passed on
+-- them. Nothing reads this table from the client, and discover_candidates
+-- and handle_swipe are SECURITY DEFINER, so removing it costs nothing.
+-- The DROP above stays so re-running this file removes it again.
 
 -- ----- MATCHES -----
 DROP POLICY IF EXISTS
