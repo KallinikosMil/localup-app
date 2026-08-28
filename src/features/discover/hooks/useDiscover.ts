@@ -232,9 +232,21 @@ const parseSwipeResult = (data: unknown): SwipeResult => {
   };
 };
 
-export const useSwipe = () => {
+// `onMatched` is reported from the MUTATION-level onSuccess, not from a
+// per-call one. react-query keeps a single set of per-call options per
+// observer: mutate() overwrites #mutateOptions and detaches the observer
+// from the previous mutation, so when two swipes overlap the first one's
+// callbacks never run. A mutual match on the first of two quick swipes
+// was invalidating ['matches'] — the match existed — while the
+// celebration silently never appeared.
+export const useSwipe = (onMatched?: (targetId: string) => void) => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const queryClient = useQueryClient();
+
+  // Held in a ref so the caller can pass an inline closure without
+  // re-creating the mutation on every render.
+  const onMatchedRef = useRef(onMatched);
+  onMatchedRef.current = onMatched;
 
   const swipeMutation = useMutation({
     mutationFn: async ({
@@ -280,6 +292,7 @@ export const useSwipe = () => {
         queryClient.invalidateQueries({
           queryKey: ['matches'],
         });
+        onMatchedRef.current?.(result.targetId);
       }
     },
     onError: () => {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -63,7 +63,16 @@ export default function DiscoverScreen() {
     refetch,
     dataUpdatedAt,
   } = useCandidates();
-  const swipe = useSwipe();
+  // Read through a ref: the callback below is created fresh each render
+  // but must not re-create the mutation, and it needs whatever deck is
+  // current when the swipe RESOLVES, not when it was fired.
+  const candidatesRef = useRef<Candidate[] | undefined>(undefined);
+  const swipe = useSwipe(targetId => {
+    const who = candidatesRef.current?.find(
+      (c: Candidate) => c.user_id === targetId,
+    );
+    if (who) setMatchedUser(who);
+  });
 
   // Everything floating over the bottom of the photo, so the card knows
   // how much of its own text would otherwise sit behind the buttons.
@@ -76,8 +85,27 @@ export default function DiscoverScreen() {
     Layout.ACTION_GAP;
   const errorMessage = useErrorMessage();
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // The cursor carries the pack it belongs to. Resetting it in an effect
+  // meant the render that delivered a new deck still had the OLD index
+  // (= the previous pack's full length), so `deckConsumed` computed true
+  // and the exhaustion effect fired a SECOND refetch on every refill —
+  // whose late response then rewound the deck and re-showed candidates the
+  // user had just swiped. Derived, it is correct in the same render.
+  const [cursor, setCursor] = useState({ index: 0, packId: 0 });
+  const currentIndex = cursor.packId === dataUpdatedAt ? cursor.index : 0;
+  const advance = useCallback(
+    (to: number | ((from: number) => number)) =>
+      setCursor(c => {
+        const from = c.packId === dataUpdatedAt ? c.index : 0;
+        return {
+          index: typeof to === 'function' ? to(from) : to,
+          packId: dataUpdatedAt,
+        };
+      }),
+    [dataUpdatedAt],
+  );
   const [matchedUser, setMatchedUser] = useState<Candidate | null>(null);
+  candidatesRef.current = candidates ?? undefined;
 
   // Reassure the user after a few seconds of loading — a Supabase
   // project waking from auto-pause can take 10-20s. Same hint as
@@ -91,14 +119,6 @@ export default function DiscoverScreen() {
     const timer = setTimeout(() => setSlowLoading(true), 4500);
     return () => clearTimeout(timer);
   }, [isPending]);
-
-  // Every fresh deck is re-packed from
-  // position 0 (the RPC excludes already-
-  // swiped users), so the local cursor
-  // must follow it.
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [dataUpdatedAt]);
 
   // Swipe through the cached deck
   // locally; fetch the next page only
@@ -125,23 +145,17 @@ export default function DiscoverScreen() {
     (action: 'liked' | 'passed') => {
       if (!current) return;
 
-      swipe.mutate(
-        {
-          targetId: current.user_id,
-          action,
-        },
-        {
-          onSuccess: result => {
-            if (result.matched) {
-              setMatchedUser(current);
-            }
-          },
-        },
-      );
+      // No per-call onSuccess: a second swipe overwrites it and detaches
+      // the observer from the first mutation, so the first swipe's match
+      // never got announced. useSwipe reports it at the mutation level.
+      swipe.mutate({
+        targetId: current.user_id,
+        action,
+      });
 
-      setCurrentIndex(prev => prev + 1);
+      advance(prev => prev + 1);
     },
-    [current, swipe],
+    [current, swipe, advance],
   );
 
   const handleSwipeRight = useCallback(() => {
@@ -171,12 +185,12 @@ export default function DiscoverScreen() {
     setManualRefreshing(true);
     try {
       await refreshLocation();
-      setCurrentIndex(0);
+      advance(0);
       await refetch();
     } finally {
       setManualRefreshing(false);
     }
-  }, [refreshLocation, refetch]);
+  }, [refreshLocation, refetch, advance]);
 
   // W7a: the match celebration must persist until the user explicitly
   // dismisses it. It used to live only in the main return branch, so a
