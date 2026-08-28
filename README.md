@@ -1,8 +1,9 @@
 # LocalUp
 
-> **🚧 Work in progress.** LocalUp is an actively-developed MVP built as a
-> university thesis project. Core flows work end-to-end, but the app is not
-> feature-complete and the UI is still being polished.
+> **Actively developed.** LocalUp is an MVP built solo as a university thesis —
+> architecture, app and backend. Every flow below works end to end and the
+> design pass is done; it is being prepared for a Google Play release and is not
+> production-hardened yet.
 
 **LocalUp connects travelers with locals in the same city.** Not a dating app —
 think "Bumble meets Airbnb's editorial style": clean, curated, trust-oriented.
@@ -22,16 +23,22 @@ travelers currently passing through. That opposite-mode pairing is the core
 invariant — it's what makes *"I want to meet locals when I travel"* and *"I want
 to meet interesting travelers in my city"* the same product.
 
-## Demo
+## Screenshots
 
-🎥 *A full walkthrough video and screenshots are coming once the UI polish pass
-is done.* In the meantime, the sections below describe what the app does and how
-it's built.
+| Discover | Profile | Matches | Chat |
+|---|---|---|---|
+| ![Discover — a deck card showing a local, their mode badge, home city and shared interests](docs/screenshots/discover.png) | ![Profile — the signed-in traveler's own profile, showing their mode and home city](docs/screenshots/profile.png) | ![Matches — the list of mutual matches with the latest message](docs/screenshots/matches.png) | ![Chat — a conversation between a traveler and a local](docs/screenshots/chat.png) |
+
+Both people above are demo accounts and the photos are generated artwork — no
+real user's pictures, names or coordinates appear anywhere in this repository.
+Note the badges: the traveler's deck shows **LOCAL** cards, and her own profile
+reads **TRAVELER**. That is the whole product in two labels.
 
 ## What you can do today
 
-- **Sign up & build a profile** — name, bio, photos, interests, languages, date
-  of birth.
+- **Sign up & build a profile** — name, bio, interests, languages, date of birth,
+  and up to six photos. One is enough to finish; the first is the one people see
+  first, and the order is yours to change.
 - **Get placed automatically** — the app reads your location and assigns your
   mode (local vs. traveler).
 - **Discover** — swipe through a deck of opposite-mode people near you. Each card
@@ -39,9 +46,25 @@ it's built.
 - **Match** — a mutual like creates a match.
 - **Chat** — matched users get a thread to coordinate meeting up.
 
-Candidates are ranked server-side by a quality score combining shared interests,
-distance, activity recency, and language overlap. You can filter by distance and
-age range — mode is never a filter, opposite-mode is fixed.
+### How the deck is built
+
+Ranking happens entirely in Postgres, in one `discover_candidates` call. The
+query filters first — opposite mode, inside your distance and age range, not
+already swiped, neither side blocked — narrowing by PostGIS proximity
+(`ST_DWithin` plus a KNN `<->` ordering) before scoring anything. Only then are
+the survivors scored:
+
+| Signal | Weight | How it is measured |
+|---|---|---|
+| Shared interests | 10 | how many of *your* interests they share |
+| Distance | 5 | linear decay across your maximum radius |
+| Activity recency | 3 | how recently their location was updated, over a 14-day window |
+| Shared language | 2 | any overlap at all |
+
+Those weights live in a `match_weights` table rather than in the function body,
+so the ranking can be retuned with an `UPDATE` — no migration, no redeploy, and
+no app release. The scoring is deliberately the only tunable part; the
+opposite-mode rule is a hard filter, never a weight.
 
 ## Tech stack
 
@@ -59,6 +82,11 @@ Sensitive/multi-step operations (mutual-match resolution, onboarding, the matche
 overview) run as **Postgres functions**, so they're atomic and enforced at the
 database layer rather than composed on the client.
 
+Row-Level Security is enabled on every application table, and the `SECURITY
+DEFINER` functions take the caller's identity from `auth.uid()` rather than from
+a parameter — so there is no argument a client could point at somebody else's
+data.
+
 ## Project structure
 
 ```
@@ -73,11 +101,10 @@ src/
 
 ## Roadmap
 
-- [ ] Profile photo gallery (3-photo minimum) + profile edit rebuild
-- [ ] Discovery filters UI (distance / age)
-- [ ] Unread message badges
-- [ ] Push notifications (Expo Push, server-side)
-- [ ] Design polish pass across all screens
+- [ ] Discovery filters UI — `match_preferences` is already read server-side, but
+      there is no screen to set distance and age yet
+- [ ] Editing interests after onboarding
+- [ ] Google Play release
 
 ## Status & scope
 
