@@ -98,12 +98,15 @@ const PhotoScreen = () => {
           accessibilityHint={
             first ? t(Common.A11Y_REMOVE_PHOTO_HINT) : undefined
           }
+          // The background is unconditional so the card has something to
+          // show while the photo decodes, instead of a hole. The dashes
+          // stay conditional — a photo covers the fill anyway.
           style={[
             styles.slot,
+            { backgroundColor: theme.colors.surfaceElevated },
             first
               ? null
               : {
-                  backgroundColor: theme.colors.surfaceElevated,
                   borderColor: theme.colors.outlineDashed,
                   borderWidth: 1.5,
                   borderStyle: 'dashed',
@@ -111,7 +114,7 @@ const PhotoScreen = () => {
           ]}
         >
           {first ? (
-            <Image source={{ uri: first }} style={styles.preview} />
+            <Image source={{ uri: first }} style={styles.previewLg} />
           ) : (
             <>
               <LinearGradient
@@ -246,11 +249,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Layout.STRIP_GAP,
-    overflow: 'hidden',
+    // No overflow:'hidden'. With a rounded corner and no border, this view
+    // sits on a HARDWARE layer, and the rounded clip there does not draw a
+    // child that fills the bounds — the photo loaded (onLoad fired) and
+    // simply never appeared. The five small slots escape it only because
+    // their dashed border forces a software layer, and so does this card's
+    // own empty state, which is why the gradient and labels always drew.
+    // The image rounds itself (previewLg), so nothing needs clipping.
   },
   preview: {
     width: '100%',
     height: '100%',
+  },
+  // The large card rounds the IMAGE itself rather than leaning on the
+  // parent's overflow:'hidden'. A child whose bounds coincide exactly
+  // with a rounded clip gets clipped away entirely on Android; the small
+  // slots escape it only because their 1px border insets the child by a
+  // pixel. Rounding here means nothing has to be clipped at all.
+  // The card rounds the IMAGE rather than clipping it with the parent —
+  // see the note on `slot` for why the parent cannot do it. Explicit
+  // pixels because the slot is a fixed size and there is no longer a
+  // clipping parent for a percentage to resolve against.
+  previewLg: {
+    width: Layout.PHOTO_SLOT_LG_W,
+    height: Layout.PHOTO_SLOT_LG_H,
+    borderRadius: BorderRadius.xxl,
   },
   plus: {
     width: Layout.AVATAR_STRIP,
