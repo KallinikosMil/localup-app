@@ -565,15 +565,6 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.lg,
   },
-  totalBadge: {
-    minWidth: Layout.BADGE_MD,
-    height: Layout.BADGE_MD,
-    borderRadius: Layout.BADGE_MD / 2,
-    paddingHorizontal: Layout.BADGE_PADDING_MD,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -663,15 +654,6 @@ const styles = StyleSheet.create({
   rowMeta: {
     alignItems: 'flex-end',
     gap: Spacing.xs + 2,
-  },
-  unreadBadge: {
-    minWidth: Layout.BADGE_SM,
-    height: Layout.BADGE_SM,
-    borderRadius: Layout.BADGE_SM / 2,
-    paddingHorizontal: Layout.BADGE_PADDING_SM,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   center: {
     flex: 1,
