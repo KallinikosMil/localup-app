@@ -85,7 +85,10 @@ database layer rather than composed on the client.
 Row-Level Security is enabled on every application table, and the `SECURITY
 DEFINER` functions take the caller's identity from `auth.uid()` rather than from
 a parameter — so there is no argument a client could point at somebody else's
-data.
+data. Where RLS cannot reach, column grants do: a policy can say *which rows*
+you may write but not *which columns*, so the columns the server owns — the
+denormalised interest cache the deck is scored on, the onboarding gate — are
+simply not granted to clients at all.
 
 ## Project structure
 
@@ -101,10 +104,14 @@ src/
 
 ## Roadmap
 
-- [ ] Discovery filters UI — `match_preferences` is already read server-side, but
-      there is no screen to set distance and age yet
-- [ ] Editing interests after onboarding
-- [ ] Google Play release
+- [ ] **Search filters** — designed, and the server side is done: reading and
+      writing preferences, a live count of who a setting would show, and the
+      distance spread behind the "your radius is too narrow" warning. The
+      screen itself is what is left.
+- [ ] **Editing interests** — same: designed, and the write path enforces the
+      3–5 rule in one transaction. Only the screen is missing.
+- [ ] Google Play release — privacy policy, the Data Safety form and a
+      production keystore
 
 ## Status & scope
 
