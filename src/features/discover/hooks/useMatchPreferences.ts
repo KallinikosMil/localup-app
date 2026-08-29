@@ -120,3 +120,53 @@ export const useCandidateCount = (prefs: MatchPreferences | undefined) => {
     },
   });
 };
+
+export type DistanceSummary = {
+  total: number;
+  p25Km: number;
+  p75Km: number;
+  suggestedKm: number;
+  suggestedCount: number;
+};
+
+// The shape of the room, for the too-narrow warning: where people actually
+// are, and the smallest round radius that would fill a deck.
+//
+// Returns null when there is NOBODY at any distance in the chosen age range.
+// That distinction matters on screen: it means widening the radius will not
+// help, because age is what is excluding everyone, and offering "Widen to
+// 45 km" there sends the user to a second empty deck. Also null with no
+// location fix, for the same reason the count is.
+export const useDistanceSummary = (minAge: number, maxAge: number) => {
+  const uid = useSelector((s: RootState) => s.auth.user?.uid);
+
+  return useQuery<DistanceSummary | null>({
+    queryKey: ['distance-summary', uid, minAge, maxAge],
+    enabled: !!uid,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('candidate_distance_summary', {
+        p_min_age: minAge,
+        p_max_age: maxAge,
+      });
+      if (error) throw error;
+      const row = (data as unknown[] | null)?.[0] as
+        | {
+            total: number;
+            p25_km: number;
+            p75_km: number;
+            suggested_km: number;
+            suggested_count: number;
+          }
+        | undefined;
+      if (!row) return null;
+      return {
+        total: Number(row.total),
+        p25Km: Number(row.p25_km),
+        p75Km: Number(row.p75_km),
+        suggestedKm: Number(row.suggested_km),
+        suggestedCount: Number(row.suggested_count),
+      };
+    },
+  });
+};
