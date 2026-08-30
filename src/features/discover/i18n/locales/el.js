@@ -1,6 +1,28 @@
 export default {
   discoverTitle: 'LocalUp',
   discoverTabTitle: 'Ανακάλυψη',
+  filtersTitle: 'Φίλτρα αναζήτησης',
+  filtersDistance: 'Απόσταση',
+  filtersAge: 'Ηλικία',
+  filtersDistanceRange: '{{min}} – {{max}} χλμ',
+  filtersAgeRange: '{{min}} – {{max}}',
+  filtersKm: '{{km}} χλμ',
+  filtersAgeValue: '{{min}} – {{max}}',
+  filtersMatchLocals: '{{count}} ντόπιοι ταιριάζουν τώρα',
+  filtersMatchTravelers: '{{count}} ταξιδιώτες ταιριάζουν τώρα',
+  filtersSummary: 'Σε ακτίνα {{km}} χλμ από {{city}}, ηλικίες {{min}}–{{max}}.',
+  filtersNarrowLocals: 'Μόνο {{count}} ντόπιοι τόσο κοντά',
+  filtersNarrowTravelers: 'Μόνο {{count}} ταξιδιώτες τόσο κοντά',
+  filtersNarrowBody:
+    'Οι περισσότεροι κοντά σου είναι {{from}}–{{to}} χλμ μακριά. Στα {{km}} χλμ η τράπουλά σου τελειώνει σε μια μέρα και η εφαρμογή θα φαίνεται άδεια.',
+  filtersWiden: 'Άνοιξε στα {{km}} χλμ',
+  filtersAgeBlocks:
+    'Κανείς δεν ταιριάζει σε αυτές τις ηλικίες σε καμία απόσταση. Το να ανοίξεις την ακτίνα δεν θα βοηθήσει — το εύρος ηλικίας είναι που τους αποκλείει.',
+  filtersModeTitle: 'Βλέπεις πάντα την άλλη πλευρά',
+  filtersModeBody:
+    'Οι ταξιδιώτες συναντούν ντόπιους, οι ντόπιοι ταξιδιώτες. Αυτό είναι η ίδια η εφαρμογή, όχι προτίμηση — οπότε δεν υπάρχει τίποτα να αλλάξεις εδώ.',
+  filtersReset: 'Επαναφορά προεπιλογών',
+  filtersSaveError: 'Τα φίλτρα δεν αποθηκεύτηκαν. Δοκίμασε ξανά.',
   discoverEmptyTitle: 'Κανείς κοντά σου',
   discoverEmptySubtitle: 'Έλεγξε ξανά αργότερα για νέα άτομα',
   discoverRefresh: 'Ανανέωση',

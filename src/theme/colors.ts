@@ -63,6 +63,9 @@ const lightBase = {
   RED_700: '#B3261E',
   RED_900: '#601410',
   AMBER_500: '#F59E0B',
+  AMBER_050: '#FFF4E0',
+  AMBER_200: '#F5D9A8',
+  AMBER_700: '#B77400',
   BLUE_500: '#3B82F6',
 
   // on-photo / overlay — mode-constant
@@ -158,6 +161,9 @@ const darkBase: typeof lightBase = {
   RED_700: '#F2B8B5',
   RED_900: '#601410',
   AMBER_500: '#FFD740',
+  AMBER_050: '#2E2617',
+  AMBER_200: '#5C4E2E',
+  AMBER_700: '#FFD740',
   BLUE_500: '#8AB4F8',
 
   // on-photo / overlay — mode-constant
@@ -222,6 +228,11 @@ export const lightColors = {
 
   success: lightBase.GREEN_500,
   warning: lightBase.AMBER_500,
+  warningContainer: lightBase.AMBER_050,
+  warningOutline: lightBase.AMBER_200,
+  // The readable amber ON that container. Light needs a far darker one
+  // than the signal colour: #F59E0B on #FFF4E0 is not text.
+  onWarningContainer: lightBase.AMBER_700,
   info: lightBase.BLUE_500,
 
   // UI redesign tokens (spec §2.3)
@@ -330,6 +341,9 @@ export const darkColors: typeof lightColors = {
 
   success: darkBase.GREEN_500,
   warning: darkBase.AMBER_500,
+  warningContainer: darkBase.AMBER_050,
+  warningOutline: darkBase.AMBER_200,
+  onWarningContainer: darkBase.AMBER_700,
   info: darkBase.BLUE_500,
 
   // UI redesign tokens (spec §2.3)

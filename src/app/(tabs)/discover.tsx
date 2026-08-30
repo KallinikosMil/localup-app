@@ -8,6 +8,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native';
 import { ActivityIndicator, Portal, Modal, Snackbar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -37,7 +38,10 @@ import { Layout } from '@theme/constants/Layout';
 import { Translations } from '@features/discover/i18n/translationKeys';
 import { Translations as Common } from '@shared/i18n/translationKeys';
 
-const FILTERS_ENABLED = false;
+// Was false while the button had nowhere to go: match_preferences was read
+// on every deck build and written by nothing, so a filters control would
+// have been a lie. /filters exists now.
+const FILTERS_ENABLED = true;
 
 export default function DiscoverScreen() {
   const theme = useAppTheme();
@@ -484,8 +488,10 @@ export default function DiscoverScreen() {
 
           {FILTERS_ENABLED ? (
             <Pressable
+              onPress={() => router.push('/filters')}
               accessibilityRole="button"
               accessibilityLabel={t(Translations.DISCOVER_FILTERS)}
+              hitSlop={Layout.HIT_SLOP}
               style={[
                 styles.headerBtn,
                 {

@@ -156,6 +156,11 @@ export const Layout = {
   // asked for, and growing it would push the layout around — what has to
   // reach 44 is the area that responds to a finger, not the ink.
   HIT_SLOP: 8,
+
+  // Filter sliders. The handle is the touch target as well as the mark, so
+  // it is drawn at the 26 the artboards ask for rather than a hairline.
+  SLIDER_HANDLE: 26,
+  SLIDER_RAIL: 6,
   // Vertical slop for a link whose box is the TYPE itself. HIT_SLOP was
   // enough for controls with a drawn box (38, 34 and 40 became 54, 50 and
   // 56) and nowhere near it for these: labelStrong is 18pt tall, so 8 a

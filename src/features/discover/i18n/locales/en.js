@@ -1,6 +1,28 @@
 export default {
   discoverTitle: 'LocalUp',
   discoverTabTitle: 'Discover',
+  filtersTitle: 'Search filters',
+  filtersDistance: 'Distance',
+  filtersAge: 'Age',
+  filtersDistanceRange: '{{min}} – {{max}} km',
+  filtersAgeRange: '{{min}} – {{max}}',
+  filtersKm: '{{km}} km',
+  filtersAgeValue: '{{min}} – {{max}}',
+  filtersMatchLocals: '{{count}} locals match right now',
+  filtersMatchTravelers: '{{count}} travellers match right now',
+  filtersSummary: 'Within {{km}} km of {{city}}, ages {{min}}–{{max}}.',
+  filtersNarrowLocals: 'Only {{count}} locals this close',
+  filtersNarrowTravelers: 'Only {{count}} travellers this close',
+  filtersNarrowBody:
+    'Most people near you are {{from}}–{{to}} km away. At {{km}} km your deck runs out in a day and the app will look empty.',
+  filtersWiden: 'Widen to {{km}} km',
+  filtersAgeBlocks:
+    'Nobody matches these ages at any distance. Widening the radius will not help — the age range is what is excluding everyone.',
+  filtersModeTitle: 'You always see the other side',
+  filtersModeBody:
+    'Travellers meet locals, locals meet travellers. That is the app itself, not a preference — so there is nothing to switch here.',
+  filtersReset: 'Reset to defaults',
+  filtersSaveError: "Couldn't save your filters. Please try again.",
   discoverEmptyTitle: 'No one nearby',
   discoverEmptySubtitle: 'Check back later for new people',
   discoverRefresh: 'Refresh',
