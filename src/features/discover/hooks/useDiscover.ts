@@ -7,6 +7,10 @@ import { RootState } from '@store';
 import { useProfile } from '@features/profile/hooks/useProfile';
 import { haversineKm } from '@features/profile/utils/mode';
 import { publicPhotoUrls } from '@shared/utils/storage';
+import {
+  PREF_DEFAULTS,
+  useMatchPreferences,
+} from '@features/discover/hooks/useMatchPreferences';
 
 const STALE_GPS_KM_THRESHOLD = 5;
 
@@ -48,36 +52,15 @@ export type Candidate = {
   rank_score: number;
 };
 
-type MatchPrefs = {
-  max_distance_km: number | null;
-  min_age: number | null;
-  max_age: number | null;
-};
-
-const PREFS_FALLBACK: MatchPrefs = {
-  max_distance_km: 75,
-  min_age: 18,
-  max_age: 99,
-};
-
-const useMatchPreferences = (uid: string | undefined) =>
-  useQuery({
-    queryKey: ['match-preferences', uid],
-    enabled: !!uid,
-    queryFn: async (): Promise<MatchPrefs> => {
-      const { data, error } = await supabase
-        .from('match_preferences')
-        .select('max_distance_km, min_age, max_age')
-        .eq('user_id', uid!)
-        .maybeSingle();
-      if (error) throw error;
-      return data ?? PREFS_FALLBACK;
-    },
-  });
-
+// The preferences hook lives in useMatchPreferences.ts, not here. There
+// used to be a private copy in this file using the SAME query key —
+// ['match-preferences', uid] — but returning the raw snake_case row while
+// the shared one returns camelCase. Two hooks, one cache key, two shapes:
+// whichever mounted first won, and the filters screen silently read
+// Discover's row and rendered blanks for every value.
 export const useCandidates = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
-  const { data: prefs, isError: prefsError } = useMatchPreferences(uid);
+  const { data: prefs, isError: prefsError } = useMatchPreferences();
 
   // H2: a failed prefs read must NOT disable the deck. It used to —
   // `enabled: !!uid && !!prefs` meant a prefs error/hang left `prefs`
@@ -87,17 +70,16 @@ export const useCandidates = () => {
   // Prefs are only a filter; degrade to the defaults and still show a
   // deck. (Failing loudly here would be worse than serving the same
   // defaults the query itself falls back to when the row is missing.)
-  const effectivePrefs = prefs ?? (prefsError ? PREFS_FALLBACK : undefined);
+  const effectivePrefs = prefs ?? (prefsError ? PREF_DEFAULTS : undefined);
 
   return useQuery({
     queryKey: [
       'discover-candidates',
       uid,
       {
-        maxDist:
-          effectivePrefs?.max_distance_km ?? PREFS_FALLBACK.max_distance_km,
-        minAge: effectivePrefs?.min_age ?? PREFS_FALLBACK.min_age,
-        maxAge: effectivePrefs?.max_age ?? PREFS_FALLBACK.max_age,
+        maxDist: effectivePrefs?.maxDistanceKm ?? PREF_DEFAULTS.maxDistanceKm,
+        minAge: effectivePrefs?.minAge ?? PREF_DEFAULTS.minAge,
+        maxAge: effectivePrefs?.maxAge ?? PREF_DEFAULTS.maxAge,
       },
     ],
     enabled: !!uid && !!effectivePrefs,
