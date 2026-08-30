@@ -39,6 +39,17 @@ export default {
   profileUnblockError: 'Η άρση απέτυχε. Δοκίμασε ξανά.',
   profileReorderError: 'Η νέα σειρά δεν αποθηκεύτηκε. Δοκίμασε ξανά.',
   profileSettings: 'Ρυθμίσεις',
+  profileSectionPrivacy: 'Απόρρητο',
+  profileSectionAccount: 'Λογαριασμός',
+  profileThemeFollowingDark:
+    'Ακολουθεί το κινητό σου — σκοτεινή αυτή τη στιγμή.',
+  profileThemeFollowingLight:
+    'Ακολουθεί το κινητό σου — φωτεινή αυτή τη στιγμή.',
+  profileThemeAlwaysLight: 'Πάντα φωτεινή, ό,τι κι αν κάνει το κινητό σου.',
+  profileThemeAlwaysDark: 'Πάντα σκοτεινή, ό,τι κι αν κάνει το κινητό σου.',
+  profileBlockedHint:
+    'Τα αποκλεισμένα άτομα δεν σε βλέπουν στο Discover ούτε μπορούν να σου στείλουν μήνυμα. Δεν ειδοποιούνται.',
+  profileAppVersion: 'LocalUp {{version}}',
   profileNameAge: '{{name}}, {{age}}',
   profileViewMessage: 'Μήνυμα στον/στην {{name}}',
   profileViewInCommon: '{{count}} κοινά',

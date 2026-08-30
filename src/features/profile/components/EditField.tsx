@@ -135,13 +135,23 @@ export const LabelledField = ({
   );
 };
 
+export type ModeSegmentOption = {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  // Optional, and only Settings passes one. "How you appear" reads as a
+  // mode picker from its two words alone; System / Light / Dark does not
+  // — three theme words with no glyph could be picking anything.
+  icon?: IconName;
+};
+
 // A segmented control, not three loose pills: the three are mutually
 // exclusive and the track makes that visible before you read a label.
 export const ModeSegments = ({
   options,
   theme,
 }: {
-  options: { label: string; active: boolean; onPress: () => void }[];
+  options: ModeSegmentOption[];
   theme: AppTheme;
 }) => (
   <View
@@ -168,6 +178,13 @@ export const ModeSegments = ({
             end={{ x: 1, y: 1 }}
             style={styles.segmentFill}
           >
+            {option.icon ? (
+              <MaterialCommunityIcons
+                name={option.icon}
+                size={Layout.SEGMENT_ICON}
+                color={theme.colors.onGradient}
+              />
+            ) : null}
             <AppText
               variant="bodySmallStrong"
               style={{
@@ -186,6 +203,13 @@ export const ModeSegments = ({
           accessibilityState={{ selected: false }}
           style={[styles.segment, styles.segmentFill]}
         >
+          {option.icon ? (
+            <MaterialCommunityIcons
+              name={option.icon}
+              size={Layout.SEGMENT_ICON}
+              color={theme.colors.onSurfaceVariant}
+            />
+          ) : null}
           <AppText
             variant="bodySmall"
             style={{
@@ -241,6 +265,8 @@ const styles = StyleSheet.create({
   },
   segmentFill: {
     height: Layout.TAB_SEGMENT_HEIGHT - 2,
+    flexDirection: 'row',
+    gap: Spacing.xs + 2,
     alignItems: 'center',
     justifyContent: 'center',
   },

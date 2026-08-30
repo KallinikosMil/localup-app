@@ -7,7 +7,7 @@ import {
   RefreshControl,
   StatusBar,
 } from 'react-native';
-import { ActivityIndicator, Snackbar } from 'react-native-paper';
+import { ActivityIndicator } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -16,21 +16,14 @@ import { useIsFocused } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
-import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
-import CustomModal from '@shared/components/CustomModal';
-import AppButton from '@shared/components/AppButton';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { ageFromISODate } from '@shared/utils/date';
-import { useLogout } from '@features/auth/hooks/useAuth';
-import { useDeleteAccount } from '@features/auth/hooks/useDeleteAccount';
 import ProfileHero from '@features/profile/components/ProfileHero';
-import { ModeSegments } from '@features/profile/components/EditField';
 import { useProfile, usePhotos } from '@features/profile/hooks/useProfile';
 import { computeMode } from '@features/profile/utils/mode';
 import { useAppTheme } from '@theme/paper';
-import { useThemeMode } from '@theme/ThemeModeProvider';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Spacing } from '@theme/constants/Spacing';
 import { BorderRadius } from '@theme/constants/BorderRadius';
@@ -43,14 +36,11 @@ import { Layout } from '@theme/constants/Layout';
 
 function ProfileScreenContent() {
   const theme = useAppTheme();
-  const { mode: themeMode, setMode: setThemeMode } = useThemeMode();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
-  const logout = useLogout();
-  const deleteAccount = useDeleteAccount();
   const {
     data: profile,
     // isPending (not isLoading): true while the query is still disabled
@@ -67,16 +57,6 @@ function ProfileScreenContent() {
     refetch: refetchPhotos,
     isRefetching: photosRefetching,
   } = usePhotos(profile?.user_id);
-
-  // Logout can fail (offline, server). Without this the button just
-  // un-spun and the user stayed silently signed in, thinking they had
-  // left.
-  const [logoutError, setLogoutError] = useState<string | null>(null);
-  // Deleting is irreversible, so it is gated behind an explicit
-  // confirmation rather than a single tap. On success there is nothing to
-  // navigate to — the hook clears the session and AppGuard routes to
-  // login by itself.
-  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleRefresh = async () => {
     await Promise.all([refetchProfile(), refetchPhotos()]);
@@ -215,6 +195,30 @@ function ProfileScreenContent() {
           city={profile?.home_city}
           mode={mode}
           modeLabel={t(modeLabel)}
+          // The hero has had a right-hand slot since it was written and
+          // this screen never filled it. Everything that used to sit at
+          // the bottom of the page lives behind it now.
+          rightAction={
+            <Pressable
+              onPress={() => router.push('/settings')}
+              accessibilityRole="button"
+              accessibilityLabel={t(Translations.PROFILE_SETTINGS)}
+              hitSlop={Layout.HIT_SLOP}
+              style={[
+                styles.gear,
+                {
+                  backgroundColor: theme.colors.headerPill,
+                  borderColor: theme.colors.headerPillBorder,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="cog-outline"
+                size={20}
+                color={theme.colors.onHeaderPill}
+              />
+            </Pressable>
+          }
         />
 
         <View style={styles.body}>
@@ -338,198 +342,8 @@ function ProfileScreenContent() {
               </View>
             </>
           ) : null}
-
-          {/* Pushes the footer to the bottom of the page rather than
-              letting it hang under the interests. On a sparse profile
-              that left a big void below two small links and made the
-              screen look unfinished. */}
-          <View style={styles.spacer} />
-
-          {/* The theme control used to be a lone icon on the login
-              screen: a one-way flip out of following the system, with
-              nothing anywhere to get back, sitting on the one screen you
-              stop seeing the moment you have an account. It belongs
-              here, with all three options visible — including the
-              default, which was previously unreachable once left. */}
-          <View style={styles.appearance}>
-            <AppText
-              variant="labelStrong"
-              style={{
-                color: theme.colors.onSurfaceVariant,
-              }}
-            >
-              {t(Translations.PROFILE_APPEARANCE)}
-            </AppText>
-            <ModeSegments
-              theme={theme}
-              options={[
-                {
-                  label: t(Translations.PROFILE_THEME_SYSTEM),
-                  active: themeMode === 'system',
-                  onPress: () => setThemeMode('system'),
-                },
-                {
-                  label: t(Translations.PROFILE_THEME_LIGHT),
-                  active: themeMode === 'light',
-                  onPress: () => setThemeMode('light'),
-                },
-                {
-                  label: t(Translations.PROFILE_THEME_DARK),
-                  active: themeMode === 'dark',
-                  onPress: () => setThemeMode('dark'),
-                },
-              ]}
-            />
-          </View>
-
-          {/* Blocking was one-way until this screen existed — you could
-              cut someone off and never change your mind, which is hard to
-              defend when the copy also says they are never told. It sits
-              with the other account actions rather than behind a settings
-              gear that has nothing else in it yet. */}
-          <Pressable
-            onPress={() => router.push('/profile/blocked')}
-            hitSlop={12}
-            accessibilityRole="button"
-            accessibilityLabel={t(Translations.PROFILE_BLOCKED_TITLE)}
-            style={styles.blockedLink}
-          >
-            <MaterialCommunityIcons
-              name="account-cancel-outline"
-              size={17}
-              color={theme.colors.onSurfaceVariant}
-            />
-            <AppText
-              variant="labelStrong"
-              style={{
-                color: theme.colors.onSurfaceVariant,
-              }}
-            >
-              {t(Translations.PROFILE_BLOCKED_TITLE)}
-            </AppText>
-          </Pressable>
-
-          {/* Both quiet, and side by side rather than stacked as buttons:
-              neither is something the screen wants you to do. Delete is
-              findable because Google Play requires it to be, and tinted
-              with the error colour so it can never be mistaken for the
-              one beside it. */}
-          <View style={styles.footerRow}>
-            <Pressable
-              onPress={() =>
-                logout.mutate(undefined, {
-                  onError: err =>
-                    setLogoutError(
-                      errorMessage(err, Translations.PROFILE_LOGOUT_ERROR),
-                    ),
-                })
-              }
-              hitSlop={12}
-              disabled={logout.isPending}
-              accessibilityRole="button"
-              accessibilityLabel={t(Translations.PROFILE_LOGOUT)}
-              accessibilityState={{ disabled: logout.isPending }}
-            >
-              {logout.isPending ? (
-                <ActivityIndicator size={16} />
-              ) : (
-                <AppText
-                  variant="labelStrong"
-                  style={{
-                    color: theme.colors.onSurfaceVariant,
-                  }}
-                >
-                  {t(Translations.PROFILE_LOGOUT)}
-                </AppText>
-              )}
-            </Pressable>
-
-            <Pressable
-              onPress={() => setConfirmDelete(true)}
-              hitSlop={12}
-              disabled={deleteAccount.isPending}
-              accessibilityRole="button"
-              accessibilityLabel={t(Translations.PROFILE_DELETE_ACCOUNT)}
-              accessibilityHint={t(Translations.PROFILE_DELETE_BODY)}
-              accessibilityState={{ disabled: deleteAccount.isPending }}
-            >
-              {deleteAccount.isPending ? (
-                <ActivityIndicator size={16} />
-              ) : (
-                <AppText
-                  variant="label"
-                  style={{
-                    color: theme.colors.error,
-                  }}
-                >
-                  {t(Translations.PROFILE_DELETE_ACCOUNT)}
-                </AppText>
-              )}
-            </Pressable>
-          </View>
         </View>
       </ScrollView>
-
-      <CustomModal
-        visible={confirmDelete}
-        onDismiss={() => setConfirmDelete(false)}
-      >
-        <AppText
-          variant="h3"
-          style={[
-            styles.modalText,
-            {
-              color: theme.colors.onSurface,
-            },
-          ]}
-        >
-          {t(Translations.PROFILE_DELETE_TITLE)}
-        </AppText>
-        <Spacer spacing={Spacing.sm} />
-        <AppText
-          variant="body"
-          style={[
-            styles.modalText,
-            {
-              color: theme.colors.onSurfaceVariant,
-            },
-          ]}
-        >
-          {t(Translations.PROFILE_DELETE_BODY)}
-        </AppText>
-        <Spacer spacing={Spacing.xl} />
-        {/* The safe choice is the prominent one. The destructive choice is
-            reachable but never the default. */}
-        <AppButton variant="primary" onPress={() => setConfirmDelete(false)}>
-          {t(Translations.PROFILE_DELETE_CANCEL)}
-        </AppButton>
-        <Spacer spacing={Spacing.md} />
-        <AppButton
-          variant="link"
-          onPress={() => {
-            setConfirmDelete(false);
-            deleteAccount.mutate(undefined, {
-              onError: err =>
-                setLogoutError(
-                  errorMessage(err, Translations.PROFILE_DELETE_ERROR),
-                ),
-            });
-          }}
-          labelStyle={{
-            color: theme.colors.error,
-          }}
-        >
-          {t(Translations.PROFILE_DELETE_CONFIRM)}
-        </AppButton>
-      </CustomModal>
-
-      <Snackbar
-        visible={!!logoutError}
-        onDismiss={() => setLogoutError(null)}
-        duration={4000}
-      >
-        {logoutError ?? ''}
-      </Snackbar>
     </View>
   );
 }
@@ -611,27 +425,14 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
   },
-  spacer: {
-    flex: 1,
-    minHeight: Spacing.xxl,
-  },
-  appearance: {
-    gap: Layout.FIELD_LABEL_GAP,
-    marginBottom: Spacing.lg,
-  },
-  blockedLink: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
+  // Same pill as the back button on someone else's profile — it sits on
+  // a photo, so it needs its own ground rather than the page's.
+  gear: {
+    width: Layout.CHAT_AVATAR,
+    height: Layout.CHAT_AVATAR,
+    borderRadius: Layout.CHAT_AVATAR / 2,
+    borderWidth: 1,
     alignItems: 'center',
-    gap: Layout.CHIP_GAP,
-    marginBottom: Spacing.lg,
-  },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Layout.SCREEN_PADDING,
-  },
-  modalText: {
-    textAlign: 'center',
+    justifyContent: 'center',
   },
 });

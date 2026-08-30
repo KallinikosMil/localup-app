@@ -196,6 +196,15 @@ export const Layout = {
   COMPOSER_PADDING_H: 18,
   STATUS_DOT: 6,
 
+  // ---- settings ----
+  // A settings row is taller than a list row on purpose: it is a single
+  // tap target with one line in it, and 60 keeps the whole card well
+  // clear of the 44 minimum without needing hitSlop to rescue it.
+  SETTINGS_ROW_HEIGHT: 60,
+  // Beside a segment label, not on its own — so it stays smaller than
+  // the 20 the row icons use.
+  SEGMENT_ICON: 16,
+
   // ---- ambient ----
   // The violet blob behind the top-left corner (§3.3).
   // SVG stop-color does NOT carry alpha — an rgba() there is read as
