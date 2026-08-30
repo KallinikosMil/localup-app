@@ -74,6 +74,8 @@ const lightBase = {
   // different, paler gradient than light.
   GRADIENT_FROM: '#A78BFA',
   GRADIENT_TO: '#653FD4',
+
+  CHIP_SELECTED: '#653FD4',
   // A SENT chat bubble, and only that. Mode-constant like the brand
   // gradient, but darker at both ends: a bubble is a small block of
   // white text, and the brand gradient is light enough at its top end
@@ -162,6 +164,7 @@ const darkBase: typeof lightBase = {
   ON_PHOTO: '#FFFFFF',
   GRADIENT_FROM: '#A78BFA',
   GRADIENT_TO: '#653FD4',
+  CHIP_SELECTED: '#653FD4',
   BUBBLE_FROM: '#7C5CE0',
   BUBBLE_TO: '#5B36C4',
   SCRIM_00: 'rgba(14,12,20,0)',
@@ -228,6 +231,18 @@ export const lightColors = {
   pass: lightBase.RED_500,
   gradientStart: lightBase.GRADIENT_FROM,
   gradientEnd: lightBase.GRADIENT_TO,
+
+  // A chosen interest chip. NOT surfaceSelected: that pair is a tint used
+
+  // for "picked out" rows and shared-interest chips, and the redesign wants
+
+  // a chosen chip to read as a filled control instead. Mode-constant for the
+
+  // same reason the gradient is — it is brand violet, not a themed surface.
+
+  chipSelected: lightBase.CHIP_SELECTED,
+
+  onChipSelected: lightBase.WHITE,
   surfaceElevated: lightBase.WHITE,
   imageInset: lightBase.BLACK_A10,
 
@@ -324,6 +339,10 @@ export const darkColors: typeof lightColors = {
   pass: darkBase.RED_500,
   gradientStart: darkBase.GRADIENT_FROM,
   gradientEnd: darkBase.GRADIENT_TO,
+
+  chipSelected: darkBase.CHIP_SELECTED,
+
+  onChipSelected: darkBase.WHITE,
   surfaceElevated: darkBase.WHITE,
   imageInset: darkBase.WHITE_A10,
 

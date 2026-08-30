@@ -76,6 +76,17 @@ export enum Translations {
 
   // Edit Profile
   PROFILE_EDIT_TITLE = 'profileEditTitle',
+  PROFILE_SECTION_INTERESTS_EDIT = 'profileSectionInterestsEdit',
+  PROFILE_INTERESTS_SUMMARY = 'profileInterestsSummary',
+  PROFILE_INTERESTS_TITLE = 'profileInterestsTitle',
+  PROFILE_INTERESTS_WHY = 'profileInterestsWhy',
+  PROFILE_INTERESTS_RANGE = 'profileInterestsRange',
+  PROFILE_INTERESTS_NEED_MORE = 'profileInterestsNeedMore',
+  PROFILE_INTERESTS_AT_MAX = 'profileInterestsAtMax',
+  PROFILE_INTERESTS_COUNT = 'profileInterestsCount',
+  PROFILE_INTERESTS_MIN_HINT = 'profileInterestsMinHint',
+  PROFILE_INTERESTS_MAX_HINT = 'profileInterestsMaxHint',
+  PROFILE_INTERESTS_SAVE_ERROR = 'profileInterestsSaveError',
   PROFILE_CANCEL = 'profileCancel',
   PROFILE_SAVE = 'profileSave',
   PROFILE_SAVING = 'profileSaving',

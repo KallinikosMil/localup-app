@@ -62,6 +62,22 @@ export default {
   profileBadgeLocating: 'ΕΝΤΟΠΙΣΜΟΣ…',
 
   profileEditTitle: 'Επεξεργασία προφίλ',
+  profileSectionInterestsEdit: 'Ενδιαφέροντα',
+  profileInterestsSummary:
+    'Αυτά κρίνουν ποιος φτάνει στην κορυφή της τράπουλάς σου. Πάτα για αλλαγή.',
+  profileInterestsTitle: 'Ενδιαφέροντα',
+  profileInterestsWhy:
+    'Τα κοινά ενδιαφέροντα μετράνε διπλάσια από την απόσταση όταν χτίζεται η τράπουλά σου. Αν τα αλλάξεις, ανακατεύεται αμέσως.',
+  profileInterestsRange: 'Διάλεξε από 3 έως 5',
+  profileInterestsNeedMore: 'Διάλεξε {{count}} ακόμη για αποθήκευση',
+  profileInterestsAtMax: 'Έφτασες το μέγιστο',
+  profileInterestsCount: '{{selected}} από {{max}} επιλεγμένα',
+  profileInterestsMinHint:
+    'Τρία είναι το ελάχιστο — κάτω από αυτό δεν υπάρχουν αρκετά για να σε ταιριάξουμε.',
+  profileInterestsMaxHint:
+    'Πάτα ένα από τα πέντε σου για να ελευθερώσεις θέση. Τα πέντε κρατούν το σήμα καθαρό.',
+  profileInterestsSaveError:
+    'Τα ενδιαφέροντα δεν αποθηκεύτηκαν. Δοκίμασε ξανά.',
   profileCancel: 'Άκυρο',
   profileSave: 'Αποθήκευση',
   profileSaving: 'Αποθήκευση…',

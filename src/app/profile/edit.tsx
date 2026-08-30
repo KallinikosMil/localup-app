@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 
 import AppText from '@shared/components/AppText';
+import InterestChip from '@shared/components/InterestChip';
 import ScreenSafeArea from '@shared/components/ScreenSafeArea';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
@@ -32,6 +33,10 @@ import { computeMode, type ProfileMode } from '@features/profile/utils/mode';
 import PhotoGrid from '@features/profile/components/PhotoGrid';
 import { useAppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
+import {
+  useInterestCatalogue,
+  useMyInterests,
+} from '@features/profile/hooks/useInterests';
 import { Translations as Common } from '@shared/i18n/translationKeys';
 import {
   Section,
@@ -50,6 +55,17 @@ const BIO_LIMIT = 240;
 function EditProfileScreenContent() {
   const theme = useAppTheme();
   const router = useRouter();
+  // Names, not ids: the card shows what the user picked, and only the
+  // catalogue knows what an id is called. Both queries are cached and
+  // shared with the interests screen, so this costs no extra round trip.
+  const catalogue = useInterestCatalogue();
+  const myInterests = useMyInterests();
+  const myInterestNames = useMemo(() => {
+    const chosen = new Set(myInterests.data ?? []);
+    return (catalogue.data ?? [])
+      .filter(i => chosen.has(i.id))
+      .map(i => i.name);
+  }, [catalogue.data, myInterests.data]);
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const {
@@ -664,6 +680,47 @@ function EditProfileScreenContent() {
 
         <SectionRule />
 
+        {/* A summary that opens its own screen, not chips you edit here.
+            The 3-5 rule would otherwise disable the Save for this WHOLE
+            form the moment someone dropped to two — while they were
+            editing their bio, with the cause several hundred pixels
+            further down. */}
+        <Section title={t(Translations.PROFILE_SECTION_INTERESTS_EDIT)}>
+          <Pressable
+            onPress={() => router.push('/profile/interests')}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.PROFILE_SECTION_INTERESTS_EDIT)}
+            style={[
+              styles.interestsCard,
+              {
+                backgroundColor: theme.colors.surfaceElevated,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <View style={styles.interestsBody}>
+              <View style={styles.interestsChips}>
+                {(myInterestNames ?? []).map(name => (
+                  <InterestChip key={name} label={name} variant="tonal" />
+                ))}
+              </View>
+              <AppText
+                variant="caption"
+                style={{ color: theme.colors.onSurfaceFaint }}
+              >
+                {t(Translations.PROFILE_INTERESTS_SUMMARY)}
+              </AppText>
+            </View>
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={22}
+              color={theme.colors.onSurfaceFaint}
+            />
+          </Pressable>
+        </Section>
+
+        <SectionRule />
+
         <Section title={t(Translations.PROFILE_SECTION_MODE)}>
           <ModeSegments
             theme={theme}
@@ -740,6 +797,24 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  interestsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.CARD_INNER_GAP,
+    padding: Layout.CARD_PADDING,
+    borderRadius: Layout.CARD_RADIUS,
+    borderWidth: 1,
+  },
+  interestsBody: {
+    flex: 1,
+    minWidth: 0,
+    gap: Spacing.sm,
+  },
+  interestsChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs + 2,
+  },
   center: {
     flex: 1,
     alignItems: 'center',

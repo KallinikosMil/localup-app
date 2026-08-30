@@ -65,6 +65,21 @@ export default {
   profileBadgeLocating: 'LOCATING…',
 
   profileEditTitle: 'Edit Profile',
+  profileSectionInterestsEdit: 'Interests',
+  profileInterestsSummary:
+    'They decide who reaches the top of your deck. Tap to change them.',
+  profileInterestsTitle: 'Interests',
+  profileInterestsWhy:
+    'Shared interests count double what distance does when your deck is built. Changing them reshuffles it right away.',
+  profileInterestsRange: 'Pick between 3 and 5',
+  profileInterestsNeedMore: 'Pick {{count}} more to save',
+  profileInterestsAtMax: 'That is the maximum',
+  profileInterestsCount: '{{selected}} of {{max}} selected',
+  profileInterestsMinHint:
+    'Three is the minimum — below that there is not enough to match you on.',
+  profileInterestsMaxHint:
+    'Tap one of your five to free a slot. Five keeps the signal sharp.',
+  profileInterestsSaveError: "Couldn't save your interests. Please try again.",
   profileCancel: 'Cancel',
   profileSave: 'Save',
   profileSaving: 'Saving…',

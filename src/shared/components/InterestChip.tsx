@@ -19,10 +19,12 @@ type Props = {
   onPress?: () => void;
 };
 
-// Selected reuses the surfaceSelected/outlineSelected pair rather than
-// inventing a fourth "chosen" look. That pair already means "this one is
-// picked out" on unread match rows and on shared interests, and one
-// meaning per colour is the only way a reader learns it.
+// A chosen chip is a FILLED control: solid brand violet, white label, in
+// both themes. It used to borrow the surfaceSelected/outlineSelected tint,
+// which reads as "picked out" on an unread match row but is too quiet for a
+// grid of thirty-two where the whole task is seeing what you have chosen.
+// The redesign draws it filled on every board that has one, so the token is
+// its own rather than a second meaning stacked onto the tint.
 const InterestChip = ({
   label,
   variant,
@@ -82,10 +84,12 @@ const InterestChip = ({
         styles.chip,
         {
           backgroundColor: selected
-            ? theme.colors.surfaceSelected
+            ? theme.colors.chipSelected
             : theme.colors.surfaceElevated,
+          // The fill IS the border when chosen — a contrasting outline round
+          // a solid pill only makes it look like two shapes.
           borderColor: selected
-            ? theme.colors.outlineSelected
+            ? theme.colors.chipSelected
             : theme.colors.outlineVariant,
         },
       ]}
@@ -94,14 +98,16 @@ const InterestChip = ({
         <MaterialCommunityIcons
           name={icon as IconName}
           size={16}
-          color={selected ? theme.colors.primary : theme.colors.onSurfaceFaint}
+          color={
+            selected ? theme.colors.onChipSelected : theme.colors.onSurfaceFaint
+          }
         />
       ) : null}
       <AppText
         variant={selected ? 'bodySmallStrong' : 'bodySmall'}
         style={{
           color: selected
-            ? theme.colors.primary
+            ? theme.colors.onChipSelected
             : theme.colors.onSurfaceVariant,
         }}
       >
