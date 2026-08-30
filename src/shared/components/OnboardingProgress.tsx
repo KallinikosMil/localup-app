@@ -101,7 +101,7 @@ export default OnboardingProgress;
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.SPACING_PADDING_12,
+    gap: Spacing.md,
   },
   headerRow: {
     flexDirection: 'row',
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   segmentRow: {
     flexDirection: 'row',
-    gap: Spacing.SPACING_PADDING_8,
+    gap: Spacing.sm,
   },
   segment: {
     flex: 1,

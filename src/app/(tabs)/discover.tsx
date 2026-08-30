@@ -263,7 +263,7 @@ export default function DiscoverScreen() {
         ]}
       >
         <YesMark size={30} color={theme.colors.primary} />
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+        <Spacer spacing={Spacing.lg} />
         <AppText
           variant="h2"
           style={{
@@ -273,7 +273,7 @@ export default function DiscoverScreen() {
         >
           {t(Translations.DISCOVER_MATCH_TITLE)}
         </AppText>
-        <Spacer spacing={Spacing.SPACING_PADDING_8} />
+        <Spacer spacing={Spacing.sm} />
         <AppText
           variant="body"
           style={{
@@ -285,7 +285,7 @@ export default function DiscoverScreen() {
             name: matchedUser?.display_name ?? '',
           })}
         </AppText>
-        <Spacer spacing={Spacing.SPACING_PADDING_24} />
+        <Spacer spacing={Spacing.xl} />
         <AppButton variant="primary" onPress={dismissMatch}>
           {t(Translations.DISCOVER_MATCH_CTA)}
         </AppButton>

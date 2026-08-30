@@ -407,7 +407,7 @@ export default function ChatScreen() {
               style={{
                 color: theme.colors.onSurfaceVariant,
                 textAlign: 'center',
-                marginTop: Spacing.SPACING_PADDING_16,
+                marginTop: Spacing.lg,
               }}
             >
               {t(Translations.CHAT_WAKING)}
@@ -426,7 +426,7 @@ export default function ChatScreen() {
             style={{
               color: theme.colors.onSurfaceVariant,
               textAlign: 'center',
-              marginTop: Spacing.SPACING_PADDING_12,
+              marginTop: Spacing.md,
             }}
           >
             {errorMessage(error, Translations.CHAT_ERROR)}
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
+    paddingHorizontal: Spacing.xl,
   },
   list: {
     flexGrow: 1,

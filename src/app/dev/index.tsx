@@ -78,7 +78,7 @@ const DevGallery = () => {
           Dev Gallery
         </AppText>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_8} />
+        <Spacer spacing={Spacing.sm} />
 
         <AppText
           variant="body"
@@ -89,13 +89,13 @@ const DevGallery = () => {
           Tap any screen to preview it
         </AppText>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_32} />
+        <Spacer spacing={Spacing.xxl} />
 
         <AppText
           variant="label"
           style={{
             color: theme.colors.onSurfaceVariant,
-            marginBottom: Spacing.SPACING_PADDING_8,
+            marginBottom: Spacing.sm,
           }}
         >
           Auth Screens
@@ -109,13 +109,13 @@ const DevGallery = () => {
           />
         ))}
 
-        <Spacer spacing={Spacing.SPACING_PADDING_24} />
+        <Spacer spacing={Spacing.xl} />
 
         <AppText
           variant="label"
           style={{
             color: theme.colors.onSurfaceVariant,
-            marginBottom: Spacing.SPACING_PADDING_8,
+            marginBottom: Spacing.sm,
           }}
         >
           Onboarding Screens
@@ -183,18 +183,18 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingTop: Spacing.SPACING_PADDING_60,
-    paddingBottom: Spacing.SPACING_PADDING_32,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xxxl,
+    paddingBottom: Spacing.xxl,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.SPACING_PADDING_16,
-    paddingHorizontal: Spacing.SPACING_PADDING_16,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
     borderWidth: 1,
     borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.SPACING_PADDING_8,
+    marginBottom: Spacing.sm,
   },
 });

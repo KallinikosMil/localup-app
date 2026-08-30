@@ -35,8 +35,8 @@ export default CustomModal;
 
 const styles = StyleSheet.create({
   contentStyle: {
-    margin: Spacing.SPACING_PADDING_24,
-    padding: Spacing.SPACING_PADDING_24,
+    margin: Spacing.xl,
+    padding: Spacing.xl,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 16,

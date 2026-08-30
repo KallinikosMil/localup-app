@@ -281,7 +281,7 @@ const RegisterScreen = () => {
         >
           {modalMessage || t(Translations.AUTH_ERROR_FALLBACK)}
         </AppText>
-        <Spacer spacing={Spacing.SPACING_PADDING_16} />
+        <Spacer spacing={Spacing.lg} />
         <AppButton variant="primary" onPress={handleDismiss}>
           {t(Translations.AUTH_DISMISS)}
         </AppButton>

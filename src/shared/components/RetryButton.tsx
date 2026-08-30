@@ -70,9 +70,9 @@ export default RetryButton;
 
 const styles = StyleSheet.create({
   button: {
-    marginTop: Spacing.SPACING_PADDING_16,
-    paddingHorizontal: Spacing.SPACING_PADDING_24,
-    paddingVertical: Spacing.SPACING_PADDING_8,
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',

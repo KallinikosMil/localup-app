@@ -210,7 +210,7 @@ const InterestsScreen = () => {
         })}
       </AppText>
 
-      <Spacer spacing={Spacing.SPACING_PADDING_8} />
+      <Spacer spacing={Spacing.sm} />
 
       {isLoading ? (
         <ActivityIndicator style={styles.loader} />
@@ -228,7 +228,7 @@ const InterestsScreen = () => {
               Translations.ONBOARDING_INTERESTS_ERROR,
             )}
           </AppText>
-          <Spacer spacing={Spacing.SPACING_PADDING_12} />
+          <Spacer spacing={Spacing.md} />
           <AppButton variant="outlined" onPress={() => refetchInterests()}>
             {t(Translations.ONBOARDING_RETRY)}
           </AppButton>
@@ -261,7 +261,7 @@ const InterestsScreen = () => {
 
       {!canFinish && selectedIds.length > 0 ? (
         <>
-          <Spacer spacing={Spacing.SPACING_PADDING_8} />
+          <Spacer spacing={Spacing.sm} />
           <AppText
             variant="caption"
             style={{
@@ -273,7 +273,7 @@ const InterestsScreen = () => {
         </>
       ) : null}
 
-      <Spacer spacing={Spacing.SPACING_PADDING_24} />
+      <Spacer spacing={Spacing.xl} />
 
       <View>
         <AppText
@@ -317,14 +317,14 @@ const InterestsScreen = () => {
             >
               {t(MISSING_MESSAGE[missing])}
             </AppText>
-            <Spacer spacing={Spacing.SPACING_PADDING_12} />
+            <Spacer spacing={Spacing.md} />
             <AppButton
               variant="outlined"
               onPress={() => router.push(MISSING_ROUTE[missing])}
             >
               {t(Translations.ONBOARDING_GO_BACK)}
             </AppButton>
-            <Spacer spacing={Spacing.SPACING_PADDING_12} />
+            <Spacer spacing={Spacing.md} />
           </>
         ) : null}
 
@@ -339,7 +339,7 @@ const InterestsScreen = () => {
             >
               {errorMessage(finishError, Translations.ONBOARDING_FINISH_ERROR)}
             </AppText>
-            <Spacer spacing={Spacing.SPACING_PADDING_12} />
+            <Spacer spacing={Spacing.md} />
           </>
         ) : null}
 
@@ -353,7 +353,7 @@ const InterestsScreen = () => {
                 message rather than a shorter timeout. */}
             {progress ? (
               <>
-                <Spacer spacing={Spacing.SPACING_PADDING_12} />
+                <Spacer spacing={Spacing.md} />
                 <AppText
                   variant="caption"
                   style={{
@@ -382,23 +382,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   categoryBlock: {
-    marginBottom: Spacing.SPACING_PADDING_16,
+    marginBottom: Spacing.lg,
   },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: Spacing.SPACING_PADDING_8,
+    marginTop: Spacing.sm,
     // Spacing belongs to the row, not to each chip. A per-chip margin also
     // padded the outside edges, so the grid sat inset from the headings above
     // it and the wrapped rows never lined up with the screen's gutter.
-    gap: Spacing.SPACING_PADDING_8,
+    gap: Spacing.sm,
   },
   loader: {
-    marginVertical: Spacing.SPACING_PADDING_32,
+    marginVertical: Spacing.xxl,
   },
   errorBlock: {
     alignItems: 'center',
-    marginVertical: Spacing.SPACING_PADDING_32,
+    marginVertical: Spacing.xxl,
   },
   bioInput: {
     minHeight: Layout.FIELD_HEIGHT * 2,

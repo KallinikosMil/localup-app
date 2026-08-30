@@ -8,7 +8,7 @@ type Props = {
   horizontal?: boolean;
 };
 
-const Spacer = ({ horizontal, spacing = Spacing.SPACING_PADDING_8 }: Props) => {
+const Spacer = ({ horizontal, spacing = Spacing.sm }: Props) => {
   return (
     <View style={horizontal ? { width: spacing } : { height: spacing }}></View>
   );

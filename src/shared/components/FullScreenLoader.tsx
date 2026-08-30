@@ -24,7 +24,7 @@ export default function FullScreenLoader({ message }: { message?: string }) {
           style={{
             color: theme.colors.onSurfaceVariant,
             textAlign: 'center',
-            marginTop: Spacing.SPACING_PADDING_16,
+            marginTop: Spacing.lg,
           }}
         >
           {message}

@@ -369,7 +369,7 @@ function EditProfileScreenContent() {
             style={{
               color: theme.colors.onSurfaceVariant,
               textAlign: 'center',
-              marginTop: Spacing.SPACING_PADDING_12,
+              marginTop: Spacing.md,
             }}
           >
             {errorMessage(error, Translations.PROFILE_EDIT_ERROR)}
@@ -768,7 +768,7 @@ function EditProfileScreenContent() {
           </AppText>
         </Section>
 
-        <Spacer spacing={Spacing.SPACING_PADDING_32} />
+        <Spacer spacing={Spacing.xxl} />
       </ScrollView>
 
       <Snackbar
