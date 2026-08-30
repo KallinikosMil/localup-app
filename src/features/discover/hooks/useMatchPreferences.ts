@@ -2,6 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 
 import { supabase } from '@config/supabase';
+import {
+  PREF_DEFAULTS,
+  type DistanceSummary,
+  type MatchPreferences,
+} from '@features/discover/utils/preferences';
 import { RootState } from '@store';
 
 // Reading and writing the deck filters.
@@ -10,31 +15,16 @@ import { RootState } from '@store';
 // written and set by nothing, so every user has been on the defaults with no
 // way to change them.
 
-// These must match the server. discover_candidates falls back to exactly
-// these when a user has no row, so a screen showing anything else would be
-// describing a deck the server is not building.
-export const PREF_DEFAULTS = {
-  maxDistanceKm: 75,
-  minAge: 18,
-  maxAge: 99,
-} as const;
-
-// Enforced by CHECK constraints, so these are the UI's copy of a rule the
-// database owns — not the rule itself. The designer's slider stops at 150;
-// the column allows up to 500, deliberately wider so the range can be opened
-// later without a migration.
-export const PREF_LIMITS = {
-  distanceMin: 5,
-  distanceMax: 500,
-  ageMin: 18,
-  ageMax: 99,
-} as const;
-
-export type MatchPreferences = {
-  maxDistanceKm: number;
-  minAge: number;
-  maxAge: number;
-};
+// The values themselves live in utils/preferences so they can be tested
+// without a test runner having to load react-query. Re-exported because
+// every caller wants the numbers and the queries together.
+export {
+  PREF_DEFAULTS,
+  PREF_LIMITS,
+  SUGGEST_CAP_KM,
+  type MatchPreferences,
+  type DistanceSummary,
+} from '@features/discover/utils/preferences';
 
 export const useMatchPreferences = () => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
@@ -121,22 +111,15 @@ export const useCandidateCount = (prefs: MatchPreferences | undefined) => {
   });
 };
 
-export type DistanceSummary = {
-  total: number;
-  p25Km: number;
-  p75Km: number;
-  suggestedKm: number;
-  suggestedCount: number;
-};
-
 // The shape of the room, for the too-narrow warning: where people actually
 // are, and the smallest round radius that would fill a deck.
 //
-// Returns null when there is NOBODY at any distance in the chosen age range.
-// That distinction matters on screen: it means widening the radius will not
-// help, because age is what is excluding everyone, and offering "Widen to
-// 45 km" there sends the user to a second empty deck. Also null with no
-// location fix, for the same reason the count is.
+// **null means one thing only: no location fix.** It used to mean that OR
+// "nobody at any distance in this age range", and a caller cannot tell two
+// different silences apart — which let the Filters screen tell someone
+// "no one in that age range" when the truth was that their GPS had not
+// reported yet. The server now returns a row with `total: 0` for the
+// second case, so read the number, not the absence.
 export const useDistanceSummary = (minAge: number, maxAge: number) => {
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
 

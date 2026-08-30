@@ -16,12 +16,19 @@ import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
-import EmptyState from '@shared/components/EmptyState';
 import GradientButton from '@shared/components/GradientButton';
 import YesMark from '@shared/components/YesMark';
 import Spacer from '@shared/components/Spacer';
 import RetryButton from '@shared/components/RetryButton';
 import SwipeCard from '@features/discover/components/SwipeCard';
+import DeckEmptyState from '@features/discover/components/DeckEmptyState';
+import { classifyEmptyDeck } from '@features/discover/utils/deckEmpty';
+import {
+  PREF_DEFAULTS,
+  useDistanceSummary,
+  useMatchPreferences,
+  useUpdateMatchPreferences,
+} from '@features/discover/hooks/useMatchPreferences';
 import { formatDistance } from '@features/discover/utils/format';
 import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
@@ -67,6 +74,22 @@ export default function DiscoverScreen() {
     refetch,
     dataUpdatedAt,
   } = useCandidates();
+
+  // Only ever read to EXPLAIN an empty deck, never to build one — the
+  // server applies these itself. `prefs.data` is undefined for the first
+  // frames, and the defaults are exactly what the server falls back to,
+  // so standing in for it is honest rather than a guess.
+  const savedPrefs = useMatchPreferences();
+  const updatePrefs = useUpdateMatchPreferences();
+  const prefs = savedPrefs.data ?? PREF_DEFAULTS;
+  const spread = useDistanceSummary(prefs.minAge, prefs.maxAge);
+  const emptyState = classifyEmptyDeck({
+    summary: spread.isPending ? undefined : spread.data,
+    currentKm: prefs.maxDistanceKm,
+    minAge: prefs.minAge,
+    maxAge: prefs.maxAge,
+  });
+
   // Read through a ref: the callback below is created fresh each render
   // but must not re-create the mutation, and it needs whatever deck is
   // current when the swipe RESOLVES, not when it was fired.
@@ -362,14 +385,16 @@ export default function DiscoverScreen() {
             />
           }
         >
-          <EmptyState
-            icon="compass-off-outline"
-            title={t(Translations.DISCOVER_EMPTY_TITLE)}
-            subtitle={t(Translations.DISCOVER_EMPTY_SUBTITLE)}
-            action={{
-              label: t(Translations.DISCOVER_REFRESH),
-              onPress: handleRefresh,
-            }}
+          {/* Why it is empty decides what to say. "Check back later" was
+              the only answer this ever gave, and for someone whose own
+              filters had emptied the deck it was the wrong one. */}
+          <DeckEmptyState
+            state={emptyState}
+            prefs={prefs}
+            widening={updatePrefs.isPending}
+            onWiden={km => updatePrefs.mutate({ ...prefs, maxDistanceKm: km })}
+            onOpenFilters={() => router.push('/filters')}
+            onRefresh={handleRefresh}
           />
         </ScrollView>
         {celebration}

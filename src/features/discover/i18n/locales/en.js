@@ -10,7 +10,7 @@ export default {
   filtersAgeValue: '{{min}} – {{max}}',
   filtersMatchLocals: '{{count}} locals match right now',
   filtersMatchTravelers: '{{count}} travellers match right now',
-  filtersSummary: 'Within {{km}} km of {{city}}, ages {{min}}–{{max}}.',
+  filtersSummary: 'Within {{km}} km of where you are, ages {{min}}–{{max}}.',
   filtersNarrowLocals: 'Only {{count}} locals this close',
   filtersNarrowTravelers: 'Only {{count}} travellers this close',
   filtersNarrowBody:
@@ -24,8 +24,25 @@ export default {
   filtersReset: 'Reset to defaults',
   filtersSaveError: "Couldn't save your filters. Please try again.",
   discoverEmptyTitle: 'No one nearby',
-  discoverEmptySubtitle: 'Check back later for new people',
+  discoverEmptySubtitle:
+    "You've seen everyone within your range for now. New people show up as they arrive.",
   discoverRefresh: 'Refresh',
+  discoverEmptyLocatingTitle: 'Still finding you',
+  discoverEmptyLocatingBody:
+    'Your location has not come through yet, so there is nothing to measure distance from.',
+  discoverEmptyTightTitle: 'Your filters are too tight',
+  discoverEmptyTightBody:
+    'Nobody is within {{km}} km right now. There are {{count}} people within {{widen}} km.',
+  discoverEmptyWiden: 'Widen to {{km}} km',
+  discoverEmptyFarTitle: 'Nobody close by right now',
+  discoverEmptyFarBody:
+    'The nearest {{count}} people are around {{km}} km away — further than most would travel to meet. New people show up as they arrive.',
+  discoverEmptyAgeTitle: 'No one in that age range',
+  discoverEmptyAgeBody:
+    'Distance is not the problem. Nobody around you is aged {{from}}–{{to}} right now, at any radius — widening the km will not change it.',
+  discoverOpenFilters: 'Open filters',
+  discoverChipKm: '{{km}} km',
+  discoverChipAges: '{{from}} – {{to}}',
   discoverWaking: 'Waking the server…',
   discoverError: "Couldn't load people near you.",
   discoverRetry: 'Retry',

@@ -10,7 +10,7 @@ export default {
   filtersAgeValue: '{{min}} – {{max}}',
   filtersMatchLocals: '{{count}} ντόπιοι ταιριάζουν τώρα',
   filtersMatchTravelers: '{{count}} ταξιδιώτες ταιριάζουν τώρα',
-  filtersSummary: 'Σε ακτίνα {{km}} χλμ από {{city}}, ηλικίες {{min}}–{{max}}.',
+  filtersSummary: 'Σε ακτίνα {{km}} χλμ από εκεί που βρίσκεσαι, ηλικίες {{min}}–{{max}}.',
   filtersNarrowLocals: 'Μόνο {{count}} ντόπιοι τόσο κοντά',
   filtersNarrowTravelers: 'Μόνο {{count}} ταξιδιώτες τόσο κοντά',
   filtersNarrowBody:
@@ -24,8 +24,25 @@ export default {
   filtersReset: 'Επαναφορά προεπιλογών',
   filtersSaveError: 'Τα φίλτρα δεν αποθηκεύτηκαν. Δοκίμασε ξανά.',
   discoverEmptyTitle: 'Κανείς κοντά σου',
-  discoverEmptySubtitle: 'Έλεγξε ξανά αργότερα για νέα άτομα',
+  discoverEmptySubtitle:
+    'Τους είδες όλους μέσα στην ακτίνα σου προς το παρόν. Νέα άτομα εμφανίζονται καθώς φτάνουν.',
   discoverRefresh: 'Ανανέωση',
+  discoverEmptyLocatingTitle: 'Σε εντοπίζουμε ακόμη',
+  discoverEmptyLocatingBody:
+    'Η τοποθεσία σου δεν έχει έρθει ακόμη, οπότε δεν υπάρχει σημείο για να μετρήσουμε αποστάσεις.',
+  discoverEmptyTightTitle: 'Τα φίλτρα σου είναι πολύ στενά',
+  discoverEmptyTightBody:
+    'Δεν υπάρχει κανείς μέσα σε {{km}} km αυτή τη στιγμή. Υπάρχουν {{count}} άτομα μέσα σε {{widen}} km.',
+  discoverEmptyWiden: 'Άνοιξέ το στα {{km}} km',
+  discoverEmptyFarTitle: 'Κανείς κοντά αυτή τη στιγμή',
+  discoverEmptyFarBody:
+    'Τα {{count}} πλησιέστερα άτομα είναι περίπου {{km}} km μακριά — πιο μακριά απ’ όσο θα διένυαν οι περισσότεροι για μια συνάντηση. Νέα άτομα εμφανίζονται καθώς φτάνουν.',
+  discoverEmptyAgeTitle: 'Κανείς σε αυτό το εύρος ηλικίας',
+  discoverEmptyAgeBody:
+    'Δεν φταίει η απόσταση. Δεν υπάρχει κανείς γύρω σου ηλικίας {{from}}–{{to}} αυτή τη στιγμή, σε καμία ακτίνα — το να ανοίξεις τα χιλιόμετρα δεν θα το αλλάξει.',
+  discoverOpenFilters: 'Άνοιξε τα φίλτρα',
+  discoverChipKm: '{{km}} km',
+  discoverChipAges: '{{from}} – {{to}}',
   discoverWaking: 'Ξυπνάει ο διακομιστής…',
   discoverError: 'Δεν φορτώθηκαν άτομα κοντά σου.',
   discoverRetry: 'Δοκίμασε ξανά',

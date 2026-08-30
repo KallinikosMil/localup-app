@@ -49,6 +49,11 @@ const Track = ({
   const theme = useAppTheme();
   return (
     <View
+      // GestureDetector's direct child must survive view flattening. This
+      // View has no props React Native considers "interesting", so the
+      // optimiser removes it from the native tree and the detector ends up
+      // attached to nothing — it warned about exactly this at runtime.
+      collapsable={false}
       style={styles.track}
       onLayout={e => onLayoutWidth(e.nativeEvent.layout.width)}
     >

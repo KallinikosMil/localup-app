@@ -14,12 +14,14 @@ import useLocation from '@shared/hooks/useLocation';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import {
   PREF_DEFAULTS,
+  SUGGEST_CAP_KM,
   useCandidateCount,
   useDistanceSummary,
   useMatchPreferences,
   useUpdateMatchPreferences,
   type MatchPreferences,
 } from '@features/discover/hooks/useMatchPreferences';
+import { isAgeNarrowed } from '@features/discover/utils/deckEmpty';
 import { useProfile } from '@features/profile/hooks/useProfile';
 import { computeMode } from '@features/profile/utils/mode';
 import { useAppTheme } from '@theme/paper';
@@ -87,13 +89,33 @@ export default function FiltersScreen() {
   // Two different empty answers. A thin deck can be widened; nobody at ANY
   // distance means the age range is the thing excluding everyone, and
   // offering a bigger radius there is simply wrong advice.
-  const ageBlocks = spread.data === null && !spread.isPending;
+  //
+  // This used to read `spread.data === null`, which was also what a missing
+  // GPS fix looked like — so someone whose location had not reported yet
+  // was told "no one in that age range". The server distinguishes them now:
+  // null is no fix, `total: 0` is "we looked and found nobody". And it is
+  // only an AGE story if the range was actually narrowed; on the default
+  // 18-99 an empty result just means nobody is out there.
+  const ageBlocks =
+    !!spread.data &&
+    spread.data.total === 0 &&
+    isAgeNarrowed(prefs.minAge, prefs.maxAge);
   const thin =
     !ageBlocks &&
     typeof count.data === 'number' &&
     count.data < THIN_DECK &&
     !!spread.data &&
+    spread.data.total > 0 &&
     spread.data.suggestedKm > prefs.maxDistanceKm;
+
+  // The warning always explains. The BUTTON only appears while the radius
+  // it would set is one we would defend — past the cap we leave the reader
+  // with the facts and the slider they are already looking at, rather than
+  // a one-tap shortcut to a deck they cannot travel to.
+  const widenToKm =
+    thin && spread.data && spread.data.suggestedKm <= SUGGEST_CAP_KM
+      ? spread.data.suggestedKm
+      : null;
 
   const onSave = () => {
     if (!draft) return;
@@ -232,9 +254,14 @@ export default function FiltersScreen() {
               variant="caption"
               style={[styles.summary, { color: theme.colors.onSurfaceFaint }]}
             >
+              {/* Deliberately no city. This said "within 10 km of
+                  {home_city}", and the radius is measured from where you
+                  ARE — so it told a traveller in Athens that their deck
+                  was drawn around Lisbon. We do not store a name for the
+                  current position, only coordinates, so the honest
+                  sentence names no place at all. */}
               {t(Translations.FILTERS_SUMMARY, {
                 km: prefs.maxDistanceKm,
-                city: profile?.home_city ?? '',
                 min: prefs.minAge,
                 max: prefs.maxAge,
               })}
@@ -302,32 +329,26 @@ export default function FiltersScreen() {
                   </AppText>
                   {/* Widening is offered, never done for them: a narrow
                       radius is a legitimate choice, just a costly one. */}
-                  <Pressable
-                    onPress={() =>
-                      setDraft(p => ({
-                        ...(p ?? PREF_DEFAULTS),
-                        maxDistanceKm: Math.min(
-                          spread.data!.suggestedKm,
-                          DISTANCE_BOUNDS.max,
-                        ),
-                      }))
-                    }
-                    accessibilityRole="button"
-                    hitSlop={Layout.HIT_SLOP}
-                    style={styles.widen}
-                  >
-                    <AppText
-                      variant="bodySmallStrong"
-                      style={{ color: theme.colors.primary }}
+                  {widenToKm !== null ? (
+                    <Pressable
+                      onPress={() =>
+                        setDraft(p => ({
+                          ...(p ?? PREF_DEFAULTS),
+                          maxDistanceKm: widenToKm,
+                        }))
+                      }
+                      accessibilityRole="button"
+                      hitSlop={Layout.HIT_SLOP}
+                      style={styles.widen}
                     >
-                      {t(Translations.FILTERS_WIDEN, {
-                        km: Math.min(
-                          spread.data.suggestedKm,
-                          DISTANCE_BOUNDS.max,
-                        ),
-                      })}
-                    </AppText>
-                  </Pressable>
+                      <AppText
+                        variant="bodySmallStrong"
+                        style={{ color: theme.colors.primary }}
+                      >
+                        {t(Translations.FILTERS_WIDEN, { km: widenToKm })}
+                      </AppText>
+                    </Pressable>
+                  ) : null}
                 </View>
               </View>
             ) : null}
