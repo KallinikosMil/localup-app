@@ -122,6 +122,11 @@ export const LabelledField = ({
           onChangeText={onChange}
           placeholder={placeholder}
           placeholderTextColor={theme.colors.onSurfaceFaint}
+          // Same reason as InputField: the label is a sibling Text node,
+          // so nothing ties it to the box. A placeholder is not a
+          // substitute — Android reads the hint only while the field is
+          // empty, so a filled field would go back to having no name.
+          accessibilityLabel={label}
           style={[
             styles.input,
             Typography.message.style,
@@ -169,6 +174,12 @@ export const ModeSegments = ({
           key={option.label}
           onPress={option.onPress}
           accessibilityRole="button"
+          // Explicit, because the icon beside it is a glyph from a font.
+          // Without this the composed name came out as the private-use
+          // character followed by the word — verified on device, TalkBack
+          // announced ", System". The icon is decorative and the
+          // label already says everything.
+          accessibilityLabel={option.label}
           accessibilityState={{ selected: true }}
           style={styles.segment}
         >
@@ -183,6 +194,8 @@ export const ModeSegments = ({
                 name={option.icon}
                 size={Layout.SEGMENT_ICON}
                 color={theme.colors.onGradient}
+                accessibilityElementsHidden
+                importantForAccessibility="no"
               />
             ) : null}
             <AppText
@@ -200,6 +213,7 @@ export const ModeSegments = ({
           key={option.label}
           onPress={option.onPress}
           accessibilityRole="button"
+          accessibilityLabel={option.label}
           accessibilityState={{ selected: false }}
           style={[styles.segment, styles.segmentFill]}
         >
@@ -208,6 +222,8 @@ export const ModeSegments = ({
               name={option.icon}
               size={Layout.SEGMENT_ICON}
               color={theme.colors.onSurfaceVariant}
+              accessibilityElementsHidden
+              importantForAccessibility="no"
             />
           ) : null}
           <AppText

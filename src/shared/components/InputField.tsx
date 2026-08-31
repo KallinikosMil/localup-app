@@ -127,6 +127,12 @@ const InputField = <T extends FieldValues>({
           onBlur={handleBlur}
           secureTextEntry={secureTextEntry && !isVisible}
           placeholderTextColor={theme.colors.onSurfaceFaint}
+          // The visible label sits ABOVE the box as its own Text node, so
+          // nothing connects the two for a screen reader — verified on
+          // device, every field came through as a nameless "Edit box".
+          // `rest` can still override it for a field whose spoken name
+          // should differ from the printed one.
+          accessibilityLabel={label}
           // The box owns the height and the padding; the input just fills
           // it. Without this the text sits against the top on Android.
           style={[
