@@ -88,10 +88,18 @@ const OnboardingShell = ({
     navigation.setOptions({ gestureEnabled: !backDisabled });
   }, [navigation, backDisabled]);
 
-  // Every step lands the screen reader on its own title. Four screens
-  // that look identical apart from the heading are exactly the case where
-  // "where am I" has to be the first thing said.
-  const titleRef = useAccessibilityFocus<View>();
+  // The screen reader lands on the FIRST interactive thing on the step,
+  // not on the title.
+  //
+  // Focusing the title was wrong, and wrong in a way that is easy to
+  // miss: the title sits BELOW the header row, so landing there drops
+  // someone into the middle of the screen with the back button already
+  // behind them. On step 2 that is the only way back out.
+  //
+  // Which element is first depends on the step: the back button when
+  // there is one, the progress bar when there is not — it is `accessible`
+  // with its own label, so it is a real stop and not a gap.
+  const firstFocusRef = useAccessibilityFocus<View>();
   const segments = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
@@ -131,6 +139,7 @@ const OnboardingShell = ({
         <View style={styles.header}>
           {showBack ? (
             <Pressable
+              ref={firstFocusRef}
               onPress={() => router.back()}
               disabled={backDisabled}
               accessibilityRole="button"
@@ -152,6 +161,10 @@ const OnboardingShell = ({
           )}
 
           <View
+            // Step 1 has no back button, so the progress bar is the first
+            // stop and takes the cursor instead. The ref is harmless on
+            // the other steps — only one of the two is ever attached.
+            ref={showBack ? undefined : firstFocusRef}
             // Four coloured slivers convey progress visually and nothing
             // otherwise. One grouped label says where you are.
             accessible
@@ -205,7 +218,7 @@ const OnboardingShell = ({
         {/* The ref and the role live on the View rather than the text:
             react-native-paper's Text types its ref too narrowly to
             forward, and a View is the node findNodeHandle wants anyway. */}
-        <View ref={titleRef} accessible accessibilityRole="header">
+        <View accessible accessibilityRole="header">
           <AppText
             variant="display"
             style={[

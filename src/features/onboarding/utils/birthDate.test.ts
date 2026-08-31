@@ -1,10 +1,15 @@
 import {
-  clampParts,
-  dayOptions,
+  chooseMonth,
+  chooseYear,
   daysInMonth,
-  monthOptions,
+  decadeOf,
+  decadeOptions,
+  isDayAllowed,
+  isMonthAllowed,
+  isYearAllowed,
   yearOptions,
-  YEAR_SPAN,
+  dayOptions,
+  isComplete,
 } from './birthDate';
 
 // Someone turning 18 exactly on 14 June 2008.
@@ -21,79 +26,102 @@ describe('daysInMonth', () => {
   });
 });
 
-describe('yearOptions', () => {
-  it('runs newest first and stops after the span', () => {
-    const years = yearOptions(MAX);
-    expect(years[0]).toBe(2008);
-    expect(years).toHaveLength(YEAR_SPAN);
-    expect(years[years.length - 1]).toBe(1909);
+describe('the decade rail', () => {
+  it('runs newest first and ends at the ceiling decade', () => {
+    const decades = decadeOptions(MAX);
+    expect(decades[0]).toBe(2000);
+    expect(decades).toContain(1990);
+    expect(decades[decades.length - 1]).toBe(1900);
+  });
+
+  it('puts a year in its own decade', () => {
+    expect(decadeOf(1994)).toBe(1990);
+    expect(decadeOf(2000)).toBe(2000);
+  });
+
+  // The grid is always ten cells. The illegal ones are drawn dimmed
+  // rather than omitted — that is the whole point of the redesign.
+  it('always offers ten years, legal or not', () => {
+    expect(yearOptions(2000)).toHaveLength(10);
+    expect(yearOptions(2000)[9]).toBe(2009);
+  });
+
+  it('marks the years past the ceiling as not allowed', () => {
+    expect(isYearAllowed(2008, MAX)).toBe(true);
+    expect(isYearAllowed(2009, MAX)).toBe(false);
   });
 });
 
-describe('monthOptions', () => {
-  it('gives all twelve for any year below the ceiling', () => {
-    expect(monthOptions(1995, MAX)).toEqual([
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-    ]);
+describe('the ceiling inside the newest year', () => {
+  it('closes the months after the ceiling month', () => {
+    expect(isMonthAllowed(2008, 5, MAX)).toBe(true); // June
+    expect(isMonthAllowed(2008, 6, MAX)).toBe(false); // July
+    // Any earlier year is untouched.
+    expect(isMonthAllowed(2007, 11, MAX)).toBe(true);
   });
 
-  // The whole reason this function exists.
-  it('stops at the ceiling month in the newest year', () => {
-    expect(monthOptions(2008, MAX)).toEqual([0, 1, 2, 3, 4, 5]);
-  });
-});
-
-describe('dayOptions', () => {
-  it('follows the length of the month', () => {
-    expect(dayOptions(1995, 1, MAX)).toHaveLength(28);
-    expect(dayOptions(1996, 1, MAX)).toHaveLength(29);
-    expect(dayOptions(1995, 3, MAX)).toHaveLength(30);
+  it('closes the days after the ceiling day', () => {
+    expect(isDayAllowed(2008, 5, 14, MAX)).toBe(true);
+    expect(isDayAllowed(2008, 5, 15, MAX)).toBe(false);
+    expect(isDayAllowed(2008, 4, 31, MAX)).toBe(true); // May, untouched
   });
 
-  it('stops at the ceiling day in the ceiling month', () => {
-    const days = dayOptions(2008, 5, MAX);
-    expect(days[days.length - 1]).toBe(14);
-  });
-
-  it('does not cut a different month of the ceiling year', () => {
-    expect(dayOptions(2008, 4, MAX)).toHaveLength(31); // May
+  it('gives a month its real length', () => {
+    expect(dayOptions(1995, 1)).toHaveLength(28);
+    expect(dayOptions(1996, 1)).toHaveLength(29);
   });
 });
 
-describe('clampParts', () => {
-  it('leaves a legal date alone', () => {
-    const parts = { year: 1995, month: 6, day: 20 };
-    expect(clampParts(parts, MAX)).toEqual(parts);
+// The rule the designer overruled, and the reason it matters.
+describe('choosing a year never silently rewrites a month', () => {
+  it('clears the month and asks again when the year closes it', () => {
+    const before = { year: 1994, month: 8, day: 3 }; // September
+    const after = chooseYear(before, 2008, MAX);
+
+    expect(after.parts).toEqual({ year: 2008, month: null, day: null });
+    expect(after.step).toBe('month');
+    expect(after.cleared).toBe(true);
   });
 
-  // 31 January, then the user moves the month to February.
-  it('pulls the day back when the new month is shorter', () => {
-    expect(clampParts({ year: 1995, month: 1, day: 31 }, MAX)).toEqual({
-      year: 1995,
-      month: 1,
-      day: 28,
-    });
+  it('keeps a month the new year still allows', () => {
+    const after = chooseYear({ year: 1994, month: 2, day: 10 }, 1996, MAX);
+    expect(after.parts).toEqual({ year: 1996, month: 2, day: 10 });
+    expect(after.cleared).toBe(false);
   });
 
-  it('keeps the 29th when the year is a leap year', () => {
-    expect(clampParts({ year: 1996, month: 1, day: 31 }, MAX)).toEqual({
-      year: 1996,
-      month: 1,
-      day: 29,
-    });
+  // 29 February exists in 1996 and not in 1995.
+  it('clears only the day when the month survives but the day does not', () => {
+    const after = chooseYear({ year: 1996, month: 1, day: 29 }, 1995, MAX);
+    expect(after.parts).toEqual({ year: 1995, month: 1, day: null });
+    expect(after.cleared).toBe(true);
   });
 
-  // Picking the newest year while a later month is selected must not
-  // hand back a date that fails the 18-year rule.
-  it('pulls month AND day back under the ceiling', () => {
-    expect(clampParts({ year: 2008, month: 11, day: 31 }, MAX)).toEqual({
-      year: 2008,
-      month: 5,
-      day: 14,
-    });
+  it('never invents a value the user did not choose', () => {
+    const after = chooseYear({ year: 1994, month: 0, day: 31 }, 1994, MAX);
+    // January is 31 days in every year, so nothing moves.
+    expect(after.parts.day).toBe(31);
+  });
+});
+
+describe('choosing a month', () => {
+  it('clears a day the new month is too short for', () => {
+    const after = chooseMonth({ year: 1995, month: 0, day: 31 }, 1, MAX);
+    expect(after.parts).toEqual({ year: 1995, month: 1, day: null });
+    expect(after.cleared).toBe(true);
+    expect(after.step).toBe('day');
   });
 
-  it('keeps the year the user chose rather than the date they had', () => {
-    expect(clampParts({ year: 2008, month: 8, day: 3 }, MAX).year).toBe(2008);
+  it('keeps a day that still fits', () => {
+    const after = chooseMonth({ year: 1995, month: 0, day: 12 }, 1, MAX);
+    expect(after.parts.day).toBe(12);
+    expect(after.cleared).toBe(false);
+  });
+});
+
+describe('isComplete', () => {
+  it('needs all three', () => {
+    expect(isComplete({ year: 1994, month: 2, day: 14 })).toBe(true);
+    expect(isComplete({ year: 1994, month: 2, day: null })).toBe(false);
+    expect(isComplete({ year: null, month: null, day: null })).toBe(false);
   });
 });

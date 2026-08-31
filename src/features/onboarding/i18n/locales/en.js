@@ -14,6 +14,18 @@ export default {
     dobDay: 'Day',
     dobMonth: 'Month',
     dobYear: 'Year',
+    dobDecade: '{{decade}}s',
+    dobYearCell: '{{year}}',
+    dobYearClosed: '{{year}}, unavailable, you must be 18',
+    dobMonthClosed: '{{month}}, unavailable, you must be 18',
+    dobDayClosed: '{{day}}, unavailable, you must be 18',
+    dobCeiling:
+      'You have to be 18 to join LocalUp, so {{year}} onward is closed.',
+    dobBackstep:
+      'You changed the year to {{year}}, and {{year}} only runs to {{month}} — pick a month again.',
+    dobChipYear: 'Year, {{value}}, double tap to change',
+    dobChipMonth: 'Month, {{value}}, double tap to change',
+    dobChipDay: 'Day, {{value}}, double tap to change',
     next: 'Next',
     step2Title: 'Where do you live?',
     step2Subtitle:

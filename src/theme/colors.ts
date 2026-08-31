@@ -123,6 +123,13 @@ const lightBase = {
   BLACK_A75: 'rgba(0,0,0,0.75)',
   BLACK_A35: 'rgba(0,0,0,0.35)',
   BLACK_A10: 'rgba(0,0,0,0.1)',
+  // The surface a sheet or dialog sits ON, which is NOT the surface a
+  // card sits on. In light they happen to be the same white; in dark the
+  // sheet is a step lighter than a card, so it lifts off the ones behind
+  // it. Redesign §12.6.
+  SHEET: '#FFFFFF',
+  SHEET_OUTLINE: '#E8E6EC',
+  SCRIM_PLAIN: 'rgba(30,26,31,0.45)',
 };
 
 const darkBase: typeof lightBase = {
@@ -196,6 +203,9 @@ const darkBase: typeof lightBase = {
   BLACK_A75: 'rgba(0,0,0,0.75)',
   BLACK_A35: 'rgba(0,0,0,0.35)',
   BLACK_A10: 'rgba(0,0,0,0.1)',
+  SHEET: '#2F2D36',
+  SHEET_OUTLINE: '#3D3945',
+  SCRIM_PLAIN: 'rgba(8,6,12,0.72)',
 };
 
 export const lightColors = {
@@ -263,6 +273,14 @@ export const lightColors = {
   outlineSelected: lightBase.VIOLET_200,
   onSurfaceFaint: lightBase.GREY_350,
   outlineDashed: lightBase.GREY_300,
+  // Named surfaceSheet, NOT surfaceElevated as the handoff asks. That
+  // name is already taken by the CARD surface, and the boards prove they
+  // are two different things: DobYear paints its cells #27252B sixteen
+  // times and the sheet behind them #2F2D36 once. Following the handoff
+  // literally would have relit every card in the app.
+  surfaceSheet: lightBase.SHEET,
+  outlineSheet: lightBase.SHEET_OUTLINE,
+  scrim: lightBase.SCRIM_PLAIN,
   // MD3 already owns these two names; Paper's own error surfaces pick
   // them up, which is the intent — one error colour, not two.
   errorContainer: lightBase.RED_050,
@@ -364,6 +382,9 @@ export const darkColors: typeof lightColors = {
   outlineSelected: darkBase.VIOLET_200,
   onSurfaceFaint: darkBase.GREY_350,
   outlineDashed: darkBase.GREY_300,
+  surfaceSheet: darkBase.SHEET,
+  outlineSheet: darkBase.SHEET_OUTLINE,
+  scrim: darkBase.SCRIM_PLAIN,
   errorContainer: darkBase.RED_050,
   errorOutline: darkBase.RED_200,
 

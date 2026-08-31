@@ -14,6 +14,18 @@ export default {
     dobDay: 'Ημέρα',
     dobMonth: 'Μήνας',
     dobYear: 'Έτος',
+    dobDecade: '{{decade}}',
+    dobYearCell: '{{year}}',
+    dobYearClosed: '{{year}}, μη διαθέσιμο, πρέπει να είσαι 18',
+    dobMonthClosed: '{{month}}, μη διαθέσιμο, πρέπει να είσαι 18',
+    dobDayClosed: '{{day}}, μη διαθέσιμο, πρέπει να είσαι 18',
+    dobCeiling:
+      'Πρέπει να είσαι 18 για να μπεις στο LocalUp, οπότε από {{year}} και μετά είναι κλειστά.',
+    dobBackstep:
+      'Άλλαξες το έτος σε {{year}}, και το {{year}} φτάνει μόνο μέχρι {{month}} — διάλεξε ξανά μήνα.',
+    dobChipYear: 'Έτος, {{value}}, διπλό πάτημα για αλλαγή',
+    dobChipMonth: 'Μήνας, {{value}}, διπλό πάτημα για αλλαγή',
+    dobChipDay: 'Ημέρα, {{value}}, διπλό πάτημα για αλλαγή',
     next: 'Επόμενο',
     step2Title: 'Πού μένεις;',
     step2Subtitle:

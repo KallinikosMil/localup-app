@@ -37,7 +37,7 @@ type AuthShellProps = {
 
 const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
   const theme = useAppTheme();
-  const titleRef = useAccessibilityFocus<View>();
+  const firstFocusRef = useAccessibilityFocus<View>();
   const { t } = useTranslation();
 
   return (
@@ -72,7 +72,17 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.brandRow}>
+        {/* The cursor lands HERE, at the literal top of the content, not
+            on the title below it. Same rule as the onboarding shell:
+            never drop someone into the middle of a screen with things
+            already behind them. `accessible` collapses the mark and the
+            wordmark into the one stop they read as. */}
+        <View
+          ref={firstFocusRef}
+          accessible
+          accessibilityLabel={t(Translations.AUTH_HEADER_TEXT)}
+          style={styles.brandRow}
+        >
           <LinearGradient
             colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
             start={{ x: 0, y: 0 }}
@@ -98,7 +108,7 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
         {/* Same reason as the onboarding shell: arriving on a screen must
             say which screen it is, not read out whatever sits where the
             cursor happened to be. */}
-        <View ref={titleRef} accessible accessibilityRole="header">
+        <View accessible accessibilityRole="header">
           <AppText
             variant="display"
             style={[
