@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
 import AppText from '@shared/components/AppText';
+import { hiddenFromScreenReader } from '@shared/a11y';
 import GradientButton from '@shared/components/GradientButton';
 import AuthShell from '@features/auth/components/AuthShell';
 import AppButton from '@shared/components/AppButton';
@@ -110,7 +111,9 @@ const RegisterScreen = () => {
         subtitle={t(Translations.AUTH_CREATE_ACCOUNT_SUBTITLE)}
         footer={
           <>
+            {/* Same as the login footer: one sentence, one focus stop. */}
             <AppText
+              {...hiddenFromScreenReader}
               variant="body"
               style={{
                 color: theme.colors.onSurfaceFaint,
@@ -121,7 +124,9 @@ const RegisterScreen = () => {
             <Pressable
               onPress={goToLogin}
               accessibilityRole="link"
-              accessibilityLabel={t(Translations.AUTH_LOGIN_LINK)}
+              accessibilityLabel={`${t(Translations.AUTH_HAS_ACCOUNT)} ${t(
+                Translations.AUTH_LOGIN_LINK,
+              )}`}
               hitSlop={{
                 top: Layout.HIT_SLOP_TEXT,
                 bottom: Layout.HIT_SLOP_TEXT,

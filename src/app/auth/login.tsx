@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
 import AppText from '@shared/components/AppText';
+import { hiddenFromScreenReader } from '@shared/a11y';
 import GradientButton from '@shared/components/GradientButton';
 import FullScreenLoader from '@shared/components/FullScreenLoader';
 import InputField from '@shared/components/InputField';
@@ -97,7 +98,11 @@ const LoginScreen = () => {
         subtitle={t(Translations.AUTH_SUBTITLE_TEXT)}
         footer={
           <>
+            {/* Hidden, and read as part of the link instead. Two stops
+                for one sentence is noise, and the question on its own is
+                not something anyone can act on. */}
             <AppText
+              {...hiddenFromScreenReader}
               variant="body"
               style={{
                 color: theme.colors.onSurfaceFaint,
@@ -108,7 +113,13 @@ const LoginScreen = () => {
             <Pressable
               onPress={() => router.push('/auth/register')}
               accessibilityRole="link"
-              accessibilityLabel={t(Translations.AUTH_NO_ACCOUNT)}
+              // Was AUTH_NO_ACCOUNT — the link announced the QUESTION
+              // rather than what it does. Composed from the two visible
+              // keys rather than a third one of its own, so the spoken
+              // sentence cannot drift from the printed one.
+              accessibilityLabel={`${t(Translations.AUTH_NO_ACCOUNT)} ${t(
+                Translations.AUTH_REGISTER,
+              )}`}
               hitSlop={{
                 top: Layout.HIT_SLOP_TEXT,
                 bottom: Layout.HIT_SLOP_TEXT,
