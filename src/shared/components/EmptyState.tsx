@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon, { type IconName } from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
@@ -9,7 +9,7 @@ import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 
 type EmptyStateProps = {
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  icon: IconName;
   title: string;
   subtitle?: string;
   action?: {
@@ -23,13 +23,7 @@ const EmptyState = ({ icon, title, subtitle, action }: EmptyStateProps) => {
 
   return (
     <View style={styles.root}>
-      <MaterialCommunityIcons
-        importantForAccessibility="no"
-        accessibilityElementsHidden
-        name={icon}
-        size={48}
-        color={theme.colors.onSurfaceVariant}
-      />
+      <AppIcon name={icon} size={48} color={theme.colors.onSurfaceVariant} />
       <Spacer spacing={Spacing.lg} />
       <AppText
         variant="h3"

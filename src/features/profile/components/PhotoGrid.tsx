@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -145,9 +145,7 @@ const PhotoGrid = ({
                   },
                 ]}
               >
-                <MaterialCommunityIcons
-                  importantForAccessibility="no"
-                  accessibilityElementsHidden
+                <AppIcon
                   name="plus"
                   size={24}
                   color={theme.colors.onSurfaceFaint}
@@ -289,13 +287,7 @@ const DraggableTile = ({
             },
           ]}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
-            name="close"
-            size={11}
-            color={theme.colors.ON_PHOTO}
-          />
+          <AppIcon name="close" size={11} color={theme.colors.ON_PHOTO} />
         </Pressable>
 
         {isMain ? (

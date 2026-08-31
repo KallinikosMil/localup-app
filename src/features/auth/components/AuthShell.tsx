@@ -7,7 +7,7 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
@@ -79,9 +79,7 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
             end={{ x: 1, y: 1 }}
             style={styles.mark}
           >
-            <MaterialCommunityIcons
-              importantForAccessibility="no"
-              accessibilityElementsHidden
+            <AppIcon
               name="map-marker-outline"
               size={27}
               color={theme.colors.onGradient}

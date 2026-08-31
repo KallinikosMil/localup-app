@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, TextInput, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon, { type IconName } from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
 import { useAppTheme, type AppTheme } from '@theme/paper';
@@ -17,8 +17,6 @@ import { Layout } from '@theme/constants/Layout';
 // flag rather than submitting a form. Wiring RHF in just to borrow a box
 // would be the tail wagging the dog. The SHAPES are shared — same height,
 // radius, border and label treatment — so the two read as one system.
-
-type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 // Sections are separated by a rule, not by a tinted card each. Five
 // stacked cards on one scrolling page read as five unrelated screens; a
@@ -112,9 +110,7 @@ export const LabelledField = ({
           },
         ]}
       >
-        <MaterialCommunityIcons
-          importantForAccessibility="no"
-          accessibilityElementsHidden
+        <AppIcon
           name={icon}
           size={Layout.FIELD_ICON}
           color={theme.colors.onSurfaceFaint}
@@ -192,9 +188,7 @@ export const ModeSegments = ({
             style={styles.segmentFill}
           >
             {option.icon ? (
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name={option.icon}
                 size={Layout.SEGMENT_ICON}
                 color={theme.colors.onGradient}
@@ -220,9 +214,7 @@ export const ModeSegments = ({
           style={[styles.segment, styles.segmentFill]}
         >
           {option.icon ? (
-            <MaterialCommunityIcons
-              importantForAccessibility="no"
-              accessibilityElementsHidden
+            <AppIcon
               name={option.icon}
               size={Layout.SEGMENT_ICON}
               color={theme.colors.onSurfaceVariant}

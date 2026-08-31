@@ -1,13 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon, { type IconName } from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
 import { useAppTheme } from '@theme/paper';
 import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Layout } from '@theme/constants/Layout';
-
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 type Props = {
   label: string;
@@ -95,9 +93,7 @@ const InterestChip = ({
       ]}
     >
       {icon ? (
-        <MaterialCommunityIcons
-          importantForAccessibility="no"
-          accessibilityElementsHidden
+        <AppIcon
           name={icon as IconName}
           size={16}
           color={

@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon, { type IconName } from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
@@ -23,8 +23,6 @@ import { Translations } from '@features/discover/i18n/translationKeys';
 // what the button does. Four components would have drifted apart on the
 // two thirds they share.
 
-type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
-
 // What the reader is currently asking for. Shown on the two states where
 // the filters are the story, so the numbers in the sentence have
 // something to sit against.
@@ -43,13 +41,7 @@ const FilterChips = ({ prefs }: { prefs: MatchPreferences }) => {
         },
       ]}
     >
-      <MaterialCommunityIcons
-        importantForAccessibility="no"
-        accessibilityElementsHidden
-        name={icon}
-        size={13}
-        color={theme.colors.onSurfaceVariant}
-      />
+      <AppIcon name={icon} size={13} color={theme.colors.onSurfaceVariant} />
       <AppText
         variant="caption"
         style={{ color: theme.colors.onSurfaceVariant }}
@@ -149,13 +141,7 @@ const DeckEmptyState = ({
 
   return (
     <View style={styles.root}>
-      <MaterialCommunityIcons
-        importantForAccessibility="no"
-        accessibilityElementsHidden
-        name={icon}
-        size={48}
-        color={theme.colors.onSurfaceVariant}
-      />
+      <AppIcon name={icon} size={48} color={theme.colors.onSurfaceVariant} />
       <Spacer spacing={Spacing.lg} />
       <AppText
         variant="h2"

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, Pressable, FlatList } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -84,9 +84,7 @@ export default function BlockedUsersScreen() {
                 },
               ]}
             >
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name="account"
                 size={24}
                 color={theme.colors.onSurfaceVariant}
@@ -191,9 +189,7 @@ export default function BlockedUsersScreen() {
           accessibilityLabel={t(Common.A11Y_BACK)}
           style={styles.back}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="chevron-left"
             size={24}
             color={theme.colors.onBackground}
@@ -238,9 +234,7 @@ export default function BlockedUsersScreen() {
         </View>
       ) : isError ? (
         <View style={styles.center}>
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -263,9 +257,7 @@ export default function BlockedUsersScreen() {
         </View>
       ) : blocked.length === 0 ? (
         <View style={styles.center}>
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="account-check-outline"
             size={48}
             color={theme.colors.onSurfaceFaint}
@@ -297,9 +289,7 @@ export default function BlockedUsersScreen() {
                 },
               ]}
             >
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name="information-outline"
                 size={17}
                 color={theme.colors.onSurfaceFaint}

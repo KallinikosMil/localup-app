@@ -8,7 +8,7 @@ import {
   TextInput as RNTextInput,
 } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
@@ -359,9 +359,7 @@ function EditProfileScreenContent() {
       >
         {backBar}
         <View style={styles.center}>
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -593,9 +591,7 @@ function EditProfileScreenContent() {
               },
             ]}
           >
-            <MaterialCommunityIcons
-              importantForAccessibility="no"
-              accessibilityElementsHidden
+            <AppIcon
               name="map-marker-outline"
               size={Layout.FIELD_ICON}
               color={theme.colors.onSurfaceFaint}
@@ -633,9 +629,7 @@ function EditProfileScreenContent() {
               },
             ]}
           >
-            <MaterialCommunityIcons
-              importantForAccessibility="no"
-              accessibilityElementsHidden
+            <AppIcon
               name="crosshairs-gps"
               size={16}
               color={theme.colors.primary}
@@ -717,9 +711,7 @@ function EditProfileScreenContent() {
                 {t(Translations.PROFILE_INTERESTS_SUMMARY)}
               </AppText>
             </View>
-            <MaterialCommunityIcons
-              importantForAccessibility="no"
-              accessibilityElementsHidden
+            <AppIcon
               name="chevron-right"
               size={22}
               color={theme.colors.onSurfaceFaint}

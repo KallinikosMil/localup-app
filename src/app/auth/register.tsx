@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -249,13 +249,7 @@ const RegisterScreen = () => {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
-            name="google"
-            size={19}
-            color={theme.colors.onSurface}
-          />
+          <AppIcon name="google" size={19} color={theme.colors.onSurface} />
           <AppText
             variant="bodySmallStrong"
             style={{

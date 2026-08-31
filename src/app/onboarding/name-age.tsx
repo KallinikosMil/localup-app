@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -145,9 +145,7 @@ const NameAgeScreen = () => {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="calendar-outline"
             size={Layout.FIELD_ICON}
             color={theme.colors.onSurfaceFaint}
@@ -165,9 +163,7 @@ const NameAgeScreen = () => {
           >
             {dob ? shownDate(dob) : t(Translations.ONBOARDING_DOB_PLACEHOLDER)}
           </AppText>
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="chevron-right"
             size={18}
             color={theme.colors.onSurfaceFaint}
@@ -176,9 +172,7 @@ const NameAgeScreen = () => {
 
         <View style={styles.helper}>
           {dobError ? (
-            <MaterialCommunityIcons
-              importantForAccessibility="no"
-              accessibilityElementsHidden
+            <AppIcon
               name="alert-circle-outline"
               size={Layout.FIELD_ERROR_ICON}
               color={theme.colors.error}

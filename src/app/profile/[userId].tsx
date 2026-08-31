@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -134,9 +134,7 @@ export default function UserProfileScreen() {
           },
         ]}
       >
-        <MaterialCommunityIcons
-          importantForAccessibility="no"
-          accessibilityElementsHidden
+        <AppIcon
           name="alert-circle-outline"
           size={40}
           color={theme.colors.onSurfaceVariant}
@@ -204,9 +202,7 @@ export default function UserProfileScreen() {
                 theme.dark ? null : styles.onPhotoShadow,
               ]}
             >
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name="chevron-left"
                 size={24}
                 color={theme.colors.onHeaderPill}
@@ -247,9 +243,7 @@ export default function UserProfileScreen() {
                 end={{ x: 1, y: 1 }}
                 style={styles.messageButtonFill}
               >
-                <MaterialCommunityIcons
-                  importantForAccessibility="no"
-                  accessibilityElementsHidden
+                <AppIcon
                   name="chat-outline"
                   size={19}
                   color={theme.colors.onGradient}
@@ -341,9 +335,7 @@ export default function UserProfileScreen() {
                           these two were shown to each other, and colour
                           alone does not survive a colour-blind reader. */}
                       {isShared ? (
-                        <MaterialCommunityIcons
-                          importantForAccessibility="no"
-                          accessibilityElementsHidden
+                        <AppIcon
                           name="check"
                           size={12}
                           color={theme.colors.primary}
@@ -439,9 +431,7 @@ export default function UserProfileScreen() {
               {block.isPending ? (
                 <ActivityIndicator size={16} />
               ) : (
-                <MaterialCommunityIcons
-                  importantForAccessibility="no"
-                  accessibilityElementsHidden
+                <AppIcon
                   name="block-helper"
                   size={17}
                   color={theme.colors.error}

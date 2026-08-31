@@ -13,7 +13,7 @@ import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
@@ -308,9 +308,7 @@ export default function ChatScreen() {
           accessibilityLabel={t(Common.A11Y_BACK)}
           style={styles.backButton}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="chevron-left"
             size={28}
             color={theme.colors.onBackground}
@@ -360,9 +358,7 @@ export default function ChatScreen() {
                 },
               ]}
             >
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name="account"
                 size={18}
                 color={theme.colors.onSurfaceVariant}
@@ -421,9 +417,7 @@ export default function ChatScreen() {
         </View>
       ) : isError ? (
         <View style={styles.center}>
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="message-alert-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -528,9 +522,7 @@ export default function ChatScreen() {
               style={StyleSheet.absoluteFill}
             />
           ) : null}
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="send"
             size={21}
             color={

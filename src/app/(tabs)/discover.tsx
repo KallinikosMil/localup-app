@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native';
 import { ActivityIndicator, Portal, Modal, Snackbar } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
@@ -311,9 +311,7 @@ export default function DiscoverScreen() {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -496,9 +494,7 @@ export default function DiscoverScreen() {
               theme.dark ? null : styles.headerPillShadow,
             ]}
           >
-            <MaterialCommunityIcons
-              importantForAccessibility="no"
-              accessibilityElementsHidden
+            <AppIcon
               name="map-marker-outline"
               size={13}
               color={theme.colors.onHeaderPill}
@@ -531,9 +527,7 @@ export default function DiscoverScreen() {
                 theme.dark ? null : styles.headerPillShadow,
               ]}
             >
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name="tune-variant"
                 size={17}
                 color={theme.colors.onHeaderPillIcon}
@@ -572,13 +566,7 @@ export default function DiscoverScreen() {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
-            name="close"
-            size={24}
-            color={theme.colors.onPassButton}
-          />
+          <AppIcon name="close" size={24} color={theme.colors.onPassButton} />
         </Pressable>
 
         <GradientButton

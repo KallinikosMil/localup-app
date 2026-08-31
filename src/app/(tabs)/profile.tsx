@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
@@ -132,9 +132,7 @@ function ProfileScreenContent() {
           },
         ]}
       >
-        <MaterialCommunityIcons
-          importantForAccessibility="no"
-          accessibilityElementsHidden
+        <AppIcon
           name="alert-circle-outline"
           size={40}
           color={theme.colors.onSurfaceVariant}
@@ -214,9 +212,7 @@ function ProfileScreenContent() {
                 },
               ]}
             >
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name="cog-outline"
                 size={20}
                 color={theme.colors.onHeaderPill}
@@ -239,9 +235,7 @@ function ProfileScreenContent() {
                 end={{ x: 1, y: 1 }}
                 style={styles.editButtonFill}
               >
-                <MaterialCommunityIcons
-                  importantForAccessibility="no"
-                  accessibilityElementsHidden
+                <AppIcon
                   name="pencil-outline"
                   size={18}
                   color={theme.colors.onGradient}
@@ -279,9 +273,7 @@ function ProfileScreenContent() {
                 },
               ]}
             >
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name="camera-outline"
                 size={20}
                 color={theme.colors.onSurfaceVariant}

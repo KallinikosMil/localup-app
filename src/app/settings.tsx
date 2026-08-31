@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon, { type IconName } from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -36,8 +36,6 @@ import { Translations as Common } from '@shared/i18n/translationKeys';
 //
 // They are NOT left in both places. Two log-out affordances is how a
 // person ends up hunting for the one that works.
-
-type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 const SectionLabel = ({
   theme,
@@ -106,13 +104,7 @@ const SettingsRow = ({
         },
       ]}
     >
-      <MaterialCommunityIcons
-        importantForAccessibility="no"
-        accessibilityElementsHidden
-        name={icon}
-        size={20}
-        color={tint}
-      />
+      <AppIcon name={icon} size={20} color={tint} />
       <AppText
         variant="message"
         style={[
@@ -129,9 +121,7 @@ const SettingsRow = ({
         </AppText>
       ) : null}
       {chevron ? (
-        <MaterialCommunityIcons
-          importantForAccessibility="no"
-          accessibilityElementsHidden
+        <AppIcon
           name="chevron-right"
           size={18}
           color={theme.colors.onSurfaceFaint}
@@ -205,9 +195,7 @@ export default function SettingsScreen() {
           accessibilityLabel={t(Common.A11Y_BACK)}
           style={styles.headerSide}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="chevron-left"
             size={24}
             color={theme.colors.onBackground}

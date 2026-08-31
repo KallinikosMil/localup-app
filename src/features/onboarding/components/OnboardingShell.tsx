@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { router, useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -139,9 +139,7 @@ const OnboardingShell = ({
               hitSlop={Layout.HIT_SLOP}
               style={[styles.back, backDisabled ? styles.backOff : null]}
             >
-              <MaterialCommunityIcons
-                importantForAccessibility="no"
-                accessibilityElementsHidden
+              <AppIcon
                 name="chevron-left"
                 size={24}
                 color={theme.colors.onSurfaceFaint}

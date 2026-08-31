@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
@@ -33,9 +33,7 @@ const ModeBadge = ({ mode, size = 'md' }: ModeBadgeProps) => {
         { backgroundColor: bg },
       ]}
     >
-      <MaterialCommunityIcons
-        importantForAccessibility="no"
-        accessibilityElementsHidden
+      <AppIcon
         name={isTraveler ? 'airplane' : 'home-variant-outline'}
         size={sm ? 10 : 12}
         color={fg}

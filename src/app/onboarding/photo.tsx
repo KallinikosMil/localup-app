@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
@@ -123,9 +123,7 @@ const PhotoScreen = () => {
                 end={{ x: 1, y: 1 }}
                 style={styles.plus}
               >
-                <MaterialCommunityIcons
-                  importantForAccessibility="no"
-                  accessibilityElementsHidden
+                <AppIcon
                   name="plus"
                   size={28}
                   color={theme.colors.onGradient}
@@ -190,9 +188,7 @@ const PhotoScreen = () => {
               {uri ? (
                 <Image source={{ uri }} style={styles.preview} />
               ) : isNext ? (
-                <MaterialCommunityIcons
-                  importantForAccessibility="no"
-                  accessibilityElementsHidden
+                <AppIcon
                   name="plus"
                   size={20}
                   color={theme.colors.onSurfaceFaint}

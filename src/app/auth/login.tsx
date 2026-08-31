@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -108,7 +108,7 @@ const LoginScreen = () => {
             <Pressable
               onPress={() => router.push('/auth/register')}
               accessibilityRole="link"
-              accessibilityLabel={t(Translations.AUTH_REGISTER)}
+              accessibilityLabel={t(Translations.AUTH_NO_ACCOUNT)}
               hitSlop={{
                 top: Layout.HIT_SLOP_TEXT,
                 bottom: Layout.HIT_SLOP_TEXT,
@@ -237,13 +237,7 @@ const LoginScreen = () => {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
-            name="google"
-            size={19}
-            color={theme.colors.onSurface}
-          />
+          <AppIcon name="google" size={19} color={theme.colors.onSurface} />
           <AppText
             variant="bodySmallStrong"
             style={{

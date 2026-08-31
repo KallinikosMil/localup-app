@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet, View, TextInput, FlatList, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
@@ -209,9 +209,7 @@ const HomeCityScreen = () => {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            importantForAccessibility="no"
-            accessibilityElementsHidden
+          <AppIcon
             name="magnify"
             size={Layout.FIELD_ICON}
             color={theme.colors.onSurfaceFaint}
