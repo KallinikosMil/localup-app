@@ -29,10 +29,22 @@ export const useAccessibilityFocus = <T>() => {
   const ref = useRef<T>(null);
   const navigation = useNavigation();
 
-  const claim = useCallback(() => {
+  // TEMPORARY — proves the hook is mounted at all, so "no log" cannot be
+  // confused with "the new code never reached the device".
+  // eslint-disable-next-line no-console
+  console.log('[a11y-focus] hook mounted');
+
+  const claim = useCallback((from: string) => {
     // A no-op when no screen reader is running, so this costs nothing for
     // everyone else.
     const tag = findNodeHandle(ref.current as never);
+    // TEMPORARY — remove once the focus target is confirmed on device.
+    // eslint-disable-next-line no-console
+    console.log('[a11y-focus]', {
+      from,
+      hasRef: !!ref.current,
+      tag,
+    });
     if (tag) AccessibilityInfo.setAccessibilityFocus(tag);
   }, []);
 
@@ -43,14 +55,14 @@ export const useAccessibilityFocus = <T>() => {
   useEffect(() => {
     const sub = navigation.addListener(
       'transitionEnd' as never,
-      claim as never,
+      (() => claim('transitionEnd')) as never,
     );
     return sub;
   }, [navigation, claim]);
 
   useFocusEffect(
     useCallback(() => {
-      const timer = setTimeout(claim, SETTLE_MS);
+      const timer = setTimeout(() => claim('timeout'), SETTLE_MS);
       return () => clearTimeout(timer);
     }, [claim]),
   );

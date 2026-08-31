@@ -200,6 +200,7 @@ export const Layout = {
   // A row is a tap target, so it clears 44. The list shows five of them,
   // which is enough to read as a list rather than a peephole without the
   // sheet outgrowing a small screen.
+  DOB_BOX_GAP: 10,
   DOB_YEAR_CELL: 56,
   DOB_MONTH_CELL: 46,
   // Exactly the 44 minimum, in a 7-wide grid — the tightest thing in

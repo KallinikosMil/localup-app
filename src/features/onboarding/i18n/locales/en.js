@@ -14,6 +14,15 @@ export default {
     dobDay: 'Day',
     dobMonth: 'Month',
     dobYear: 'Year',
+    dobDd: 'DD',
+    dobMm: 'MM',
+    dobYyyy: 'YYYY',
+    dobGroup: 'Date of birth, day month year',
+    dobEcho:
+      'You will appear as {{age}} — only your age is shown, never the date.',
+    dobUnderAge:
+      'You have to be 18 to join LocalUp. You would turn 18 in {{when}}.',
+    dobInvalid: 'That is not a real date. Check the day and month.',
     dobDecade: '{{decade}}s',
     dobYearCell: '{{year}}',
     dobYearClosed: '{{year}}, unavailable, you must be 18',

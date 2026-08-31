@@ -1,153 +1,110 @@
-// The lists behind the date-of-birth sheet.
+// The rules behind the typed date-of-birth field.
 //
-// Three steps, each computed from the ones above it: decade+year, then
-// month, then day. That shape is what makes 1994 two taps instead of a
-// hundred swipes, and it also removes most of the 18+ problem before it
-// starts — February 1994 simply HAS 28 cells and 2008 simply HAS eight
-// months, with nothing to reject afterwards.
+// Three boxes — DD / MM / YYYY — rather than a picker. A drill-down sheet
+// was built first and withdrawn: it was a shape nobody had met, and a
+// bespoke grid is worse for a screen reader than a text input, not
+// better. A text input is a role every assistive technology already
+// drives. Redesign §12.1.
 //
-// The ceiling is a specific DAY, not a year: signing up requires being
-// 18, so the newest legal date is today minus eighteen years. Only the
-// newest year, and inside it only the newest month, are ever cut short.
+// Typing cannot make an illegal date unreachable, so the 18+ rule is
+// enforced by CHECKING rather than by hiding, the moment the year is
+// complete — and the answer names the date the person becomes eligible
+// instead of just refusing.
 
-export const MONTHS_IN_YEAR = 12;
-export const YEARS_PER_DECADE = 10;
+export const MIN_AGE = 18;
+// Below this a birth year is a typo, not a person.
+export const MIN_YEAR = 1900;
 
-// How far back the decade rail goes. A hundred years covers every
-// plausible user and keeps the rail finite.
-export const YEAR_SPAN = 100;
+export type DobInput = { day: string; month: string; year: string };
 
-export type BirthParts = {
-  year: number | null;
-  month: number | null;
-  day: number | null;
-};
+export type DobResult =
+  // Not enough typed yet to judge. Nothing is shown; a half-typed year is
+  // not a wrong answer.
+  | { kind: 'incomplete' }
+  // The parts are numbers but not a real date: 31 February, month 13,
+  // a year before 1900.
+  | { kind: 'invalid' }
+  // A real date, but not old enough. Carries WHEN they qualify, because
+  // that is more use than a refusal.
+  | { kind: 'tooYoung'; eligibleOn: Date }
+  | { kind: 'ok'; date: Date; age: number };
 
-export const EMPTY_PARTS: BirthParts = { year: null, month: null, day: null };
-
-export type Step = 'year' | 'month' | 'day';
+const digits = (s: string) => /^\d+$/.test(s);
 
 export const daysInMonth = (year: number, month: number) =>
   // Day 0 of the NEXT month is the last day of this one, and it handles
   // leap years without a rule of its own.
   new Date(year, month + 1, 0).getDate();
 
-// The decade a year belongs to: 1994 -> 1990.
-export const decadeOf = (year: number) =>
-  Math.floor(year / YEARS_PER_DECADE) * YEARS_PER_DECADE;
-
-// Newest first, so the decade someone is most likely to want is the one
-// they land on. The rail simply ENDS at the ceiling's decade — a rail
-// that ends reads as a rail that ends and needs no explaining.
-export const decadeOptions = (maxDate: Date): number[] => {
-  const newest = decadeOf(maxDate.getFullYear());
-  const oldest = decadeOf(maxDate.getFullYear() - YEAR_SPAN);
-  const out: number[] = [];
-  for (let d = newest; d >= oldest; d -= YEARS_PER_DECADE) out.push(d);
-  return out;
+export const ageOn = (birth: Date, on: Date) => {
+  let age = on.getFullYear() - birth.getFullYear();
+  const beforeBirthday =
+    on.getMonth() < birth.getMonth() ||
+    (on.getMonth() === birth.getMonth() && on.getDate() < birth.getDate());
+  if (beforeBirthday) age -= 1;
+  return age;
 };
 
-// Ten cells, always. The ones past the ceiling are RETURNED, not omitted
-// — the sheet draws them dimmed with a reason, because a grid that just
-// stops is indistinguishable from a bug.
-export const yearOptions = (decade: number) => {
-  const out: number[] = [];
-  for (let i = 0; i < YEARS_PER_DECADE; i++) out.push(decade + i);
-  return out;
-};
+// The day the person turns MIN_AGE. Named rather than derived at the call
+// site so the copy and the check can never disagree about it.
+export const eligibleOn = (birth: Date) =>
+  new Date(birth.getFullYear() + MIN_AGE, birth.getMonth(), birth.getDate());
 
-export const isYearAllowed = (year: number, maxDate: Date) =>
-  year <= maxDate.getFullYear();
+export const evaluateDob = (input: DobInput, today: Date): DobResult => {
+  const { day, month, year } = input;
 
-// Months 0-11. Only the ceiling year is ever short.
-export const monthOptions = (year: number, maxDate: Date): number[] => {
-  const out: number[] = [];
-  for (let m = 0; m < MONTHS_IN_YEAR; m++) out.push(m);
-  return out;
-};
-
-export const isMonthAllowed = (year: number, month: number, maxDate: Date) =>
-  year < maxDate.getFullYear() || month <= maxDate.getMonth();
-
-export const dayOptions = (year: number, month: number): number[] => {
-  const out: number[] = [];
-  for (let d = 1; d <= daysInMonth(year, month); d++) out.push(d);
-  return out;
-};
-
-export const isDayAllowed = (
-  year: number,
-  month: number,
-  day: number,
-  maxDate: Date,
-) =>
-  year < maxDate.getFullYear() ||
-  month < maxDate.getMonth() ||
-  day <= maxDate.getDate();
-
-// Choosing a year can invalidate a month that was already picked.
-//
-// The old rule pulled the month back to the nearest legal value. That is
-// wrong here and the designer was right to overrule it: silently turning
-// September into August hands someone a birth date they never chose, on
-// the one field that decides whether they are old enough to be here.
-// Clearing is loud, costs one tap, and cannot produce a wrong answer
-// nobody noticed.
-export const chooseYear = (
-  parts: BirthParts,
-  year: number,
-  maxDate: Date,
-): { parts: BirthParts; step: Step; cleared: boolean } => {
-  const monthStillLegal =
-    parts.month !== null && isMonthAllowed(year, parts.month, maxDate);
-
-  if (!monthStillLegal) {
-    return {
-      parts: { year, month: null, day: null },
-      step: 'month',
-      cleared: parts.month !== null,
-    };
+  // A year is only judged once all four digits are there. Checking at
+  // three would call 199 too young and then flip, which is worse than
+  // saying nothing.
+  if (day.length === 0 || month.length === 0 || year.length < 4) {
+    return { kind: 'incomplete' };
+  }
+  if (!digits(day) || !digits(month) || !digits(year)) {
+    return { kind: 'invalid' };
   }
 
-  const dayStillLegal =
-    parts.day !== null &&
-    parts.day <= daysInMonth(year, parts.month!) &&
-    isDayAllowed(year, parts.month!, parts.day, maxDate);
+  const d = Number(day);
+  const m = Number(month);
+  const y = Number(year);
 
-  return {
-    parts: { year, month: parts.month, day: dayStillLegal ? parts.day : null },
-    step: dayStillLegal ? 'day' : 'day',
-    cleared: parts.day !== null && !dayStillLegal,
-  };
+  if (y < MIN_YEAR || y > today.getFullYear()) return { kind: 'invalid' };
+  if (m < 1 || m > 12) return { kind: 'invalid' };
+  // The month's real length, so 31 April and 29 February in a common year
+  // are both caught here rather than silently rolling into the next month
+  // the way `new Date` would.
+  if (d < 1 || d > daysInMonth(y, m - 1)) return { kind: 'invalid' };
+
+  const date = new Date(y, m - 1, d);
+  const age = ageOn(date, today);
+
+  if (age < MIN_AGE) return { kind: 'tooYoung', eligibleOn: eligibleOn(date) };
+
+  return { kind: 'ok', date, age };
 };
 
-export const chooseMonth = (
-  parts: BirthParts,
-  month: number,
-  maxDate: Date,
-): { parts: BirthParts; step: Step; cleared: boolean } => {
-  const year = parts.year!;
-  const dayStillLegal =
-    parts.day !== null &&
-    parts.day <= daysInMonth(year, month) &&
-    isDayAllowed(year, month, parts.day, maxDate);
+// Typing into a fixed-width box should move on by itself; deleting out of
+// an empty one should step back. Both are pure decisions about where the
+// cursor belongs next, so they are testable without a component.
+export const MAX_LEN = { day: 2, month: 2, year: 4 } as const;
 
-  return {
-    parts: { year, month, day: dayStillLegal ? parts.day : null },
-    step: 'day',
-    cleared: parts.day !== null && !dayStillLegal,
-  };
+export type DobBox = keyof typeof MAX_LEN;
+
+export const nextBoxAfterTyping = (
+  box: DobBox,
+  value: string,
+): DobBox | null => {
+  if (value.length < MAX_LEN[box]) return null;
+  if (box === 'day') return 'month';
+  if (box === 'month') return 'year';
+  return null;
 };
 
-export const isComplete = (
-  parts: BirthParts,
-): parts is { year: number; month: number; day: number } =>
-  parts.year !== null && parts.month !== null && parts.day !== null;
-
-export const toDate = (parts: BirthParts) =>
-  new Date(parts.year!, parts.month!, parts.day!);
-
-export const fromDate = (d: Date | null): BirthParts =>
-  d
-    ? { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() }
-    : { ...EMPTY_PARTS };
+export const previousBoxOnBackspace = (
+  box: DobBox,
+  value: string,
+): DobBox | null => {
+  if (value.length > 0) return null;
+  if (box === 'year') return 'month';
+  if (box === 'month') return 'day';
+  return null;
+};

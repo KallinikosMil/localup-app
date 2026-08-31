@@ -14,6 +14,15 @@ export default {
     dobDay: 'Ημέρα',
     dobMonth: 'Μήνας',
     dobYear: 'Έτος',
+    dobDd: 'ΗΗ',
+    dobMm: 'ΜΜ',
+    dobYyyy: 'ΕΕΕΕ',
+    dobGroup: 'Ημερομηνία γέννησης, ημέρα μήνας έτος',
+    dobEcho:
+      'Θα εμφανίζεσαι ως {{age}} — φαίνεται μόνο η ηλικία, ποτέ η ημερομηνία.',
+    dobUnderAge:
+      'Πρέπει να είσαι 18 για να μπεις στο LocalUp. Θα γίνεις 18 τον {{when}}.',
+    dobInvalid: 'Αυτή δεν είναι υπαρκτή ημερομηνία. Έλεγξε ημέρα και μήνα.',
     dobDecade: '{{decade}}',
     dobYearCell: '{{year}}',
     dobYearClosed: '{{year}}, μη διαθέσιμο, πρέπει να είσαι 18',
