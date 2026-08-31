@@ -11,6 +11,7 @@ import {
 import { ActivityIndicator } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -261,7 +262,7 @@ function MatchesScreenContent() {
 
   const openChat = (item: Match) =>
     router.push({
-      pathname: '/chat/[matchId]',
+      pathname: Routes.chat,
       params: {
         matchId: item.id,
         name: item.display_name,
@@ -278,7 +279,7 @@ function MatchesScreenContent() {
 
   const openProfile = (item: Match) =>
     router.push({
-      pathname: '/profile/[userId]',
+      pathname: Routes.profile.user,
       params: {
         userId: item.user_id,
         matchId: item.id,

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet, View, TextInput, FlatList, Pressable } from 'react-native';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -136,7 +137,7 @@ const HomeCityScreen = () => {
   );
 
   const onNext = () => {
-    router.push('/onboarding/photo');
+    router.push(Routes.onboarding.photo);
   };
 
   // Two lines, as drawn: the place, then only as much of where it is as

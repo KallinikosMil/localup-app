@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
@@ -84,7 +85,7 @@ const PhotoScreen = () => {
       title={t(Translations.ONBOARDING_STEP_3_TITLE)}
       subtitle={t(Translations.ONBOARDING_STEP_3_SUBTITLE)}
       actionLabel={t(Translations.ONBOARDING_NEXT)}
-      onAction={() => router.push('/onboarding/interests')}
+      onAction={() => router.push(Routes.onboarding.interests)}
       actionDisabled={photos.length === 0}
     >
       <View style={styles.slotRow}>

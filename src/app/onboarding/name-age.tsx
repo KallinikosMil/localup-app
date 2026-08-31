@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -73,7 +74,7 @@ const NameAgeScreen = () => {
       displayName,
       dateOfBirth: dob,
     });
-    router.push('/onboarding/home-city');
+    router.push(Routes.onboarding.homeCity);
   });
 
   return (

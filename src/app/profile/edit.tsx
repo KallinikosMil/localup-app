@@ -8,6 +8,7 @@ import {
   TextInput as RNTextInput,
 } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -687,7 +688,7 @@ function EditProfileScreenContent() {
             further down. */}
         <Section title={t(Translations.PROFILE_SECTION_INTERESTS_EDIT)}>
           <Pressable
-            onPress={() => router.push('/profile/interests')}
+            onPress={() => router.push(Routes.profile.interests)}
             accessibilityRole="button"
             accessibilityLabel={t(Translations.PROFILE_SECTION_INTERESTS_EDIT)}
             style={[

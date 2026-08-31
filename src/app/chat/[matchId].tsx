@@ -13,6 +13,7 @@ import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -323,7 +324,7 @@ export default function ChatScreen() {
           onPress={() =>
             userId
               ? router.push({
-                  pathname: '/profile/[userId]',
+                  pathname: Routes.profile.user,
                   params: { userId, matchId, name: name ?? '' },
                 })
               : undefined

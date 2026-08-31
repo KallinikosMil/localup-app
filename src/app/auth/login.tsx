@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -111,7 +112,7 @@ const LoginScreen = () => {
               {t(Translations.AUTH_NO_ACCOUNT)}
             </AppText>
             <Pressable
-              onPress={() => router.push('/auth/register')}
+              onPress={() => router.push(Routes.auth.register)}
               accessibilityRole="link"
               // Was AUTH_NO_ACCOUNT — the link announced the QUESTION
               // rather than what it does. Composed from the two visible
@@ -177,7 +178,7 @@ const LoginScreen = () => {
         </FormProvider>
 
         <Pressable
-          onPress={() => router.push('/auth/forgot-password')}
+          onPress={() => router.push(Routes.auth.forgotPassword)}
           accessibilityRole="link"
           accessibilityLabel={t(Translations.AUTH_FORGOT_PASSWORD)}
           hitSlop={{

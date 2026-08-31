@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 
+import { Routes } from '@shared/routes';
 import { usePushRegistration } from '@features/notifications/hooks/usePushRegistration';
 import { RootState } from '@store';
 
@@ -27,7 +28,16 @@ export default function PushRegistrar() {
     const open = (response: Notifications.NotificationResponse | null) => {
       const data = response?.notification.request.content.data as
         PushData | undefined;
-      if (data?.matchId) router.push(`/chat/${data.matchId}`);
+      // The pattern plus params, not an interpolated path. Both navigate
+      // today, but only this form survives the route being renamed —
+      // and the constant is what routes.test.ts checks against a real
+      // file on every run.
+      if (data?.matchId) {
+        router.push({
+          pathname: Routes.chat,
+          params: { matchId: data.matchId },
+        });
+      }
     };
 
     const openColdStart = async () => {

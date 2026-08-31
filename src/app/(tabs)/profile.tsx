@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -200,7 +201,7 @@ function ProfileScreenContent() {
           // the bottom of the page lives behind it now.
           rightAction={
             <Pressable
-              onPress={() => router.push('/settings')}
+              onPress={() => router.push(Routes.settings)}
               accessibilityRole="button"
               accessibilityLabel={t(Translations.PROFILE_SETTINGS)}
               hitSlop={Layout.HIT_SLOP}
@@ -224,7 +225,7 @@ function ProfileScreenContent() {
         <View style={styles.body}>
           <View style={styles.actionRow}>
             <Pressable
-              onPress={() => router.push('/profile/edit')}
+              onPress={() => router.push(Routes.profile.edit)}
               accessibilityRole="button"
               accessibilityLabel={t(Translations.PROFILE_EDIT_FULL)}
               style={styles.editButton}
@@ -257,7 +258,7 @@ function ProfileScreenContent() {
             <Pressable
               onPress={() =>
                 router.push({
-                  pathname: '/profile/edit',
+                  pathname: Routes.profile.edit,
                   params: {
                     focus: 'photos',
                   },

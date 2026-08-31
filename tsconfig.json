@@ -13,7 +13,16 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "noEmit": true,
-    "types": ["react", "react-native", "expo", "jest"],
+    // "node" is for the TESTS, not the app — routes.test.ts reads
+    // src/app off disk to prove every route constant still points at a
+    // real screen. @types/node was already installed (jest pulls it in);
+    // this allowlist was simply not letting it through.
+    //
+    // The cost: Node globals become visible to app code too, so nothing
+    // stops someone importing `fs` in a screen. It would crash on the
+    // first render rather than fail quietly, which is why this is worth
+    // the trade for a test that catches a whole class of dead links.
+    "types": ["react", "react-native", "expo", "jest", "node"],
     "baseUrl": ".",                         // project root
     "paths": {
       "@app/*": ["src/app/*"],              // Expo Router routes (in src/app)

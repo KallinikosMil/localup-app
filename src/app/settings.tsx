@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
+import { Routes } from '@shared/routes';
 import AppIcon, { type IconName } from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -263,7 +264,7 @@ export default function SettingsScreen() {
             label={t(Translations.PROFILE_BLOCKED_TITLE)}
             value={blockedCount}
             chevron
-            onPress={() => router.push('/profile/blocked')}
+            onPress={() => router.push(Routes.profile.blocked)}
           />
         </View>
         <Hint theme={theme}>{t(Translations.PROFILE_BLOCKED_HINT)}</Hint>

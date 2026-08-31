@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native';
 import { ActivityIndicator, Portal, Modal, Snackbar } from 'react-native-paper';
+import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 
@@ -394,7 +395,7 @@ export default function DiscoverScreen() {
             prefs={prefs}
             widening={updatePrefs.isPending}
             onWiden={km => updatePrefs.mutate({ ...prefs, maxDistanceKm: km })}
-            onOpenFilters={() => router.push('/filters')}
+            onOpenFilters={() => router.push(Routes.filters)}
             onRefresh={handleRefresh}
           />
         </ScrollView>
@@ -514,7 +515,7 @@ export default function DiscoverScreen() {
 
           {FILTERS_ENABLED ? (
             <Pressable
-              onPress={() => router.push('/filters')}
+              onPress={() => router.push(Routes.filters)}
               accessibilityRole="button"
               accessibilityLabel={t(Translations.DISCOVER_FILTERS)}
               hitSlop={Layout.HIT_SLOP}
