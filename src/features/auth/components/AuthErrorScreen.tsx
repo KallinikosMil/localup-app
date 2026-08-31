@@ -45,6 +45,8 @@ export default function AuthErrorScreen() {
       ]}
     >
       <MaterialCommunityIcons
+        importantForAccessibility="no"
+        accessibilityElementsHidden
         name="alert-circle-outline"
         size={48}
         color={theme.colors.onSurfaceVariant}

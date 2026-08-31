@@ -11,6 +11,9 @@ export default {
     dobRequired: 'Παρακαλώ εισάγετε την ημερομηνία γέννησής σας',
     pickerOk: 'OK',
     pickerCancel: 'Άκυρο',
+    dobDay: 'Ημέρα',
+    dobMonth: 'Μήνας',
+    dobYear: 'Έτος',
     next: 'Επόμενο',
     step2Title: 'Πού μένεις;',
     step2Subtitle:

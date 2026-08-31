@@ -34,6 +34,8 @@ const ModeBadge = ({ mode, size = 'md' }: ModeBadgeProps) => {
       ]}
     >
       <MaterialCommunityIcons
+        importantForAccessibility="no"
+        accessibilityElementsHidden
         name={isTraveler ? 'airplane' : 'home-variant-outline'}
         size={sm ? 10 : 12}
         color={fg}

@@ -44,6 +44,8 @@ const FilterChips = ({ prefs }: { prefs: MatchPreferences }) => {
       ]}
     >
       <MaterialCommunityIcons
+        importantForAccessibility="no"
+        accessibilityElementsHidden
         name={icon}
         size={13}
         color={theme.colors.onSurfaceVariant}
@@ -148,6 +150,8 @@ const DeckEmptyState = ({
   return (
     <View style={styles.root}>
       <MaterialCommunityIcons
+        importantForAccessibility="no"
+        accessibilityElementsHidden
         name={icon}
         size={48}
         color={theme.colors.onSurfaceVariant}
@@ -155,6 +159,7 @@ const DeckEmptyState = ({
       <Spacer spacing={Spacing.lg} />
       <AppText
         variant="h2"
+        accessibilityRole="header"
         style={[styles.centred, { color: theme.colors.onBackground }]}
       >
         {title}

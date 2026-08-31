@@ -115,6 +115,8 @@ const FloatingTabBar = ({
             const content = (
               <>
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name={ICONS[route.name] ?? 'circle-outline'}
                   size={ICON_ACTIVE}
                   color={theme.colors.onTabActive}
@@ -188,6 +190,8 @@ const FloatingTabBar = ({
               style={styles.inactiveSegment}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name={ICONS[route.name] ?? 'circle-outline'}
                 size={ICON_INACTIVE}
                 color={inactiveTint}

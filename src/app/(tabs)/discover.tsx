@@ -266,6 +266,7 @@ export default function DiscoverScreen() {
         <Spacer spacing={Spacing.lg} />
         <AppText
           variant="h2"
+          accessibilityRole="header"
           style={{
             color: theme.colors.primary,
             textAlign: 'center',
@@ -311,6 +312,8 @@ export default function DiscoverScreen() {
           ]}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -494,6 +497,8 @@ export default function DiscoverScreen() {
             ]}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="map-marker-outline"
               size={13}
               color={theme.colors.onHeaderPill}
@@ -527,6 +532,8 @@ export default function DiscoverScreen() {
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="tune-variant"
                 size={17}
                 color={theme.colors.onHeaderPillIcon}
@@ -566,6 +573,8 @@ export default function DiscoverScreen() {
           ]}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="close"
             size={24}
             color={theme.colors.onPassButton}

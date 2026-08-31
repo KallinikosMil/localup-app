@@ -135,6 +135,8 @@ export default function UserProfileScreen() {
         ]}
       >
         <MaterialCommunityIcons
+          importantForAccessibility="no"
+          accessibilityElementsHidden
           name="alert-circle-outline"
           size={40}
           color={theme.colors.onSurfaceVariant}
@@ -203,6 +205,8 @@ export default function UserProfileScreen() {
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="chevron-left"
                 size={24}
                 color={theme.colors.onHeaderPill}
@@ -244,6 +248,8 @@ export default function UserProfileScreen() {
                 style={styles.messageButtonFill}
               >
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="chat-outline"
                   size={19}
                   color={theme.colors.onGradient}
@@ -336,6 +342,8 @@ export default function UserProfileScreen() {
                           alone does not survive a colour-blind reader. */}
                       {isShared ? (
                         <MaterialCommunityIcons
+                          importantForAccessibility="no"
+                          accessibilityElementsHidden
                           name="check"
                           size={12}
                           color={theme.colors.primary}
@@ -432,6 +440,8 @@ export default function UserProfileScreen() {
                 <ActivityIndicator size={16} />
               ) : (
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="block-helper"
                   size={17}
                   color={theme.colors.error}

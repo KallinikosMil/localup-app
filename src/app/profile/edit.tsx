@@ -360,6 +360,8 @@ function EditProfileScreenContent() {
         {backBar}
         <View style={styles.center}>
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -592,6 +594,8 @@ function EditProfileScreenContent() {
             ]}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="map-marker-outline"
               size={Layout.FIELD_ICON}
               color={theme.colors.onSurfaceFaint}
@@ -630,6 +634,8 @@ function EditProfileScreenContent() {
             ]}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="crosshairs-gps"
               size={16}
               color={theme.colors.primary}
@@ -712,6 +718,8 @@ function EditProfileScreenContent() {
               </AppText>
             </View>
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="chevron-right"
               size={22}
               color={theme.colors.onSurfaceFaint}

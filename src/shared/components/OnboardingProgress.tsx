@@ -38,6 +38,8 @@ const OnboardingProgress = ({
             hitSlop={12}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="arrow-left"
               size={24}
               color={theme.colors.onBackground}

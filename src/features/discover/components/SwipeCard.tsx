@@ -176,6 +176,8 @@ const SwipeCard = ({
             ]}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="account"
               size={80}
               color={theme.colors.onSurfaceVariant}
@@ -269,6 +271,8 @@ const SwipeCard = ({
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name={isTraveler ? 'airplane' : 'home-variant-outline'}
                 size={11}
                 color={theme.colors.ON_PHOTO}
@@ -288,6 +292,8 @@ const SwipeCard = ({
             {candidate.home_city ? (
               <View style={styles.cityRow}>
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="home-outline"
                   size={13}
                   color={theme.colors.WHITE_A85}

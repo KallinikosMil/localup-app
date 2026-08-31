@@ -133,6 +133,8 @@ function ProfileScreenContent() {
         ]}
       >
         <MaterialCommunityIcons
+          importantForAccessibility="no"
+          accessibilityElementsHidden
           name="alert-circle-outline"
           size={40}
           color={theme.colors.onSurfaceVariant}
@@ -213,6 +215,8 @@ function ProfileScreenContent() {
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="cog-outline"
                 size={20}
                 color={theme.colors.onHeaderPill}
@@ -236,6 +240,8 @@ function ProfileScreenContent() {
                 style={styles.editButtonFill}
               >
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="pencil-outline"
                   size={18}
                   color={theme.colors.onGradient}
@@ -274,6 +280,8 @@ function ProfileScreenContent() {
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="camera-outline"
                 size={20}
                 color={theme.colors.onSurfaceVariant}

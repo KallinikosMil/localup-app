@@ -5,6 +5,8 @@ import {
   ScrollView,
   Pressable,
   BackHandler,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -14,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import AppText from '@shared/components/AppText';
 import AmbientGlow from '@shared/components/AmbientGlow';
 import GradientButton from '@shared/components/GradientButton';
+import { useAccessibilityFocus } from '@shared/hooks/useAccessibilityFocus';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { Layout } from '@theme/constants/Layout';
@@ -84,16 +87,34 @@ const OnboardingShell = ({
   useEffect(() => {
     navigation.setOptions({ gestureEnabled: !backDisabled });
   }, [navigation, backDisabled]);
+
+  // Every step lands the screen reader on its own title. Four screens
+  // that look identical apart from the heading are exactly the case where
+  // "where am I" has to be the first thing said.
+  const titleRef = useAccessibilityFocus<View>();
   const segments = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
-    <View
+    // The bio field on step 4 sat under the keyboard with no way to see
+    // what you were typing. `windowSoftInputMode="adjustResize"` is set in
+    // the manifest and does nothing, because edgeToEdgeEnabled draws the
+    // app behind the IME and the window no longer resizes — the input's
+    // measured bounds are identical before and after the keyboard opens.
+    // Chat hit this first and solved it the same way; the shells never
+    // got the same treatment.
+    //
+    // Offset 0, NOT insets.top as chat uses: this shell renders inside the
+    // group layout's ScreenSafeArea, so its top edge already starts below
+    // the status bar and measuring from there again would double it.
+    <KeyboardAvoidingView
       style={[
         styles.root,
         {
           backgroundColor: theme.colors.background,
         },
       ]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}
     >
       <AmbientGlow size={Layout.GLOW_SIZE_LG} x={-60} y={-140} />
 
@@ -119,6 +140,8 @@ const OnboardingShell = ({
               style={[styles.back, backDisabled ? styles.backOff : null]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="chevron-left"
                 size={24}
                 color={theme.colors.onSurfaceFaint}
@@ -181,17 +204,22 @@ const OnboardingShell = ({
           </AppText>
         </View>
 
-        <AppText
-          variant="display"
-          style={[
-            styles.title,
-            {
-              color: theme.colors.onBackground,
-            },
-          ]}
-        >
-          {title}
-        </AppText>
+        {/* The ref and the role live on the View rather than the text:
+            react-native-paper's Text types its ref too narrowly to
+            forward, and a View is the node findNodeHandle wants anyway. */}
+        <View ref={titleRef} accessible accessibilityRole="header">
+          <AppText
+            variant="display"
+            style={[
+              styles.title,
+              {
+                color: theme.colors.onBackground,
+              },
+            ]}
+          >
+            {title}
+          </AppText>
+        </View>
 
         {subtitle ? (
           <AppText
@@ -220,7 +248,7 @@ const OnboardingShell = ({
           {actionLabel}
         </GradientButton>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

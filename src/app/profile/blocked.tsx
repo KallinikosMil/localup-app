@@ -85,6 +85,8 @@ export default function BlockedUsersScreen() {
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="account"
                 size={24}
                 color={theme.colors.onSurfaceVariant}
@@ -190,6 +192,8 @@ export default function BlockedUsersScreen() {
           style={styles.back}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="chevron-left"
             size={24}
             color={theme.colors.onBackground}
@@ -208,6 +212,7 @@ export default function BlockedUsersScreen() {
       <View style={styles.intro}>
         <AppText
           variant="display"
+          accessibilityRole="header"
           style={{
             color: theme.colors.onBackground,
           }}
@@ -234,6 +239,8 @@ export default function BlockedUsersScreen() {
       ) : isError ? (
         <View style={styles.center}>
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -257,6 +264,8 @@ export default function BlockedUsersScreen() {
       ) : blocked.length === 0 ? (
         <View style={styles.center}>
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="account-check-outline"
             size={48}
             color={theme.colors.onSurfaceFaint}
@@ -289,6 +298,8 @@ export default function BlockedUsersScreen() {
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="information-outline"
                 size={17}
                 color={theme.colors.onSurfaceFaint}

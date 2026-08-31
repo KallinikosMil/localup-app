@@ -11,6 +11,9 @@ export default {
     dobRequired: 'Please enter your date of birth',
     pickerOk: 'OK',
     pickerCancel: 'Cancel',
+    dobDay: 'Day',
+    dobMonth: 'Month',
+    dobYear: 'Year',
     next: 'Next',
     step2Title: 'Where do you live?',
     step2Subtitle:

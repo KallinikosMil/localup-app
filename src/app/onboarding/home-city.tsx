@@ -210,6 +210,8 @@ const HomeCityScreen = () => {
           ]}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="magnify"
             size={Layout.FIELD_ICON}
             color={theme.colors.onSurfaceFaint}

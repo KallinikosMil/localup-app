@@ -106,7 +106,13 @@ const SettingsRow = ({
         },
       ]}
     >
-      <MaterialCommunityIcons name={icon} size={20} color={tint} />
+      <MaterialCommunityIcons
+        importantForAccessibility="no"
+        accessibilityElementsHidden
+        name={icon}
+        size={20}
+        color={tint}
+      />
       <AppText
         variant="message"
         style={[
@@ -124,6 +130,8 @@ const SettingsRow = ({
       ) : null}
       {chevron ? (
         <MaterialCommunityIcons
+          importantForAccessibility="no"
+          accessibilityElementsHidden
           name="chevron-right"
           size={18}
           color={theme.colors.onSurfaceFaint}
@@ -198,6 +206,8 @@ export default function SettingsScreen() {
           style={styles.headerSide}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="chevron-left"
             size={24}
             color={theme.colors.onBackground}
@@ -206,6 +216,7 @@ export default function SettingsScreen() {
 
         <AppText
           variant="chatTitle"
+          accessibilityRole="header"
           style={{ color: theme.colors.onBackground }}
         >
           {t(Translations.PROFILE_SETTINGS)}

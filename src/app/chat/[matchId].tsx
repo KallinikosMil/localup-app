@@ -309,6 +309,8 @@ export default function ChatScreen() {
           style={styles.backButton}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="chevron-left"
             size={28}
             color={theme.colors.onBackground}
@@ -359,6 +361,8 @@ export default function ChatScreen() {
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="account"
                 size={18}
                 color={theme.colors.onSurfaceVariant}
@@ -368,6 +372,7 @@ export default function ChatScreen() {
           <View style={styles.headerText}>
             <AppText
               variant="chatTitle"
+              accessibilityRole="header"
               numberOfLines={1}
               style={{
                 color: theme.colors.onBackground,
@@ -417,6 +422,8 @@ export default function ChatScreen() {
       ) : isError ? (
         <View style={styles.center}>
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="message-alert-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -522,6 +529,8 @@ export default function ChatScreen() {
             />
           ) : null}
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="send"
             size={21}
             color={

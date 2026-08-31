@@ -1,10 +1,17 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
+import { useAccessibilityFocus } from '@shared/hooks/useAccessibilityFocus';
 import AmbientGlow from '@shared/components/AmbientGlow';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
@@ -30,16 +37,25 @@ type AuthShellProps = {
 
 const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
   const theme = useAppTheme();
+  const titleRef = useAccessibilityFocus<View>();
   const { t } = useTranslation();
 
   return (
-    <View
+    // Same edge-to-edge keyboard problem as onboarding and chat: the
+    // manifest asks for adjustResize and gets nothing, because the app
+    // draws behind the IME. Four screens here are forms.
+    //
+    // Offset 0 — the group layout's ScreenSafeArea already starts this
+    // below the status bar.
+    <KeyboardAvoidingView
       style={[
         styles.root,
         {
           backgroundColor: theme.colors.background,
         },
       ]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}
     >
       <AmbientGlow size={Layout.GLOW_SIZE_LG} x={-60} y={-140} />
       {/* The second blob is paler and comes from the opposite corner, so
@@ -64,6 +80,8 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
             style={styles.mark}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="map-marker-outline"
               size={27}
               color={theme.colors.onGradient}
@@ -79,17 +97,22 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
           </AppText>
         </View>
 
-        <AppText
-          variant="display"
-          style={[
-            styles.title,
-            {
-              color: theme.colors.onBackground,
-            },
-          ]}
-        >
-          {title}
-        </AppText>
+        {/* Same reason as the onboarding shell: arriving on a screen must
+            say which screen it is, not read out whatever sits where the
+            cursor happened to be. */}
+        <View ref={titleRef} accessible accessibilityRole="header">
+          <AppText
+            variant="display"
+            style={[
+              styles.title,
+              {
+                color: theme.colors.onBackground,
+              },
+            ]}
+          >
+            {title}
+          </AppText>
+        </View>
 
         {subtitle ? (
           <AppText
@@ -114,7 +137,7 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
           </>
         ) : null}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

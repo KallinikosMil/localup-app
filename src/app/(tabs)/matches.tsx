@@ -111,6 +111,8 @@ const Avatar = ({
       ]}
     >
       <MaterialCommunityIcons
+        importantForAccessibility="no"
+        accessibilityElementsHidden
         name="account"
         size={size / 2}
         color={theme.colors.onSurfaceVariant}
@@ -421,6 +423,7 @@ function MatchesScreenContent() {
       <View style={styles.header}>
         <AppText
           variant="display"
+          accessibilityRole="header"
           style={{
             color: theme.colors.onBackground,
           }}
@@ -449,6 +452,8 @@ function MatchesScreenContent() {
       ) : isError ? (
         <View style={styles.center}>
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -482,6 +487,8 @@ function MatchesScreenContent() {
           {/* The pin, outlined and beside text — the LABEL form of the
               mark (see YesMark). Never a heart. */}
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="map-marker-outline"
             size={48}
             color={theme.colors.onSurfaceFaint}

@@ -146,6 +146,8 @@ const PhotoGrid = ({
                 ]}
               >
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="plus"
                   size={24}
                   color={theme.colors.onSurfaceFaint}
@@ -288,6 +290,8 @@ const DraggableTile = ({
           ]}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="close"
             size={11}
             color={theme.colors.ON_PHOTO}

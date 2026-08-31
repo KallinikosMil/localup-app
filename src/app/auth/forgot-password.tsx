@@ -116,6 +116,8 @@ const ForgotPasswordScreen = () => {
             ]}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="email-check-outline"
               size={40}
               color={theme.colors.primary}

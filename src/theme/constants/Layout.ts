@@ -196,6 +196,13 @@ export const Layout = {
   COMPOSER_PADDING_H: 18,
   STATUS_DOT: 6,
 
+  // ---- date picker ----
+  // A row is a tap target, so it clears 44. The list shows five of them,
+  // which is enough to read as a list rather than a peephole without the
+  // sheet outgrowing a small screen.
+  PICKER_ROW_HEIGHT: 44,
+  PICKER_HEIGHT: 220,
+
   // ---- settings ----
   // A settings row is taller than a list row on purpose: it is a single
   // tap target with one line in it, and 60 keeps the whole card well

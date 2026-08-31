@@ -113,6 +113,8 @@ const InputField = <T extends FieldValues>({
       >
         {icon ? (
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name={icon}
             size={Layout.FIELD_ICON}
             color={theme.colors.onSurfaceFaint}
@@ -159,6 +161,8 @@ const InputField = <T extends FieldValues>({
             hitSlop={12}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name={isVisible ? 'eye-off-outline' : 'eye-outline'}
               size={Layout.FIELD_ICON}
               color={theme.colors.onSurfaceFaint}
@@ -171,6 +175,8 @@ const InputField = <T extends FieldValues>({
         <View style={styles.helper}>
           {error?.message ? (
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="alert-circle-outline"
               size={Layout.FIELD_ERROR_ICON}
               color={theme.colors.error}

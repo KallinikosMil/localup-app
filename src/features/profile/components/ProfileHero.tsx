@@ -142,6 +142,8 @@ const ProfileHero = ({
           style={[styles.image, styles.fallback]}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="account"
             size={96}
             color={theme.colors.onGradient}
@@ -230,6 +232,8 @@ const ProfileHero = ({
               ]}
             >
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="camera-outline"
                 size={12}
                 color={theme.colors.onHeaderPill}
@@ -269,6 +273,8 @@ const ProfileHero = ({
             ]}
           >
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name={modeIcon}
               size={11}
               color={theme.colors.ON_PHOTO}
@@ -286,6 +292,8 @@ const ProfileHero = ({
           {city ? (
             <View style={styles.cityRow}>
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="home-outline"
                 size={13}
                 color={theme.colors.WHITE_A85}
@@ -304,6 +312,8 @@ const ProfileHero = ({
           {distanceLabel ? (
             <View style={styles.cityRow}>
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="map-marker-outline"
                 size={13}
                 color={theme.colors.WHITE_A85}
@@ -322,6 +332,7 @@ const ProfileHero = ({
 
         <AppText
           variant="displayLg"
+          accessibilityRole="header"
           style={{
             color: theme.colors.ON_PHOTO,
           }}

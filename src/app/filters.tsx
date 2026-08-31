@@ -153,6 +153,7 @@ export default function FiltersScreen() {
 
           <AppText
             variant="chatTitle"
+            accessibilityRole="header"
             style={{ color: theme.colors.onBackground }}
           >
             {t(Translations.FILTERS_TITLE)}
@@ -237,6 +238,8 @@ export default function FiltersScreen() {
                 the user's thumb rather than the one on the server. */}
             <View style={styles.countRow}>
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name="account-group-outline"
                 size={17}
                 color={theme.colors.onSurfaceVariant}
@@ -278,6 +281,8 @@ export default function FiltersScreen() {
                 ]}
               >
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="alert-outline"
                   size={19}
                   color={theme.colors.onWarningContainer}
@@ -303,6 +308,8 @@ export default function FiltersScreen() {
                 ]}
               >
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="alert-outline"
                   size={19}
                   color={theme.colors.onWarningContainer}

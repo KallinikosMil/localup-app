@@ -250,6 +250,8 @@ const RegisterScreen = () => {
           ]}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="google"
             size={19}
             color={theme.colors.onSurface}

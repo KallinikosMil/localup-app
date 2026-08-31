@@ -124,6 +124,8 @@ const PhotoScreen = () => {
                 style={styles.plus}
               >
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="plus"
                   size={28}
                   color={theme.colors.onGradient}
@@ -189,6 +191,8 @@ const PhotoScreen = () => {
                 <Image source={{ uri }} style={styles.preview} />
               ) : isNext ? (
                 <MaterialCommunityIcons
+                  importantForAccessibility="no"
+                  accessibilityElementsHidden
                   name="plus"
                   size={20}
                   color={theme.colors.onSurfaceFaint}

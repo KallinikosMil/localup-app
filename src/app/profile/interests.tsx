@@ -122,6 +122,7 @@ export default function EditInterestsScreen() {
 
           <AppText
             variant="chatTitle"
+            accessibilityRole="header"
             style={{ color: theme.colors.onBackground }}
           >
             {t(Translations.PROFILE_INTERESTS_TITLE)}

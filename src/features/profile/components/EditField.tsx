@@ -113,6 +113,8 @@ export const LabelledField = ({
         ]}
       >
         <MaterialCommunityIcons
+          importantForAccessibility="no"
+          accessibilityElementsHidden
           name={icon}
           size={Layout.FIELD_ICON}
           color={theme.colors.onSurfaceFaint}
@@ -191,11 +193,11 @@ export const ModeSegments = ({
           >
             {option.icon ? (
               <MaterialCommunityIcons
+                importantForAccessibility="no"
+                accessibilityElementsHidden
                 name={option.icon}
                 size={Layout.SEGMENT_ICON}
                 color={theme.colors.onGradient}
-                accessibilityElementsHidden
-                importantForAccessibility="no"
               />
             ) : null}
             <AppText
@@ -219,11 +221,11 @@ export const ModeSegments = ({
         >
           {option.icon ? (
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name={option.icon}
               size={Layout.SEGMENT_ICON}
               color={theme.colors.onSurfaceVariant}
-              accessibilityElementsHidden
-              importantForAccessibility="no"
             />
           ) : null}
           <AppText

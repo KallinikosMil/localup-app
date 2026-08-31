@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
@@ -9,6 +8,7 @@ import { router } from 'expo-router';
 import AppText from '@shared/components/AppText';
 import InputField from '@shared/components/InputField';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
+import BirthDatePicker from '@features/onboarding/components/BirthDatePicker';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { formatDate } from '@shared/utils/date';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
@@ -64,14 +64,6 @@ const NameAgeScreen = () => {
     formState: { isValid },
   } = form;
 
-  const onDateChange = (_event: unknown, selected?: Date) => {
-    setShowPicker(false);
-    if (selected) {
-      setDob(selected);
-      setDobError('');
-    }
-  };
-
   const onNext = handleSubmit(({ displayName }) => {
     if (!dob) {
       setDobError(t(Translations.ONBOARDING_DOB_REQUIRED));
@@ -93,7 +85,11 @@ const NameAgeScreen = () => {
       subtitle={t(Translations.ONBOARDING_STEP_1_SUBTITLE)}
       actionLabel={t(Translations.ONBOARDING_NEXT)}
       onAction={onNext}
-      actionDisabled={!isValid}
+      // `isValid` is react-hook-form's, and the date is not a form field —
+      // it is separate state. So a filled-in name alone lit the button up
+      // while pressing it could only ever produce an error. The gate has
+      // to name both things the step asks for.
+      actionDisabled={!isValid || !dob}
     >
       <FormProvider {...form}>
         <InputField
@@ -150,6 +146,8 @@ const NameAgeScreen = () => {
           ]}
         >
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="calendar-outline"
             size={Layout.FIELD_ICON}
             color={theme.colors.onSurfaceFaint}
@@ -168,6 +166,8 @@ const NameAgeScreen = () => {
             {dob ? shownDate(dob) : t(Translations.ONBOARDING_DOB_PLACEHOLDER)}
           </AppText>
           <MaterialCommunityIcons
+            importantForAccessibility="no"
+            accessibilityElementsHidden
             name="chevron-right"
             size={18}
             color={theme.colors.onSurfaceFaint}
@@ -177,6 +177,8 @@ const NameAgeScreen = () => {
         <View style={styles.helper}>
           {dobError ? (
             <MaterialCommunityIcons
+              importantForAccessibility="no"
+              accessibilityElementsHidden
               name="alert-circle-outline"
               size={Layout.FIELD_ERROR_ICON}
               color={theme.colors.error}
@@ -201,23 +203,17 @@ const NameAgeScreen = () => {
         </View>
       </View>
 
-      {showPicker ? (
-        <DateTimePicker
-          value={dob ?? maxDate}
-          mode="date"
-          display="spinner"
-          maximumDate={maxDate}
-          onChange={onDateChange}
-          positiveButton={{
-            label: t(Translations.ONBOARDING_PICKER_OK),
-            textColor: theme.colors.primary,
-          }}
-          negativeButton={{
-            label: t(Translations.ONBOARDING_PICKER_CANCEL),
-            textColor: theme.colors.primary,
-          }}
-        />
-      ) : null}
+      <BirthDatePicker
+        visible={showPicker}
+        initial={dob}
+        maxDate={maxDate}
+        onCancel={() => setShowPicker(false)}
+        onConfirm={picked => {
+          setShowPicker(false);
+          setDob(picked);
+          setDobError('');
+        }}
+      />
     </OnboardingShell>
   );
 };

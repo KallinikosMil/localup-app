@@ -24,6 +24,8 @@ const EmptyState = ({ icon, title, subtitle, action }: EmptyStateProps) => {
   return (
     <View style={styles.root}>
       <MaterialCommunityIcons
+        importantForAccessibility="no"
+        accessibilityElementsHidden
         name={icon}
         size={48}
         color={theme.colors.onSurfaceVariant}

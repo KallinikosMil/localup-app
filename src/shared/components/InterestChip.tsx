@@ -96,6 +96,8 @@ const InterestChip = ({
     >
       {icon ? (
         <MaterialCommunityIcons
+          importantForAccessibility="no"
+          accessibilityElementsHidden
           name={icon as IconName}
           size={16}
           color={
