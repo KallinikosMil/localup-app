@@ -6,7 +6,6 @@ import {
   Pressable,
   BackHandler,
   KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppIcon from '@shared/components/AppIcon';
@@ -121,7 +120,14 @@ const OnboardingShell = ({
           backgroundColor: theme.colors.background,
         },
       ]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      // 'padding' on BOTH platforms, not 'height' on Android.
+      // 'height' animates the container's own height, so closing the
+      // keyboard is a full relayout of the subtree — and Android answers
+      // a relayout that big by resetting accessibility focus to the top
+      // of the screen. Reported as "finish typing, press Done, and the
+      // cursor jumps back to the start". Padding adds space below
+      // instead and leaves the tree alone.
+      behavior="padding"
       keyboardVerticalOffset={0}
     >
       <AmbientGlow size={Layout.GLOW_SIZE_LG} x={-60} y={-140} />
@@ -247,9 +253,17 @@ const OnboardingShell = ({
         ) : null}
 
         <View style={styles.body}>{children}</View>
+      </ScrollView>
 
-        <View style={styles.spacer} />
-
+      {/* OUTSIDE the ScrollView, pinned to the bottom.
+          It used to sit at the end of the scrolling content behind a flex
+          spacer, which meant the keyboard dragged it up along with
+          everything else — reported as "the keyboard takes Next with it
+          and I can see a bit of it". A scrolling region and a fixed
+          action are two different things and have to be two siblings; the
+          field can then scroll up as far as it likes without moving the
+          button. */}
+      <View style={styles.action}>
         <GradientButton
           size="xl"
           onPress={onAction}
@@ -258,7 +272,7 @@ const OnboardingShell = ({
         >
           {actionLabel}
         </GradientButton>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -309,8 +323,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xxl + 4,
     gap: Layout.SCREEN_PADDING,
   },
-  spacer: {
-    flex: 1,
-    minHeight: Spacing.xxl,
+  // The scrolling region no longer has to reach the bottom of the
+  // screen, so it stops where its content stops.
+  action: {
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xl,
   },
 });

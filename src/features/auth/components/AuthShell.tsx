@@ -4,7 +4,6 @@ import {
   View,
   ScrollView,
   KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppIcon from '@shared/components/AppIcon';
@@ -54,7 +53,14 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
           backgroundColor: theme.colors.background,
         },
       ]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      // 'padding' on BOTH platforms, not 'height' on Android.
+      // 'height' animates the container's own height, so closing the
+      // keyboard is a full relayout of the subtree — and Android answers
+      // a relayout that big by resetting accessibility focus to the top
+      // of the screen. Reported as "finish typing, press Done, and the
+      // cursor jumps back to the start". Padding adds space below
+      // instead and leaves the tree alone.
+      behavior="padding"
       keyboardVerticalOffset={0}
     >
       <AmbientGlow size={Layout.GLOW_SIZE_LG} x={-60} y={-140} />
