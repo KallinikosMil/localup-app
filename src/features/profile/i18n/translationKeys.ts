@@ -107,6 +107,8 @@ export enum Translations {
   PROFILE_CITY_PLACEHOLDER = 'profileCityPlaceholder',
   PROFILE_SECTION_ABOUT_YOU = 'profileSectionAboutYou',
   PROFILE_BIO_PLACEHOLDER = 'profileBioPlaceholder',
+  PROFILE_BIO_LABEL = 'profileBioLabel',
+  PROFILE_BIO_HINT = 'profileBioHint',
   PROFILE_SECTION_YOUR_GALLERY = 'profileSectionYourGallery',
   PROFILE_PHOTO_HINT = 'profilePhotoHint',
   PROFILE_PHOTO_PERMISSION_TITLE = 'profilePhotoPermissionTitle',

@@ -56,7 +56,11 @@ const HomeCityScreen = () => {
   const [term, setTerm] = React.useState('');
   const [searching, setSearching] = React.useState(false);
 
-  const location = useLocation();
+  // lazy: the system prompt must FOLLOW the tap on "Use my location".
+  // Without it the hook acquires on mount and the dialog fires the moment
+  // this screen appears — unprompted, and one screen before the design
+  // has explained why it is being asked.
+  const location = useLocation({ lazy: true });
   const inFlight = useRef<AbortController | null>(null);
   const asked = useRef(false);
 

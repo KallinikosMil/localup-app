@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 
 type Coords = {
@@ -89,9 +89,20 @@ const ensure = (): Promise<void> => {
   return inFlight;
 };
 
-const useLocation = (): LocationState => {
+// `lazy` exists for onboarding step 2, and it is the difference between
+// asking for a permission and demanding one. Every other caller mounts
+// INSIDE the app, where a location is simply needed and acquiring it on
+// mount is right. Step 2 is the screen that ASKS — the prompt has to
+// follow the tap on "Use my location", because that tap is the only
+// moment the permission's purpose is self-evident. Mounting the hook
+// there without this would fire the system dialog on arrival, unprompted,
+// which is the exact behaviour the step was rebuilt to remove.
+type UseLocationOptions = { lazy?: boolean };
+
+const useLocation = (options?: UseLocationOptions): LocationState => {
+  const lazy = options?.lazy ?? false;
   const [coords, setCoords] = useState<Coords | null>(cachedCoords);
-  const [loading, setLoading] = useState(cachedCoords == null);
+  const [loading, setLoading] = useState(lazy ? false : cachedCoords == null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -106,10 +117,20 @@ const useLocation = (): LocationState => {
       setLoading(false);
     };
     listeners.add(listener);
-    void ensure();
+    if (!lazy) void ensure();
     return () => {
       listeners.delete(listener);
     };
+  }, [lazy]);
+
+  // A retry has to start from a clean slate. `error` was only ever cleared
+  // by a successful fix, so after a denial it stayed set — and a caller
+  // that reacts to `error` would read the OLD failure the instant it asked
+  // again, deciding the retry had failed before acquire() had even run.
+  const refresh = useCallback(() => {
+    setError(null);
+    setLoading(true);
+    return ensure();
   }, []);
 
   return {
@@ -117,7 +138,7 @@ const useLocation = (): LocationState => {
     longitude: coords?.longitude ?? null,
     loading,
     error,
-    refresh: ensure,
+    refresh,
   };
 };
 
