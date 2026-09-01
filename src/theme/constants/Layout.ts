@@ -196,6 +196,15 @@ export const Layout = {
   COMPOSER_PADDING_H: 18,
   STATUS_DOT: 6,
 
+  // ---- onboarding step 2 ----
+  // The map card is feedback, not decoration: it is how "we think you
+  // are here" gets SHOWN rather than asserted. Tall enough to read as a
+  // place, short enough that the question under it stays above the fold.
+  CITY_MAP_HEIGHT: 170,
+  // A result row is one button, so it clears the 44 minimum with room
+  // for the country line under the city name.
+  CITY_ROW_HEIGHT: 60,
+
   // ---- date picker ----
   // A row is a tap target, so it clears 44. The list shows five of them,
   // which is enough to read as a list rather than a peephole without the

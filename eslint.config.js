@@ -6,6 +6,10 @@ module.exports = defineConfig([
   {
     ignores: [
       'node_modules/**',
+      // Vendored agent skills. Somebody else's scripts, on somebody
+      // else's conventions — linting them turned the verify gate into
+      // 148 errors from files we do not own and cannot fix.
+      '.agents/**',
       '.expo/**',
       'android/**',
       'ios/**',

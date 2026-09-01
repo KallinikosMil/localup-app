@@ -1,180 +1,246 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { StyleSheet, View, TextInput, FlatList, Pressable } from 'react-native';
-import { Routes } from '@shared/routes';
-import AppIcon from '@shared/components/AppIcon';
+import React, { useCallback, useEffect, useReducer, useRef } from 'react';
+import { StyleSheet, View, TextInput, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
+import { Routes } from '@shared/routes';
 import AppText from '@shared/components/AppText';
+import AppIcon from '@shared/components/AppIcon';
+import GradientButton from '@shared/components/GradientButton';
+import useLocation from '@shared/hooks/useLocation';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import {
-  toCityOptions,
-  type CityOption,
-  type NominatimPlace,
-} from '@features/onboarding/utils/cityOptions';
+  reverseGeocode,
+  searchCities,
+} from '@features/onboarding/utils/geocode';
+import {
+  canAdvance,
+  cityReducer,
+  initialCityState,
+  shortcutsFor,
+} from '@features/onboarding/utils/cityStep';
+import type { CityOption } from '@features/onboarding/utils/cityOptions';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
 import { Typography } from '@theme/typography';
 import { Spacing } from '@theme/constants/Spacing';
+import { BorderRadius } from '@theme/constants/BorderRadius';
 import { Layout } from '@theme/constants/Layout';
 
-const DEBOUNCE_MS = 300;
-// Shorter than the app's 15s Supabase budget: this is a type-ahead, and a
-// suggestion that arrives after several seconds is useless anyway.
-const SEARCH_TIMEOUT_MS = 8000;
+// Step 2, rebuilt location-first. Redesign §13.
+//
+// The order used to be backwards: this screen made someone type their
+// city, and the app asked for GPS permission one screen later, after
+// onboarding ended. Asking here also asks at the one moment the
+// permission's purpose is self-evident.
+//
+// The rule that shapes everything: a detection is a QUESTION, never an
+// answer. home_city decides local-or-traveller permanently, and someone
+// on their third day in Athens visiting from Berlin would otherwise be
+// filed as an Athens local — the exact person this app exists for,
+// mislabelled for good.
+//
+// The type-ahead is gone for the same reason the date drill-down went:
+// results churning under a focused field on every keystroke is the
+// hardest widget here to make accessible. Type, press Search, results
+// arrive once.
 
 const HomeCityScreen = () => {
   const { t, i18n } = useTranslation();
   const theme = useAppTheme();
-  const { data, update } = useOnboardingData();
+  const { update } = useOnboardingData();
   const language = i18n.language;
 
-  const [query, setQuery] = useState(data.homeCity);
-  const [results, setResults] = useState<CityOption[]>([]);
-  const [selectedCity, setSelectedCity] = useState(data.homeCity);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const inFlightRef = useRef<AbortController | null>(null);
+  const [state, dispatch] = useReducer(cityReducer, initialCityState);
+  const [term, setTerm] = React.useState('');
+  const [searching, setSearching] = React.useState(false);
 
-  // Leaving the screen mid-search must not leave a pending debounce timer
-  // or an open request behind to call setState on an unmounted component.
+  const location = useLocation();
+  const inFlight = useRef<AbortController | null>(null);
+  const asked = useRef(false);
+
   useEffect(
     () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      inFlightRef.current?.abort();
+      inFlight.current?.abort();
     },
     [],
   );
 
-  // Nominatim is the one network call the app makes that is NOT a Supabase
-  // call, so the global 15s fetch timeout in config/supabase.ts does not
-  // cover it: a hung connection here hangs forever. It also had no request
-  // sequencing, so a slow earlier response could land after a newer one and
-  // repopulate a list the user had already moved past (or cleared).
-  //
-  // Aborting the previous request on every new search fixes both: the stale
-  // response is cancelled rather than raced, and the timeout gives the
-  // request an upper bound.
-  const searchCities = useCallback(
-    async (text: string) => {
-      inFlightRef.current?.abort();
+  // The fix arrives asynchronously after the permission prompt, so the
+  // reverse lookup waits for coordinates rather than for the button.
+  useEffect(() => {
+    if (state.step !== 'locating') return;
 
-      if (text.length < 2) {
-        setResults([]);
-        return;
-      }
+    if (location.error) {
+      dispatch(
+        location.error.toLowerCase().includes('denied')
+          ? { type: 'permissionDenied' }
+          : { type: 'locateFailed' },
+      );
+      return;
+    }
+    if (location.latitude === null || location.longitude === null) return;
+    if (asked.current) return;
+    asked.current = true;
 
-      const controller = new AbortController();
-      inFlightRef.current = controller;
-      const timeout = setTimeout(() => controller.abort(), SEARCH_TIMEOUT_MS);
+    const controller = new AbortController();
+    inFlight.current = controller;
+    void (async () => {
+      const city = await reverseGeocode(
+        location.latitude!,
+        location.longitude!,
+        language,
+        controller,
+      );
+      if (controller.signal.aborted) return;
+      dispatch(city ? { type: 'located', city } : { type: 'locateFailed' });
+    })();
+  }, [
+    state.step,
+    location.latitude,
+    location.longitude,
+    location.error,
+    language,
+  ]);
 
-      try {
-        // featureType, NOT featuretype. Nominatim ignores the lowercase
-        // spelling silently, so this filter was never applied and a search
-        // for "Λαρισα" offered a mountain peak near Argos as its second
-        // result. accept-language keeps the labels in one language rather
-        // than whatever each OSM object happens to carry.
-        const url =
-          'https://nominatim.openstreetmap.org/search' +
-          `?q=${encodeURIComponent(text)}` +
-          '&format=json&limit=6&addressdetails=1&featureType=city' +
-          `&accept-language=${encodeURIComponent(language)}`;
-        const res = await fetch(url, {
-          headers: {
-            'User-Agent': 'LocalUp/1.0',
-          },
-          signal: controller.signal,
-        });
-        const json: NominatimPlace[] = await res.json();
-        // A newer search started while this one was in flight — its results
-        // are the truth, so drop these rather than overwriting.
-        if (controller.signal.aborted) return;
-        setResults(toCityOptions(json));
-      } catch {
-        // An abort is expected (superseded or timed out) and must NOT wipe the
-        // list the newer search is about to fill.
-        if (controller.signal.aborted) return;
-        setResults([]);
-      } finally {
-        clearTimeout(timeout);
-        if (inFlightRef.current === controller) {
-          inFlightRef.current = null;
-        }
-      }
-    },
-    [language],
-  );
+  const onLocate = () => {
+    asked.current = false;
+    dispatch({ type: 'locate' });
+    void location.refresh();
+  };
 
-  const onChangeText = useCallback(
-    (text: string) => {
-      setQuery(text);
-      setSelectedCity('');
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-      timerRef.current = setTimeout(() => {
-        searchCities(text);
-      }, DEBOUNCE_MS);
-    },
-    [searchCities],
-  );
-
-  // The city ALONE is what gets stored and shown from here on. It used
-  // to be Nominatim's display_name, so a profile read "Λάρισα, Δημοτική
-  // Ενότητα Λαρισαίων, …, 422 22, Ελλάς" where it meant "Λάρισα".
-  const onSelectCity = useCallback(
-    (item: CityOption) => {
-      setQuery(item.name);
-      setSelectedCity(item.name);
-      setResults([]);
-      update({
-        homeCity: item.name,
-        homeLat: item.lat,
-        homeLng: item.lng,
-      });
-    },
-    [update],
-  );
+  const onSearch = useCallback(async () => {
+    const q = term.trim();
+    if (q.length < 2) return;
+    inFlight.current?.abort();
+    const controller = new AbortController();
+    inFlight.current = controller;
+    setSearching(true);
+    const found = await searchCities(q, language, controller);
+    if (controller.signal.aborted) return;
+    setSearching(false);
+    // null is "no answer at all" — leave the screen alone rather than
+    // claiming nothing matched.
+    if (found) dispatch({ type: 'searched', term: q, results: found });
+  }, [term, language]);
 
   const onNext = () => {
+    if (!state.chosen) return;
+    update({
+      homeCity: state.chosen.name,
+      homeLat: state.chosen.lat,
+      homeLng: state.chosen.lng,
+    });
     router.push(Routes.onboarding.photo);
   };
 
-  // Two lines, as drawn: the place, then only as much of where it is as
-  // is needed to tell it from the row above.
-  const renderItem = ({ item }: { item: CityOption }) => (
-    <Pressable
-      onPress={() => onSelectCity(item)}
-      accessibilityRole="button"
-      accessibilityLabel={`${item.name}, ${item.region}`}
-      style={[
-        styles.resultItem,
-        {
-          borderBottomColor: theme.colors.outlineVariant,
-        },
-      ]}
-    >
-      <AppText
-        variant="rowTitleQuiet"
-        numberOfLines={1}
-        style={{
-          color: theme.colors.onSurface,
-        }}
+  const cityRow = (city: CityOption, note?: string) => {
+    const selected = state.chosen?.placeId === city.placeId;
+    return (
+      <Pressable
+        key={city.placeId}
+        onPress={() => dispatch({ type: 'choose', city })}
+        // ONE button carrying the whole label. Two text nodes read as two
+        // unrelated fragments.
+        accessibilityRole="button"
+        accessibilityLabel={`${city.name}, ${note ?? city.region}`}
+        accessibilityState={{ selected }}
+        style={[
+          styles.row,
+          {
+            backgroundColor: selected
+              ? theme.colors.surfaceSelected
+              : theme.colors.surfaceElevated,
+            borderColor: selected
+              ? theme.colors.outlineSelected
+              : theme.colors.outlineVariant,
+          },
+        ]}
       >
-        {item.name}
-      </AppText>
-      {item.region ? (
+        <View style={styles.rowText}>
+          <AppText variant="message" style={{ color: theme.colors.onSurface }}>
+            {city.name}
+          </AppText>
+          <AppText
+            variant="caption"
+            style={{ color: theme.colors.onSurfaceFaint }}
+          >
+            {note ?? city.region}
+          </AppText>
+        </View>
+        {selected ? (
+          <AppIcon name="check-circle" size={20} color={theme.colors.primary} />
+        ) : null}
+      </Pressable>
+    );
+  };
+
+  const field = (
+    <View style={styles.searchRow}>
+      <View
+        style={[
+          styles.field,
+          {
+            backgroundColor: theme.colors.surfaceElevated,
+            borderColor: theme.colors.outlineVariant,
+          },
+        ]}
+      >
+        <TextInput
+          value={term}
+          onChangeText={setTerm}
+          onSubmitEditing={onSearch}
+          returnKeyType="search"
+          // Deliberately NOT autoFocus: stealing focus from the heading
+          // robs a screen-reader user of the question they are answering.
+          placeholder={t(Translations.ONBOARDING_CITY_PLACEHOLDER)}
+          placeholderTextColor={theme.colors.onSurfaceFaint}
+          accessibilityLabel={t(Translations.ONBOARDING_CITY_LABEL)}
+          style={[
+            styles.input,
+            Typography.message.style,
+            { color: theme.colors.onSurface },
+          ]}
+        />
+        {term.length > 0 ? (
+          <Pressable
+            onPress={() => setTerm('')}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.ONBOARDING_CITY_CLEAR)}
+            hitSlop={Layout.HIT_SLOP}
+          >
+            <AppIcon
+              name="close-circle"
+              size={18}
+              color={theme.colors.onSurfaceFaint}
+            />
+          </Pressable>
+        ) : null}
+      </View>
+      <Pressable
+        onPress={onSearch}
+        disabled={term.trim().length < 2 || searching}
+        accessibilityRole="button"
+        accessibilityLabel={t(Translations.ONBOARDING_CITY_SEARCH)}
+        accessibilityState={{ disabled: term.trim().length < 2 || searching }}
+        style={[
+          styles.searchBtn,
+          {
+            backgroundColor: theme.colors.surfaceSelected,
+            borderColor: theme.colors.outlineSelected,
+          },
+          term.trim().length < 2 ? styles.searchOff : null,
+        ]}
+      >
         <AppText
-          variant="caption"
-          numberOfLines={1}
-          style={{
-            color: theme.colors.onSurfaceFaint,
-          }}
+          variant="bodySmallStrong"
+          style={{ color: theme.colors.primary }}
         >
-          {item.region}
+          {t(Translations.ONBOARDING_CITY_SEARCH)}
         </AppText>
-      ) : null}
-    </Pressable>
+      </Pressable>
+    </View>
   );
 
   return (
@@ -185,69 +251,212 @@ const HomeCityScreen = () => {
       subtitle={t(Translations.ONBOARDING_STEP_2_SUBTITLE)}
       actionLabel={t(Translations.ONBOARDING_NEXT)}
       onAction={onNext}
-      actionDisabled={!selectedCity}
+      actionDisabled={!canAdvance(state)}
     >
-      <View>
-        <AppText
-          variant="caption"
-          style={[
-            styles.label,
-            {
-              color: theme.colors.onSurfaceFaint,
-            },
-          ]}
-        >
-          {t(Translations.ONBOARDING_CITY_LABEL)}
-        </AppText>
-        <View
-          style={[
-            styles.field,
-            {
-              backgroundColor: theme.colors.surfaceElevated,
-              borderColor: selectedCity
-                ? theme.colors.outlineSelected
-                : theme.colors.outlineVariant,
-            },
-          ]}
-        >
-          <AppIcon
-            name="magnify"
-            size={Layout.FIELD_ICON}
-            color={theme.colors.onSurfaceFaint}
-          />
-          <TextInput
-            value={query}
-            onChangeText={onChangeText}
-            placeholder={t(Translations.ONBOARDING_CITY_LABEL)}
-            placeholderTextColor={theme.colors.onSurfaceFaint}
+      {/* The card earns its place as FEEDBACK — it is how "we think you
+          are here" gets shown rather than asserted. Schematic placeholder,
+          like every image in the set. */}
+      <View
+        style={[
+          styles.map,
+          {
+            backgroundColor: theme.colors.surfaceElevated,
+            borderColor: theme.colors.outlineVariant,
+          },
+        ]}
+      >
+        <AppIcon
+          name={state.detected ? 'map-marker' : 'map-outline'}
+          size={40}
+          color={
+            state.detected ? theme.colors.primary : theme.colors.onSurfaceFaint
+          }
+        />
+        {state.detected ? (
+          <View
             style={[
-              styles.input,
-              Typography.message.style,
+              styles.pill,
               {
-                color: theme.colors.onSurface,
+                backgroundColor: theme.colors.surfaceSelected,
+                borderColor: theme.colors.outlineSelected,
               },
             ]}
-          />
-        </View>
+          >
+            <AppText
+              variant="bodySmallStrong"
+              style={{ color: theme.colors.primary }}
+            >
+              {state.detected.name}
+            </AppText>
+          </View>
+        ) : null}
       </View>
 
-      {results.length > 0 ? (
-        <View
-          style={[
-            styles.resultsList,
-            {
-              backgroundColor: theme.colors.surfaceElevated,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
-          <FlatList
-            data={results}
-            keyExtractor={item => String(item.placeId)}
-            renderItem={renderItem}
-            keyboardShouldPersistTaps="handled"
-            scrollEnabled={false}
-          />
+      {state.step === 'idle' || state.step === 'locating' ? (
+        <View style={styles.block}>
+          <GradientButton
+            size="xl"
+            onPress={onLocate}
+            disabled={state.step === 'locating'}
+          >
+            {t(
+              state.step === 'locating'
+                ? Translations.ONBOARDING_CITY_FINDING
+                : Translations.ONBOARDING_CITY_USE_LOCATION,
+            )}
+          </GradientButton>
+
+          {/* Live in EVERY state, including while locating: a cold fix
+              indoors takes 10-30 seconds and nobody should be trapped
+              behind it. */}
+          <Pressable
+            onPress={() => dispatch({ type: 'goManual' })}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.ONBOARDING_CITY_MANUAL)}
+            hitSlop={Layout.HIT_SLOP_TEXT}
+            style={styles.manual}
+          >
+            <AppText
+              variant="labelStrong"
+              style={{ color: theme.colors.primary }}
+            >
+              {t(Translations.ONBOARDING_CITY_MANUAL)}
+            </AppText>
+          </Pressable>
+
+          <AppText
+            variant="caption"
+            style={[styles.note, { color: theme.colors.onSurfaceFaint }]}
+          >
+            {t(
+              state.step === 'locating'
+                ? Translations.ONBOARDING_CITY_LOCATING_NOTE
+                : Translations.ONBOARDING_CITY_PRIVACY,
+            )}
+          </AppText>
+        </View>
+      ) : null}
+
+      {state.step === 'detected' && state.detected ? (
+        <View style={styles.block}>
+          <AppText variant="h3" style={{ color: theme.colors.onSurface }}>
+            {t(Translations.ONBOARDING_CITY_QUESTION, {
+              city: state.detected.name,
+            })}
+          </AppText>
+          <AppText
+            variant="caption"
+            style={[styles.note, { color: theme.colors.onSurfaceFaint }]}
+          >
+            {t(Translations.ONBOARDING_CITY_QUESTION_HINT)}
+          </AppText>
+
+          <View style={styles.answers}>
+            <GradientButton
+              size="xl"
+              onPress={() => {
+                dispatch({ type: 'confirmHome' });
+              }}
+            >
+              {t(Translations.ONBOARDING_CITY_YES_HOME)}
+            </GradientButton>
+
+            {/* NOT an error path and not styled as one. For a travel app
+                this is the more valuable of the two answers. */}
+            <Pressable
+              onPress={() => dispatch({ type: 'sayVisiting' })}
+              accessibilityRole="button"
+              accessibilityLabel={t(Translations.ONBOARDING_CITY_NO_VISITING)}
+              hitSlop={Layout.HIT_SLOP_TEXT}
+              style={styles.manual}
+            >
+              <AppText
+                variant="labelStrong"
+                style={{ color: theme.colors.primary }}
+              >
+                {t(Translations.ONBOARDING_CITY_NO_VISITING)}
+              </AppText>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
+
+      {state.step === 'search' ||
+      state.step === 'results' ||
+      state.step === 'noMatch' ? (
+        <View style={styles.block}>
+          {/* A refused permission is one line above the field, never a
+              dead end and never a re-prompt. */}
+          {state.deniedNote ? (
+            <AppText
+              variant="caption"
+              style={[styles.note, { color: theme.colors.onSurfaceFaint }]}
+            >
+              {t(Translations.ONBOARDING_CITY_DENIED)}
+            </AppText>
+          ) : null}
+
+          {field}
+
+          {/* Fires ONCE, on submit — not on every keystroke. */}
+          <View accessibilityLiveRegion="polite">
+            {state.step === 'results' ? (
+              <AppText
+                variant="caption"
+                style={[styles.note, { color: theme.colors.onSurfaceFaint }]}
+              >
+                {t(Translations.ONBOARDING_CITY_COUNT, {
+                  count: state.results.length,
+                  term: state.searchedFor,
+                })}
+              </AppText>
+            ) : state.step === 'noMatch' ? (
+              <AppText
+                variant="caption"
+                style={[styles.note, { color: theme.colors.error }]}
+              >
+                {t(Translations.ONBOARDING_CITY_NO_MATCH, {
+                  term: state.searchedFor,
+                })}
+              </AppText>
+            ) : null}
+          </View>
+
+          {state.step === 'results' ? state.results.map(c => cityRow(c)) : null}
+
+          {state.step === 'noMatch' ? (
+            <AppText
+              variant="caption"
+              style={[styles.note, { color: theme.colors.onSurfaceFaint }]}
+            >
+              {t(Translations.ONBOARDING_CITY_NO_MATCH_HELP)}
+            </AppText>
+          ) : null}
+
+          {/* Zero typing is the most accessible path there is, so these
+              are offered whenever a fix exists — even a stale one. */}
+          {state.step === 'search' && shortcutsFor(state).length > 0 ? (
+            <>
+              <AppText
+                variant="overline"
+                style={[styles.section, { color: theme.colors.onSurfaceFaint }]}
+              >
+                {t(Translations.ONBOARDING_CITY_SHORTCUTS)}
+              </AppText>
+              {shortcutsFor(state).map(c =>
+                cityRow(c, t(Translations.ONBOARDING_CITY_WHERE_YOU_ARE)),
+              )}
+            </>
+          ) : null}
+
+          {state.step === 'search' ? (
+            <AppText
+              variant="caption"
+              style={[styles.note, { color: theme.colors.onSurfaceFaint }]}
+            >
+              {t(Translations.ONBOARDING_CITY_SEARCH_HINT)}
+            </AppText>
+          ) : null}
         </View>
       ) : null}
     </OnboardingShell>
@@ -257,14 +466,49 @@ const HomeCityScreen = () => {
 export default HomeCityScreen;
 
 const styles = StyleSheet.create({
-  label: {
-    marginBottom: Layout.FIELD_LABEL_GAP,
+  map: {
+    height: Layout.CITY_MAP_HEIGHT,
+    borderRadius: Layout.CARD_RADIUS,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.md,
+  },
+  pill: {
+    paddingHorizontal: Layout.PILL_PADDING_H,
+    paddingVertical: Spacing.xs + 2,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+  },
+  block: {
+    marginTop: Spacing.xl,
+  },
+  answers: {
+    marginTop: Spacing.lg,
+  },
+  manual: {
+    alignSelf: 'center',
+    marginTop: Spacing.md,
+  },
+  note: {
+    marginTop: Spacing.sm,
+  },
+  section: {
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.sm,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
   },
   field: {
-    minHeight: Layout.FIELD_HEIGHT,
+    flex: 1,
+    minWidth: 0,
+    height: Layout.FIELD_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.FIELD_INNER_GAP,
+    gap: Spacing.sm,
     paddingHorizontal: Layout.FIELD_PADDING_H,
     borderRadius: Layout.FIELD_RADIUS,
     borderWidth: 1,
@@ -273,16 +517,29 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: Spacing.md,
   },
-  resultsList: {
-    borderWidth: 1,
+  searchBtn: {
+    height: Layout.FIELD_HEIGHT,
+    paddingHorizontal: Spacing.lg,
     borderRadius: Layout.FIELD_RADIUS,
-    marginTop: Spacing.sm,
-    overflow: 'hidden',
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  resultItem: {
-    gap: 2,
-    paddingVertical: Spacing.md + 2,
+  searchOff: {
+    opacity: 0.4,
+  },
+  row: {
+    minHeight: Layout.CITY_ROW_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
     paddingHorizontal: Layout.FIELD_PADDING_H,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderRadius: Layout.CARD_RADIUS,
+    borderWidth: 1,
+    marginTop: Spacing.sm,
+  },
+  rowText: {
+    flex: 1,
+    minWidth: 0,
   },
 });
