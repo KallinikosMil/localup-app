@@ -46,6 +46,8 @@ import { Layout } from '@theme/constants/Layout';
 // hardest widget here to make accessible. Type, press Search, results
 // arrive once.
 
+const LOCATE_TIMEOUT_MS = 20000;
+
 const HomeCityScreen = () => {
   const { t, i18n } = useTranslation();
   const theme = useAppTheme();
@@ -73,15 +75,26 @@ const HomeCityScreen = () => {
 
   // The fix arrives asynchronously after the permission prompt, so the
   // reverse lookup waits for coordinates rather than for the button.
+  //
+  // 'search' is here as well as 'locating' because the timeout above can
+  // give up before a slow fix lands — over 20s, measured. When the fix
+  // then arrives the reducer records it WITHOUT changing step, so it
+  // surfaces as a one-tap shortcut under the field instead of dragging
+  // someone out of a search they have already started.
   useEffect(() => {
-    if (state.step !== 'locating') return;
+    if (state.step !== 'locating' && state.step !== 'search') return;
+    if (state.detected) return;
 
     if (location.error) {
-      dispatch(
-        location.error.toLowerCase().includes('denied')
-          ? { type: 'permissionDenied' }
-          : { type: 'locateFailed' },
-      );
+      // Only while we are still the ones asking. Once the screen has moved
+      // on to the manual path, a late error has nothing left to report.
+      if (state.step === 'locating') {
+        dispatch(
+          location.error.toLowerCase().includes('denied')
+            ? { type: 'permissionDenied' }
+            : { type: 'locateFailed' },
+        );
+      }
       return;
     }
     if (location.latitude === null || location.longitude === null) return;
@@ -102,11 +115,35 @@ const HomeCityScreen = () => {
     })();
   }, [
     state.step,
+    state.detected,
     location.latitude,
     location.longitude,
     location.error,
     language,
   ]);
+
+  // useLocation has NO timeout of its own: acquire() awaits
+  // getCurrentPositionAsync, which on a device with no usable fix simply
+  // never resolves. Found by running this screen on the emulator — it sat
+  // on "Finding you…" indefinitely, never reporting the failure, because
+  // neither coords nor an error ever arrived to end the state.
+  //
+  // The ceiling lives HERE and not in the hook, because the hook has six
+  // other callers that mount inside the app, where waiting quietly for a
+  // late fix is the right behaviour. This is the one screen where a fix
+  // that never comes has to become a visible answer.
+  //
+  // 20s: the copy already warns that indoors takes a moment, and a cold
+  // fix genuinely runs 10-30s. Short enough not to read as broken, long
+  // enough not to cut off a fix that was going to arrive.
+  useEffect(() => {
+    if (state.step !== 'locating') return;
+    const timer = setTimeout(
+      () => dispatch({ type: 'locateFailed' }),
+      LOCATE_TIMEOUT_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [state.step]);
 
   const onLocate = () => {
     asked.current = false;

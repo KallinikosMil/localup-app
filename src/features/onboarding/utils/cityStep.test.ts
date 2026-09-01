@@ -106,6 +106,43 @@ describe('nobody is ever trapped behind GPS', () => {
   });
 });
 
+// Measured on a cold emulator: the fix took over 20s, so the screen's
+// timeout had already sent the person to the manual path. What arrives
+// after that must not undo where they are.
+describe('a fix that lands after the screen gave up', () => {
+  const late = run([
+    { type: 'locate' },
+    { type: 'locateFailed' },
+    { type: 'located', city: athens },
+  ]);
+
+  it('leaves them on the manual path they were moved to', () => {
+    expect(late.step).toBe('search');
+  });
+
+  it('still keeps the city, as a one-tap shortcut', () => {
+    expect(late.detected).toEqual(athens);
+    expect(shortcutsFor(late)).toEqual([athens]);
+  });
+
+  it('does not choose it for them', () => {
+    expect(late.chosen).toBeNull();
+    expect(canAdvance(late)).toBe(false);
+  });
+
+  it('does not interrupt a search already in progress', () => {
+    const typing = run([
+      { type: 'locate' },
+      { type: 'locateFailed' },
+      { type: 'searched', term: 'Berlin', results: [berlin] },
+      { type: 'located', city: athens },
+    ]);
+    expect(typing.step).toBe('results');
+    expect(typing.results).toEqual([berlin]);
+    expect(typing.detected).toEqual(athens);
+  });
+});
+
 describe('searching', () => {
   it('shows results when there are any', () => {
     const s = run([

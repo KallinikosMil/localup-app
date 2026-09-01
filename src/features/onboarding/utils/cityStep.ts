@@ -76,8 +76,20 @@ export const cityReducer = (state: CityState, event: CityEvent): CityState => {
     case 'locate':
       return { ...state, step: 'locating', deniedNote: false };
 
+    // A fix can land AFTER the locating window gave up — measured at over
+    // 20s on a cold emulator, and a slow phone indoors is the same story.
+    // By then the person is already typing, and yanking them out of a
+    // search they have started, to ask a question they moved past, would
+    // be worse than useless.
+    //
+    // So a late fix is recorded but does not steer: `detected` is set,
+    // which is what shortcutsFor reads, so the city simply appears as a
+    // one-tap row under the field. The work is kept, the screen is not
+    // stolen.
     case 'located':
-      return { ...state, step: 'detected', detected: event.city };
+      return state.step === 'locating'
+        ? { ...state, step: 'detected', detected: event.city }
+        : { ...state, detected: event.city };
 
     // A failed fix is not a dead end and not worth its own screen: it
     // lands on the manual path like every other way of getting there.
