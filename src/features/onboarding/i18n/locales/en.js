@@ -43,7 +43,6 @@ export default {
     cityRequired: 'Please select your home city',
     cityUseLocation: 'Use my location',
     cityFinding: 'Finding you…',
-    cityManual: 'Enter my city instead',
     cityPrivacy:
       'We use this once, to place you on the map. We never show your exact position to anyone.',
     cityLocatingNote:

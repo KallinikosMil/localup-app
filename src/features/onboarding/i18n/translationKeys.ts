@@ -36,7 +36,6 @@ export const Translations = {
   ONBOARDING_CITY_LABEL: 'onboarding.cityLabel',
   ONBOARDING_CITY_USE_LOCATION: 'onboarding.cityUseLocation',
   ONBOARDING_CITY_FINDING: 'onboarding.cityFinding',
-  ONBOARDING_CITY_MANUAL: 'onboarding.cityManual',
   ONBOARDING_CITY_PRIVACY: 'onboarding.cityPrivacy',
   ONBOARDING_CITY_LOCATING_NOTE: 'onboarding.cityLocatingNote',
   ONBOARDING_CITY_QUESTION: 'onboarding.cityQuestion',

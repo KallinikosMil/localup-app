@@ -66,9 +66,13 @@ export type CityEvent =
   | { type: 'permissionDenied' }
   | { type: 'confirmHome' }
   | { type: 'sayVisiting' }
-  | { type: 'goManual' }
+  // There is deliberately no 'goManual'. The manual path is a FALLBACK,
+  // not a second option offered beside the button: step 2 opens with one
+  // thing to do, and typing appears only once locating has actually
+  // failed. Every route into 'search' is therefore a failure —
+  // permissionDenied, or locateFailed (which the screen's timeout also
+  // fires when a fix never arrives).
   | { type: 'searched'; term: string; results: CityOption[] }
-  | { type: 'searchAgain' }
   | { type: 'choose'; city: CityOption };
 
 export const cityReducer = (state: CityState, event: CityEvent): CityState => {
@@ -114,9 +118,6 @@ export const cityReducer = (state: CityState, event: CityEvent): CityState => {
         chosen: null,
       };
 
-    case 'goManual':
-      return { ...state, step: 'search' };
-
     case 'searched':
       return {
         ...state,
@@ -125,9 +126,6 @@ export const cityReducer = (state: CityState, event: CityEvent): CityState => {
         searchedFor: event.term,
         chosen: null,
       };
-
-    case 'searchAgain':
-      return { ...state, step: 'search', results: [], searchedFor: '' };
 
     case 'choose':
       return { ...state, chosen: event.city };

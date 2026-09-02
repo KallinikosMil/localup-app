@@ -347,27 +347,25 @@ const HomeCityScreen = () => {
             )}
           </GradientButton>
 
-          {/* Live in EVERY state, including while locating: a cold fix
-              indoors takes 10-30 seconds and nobody should be trapped
-              behind it. */}
-          <Pressable
-            onPress={() => dispatch({ type: 'goManual' })}
-            accessibilityRole="button"
-            accessibilityLabel={t(Translations.ONBOARDING_CITY_MANUAL)}
-            hitSlop={Layout.HIT_SLOP_TEXT}
-            style={styles.manual}
-          >
-            <AppText
-              variant="labelStrong"
-              style={{ color: theme.colors.primary }}
-            >
-              {t(Translations.ONBOARDING_CITY_MANUAL)}
-            </AppText>
-          </Pressable>
+          {/* The manual link used to sit here in both states. It is gone
+              on purpose: at the start there is ONE thing to do, and a
+              second option beside it only asks people to choose between a
+              tap and typing a city name — work the tap was there to save.
+              Typing is the fallback, so it appears when the tap has
+              actually failed and not before.
+              This is only safe because the locating state now has a
+              ceiling (LOCATE_TIMEOUT_MS). The link was the sole escape
+              from a fix that never resolved; the timeout replaced it with
+              one that arrives on its own and lands exactly where this link
+              used to go. Do not remove that timeout without putting this
+              link back. */}
 
           <AppText
             variant="caption"
-            style={[styles.note, { color: theme.colors.onSurfaceFaint }]}
+            style={[
+              styles.noteUnderAction,
+              { color: theme.colors.onSurfaceFaint },
+            ]}
           >
             {t(
               state.step === 'locating'
@@ -533,6 +531,13 @@ const styles = StyleSheet.create({
   },
   note: {
     marginTop: Spacing.sm,
+  },
+  // The privacy line sits under the primary action with nothing between
+  // them any more — the manual link used to hold them apart. At the 8 the
+  // other notes use it reads as part of the button rather than as a
+  // separate remark about it, so this one pairing gets its own air.
+  noteUnderAction: {
+    marginTop: Spacing.lg,
   },
   section: {
     marginTop: Spacing.xl,

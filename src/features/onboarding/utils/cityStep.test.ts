@@ -92,8 +92,23 @@ describe('nobody is ever trapped behind GPS', () => {
     expect(s.deniedNote).toBe(false);
   });
 
-  it('lets someone skip straight to typing from the start', () => {
-    expect(run([{ type: 'goManual' }]).step).toBe('search');
+  // Typing is a FALLBACK, not a second option offered beside the button.
+  // Step 2 opens with one thing to do, so there is no event that walks
+  // someone into the search without a failure first — both routes in are
+  // failures, and the screen's timeout fires the second one when a fix
+  // never arrives.
+  it('reaches the manual path ONLY through a failure', () => {
+    expect(initialCityState.step).toBe('idle');
+    const events: Parameters<typeof cityReducer>[1][] = [
+      { type: 'locate' },
+      { type: 'located', city: athens },
+      { type: 'confirmHome' },
+      { type: 'choose', city: berlin },
+      { type: 'searched', term: 'Berlin', results: [berlin] },
+    ];
+    for (const e of events) {
+      expect(cityReducer(initialCityState, e).step).not.toBe('search');
+    }
   });
 
   it('clears a stale denial note when locating is retried', () => {
@@ -146,7 +161,7 @@ describe('a fix that lands after the screen gave up', () => {
 describe('searching', () => {
   it('shows results when there are any', () => {
     const s = run([
-      { type: 'goManual' },
+      { type: 'locateFailed' },
       { type: 'searched', term: 'Berlin', results: [berlin] },
     ]);
     expect(s.step).toBe('results');
@@ -155,7 +170,7 @@ describe('searching', () => {
 
   it('shows the no-match state when there are none', () => {
     const s = run([
-      { type: 'goManual' },
+      { type: 'locateFailed' },
       { type: 'searched', term: 'Berlinnn', results: [] },
     ]);
     expect(s.step).toBe('noMatch');
@@ -163,20 +178,22 @@ describe('searching', () => {
   });
 
   // The count line names the term, so it must never describe a query the
-  // results do not belong to.
-  it('keeps the term the results belong to', () => {
+  // results do not belong to. There is no event that changes one without
+  // the other — 'searched' carries both, which is what makes a stale
+  // pairing unrepresentable rather than merely avoided.
+  it('never lets the term and the results drift apart', () => {
     const s = run([
-      { type: 'goManual' },
+      { type: 'locateFailed' },
       { type: 'searched', term: 'Berlin', results: [berlin] },
-      { type: 'searchAgain' },
+      { type: 'searched', term: 'Athens', results: [athens] },
     ]);
-    expect(s.searchedFor).toBe('');
-    expect(s.results).toEqual([]);
+    expect(s.searchedFor).toBe('Athens');
+    expect(s.results).toEqual([athens]);
   });
 
   it('drops a previous choice when a new search lands', () => {
     const s = run([
-      { type: 'goManual' },
+      { type: 'locateFailed' },
       { type: 'searched', term: 'Berlin', results: [berlin] },
       { type: 'choose', city: berlin },
       { type: 'searched', term: 'Athens', results: [athens] },
