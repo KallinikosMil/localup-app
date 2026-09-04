@@ -70,6 +70,23 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
     queryKey: ['chat', matchId],
     enabled: !!uid && !!matchId,
     staleTime: 30_000,
+    // ALWAYS reconcile with the server when the screen opens, even inside
+    // the staleTime window.
+    //
+    // Reported as: a notification says a message arrived, the chat is
+    // opened, and it is not there — until you send something yourself, at
+    // which point the missing ones appear all at once. That is this line
+    // missing. React Query refetches on mount only when the query is
+    // STALE, so re-entering a chat within 30s served pure cache, and the
+    // comment above this block was relying on realtime to have filled the
+    // gap. When the channel is dead, nothing does; the send is the first
+    // thing that invalidates and the backlog lands then.
+    //
+    // staleTime stays: it still stops re-render storms from refetching.
+    // What changes is that opening the screen is no longer one of the
+    // things it suppresses. Realtime is an optimisation — correctness
+    // cannot depend on a websocket that is allowed to fail.
+    refetchOnMount: 'always',
     // Merge, do not trust. Anything realtime delivered that this payload
     // does not contain is added back and the whole list re-sorted — the
     // append path never sorted, so an out-of-order arrival used to sit at
@@ -181,7 +198,19 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
           });
         },
       )
-      .subscribe();
+      // A channel that never subscribes used to fail in total silence: no
+      // log, no retry, and a screen that quietly stops receiving. The
+      // status callback is the only place that failure is observable.
+      //
+      // On failure, refetch once. That does not restore live updates, but
+      // it means the person sees the messages that exist right now rather
+      // than an empty conversation they were just notified about.
+      .subscribe(status => {
+        if (__DEV__) console.log('[chat] messages channel', status);
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          queryClient.invalidateQueries({ queryKey: ['chat', matchId] });
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

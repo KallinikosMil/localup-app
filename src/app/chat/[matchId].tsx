@@ -504,34 +504,53 @@ export default function ChatScreen() {
           accessibilityState={{
             disabled: !text.trim() || sendMessage.isPending,
           }}
-          style={[
-            styles.sendBtn,
-            text.trim()
-              ? null
-              : {
-                  backgroundColor: theme.colors.surfaceElevated,
-                  borderWidth: 1,
-                  borderColor: theme.colors.outlineVariant,
-                },
-          ]}
+          style={styles.sendBtn}
         >
+          {/* The gradient is the CONTAINER, with the icon inside it —
+              the same shape GradientButton uses everywhere else in the
+              app, and the reason that one has never gone missing.
+
+              This used to paint the gradient as an absolutely-positioned
+              sibling (StyleSheet.absoluteFill) inside an overflow:hidden
+              circle, and give the button its background and border ONLY
+              in the no-text branch. So the moment you typed, the circle
+              had nothing of its own to show and depended entirely on that
+              absolute layer. When it did not render — a 0x0 measure on
+              Fabric, which is what this looked like — the button went
+              fully transparent, and the icon is white: white on a white
+              page is invisible. Reported as "the send button disappears
+              as soon as I type; it is still there and I can press it, I
+              just cannot see it", after sending that way for an hour.
+
+              Now both states paint their own surface, so neither can
+              vanish: no state depends on an overlay arriving. */}
           {text.trim() ? (
             <LinearGradient
               colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-          ) : null}
-          <AppIcon
-            name="send"
-            size={21}
-            color={
-              text.trim()
-                ? theme.colors.onGradient
-                : theme.colors.onSurfaceFaint
-            }
-          />
+              style={styles.sendFill}
+            >
+              <AppIcon name="send" size={21} color={theme.colors.onGradient} />
+            </LinearGradient>
+          ) : (
+            <View
+              style={[
+                styles.sendFill,
+                {
+                  backgroundColor: theme.colors.surfaceElevated,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <AppIcon
+                name="send"
+                size={21}
+                color={theme.colors.onSurfaceFaint}
+              />
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -655,8 +674,13 @@ const styles = StyleSheet.create({
   sendBtn: {
     width: Layout.COMPOSER_HEIGHT,
     height: Layout.COMPOSER_HEIGHT,
+  },
+  // The circle itself. Both states use it, so the button always has a
+  // surface of its own and never relies on a layer stacked over it.
+  sendFill: {
+    width: '100%',
+    height: '100%',
     borderRadius: Layout.COMPOSER_HEIGHT / 2,
-    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },

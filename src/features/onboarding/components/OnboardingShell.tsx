@@ -40,6 +40,9 @@ type OnboardingShellProps = {
   actionLabel: string;
   onAction: () => void;
   actionDisabled?: boolean;
+  // Some steps carry their primary action in the body instead. See the
+  // comment where the button is rendered.
+  hideAction?: boolean;
   showBack?: boolean;
   // Step 4 only. Finishing can mean six uploads and two RPC round trips,
   // and complete_onboarding OPENS with an unconditional
@@ -59,6 +62,7 @@ const OnboardingShell = ({
   actionLabel,
   onAction,
   actionDisabled = false,
+  hideAction = false,
   showBack = true,
   backDisabled = false,
 }: OnboardingShellProps) => {
@@ -263,16 +267,26 @@ const OnboardingShell = ({
           action are two different things and have to be two siblings; the
           field can then scroll up as far as it likes without moving the
           button. */}
-      <View style={styles.action}>
-        <GradientButton
-          size="xl"
-          onPress={onAction}
-          disabled={actionDisabled}
-          accessibilityLabel={actionLabel}
-        >
-          {actionLabel}
-        </GradientButton>
-      </View>
+      {/* Hidden, not disabled, when the step's primary action lives in the
+          content instead. Step 2 has states whose real action is a button
+          in the body — "Use my location", "Yes, I live here" — and a Next
+          sitting under them was a SECOND thing that looked like the way
+          forward. Tapping "Yes, I live here" only un-greyed Next, so it
+          read as doing nothing at all; two people hit that before it was
+          called a bug. One primary action per screen, and never a copy of
+          it pinned to the floor. */}
+      {hideAction ? null : (
+        <View style={styles.action}>
+          <GradientButton
+            size="xl"
+            onPress={onAction}
+            disabled={actionDisabled}
+            accessibilityLabel={actionLabel}
+          >
+            {actionLabel}
+          </GradientButton>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 };

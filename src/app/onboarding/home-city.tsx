@@ -166,15 +166,32 @@ const HomeCityScreen = () => {
     if (found) dispatch({ type: 'searched', term: q, results: found });
   }, [term, language]);
 
-  const onNext = () => {
-    if (!state.chosen) return;
+  // Takes the city rather than reading state, because "Yes, I live here"
+  // advances in the SAME tap that chooses — and the dispatch that records
+  // the choice has not landed in state by the time this runs.
+  const advanceWith = (city: CityOption) => {
     update({
-      homeCity: state.chosen.name,
-      homeLat: state.chosen.lat,
-      homeLng: state.chosen.lng,
+      homeCity: city.name,
+      homeLat: city.lat,
+      homeLng: city.lng,
     });
     router.push(Routes.onboarding.photo);
   };
+
+  const onNext = () => {
+    if (!state.chosen) return;
+    advanceWith(state.chosen);
+  };
+
+  // Next is only rendered once there is a list to pick from. Before that
+  // each state already shows its own primary action in the body, and a
+  // second button that also looks like the way forward is what made "Yes,
+  // I live here" feel like it did nothing — it only un-greyed the one at
+  // the bottom.
+  const showNext =
+    state.step === 'search' ||
+    state.step === 'results' ||
+    state.step === 'noMatch';
 
   const cityRow = (city: CityOption, note?: string) => {
     const selected = state.chosen?.placeId === city.placeId;
@@ -293,6 +310,7 @@ const HomeCityScreen = () => {
       actionLabel={t(Translations.ONBOARDING_NEXT)}
       onAction={onNext}
       actionDisabled={!canAdvance(state)}
+      hideAction={!showNext}
     >
       {/* The card earns its place as FEEDBACK — it is how "we think you
           are here" gets shown rather than asserted. Schematic placeholder,
@@ -391,10 +409,22 @@ const HomeCityScreen = () => {
           </AppText>
 
           <View style={styles.answers}>
+            {/* Answers the question AND moves on, in one tap. It used to
+                only dispatch, which enabled a Next button further down —
+                so the visible result of pressing it was nothing, and both
+                people who tried it thought it was broken. An answer to a
+                yes/no question IS the decision; there is nothing left to
+                confirm afterwards.
+
+                Advancing with `state.detected` rather than `state.chosen`
+                because the dispatch above has not reached state yet on
+                this tick. */}
             <GradientButton
               size="xl"
               onPress={() => {
+                if (!state.detected) return;
                 dispatch({ type: 'confirmHome' });
+                advanceWith(state.detected);
               }}
             >
               {t(Translations.ONBOARDING_CITY_YES_HOME)}
