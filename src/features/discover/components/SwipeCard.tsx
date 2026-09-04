@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Image, Pressable, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppIcon from '@shared/components/AppIcon';
@@ -6,6 +6,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
   runOnJS,
   interpolate,
   Extrapolation,
@@ -63,6 +64,23 @@ const SwipeCard = ({
         : [];
 
   const [photoIndex, setPhotoIndex] = useState(0);
+
+  // Photos used to swap instantly, which made tapping to page feel like
+  // nothing had happened when two shots were similar — and paging is
+  // already the least discoverable thing on this card. A short fade is
+  // the feedback that the tap registered.
+  //
+  // From 0.45 rather than 0: a fade that starts at zero shows a frame of
+  // empty card between photos, which reads as a flicker rather than a
+  // transition.
+  const photoFade = useSharedValue(1);
+  useEffect(() => {
+    photoFade.value = 0.45;
+    photoFade.value = withTiming(1, { duration: 170 });
+  }, [photoIndex, photoFade]);
+  const photoFadeStyle = useAnimatedStyle(() => ({
+    opacity: photoFade.value,
+  }));
   // A candidate with one photo gets no bars at all. One bar spanning the
   // whole width says nothing, and four bars over one image is a lie about
   // how much there is to see.
@@ -152,19 +170,21 @@ const SwipeCard = ({
     <GestureDetector gesture={pan}>
       <Animated.View style={[styles.card, cardStyle]}>
         {current ? (
-          <Image
-            source={{
-              uri: current,
-            }}
-            // The photo IS the content here, so unlike the small avatars
-            // elsewhere this one is named rather than hidden.
-            accessible
-            accessibilityRole="image"
-            accessibilityLabel={t(Common.A11Y_PROFILE_PHOTO, {
-              name: candidate.display_name ?? '',
-            })}
-            style={styles.image}
-          />
+          <Animated.View style={[styles.image, photoFadeStyle]}>
+            <Image
+              source={{
+                uri: current,
+              }}
+              // The photo IS the content here, so unlike the small avatars
+              // elsewhere this one is named rather than hidden.
+              accessible
+              accessibilityRole="image"
+              accessibilityLabel={t(Common.A11Y_PROFILE_PHOTO, {
+                name: candidate.display_name ?? '',
+              })}
+              style={styles.image}
+            />
+          </Animated.View>
         ) : (
           <View
             style={[
