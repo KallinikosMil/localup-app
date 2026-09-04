@@ -101,6 +101,8 @@ export default {
   profileCityPlaceholder: 'Πόλη βάσης',
   profileSectionAboutYou: 'Σχετικά με σένα',
   profileBioPlaceholder: 'Πες μας τι σε κάνει ξεχωριστό.',
+  profileBioLabel: 'Σχετικά με σένα',
+  profileBioHint: 'Έως {{max}} χαρακτήρες',
   profileSectionYourGallery: 'Η συλλογή σου',
   profilePhotoHint: 'Παρατεταμένο πάτημα για αφαίρεση',
   profilePhotoPermissionTitle: 'Απαιτείται άδεια',

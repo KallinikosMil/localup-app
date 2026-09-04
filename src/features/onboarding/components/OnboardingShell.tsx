@@ -5,15 +5,17 @@ import {
   ScrollView,
   Pressable,
   BackHandler,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { router, useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
 import AmbientGlow from '@shared/components/AmbientGlow';
 import GradientButton from '@shared/components/GradientButton';
+import { useAccessibilityFocus } from '@shared/hooks/useAccessibilityFocus';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
 import { Layout } from '@theme/constants/Layout';
@@ -84,16 +86,49 @@ const OnboardingShell = ({
   useEffect(() => {
     navigation.setOptions({ gestureEnabled: !backDisabled });
   }, [navigation, backDisabled]);
+
+  // The screen reader lands on the FIRST interactive thing on the step,
+  // not on the title.
+  //
+  // Focusing the title was wrong, and wrong in a way that is easy to
+  // miss: the title sits BELOW the header row, so landing there drops
+  // someone into the middle of the screen with the back button already
+  // behind them. On step 2 that is the only way back out.
+  //
+  // Which element is first depends on the step: the back button when
+  // there is one, the progress bar when there is not — it is `accessible`
+  // with its own label, so it is a real stop and not a gap.
+  const firstFocusRef = useAccessibilityFocus<View>();
   const segments = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
-    <View
+    // The bio field on step 4 sat under the keyboard with no way to see
+    // what you were typing. `windowSoftInputMode="adjustResize"` is set in
+    // the manifest and does nothing, because edgeToEdgeEnabled draws the
+    // app behind the IME and the window no longer resizes — the input's
+    // measured bounds are identical before and after the keyboard opens.
+    // Chat hit this first and solved it the same way; the shells never
+    // got the same treatment.
+    //
+    // Offset 0, NOT insets.top as chat uses: this shell renders inside the
+    // group layout's ScreenSafeArea, so its top edge already starts below
+    // the status bar and measuring from there again would double it.
+    <KeyboardAvoidingView
       style={[
         styles.root,
         {
           backgroundColor: theme.colors.background,
         },
       ]}
+      // 'padding' on BOTH platforms, not 'height' on Android.
+      // 'height' animates the container's own height, so closing the
+      // keyboard is a full relayout of the subtree — and Android answers
+      // a relayout that big by resetting accessibility focus to the top
+      // of the screen. Reported as "finish typing, press Done, and the
+      // cursor jumps back to the start". Padding adds space below
+      // instead and leaves the tree alone.
+      behavior="padding"
+      keyboardVerticalOffset={0}
     >
       <AmbientGlow size={Layout.GLOW_SIZE_LG} x={-60} y={-140} />
 
@@ -110,6 +145,7 @@ const OnboardingShell = ({
         <View style={styles.header}>
           {showBack ? (
             <Pressable
+              ref={firstFocusRef}
               onPress={() => router.back()}
               disabled={backDisabled}
               accessibilityRole="button"
@@ -118,7 +154,7 @@ const OnboardingShell = ({
               hitSlop={Layout.HIT_SLOP}
               style={[styles.back, backDisabled ? styles.backOff : null]}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name="chevron-left"
                 size={24}
                 color={theme.colors.onSurfaceFaint}
@@ -131,6 +167,10 @@ const OnboardingShell = ({
           )}
 
           <View
+            // Step 1 has no back button, so the progress bar is the first
+            // stop and takes the cursor instead. The ref is harmless on
+            // the other steps — only one of the two is ever attached.
+            ref={showBack ? undefined : firstFocusRef}
             // Four coloured slivers convey progress visually and nothing
             // otherwise. One grouped label says where you are.
             accessible
@@ -181,17 +221,22 @@ const OnboardingShell = ({
           </AppText>
         </View>
 
-        <AppText
-          variant="display"
-          style={[
-            styles.title,
-            {
-              color: theme.colors.onBackground,
-            },
-          ]}
-        >
-          {title}
-        </AppText>
+        {/* The ref and the role live on the View rather than the text:
+            react-native-paper's Text types its ref too narrowly to
+            forward, and a View is the node findNodeHandle wants anyway. */}
+        <View accessible accessibilityRole="header">
+          <AppText
+            variant="display"
+            style={[
+              styles.title,
+              {
+                color: theme.colors.onBackground,
+              },
+            ]}
+          >
+            {title}
+          </AppText>
+        </View>
 
         {subtitle ? (
           <AppText
@@ -208,9 +253,17 @@ const OnboardingShell = ({
         ) : null}
 
         <View style={styles.body}>{children}</View>
+      </ScrollView>
 
-        <View style={styles.spacer} />
-
+      {/* OUTSIDE the ScrollView, pinned to the bottom.
+          It used to sit at the end of the scrolling content behind a flex
+          spacer, which meant the keyboard dragged it up along with
+          everything else — reported as "the keyboard takes Next with it
+          and I can see a bit of it". A scrolling region and a fixed
+          action are two different things and have to be two siblings; the
+          field can then scroll up as far as it likes without moving the
+          button. */}
+      <View style={styles.action}>
         <GradientButton
           size="xl"
           onPress={onAction}
@@ -219,8 +272,8 @@ const OnboardingShell = ({
         >
           {actionLabel}
         </GradientButton>
-      </ScrollView>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -270,8 +323,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xxl + 4,
     gap: Layout.SCREEN_PADDING,
   },
-  spacer: {
-    flex: 1,
-    minHeight: Spacing.xxl,
+  // The scrolling region no longer has to reach the bottom of the
+  // screen, so it stops where its content stops.
+  action: {
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xl,
   },
 });

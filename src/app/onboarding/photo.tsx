@@ -4,7 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Routes } from '@shared/routes';
+import AppIcon from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
@@ -84,7 +85,7 @@ const PhotoScreen = () => {
       title={t(Translations.ONBOARDING_STEP_3_TITLE)}
       subtitle={t(Translations.ONBOARDING_STEP_3_SUBTITLE)}
       actionLabel={t(Translations.ONBOARDING_NEXT)}
-      onAction={() => router.push('/onboarding/interests')}
+      onAction={() => router.push(Routes.onboarding.interests)}
       actionDisabled={photos.length === 0}
     >
       <View style={styles.slotRow}>
@@ -123,7 +124,7 @@ const PhotoScreen = () => {
                 end={{ x: 1, y: 1 }}
                 style={styles.plus}
               >
-                <MaterialCommunityIcons
+                <AppIcon
                   name="plus"
                   size={28}
                   color={theme.colors.onGradient}
@@ -188,7 +189,7 @@ const PhotoScreen = () => {
               {uri ? (
                 <Image source={{ uri }} style={styles.preview} />
               ) : isNext ? (
-                <MaterialCommunityIcons
+                <AppIcon
                   name="plus"
                   size={20}
                   color={theme.colors.onSurfaceFaint}

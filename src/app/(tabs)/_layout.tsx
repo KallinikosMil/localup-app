@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 
 import useLocation from '@shared/hooks/useLocation';
@@ -40,7 +40,7 @@ export default function TabLayout() {
         options={{
           title: t(Discover.DISCOVER_TAB_TITLE),
           tabBarIcon: ({ color, size, focused }) => (
-            <Icon
+            <AppIcon
               name={focused ? 'compass' : 'compass-outline'}
               size={size}
               color={color}
@@ -62,7 +62,7 @@ export default function TabLayout() {
           // gradient plus the ring solves that on both themes without
           // needing a second colour pair.
           tabBarIcon: ({ color, size, focused }) => (
-            <Icon
+            <AppIcon
               name={focused ? 'chat' : 'chat-outline'}
               size={size}
               color={color}
@@ -75,7 +75,7 @@ export default function TabLayout() {
         options={{
           title: t(Profile.PROFILE_TITLE),
           tabBarIcon: ({ color, size, focused }) => (
-            <Icon
+            <AppIcon
               name={focused ? 'account' : 'account-outline'}
               size={size}
               color={color}

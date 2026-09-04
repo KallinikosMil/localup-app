@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Routes } from '@shared/routes';
+import AppIcon from '@shared/components/AppIcon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -84,7 +85,7 @@ export default function UserProfileScreen() {
     if (!userId) return;
     closeModal();
     block.mutate(userId, {
-      onSuccess: () => router.replace('/(tabs)/matches'),
+      onSuccess: () => router.replace(Routes.tabs.matches),
       onError: err =>
         setErrorMsg(errorMessage(err, Translations.PROFILE_VIEW_BLOCK_ERROR)),
     });
@@ -98,7 +99,7 @@ export default function UserProfileScreen() {
       // was opened from both refer to a match that no longer exists.
       // Landing on a chat whose match is gone is the kind of dead end that
       // looks like a bug.
-      onSuccess: () => router.replace('/(tabs)/matches'),
+      onSuccess: () => router.replace(Routes.tabs.matches),
       onError: err =>
         setErrorMsg(errorMessage(err, Translations.PROFILE_VIEW_UNMATCH_ERROR)),
     });
@@ -134,7 +135,7 @@ export default function UserProfileScreen() {
           },
         ]}
       >
-        <MaterialCommunityIcons
+        <AppIcon
           name="alert-circle-outline"
           size={40}
           color={theme.colors.onSurfaceVariant}
@@ -202,7 +203,7 @@ export default function UserProfileScreen() {
                 theme.dark ? null : styles.onPhotoShadow,
               ]}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name="chevron-left"
                 size={24}
                 color={theme.colors.onHeaderPill}
@@ -220,7 +221,7 @@ export default function UserProfileScreen() {
             <Pressable
               onPress={() =>
                 router.push({
-                  pathname: '/chat/[matchId]',
+                  pathname: Routes.chat,
                   params: {
                     matchId,
                     name: displayName,
@@ -243,7 +244,7 @@ export default function UserProfileScreen() {
                 end={{ x: 1, y: 1 }}
                 style={styles.messageButtonFill}
               >
-                <MaterialCommunityIcons
+                <AppIcon
                   name="chat-outline"
                   size={19}
                   color={theme.colors.onGradient}
@@ -335,7 +336,7 @@ export default function UserProfileScreen() {
                           these two were shown to each other, and colour
                           alone does not survive a colour-blind reader. */}
                       {isShared ? (
-                        <MaterialCommunityIcons
+                        <AppIcon
                           name="check"
                           size={12}
                           color={theme.colors.primary}
@@ -431,7 +432,7 @@ export default function UserProfileScreen() {
               {block.isPending ? (
                 <ActivityIndicator size={16} />
               ) : (
-                <MaterialCommunityIcons
+                <AppIcon
                   name="block-helper"
                   size={17}
                   color={theme.colors.error}

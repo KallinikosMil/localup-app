@@ -11,7 +11,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native';
 import { ActivityIndicator, Portal, Modal, Snackbar } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Routes } from '@shared/routes';
+import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
@@ -266,6 +267,7 @@ export default function DiscoverScreen() {
         <Spacer spacing={Spacing.lg} />
         <AppText
           variant="h2"
+          accessibilityRole="header"
           style={{
             color: theme.colors.primary,
             textAlign: 'center',
@@ -310,7 +312,7 @@ export default function DiscoverScreen() {
             },
           ]}
         >
-          <MaterialCommunityIcons
+          <AppIcon
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -393,7 +395,7 @@ export default function DiscoverScreen() {
             prefs={prefs}
             widening={updatePrefs.isPending}
             onWiden={km => updatePrefs.mutate({ ...prefs, maxDistanceKm: km })}
-            onOpenFilters={() => router.push('/filters')}
+            onOpenFilters={() => router.push(Routes.filters)}
             onRefresh={handleRefresh}
           />
         </ScrollView>
@@ -493,7 +495,7 @@ export default function DiscoverScreen() {
               theme.dark ? null : styles.headerPillShadow,
             ]}
           >
-            <MaterialCommunityIcons
+            <AppIcon
               name="map-marker-outline"
               size={13}
               color={theme.colors.onHeaderPill}
@@ -513,7 +515,7 @@ export default function DiscoverScreen() {
 
           {FILTERS_ENABLED ? (
             <Pressable
-              onPress={() => router.push('/filters')}
+              onPress={() => router.push(Routes.filters)}
               accessibilityRole="button"
               accessibilityLabel={t(Translations.DISCOVER_FILTERS)}
               hitSlop={Layout.HIT_SLOP}
@@ -526,7 +528,7 @@ export default function DiscoverScreen() {
                 theme.dark ? null : styles.headerPillShadow,
               ]}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name="tune-variant"
                 size={17}
                 color={theme.colors.onHeaderPillIcon}
@@ -565,11 +567,7 @@ export default function DiscoverScreen() {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            name="close"
-            size={24}
-            color={theme.colors.onPassButton}
-          />
+          <AppIcon name="close" size={24} color={theme.colors.onPassButton} />
         </Pressable>
 
         <GradientButton

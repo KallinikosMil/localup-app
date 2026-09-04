@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, Pressable, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -175,7 +175,7 @@ const SwipeCard = ({
               },
             ]}
           >
-            <MaterialCommunityIcons
+            <AppIcon
               name="account"
               size={80}
               color={theme.colors.onSurfaceVariant}
@@ -268,7 +268,7 @@ const SwipeCard = ({
                 },
               ]}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name={isTraveler ? 'airplane' : 'home-variant-outline'}
                 size={11}
                 color={theme.colors.ON_PHOTO}
@@ -287,7 +287,7 @@ const SwipeCard = ({
 
             {candidate.home_city ? (
               <View style={styles.cityRow}>
-                <MaterialCommunityIcons
+                <AppIcon
                   name="home-outline"
                   size={13}
                   color={theme.colors.WHITE_A85}

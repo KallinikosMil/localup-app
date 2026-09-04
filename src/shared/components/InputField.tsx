@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, TextInput, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon, { type IconName } from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 import {
   useFormContext,
@@ -28,7 +28,6 @@ import { Layout } from '@theme/constants/Layout';
 // an invalid field that is also focused should say invalid.
 
 type RNInputProps = React.ComponentProps<typeof TextInput>;
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 export type InputFieldProps<T extends FieldValues> = {
   name: FieldPath<T>;
@@ -112,7 +111,7 @@ const InputField = <T extends FieldValues>({
         ]}
       >
         {icon ? (
-          <MaterialCommunityIcons
+          <AppIcon
             name={icon}
             size={Layout.FIELD_ICON}
             color={theme.colors.onSurfaceFaint}
@@ -127,6 +126,12 @@ const InputField = <T extends FieldValues>({
           onBlur={handleBlur}
           secureTextEntry={secureTextEntry && !isVisible}
           placeholderTextColor={theme.colors.onSurfaceFaint}
+          // The visible label sits ABOVE the box as its own Text node, so
+          // nothing connects the two for a screen reader — verified on
+          // device, every field came through as a nameless "Edit box".
+          // `rest` can still override it for a field whose spoken name
+          // should differ from the printed one.
+          accessibilityLabel={label}
           // The box owns the height and the padding; the input just fills
           // it. Without this the text sits against the top on Android.
           style={[
@@ -152,7 +157,7 @@ const InputField = <T extends FieldValues>({
             accessibilityState={{ selected: isVisible }}
             hitSlop={12}
           >
-            <MaterialCommunityIcons
+            <AppIcon
               name={isVisible ? 'eye-off-outline' : 'eye-outline'}
               size={Layout.FIELD_ICON}
               color={theme.colors.onSurfaceFaint}
@@ -164,7 +169,7 @@ const InputField = <T extends FieldValues>({
       {error?.message || helper ? (
         <View style={styles.helper}>
           {error?.message ? (
-            <MaterialCommunityIcons
+            <AppIcon
               name="alert-circle-outline"
               size={Layout.FIELD_ERROR_ICON}
               color={theme.colors.error}

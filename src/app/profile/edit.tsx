@@ -6,9 +6,11 @@ import {
   Pressable,
   Alert,
   TextInput as RNTextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Routes } from '@shared/routes';
+import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
@@ -359,7 +361,7 @@ function EditProfileScreenContent() {
       >
         {backBar}
         <View style={styles.center}>
-          <MaterialCommunityIcons
+          <AppIcon
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -384,11 +386,28 @@ function EditProfileScreenContent() {
   }
 
   return (
-    <View
+    // The bio sat under the keyboard with no way to see what you were
+    // typing — the same defect the onboarding shell and chat already had.
+    // `windowSoftInputMode="adjustResize"` is set in the manifest and does
+    // nothing here, because edgeToEdgeEnabled draws the app behind the IME
+    // and the window no longer resizes: the input's measured bounds are
+    // identical before and after the keyboard opens. Three screens have
+    // now hit this; this was the last one still unfixed.
+    //
+    // Offset 0, NOT insets.top: this content renders inside
+    // ScreenSafeArea, so its top edge already starts below the status bar
+    // and measuring from there again would double it.
+    <KeyboardAvoidingView
       style={{
         flex: 1,
         backgroundColor: theme.colors.background,
       }}
+      // 'padding' on BOTH platforms, not 'height' on Android. 'height'
+      // animates the container's own height, so closing the keyboard is a
+      // full relayout of the subtree — and Android answers a relayout that
+      // big by resetting accessibility focus to the top of the screen.
+      behavior="padding"
+      keyboardVerticalOffset={0}
     >
       {/* Glass-style top bar */}
       <View
@@ -591,7 +610,7 @@ function EditProfileScreenContent() {
               },
             ]}
           >
-            <MaterialCommunityIcons
+            <AppIcon
               name="map-marker-outline"
               size={Layout.FIELD_ICON}
               color={theme.colors.onSurfaceFaint}
@@ -629,7 +648,7 @@ function EditProfileScreenContent() {
               },
             ]}
           >
-            <MaterialCommunityIcons
+            <AppIcon
               name="crosshairs-gps"
               size={16}
               color={theme.colors.primary}
@@ -653,6 +672,16 @@ function EditProfileScreenContent() {
             onChangeText={markDirty(setBio)}
             maxLength={BIO_LIMIT}
             multiline
+            // Name and Home city carry a label; this one never did, so a
+            // screen reader announced the PLACEHOLDER and nothing else —
+            // and once anything is typed the placeholder is gone, leaving
+            // the field with no name at all. The limit rides in the hint
+            // rather than the label: the counter beside it is decorative
+            // text a screen reader would otherwise never reach.
+            accessibilityLabel={t(Translations.PROFILE_BIO_LABEL)}
+            accessibilityHint={t(Translations.PROFILE_BIO_HINT, {
+              max: BIO_LIMIT,
+            })}
             placeholder={t(Translations.PROFILE_BIO_PLACEHOLDER)}
             placeholderTextColor={theme.colors.onSurfaceFaint}
             style={[
@@ -687,7 +716,7 @@ function EditProfileScreenContent() {
             further down. */}
         <Section title={t(Translations.PROFILE_SECTION_INTERESTS_EDIT)}>
           <Pressable
-            onPress={() => router.push('/profile/interests')}
+            onPress={() => router.push(Routes.profile.interests)}
             accessibilityRole="button"
             accessibilityLabel={t(Translations.PROFILE_SECTION_INTERESTS_EDIT)}
             style={[
@@ -711,7 +740,7 @@ function EditProfileScreenContent() {
                 {t(Translations.PROFILE_INTERESTS_SUMMARY)}
               </AppText>
             </View>
-            <MaterialCommunityIcons
+            <AppIcon
               name="chevron-right"
               size={22}
               color={theme.colors.onSurfaceFaint}
@@ -778,7 +807,7 @@ function EditProfileScreenContent() {
       >
         {errorMsg ?? ''}
       </Snackbar>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

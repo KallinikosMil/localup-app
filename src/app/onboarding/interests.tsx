@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
+import { Routes } from '@shared/routes';
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
 import Spacer from '@shared/components/Spacer';
@@ -48,9 +49,9 @@ const MISSING_MESSAGE: Record<MissingField, string> = {
 };
 
 const MISSING_ROUTE: Record<MissingField, string> = {
-  dob: '/onboarding/name-age',
-  city: '/onboarding/home-city',
-  photo: '/onboarding/photo',
+  dob: Routes.onboarding.nameAge,
+  city: Routes.onboarding.homeCity,
+  photo: Routes.onboarding.photo,
 };
 
 const InterestsScreen = () => {

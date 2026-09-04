@@ -8,7 +8,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -141,11 +141,7 @@ const ProfileHero = ({
           end={{ x: 1, y: 1 }}
           style={[styles.image, styles.fallback]}
         >
-          <MaterialCommunityIcons
-            name="account"
-            size={96}
-            color={theme.colors.onGradient}
-          />
+          <AppIcon name="account" size={96} color={theme.colors.onGradient} />
         </LinearGradient>
       )}
 
@@ -229,7 +225,7 @@ const ProfileHero = ({
                 theme.dark ? null : styles.pillShadow,
               ]}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name="camera-outline"
                 size={12}
                 color={theme.colors.onHeaderPill}
@@ -268,11 +264,7 @@ const ProfileHero = ({
               },
             ]}
           >
-            <MaterialCommunityIcons
-              name={modeIcon}
-              size={11}
-              color={theme.colors.ON_PHOTO}
-            />
+            <AppIcon name={modeIcon} size={11} color={theme.colors.ON_PHOTO} />
             <AppText
               variant="overline"
               style={{
@@ -285,7 +277,7 @@ const ProfileHero = ({
 
           {city ? (
             <View style={styles.cityRow}>
-              <MaterialCommunityIcons
+              <AppIcon
                 name="home-outline"
                 size={13}
                 color={theme.colors.WHITE_A85}
@@ -303,7 +295,7 @@ const ProfileHero = ({
 
           {distanceLabel ? (
             <View style={styles.cityRow}>
-              <MaterialCommunityIcons
+              <AppIcon
                 name="map-marker-outline"
                 size={13}
                 color={theme.colors.WHITE_A85}
@@ -322,6 +314,7 @@ const ProfileHero = ({
 
         <AppText
           variant="displayLg"
+          accessibilityRole="header"
           style={{
             color: theme.colors.ON_PHOTO,
           }}

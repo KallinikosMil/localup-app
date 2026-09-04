@@ -3,7 +3,7 @@ import { StyleSheet, View, Pressable } from 'react-native';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
@@ -115,7 +115,7 @@ const ForgotPasswordScreen = () => {
               },
             ]}
           >
-            <MaterialCommunityIcons
+            <AppIcon
               name="email-check-outline"
               size={40}
               color={theme.colors.primary}

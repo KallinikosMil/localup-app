@@ -101,6 +101,8 @@ export default {
   profileCityPlaceholder: 'Home city',
   profileSectionAboutYou: 'About you',
   profileBioPlaceholder: 'Share what makes you, you.',
+  profileBioLabel: 'About you',
+  profileBioHint: 'Up to {{max}} characters',
   profileSectionYourGallery: 'Your gallery',
   profilePhotoHint: 'Press and hold to remove',
   profilePhotoPermissionTitle: 'Permission needed',

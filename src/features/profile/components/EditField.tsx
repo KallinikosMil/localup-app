@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, TextInput, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon, { type IconName } from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
 import { useAppTheme, type AppTheme } from '@theme/paper';
@@ -17,8 +17,6 @@ import { Layout } from '@theme/constants/Layout';
 // flag rather than submitting a form. Wiring RHF in just to borrow a box
 // would be the tail wagging the dog. The SHAPES are shared — same height,
 // radius, border and label treatment — so the two read as one system.
-
-type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 // Sections are separated by a rule, not by a tinted card each. Five
 // stacked cards on one scrolling page read as five unrelated screens; a
@@ -112,7 +110,7 @@ export const LabelledField = ({
           },
         ]}
       >
-        <MaterialCommunityIcons
+        <AppIcon
           name={icon}
           size={Layout.FIELD_ICON}
           color={theme.colors.onSurfaceFaint}
@@ -122,6 +120,11 @@ export const LabelledField = ({
           onChangeText={onChange}
           placeholder={placeholder}
           placeholderTextColor={theme.colors.onSurfaceFaint}
+          // Same reason as InputField: the label is a sibling Text node,
+          // so nothing ties it to the box. A placeholder is not a
+          // substitute — Android reads the hint only while the field is
+          // empty, so a filled field would go back to having no name.
+          accessibilityLabel={label}
           style={[
             styles.input,
             Typography.message.style,
@@ -169,6 +172,12 @@ export const ModeSegments = ({
           key={option.label}
           onPress={option.onPress}
           accessibilityRole="button"
+          // Explicit, because the icon beside it is a glyph from a font.
+          // Without this the composed name came out as the private-use
+          // character followed by the word — verified on device, TalkBack
+          // announced ", System". The icon is decorative and the
+          // label already says everything.
+          accessibilityLabel={option.label}
           accessibilityState={{ selected: true }}
           style={styles.segment}
         >
@@ -179,7 +188,7 @@ export const ModeSegments = ({
             style={styles.segmentFill}
           >
             {option.icon ? (
-              <MaterialCommunityIcons
+              <AppIcon
                 name={option.icon}
                 size={Layout.SEGMENT_ICON}
                 color={theme.colors.onGradient}
@@ -200,11 +209,12 @@ export const ModeSegments = ({
           key={option.label}
           onPress={option.onPress}
           accessibilityRole="button"
+          accessibilityLabel={option.label}
           accessibilityState={{ selected: false }}
           style={[styles.segment, styles.segmentFill]}
         >
           {option.icon ? (
-            <MaterialCommunityIcons
+            <AppIcon
               name={option.icon}
               size={Layout.SEGMENT_ICON}
               color={theme.colors.onSurfaceVariant}

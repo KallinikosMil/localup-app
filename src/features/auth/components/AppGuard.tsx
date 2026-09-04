@@ -8,6 +8,7 @@ import {
 } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { Routes } from '@shared/routes';
 import AuthErrorScreen from '@features/auth/components/AuthErrorScreen';
 import FullScreenLoader from '@shared/components/FullScreenLoader';
 import { RootState } from '@store';
@@ -64,7 +65,7 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === 'auth';
     const inOnboarding = segments[0] === 'onboarding';
     const inDev = __DEV__ && segments[0] === 'dev';
-    const onResetScreen = pathname === '/auth/reset-password';
+    const onResetScreen = pathname === Routes.auth.resetPassword;
 
     if (inDev) return;
 
@@ -74,7 +75,7 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
     // look broken. Hold them here until the password is actually changed
     // (useUpdatePassword clears the flag), then the rules resume.
     if (passwordRecovery) {
-      if (!onResetScreen) router.replace('/auth/reset-password');
+      if (!onResetScreen) router.replace(Routes.auth.resetPassword);
       return;
     }
 
@@ -88,17 +89,17 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
     }
 
     if (!user && !inAuthGroup) {
-      router.replace('/auth/login');
+      router.replace(Routes.auth.login);
     } else if (user && inAuthGroup) {
       if (onboardingComplete) {
-        router.replace('/(tabs)/discover');
+        router.replace(Routes.tabs.discover);
       } else {
-        router.replace('/onboarding/name-age');
+        router.replace(Routes.onboarding.nameAge);
       }
     } else if (user && !onboardingComplete && !inOnboarding) {
-      router.replace('/onboarding/name-age');
+      router.replace(Routes.onboarding.nameAge);
     } else if (user && onboardingComplete && inOnboarding) {
-      router.replace('/(tabs)/discover');
+      router.replace(Routes.tabs.discover);
     }
   }, [
     navigatorReady,

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -153,6 +153,7 @@ export default function FiltersScreen() {
 
           <AppText
             variant="chatTitle"
+            accessibilityRole="header"
             style={{ color: theme.colors.onBackground }}
           >
             {t(Translations.FILTERS_TITLE)}
@@ -236,7 +237,7 @@ export default function FiltersScreen() {
             {/* The count follows the draft, so it answers the setting under
                 the user's thumb rather than the one on the server. */}
             <View style={styles.countRow}>
-              <MaterialCommunityIcons
+              <AppIcon
                 name="account-group-outline"
                 size={17}
                 color={theme.colors.onSurfaceVariant}
@@ -277,7 +278,7 @@ export default function FiltersScreen() {
                   },
                 ]}
               >
-                <MaterialCommunityIcons
+                <AppIcon
                   name="alert-outline"
                   size={19}
                   color={theme.colors.onWarningContainer}
@@ -302,7 +303,7 @@ export default function FiltersScreen() {
                   },
                 ]}
               >
-                <MaterialCommunityIcons
+                <AppIcon
                   name="alert-outline"
                   size={19}
                   color={theme.colors.onWarningContainer}

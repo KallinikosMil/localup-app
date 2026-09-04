@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { router } from 'expo-router';
 
 import { useTranslation } from 'react-i18next';
@@ -37,7 +37,7 @@ const OnboardingProgress = ({
             accessibilityLabel={t(Common.A11Y_BACK)}
             hitSlop={12}
           >
-            <MaterialCommunityIcons
+            <AppIcon
               name="arrow-left"
               size={24}
               color={theme.colors.onBackground}

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Routes } from '@shared/routes';
+import AppIcon from '@shared/components/AppIcon';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
 import AppText from '@shared/components/AppText';
+import { hiddenFromScreenReader } from '@shared/a11y';
 import GradientButton from '@shared/components/GradientButton';
 import FullScreenLoader from '@shared/components/FullScreenLoader';
 import InputField from '@shared/components/InputField';
@@ -97,7 +99,11 @@ const LoginScreen = () => {
         subtitle={t(Translations.AUTH_SUBTITLE_TEXT)}
         footer={
           <>
+            {/* Hidden, and read as part of the link instead. Two stops
+                for one sentence is noise, and the question on its own is
+                not something anyone can act on. */}
             <AppText
+              {...hiddenFromScreenReader}
               variant="body"
               style={{
                 color: theme.colors.onSurfaceFaint,
@@ -106,9 +112,15 @@ const LoginScreen = () => {
               {t(Translations.AUTH_NO_ACCOUNT)}
             </AppText>
             <Pressable
-              onPress={() => router.push('/auth/register')}
+              onPress={() => router.push(Routes.auth.register)}
               accessibilityRole="link"
-              accessibilityLabel={t(Translations.AUTH_REGISTER)}
+              // Was AUTH_NO_ACCOUNT — the link announced the QUESTION
+              // rather than what it does. Composed from the two visible
+              // keys rather than a third one of its own, so the spoken
+              // sentence cannot drift from the printed one.
+              accessibilityLabel={`${t(Translations.AUTH_NO_ACCOUNT)} ${t(
+                Translations.AUTH_REGISTER,
+              )}`}
               hitSlop={{
                 top: Layout.HIT_SLOP_TEXT,
                 bottom: Layout.HIT_SLOP_TEXT,
@@ -166,7 +178,7 @@ const LoginScreen = () => {
         </FormProvider>
 
         <Pressable
-          onPress={() => router.push('/auth/forgot-password')}
+          onPress={() => router.push(Routes.auth.forgotPassword)}
           accessibilityRole="link"
           accessibilityLabel={t(Translations.AUTH_FORGOT_PASSWORD)}
           hitSlop={{
@@ -237,11 +249,7 @@ const LoginScreen = () => {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            name="google"
-            size={19}
-            color={theme.colors.onSurface}
-          />
+          <AppIcon name="google" size={19} color={theme.colors.onSurface} />
           <AppText
             variant="bodySmallStrong"
             style={{

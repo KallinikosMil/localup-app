@@ -1,49 +1,48 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useMemo, useState } from 'react';
+import { Routes } from '@shared/routes';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 
-import AppText from '@shared/components/AppText';
 import InputField from '@shared/components/InputField';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
+import BirthDateField from '@features/onboarding/components/BirthDateField';
+import {
+  evaluateDob,
+  type DobInput,
+  type DobResult,
+} from '@features/onboarding/utils/birthDate';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
-import { formatDate } from '@shared/utils/date';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
-import { useAppTheme } from '@theme/paper';
-import { Layout } from '@theme/constants/Layout';
 
 type NameAgeForm = {
   displayName: string;
 };
 
-const getMaxDate = () => {
-  const d = new Date();
-  d.setFullYear(d.getFullYear() - 18);
-  return d;
-};
-
 const NameAgeScreen = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
-  // The shared helper takes the language explicitly; this wrapper just
-  // pins the one option set this screen uses.
-  const shownDate = (d: Date) =>
-    formatDate(d, i18n.language, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  const theme = useAppTheme();
   const { data, update } = useOnboardingData();
 
-  const maxDate = getMaxDate();
+  // Read ONCE per mount rather than per keystroke, so a date cannot
+  // change its verdict mid-session at midnight.
+  const today = useMemo(() => new Date(), []);
 
-  const [dob, setDob] = useState<Date | null>(data.dateOfBirth);
-  const [showPicker, setShowPicker] = useState(false);
-  const [dobError, setDobError] = useState('');
+  // The three boxes hold STRINGS, not a Date: '0' and '00' are different
+  // things to someone mid-typing, and a Date cannot represent a half-
+  // entered value at all.
+  const [dobInput, setDobInput] = useState<DobInput>(() =>
+    data.dateOfBirth
+      ? {
+          day: String(data.dateOfBirth.getDate()),
+          month: String(data.dateOfBirth.getMonth() + 1),
+          year: String(data.dateOfBirth.getFullYear()),
+        }
+      : { day: '', month: '', year: '' },
+  );
+  const [dobResult, setDobResult] = useState<DobResult>(() =>
+    evaluateDob(dobInput, today),
+  );
 
   // V2: this was mode/reValidateMode 'onBlur'. `isValid` only recomputed
   // when the field lost focus, so Next stayed disabled — with a filled-in
@@ -64,24 +63,15 @@ const NameAgeScreen = () => {
     formState: { isValid },
   } = form;
 
-  const onDateChange = (_event: unknown, selected?: Date) => {
-    setShowPicker(false);
-    if (selected) {
-      setDob(selected);
-      setDobError('');
-    }
-  };
-
   const onNext = handleSubmit(({ displayName }) => {
-    if (!dob) {
-      setDobError(t(Translations.ONBOARDING_DOB_REQUIRED));
-      return;
-    }
+    // The button is already gated on this; the guard stays because a
+    // submit can also arrive from the keyboard.
+    if (dobResult.kind !== 'ok') return;
     update({
       displayName,
-      dateOfBirth: dob,
+      dateOfBirth: dobResult.date,
     });
-    router.push('/onboarding/home-city');
+    router.push(Routes.onboarding.homeCity);
   });
 
   return (
@@ -93,7 +83,14 @@ const NameAgeScreen = () => {
       subtitle={t(Translations.ONBOARDING_STEP_1_SUBTITLE)}
       actionLabel={t(Translations.ONBOARDING_NEXT)}
       onAction={onNext}
-      actionDisabled={!isValid}
+      // `isValid` is react-hook-form's, and the date is not a form field —
+      // it is separate state. So a filled-in name alone lit the button up
+      // while pressing it could only ever produce an error. The gate has
+      // to name both things the step asks for.
+      //  is react-hook-form's and covers only the name. The date
+      // lives outside the form, and "legal" for it means 18+ as well as
+      // real — so the gate names both things the step asks for.
+      actionDisabled={!isValid || dobResult.kind !== 'ok'}
     >
       <FormProvider {...form}>
         <InputField
@@ -112,141 +109,16 @@ const NameAgeScreen = () => {
         />
       </FormProvider>
 
-      {/* Built to match InputField rather than reusing it: this opens a
-          picker instead of taking typing, and a real TextInput made
-          non-editable is a field that looks focusable and is not. The
-          label, box and helper line below are the same shapes, so the two
-          read as one form. */}
-      <View>
-        <AppText
-          variant="caption"
-          style={[
-            styles.label,
-            {
-              color: theme.colors.onSurfaceFaint,
-            },
-          ]}
-        >
-          {t(Translations.ONBOARDING_DOB_LABEL)}
-        </AppText>
-
-        <Pressable
-          onPress={() => setShowPicker(true)}
-          accessibilityRole="button"
-          accessibilityLabel={t(Translations.ONBOARDING_DOB_LABEL)}
-          accessibilityValue={{ text: dob ? shownDate(dob) : '' }}
-          style={[
-            styles.box,
-            {
-              backgroundColor: theme.colors.surfaceElevated,
-              borderColor: dobError
-                ? theme.colors.errorFieldOutline
-                : theme.colors.outlineVariant,
-              borderWidth:
-                dobError && !theme.dark
-                  ? Layout.FIELD_BORDER_ERROR_LIGHT
-                  : Layout.FIELD_BORDER,
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name="calendar-outline"
-            size={Layout.FIELD_ICON}
-            color={theme.colors.onSurfaceFaint}
-          />
-          <AppText
-            variant="message"
-            style={[
-              styles.value,
-              {
-                color: dob
-                  ? theme.colors.onSurface
-                  : theme.colors.onSurfaceFaint,
-              },
-            ]}
-          >
-            {dob ? shownDate(dob) : t(Translations.ONBOARDING_DOB_PLACEHOLDER)}
-          </AppText>
-          <MaterialCommunityIcons
-            name="chevron-right"
-            size={18}
-            color={theme.colors.onSurfaceFaint}
-          />
-        </Pressable>
-
-        <View style={styles.helper}>
-          {dobError ? (
-            <MaterialCommunityIcons
-              name="alert-circle-outline"
-              size={Layout.FIELD_ERROR_ICON}
-              color={theme.colors.error}
-            />
-          ) : null}
-          <AppText
-            variant="caption"
-            style={[
-              styles.helperText,
-              {
-                color: dobError
-                  ? theme.colors.error
-                  : theme.colors.onSurfaceFaint,
-              },
-            ]}
-          >
-            {/* The reassurance is the point: people hesitate over a birth
-                date, and it is true — only the age ever leaves the
-                server. */}
-            {dobError || t(Translations.ONBOARDING_DOB_HELPER)}
-          </AppText>
-        </View>
-      </View>
-
-      {showPicker ? (
-        <DateTimePicker
-          value={dob ?? maxDate}
-          mode="date"
-          display="spinner"
-          maximumDate={maxDate}
-          onChange={onDateChange}
-          positiveButton={{
-            label: t(Translations.ONBOARDING_PICKER_OK),
-            textColor: theme.colors.primary,
-          }}
-          negativeButton={{
-            label: t(Translations.ONBOARDING_PICKER_CANCEL),
-            textColor: theme.colors.primary,
-          }}
-        />
-      ) : null}
+      <BirthDateField
+        value={dobInput}
+        today={today}
+        onChange={(next, result) => {
+          setDobInput(next);
+          setDobResult(result);
+        }}
+      />
     </OnboardingShell>
   );
 };
 
 export default NameAgeScreen;
-
-const styles = StyleSheet.create({
-  label: {
-    marginBottom: Layout.FIELD_LABEL_GAP,
-  },
-  box: {
-    minHeight: Layout.FIELD_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Layout.FIELD_INNER_GAP,
-    paddingHorizontal: Layout.FIELD_PADDING_H,
-    borderRadius: Layout.FIELD_RADIUS,
-    borderWidth: 1,
-  },
-  value: {
-    flex: 1,
-  },
-  helper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Layout.FIELD_ERROR_GAP,
-    marginTop: Layout.FIELD_LABEL_GAP,
-  },
-  helperText: {
-    flex: 1,
-  },
-});

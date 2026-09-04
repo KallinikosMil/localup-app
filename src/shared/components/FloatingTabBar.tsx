@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon, { type IconName } from '@shared/components/AppIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
@@ -26,8 +26,6 @@ const ICON_INACTIVE = 21;
 // Shared with Discover, which has to reserve exactly this much room —
 // the bar floats over the content instead of taking layout space.
 const SEGMENT_HEIGHT = Layout.TAB_SEGMENT_HEIGHT;
-
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 const ICONS: Record<string, IconName> = {
   discover: 'compass-outline',
@@ -114,7 +112,7 @@ const FloatingTabBar = ({
           if (focused) {
             const content = (
               <>
-                <MaterialCommunityIcons
+                <AppIcon
                   name={ICONS[route.name] ?? 'circle-outline'}
                   size={ICON_ACTIVE}
                   color={theme.colors.onTabActive}
@@ -187,7 +185,7 @@ const FloatingTabBar = ({
               accessibilityState={{ selected: false }}
               style={styles.inactiveSegment}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name={ICONS[route.name] ?? 'circle-outline'}
                 size={ICON_INACTIVE}
                 color={inactiveTint}

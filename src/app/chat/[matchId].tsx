@@ -13,7 +13,8 @@ import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Routes } from '@shared/routes';
+import AppIcon from '@shared/components/AppIcon';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
@@ -308,7 +309,7 @@ export default function ChatScreen() {
           accessibilityLabel={t(Common.A11Y_BACK)}
           style={styles.backButton}
         >
-          <MaterialCommunityIcons
+          <AppIcon
             name="chevron-left"
             size={28}
             color={theme.colors.onBackground}
@@ -323,7 +324,7 @@ export default function ChatScreen() {
           onPress={() =>
             userId
               ? router.push({
-                  pathname: '/profile/[userId]',
+                  pathname: Routes.profile.user,
                   params: { userId, matchId, name: name ?? '' },
                 })
               : undefined
@@ -358,7 +359,7 @@ export default function ChatScreen() {
                 },
               ]}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name="account"
                 size={18}
                 color={theme.colors.onSurfaceVariant}
@@ -368,6 +369,7 @@ export default function ChatScreen() {
           <View style={styles.headerText}>
             <AppText
               variant="chatTitle"
+              accessibilityRole="header"
               numberOfLines={1}
               style={{
                 color: theme.colors.onBackground,
@@ -416,7 +418,7 @@ export default function ChatScreen() {
         </View>
       ) : isError ? (
         <View style={styles.center}>
-          <MaterialCommunityIcons
+          <AppIcon
             name="message-alert-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -521,7 +523,7 @@ export default function ChatScreen() {
               style={StyleSheet.absoluteFill}
             />
           ) : null}
-          <MaterialCommunityIcons
+          <AppIcon
             name="send"
             size={21}
             color={

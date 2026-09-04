@@ -71,6 +71,7 @@ const DevGallery = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <AppText
           variant="h1"
+          accessibilityRole="header"
           style={{
             color: theme.colors.primary,
           }}

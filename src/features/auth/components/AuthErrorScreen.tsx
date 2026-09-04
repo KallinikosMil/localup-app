@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -44,7 +44,7 @@ export default function AuthErrorScreen() {
         },
       ]}
     >
-      <MaterialCommunityIcons
+      <AppIcon
         name="alert-circle-outline"
         size={48}
         color={theme.colors.onSurfaceVariant}

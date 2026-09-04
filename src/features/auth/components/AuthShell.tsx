@@ -1,10 +1,16 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
 
 import AppText from '@shared/components/AppText';
+import { useAccessibilityFocus } from '@shared/hooks/useAccessibilityFocus';
 import AmbientGlow from '@shared/components/AmbientGlow';
 import { useAppTheme } from '@theme/paper';
 import { Spacing } from '@theme/constants/Spacing';
@@ -30,16 +36,32 @@ type AuthShellProps = {
 
 const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
   const theme = useAppTheme();
+  const firstFocusRef = useAccessibilityFocus<View>();
   const { t } = useTranslation();
 
   return (
-    <View
+    // Same edge-to-edge keyboard problem as onboarding and chat: the
+    // manifest asks for adjustResize and gets nothing, because the app
+    // draws behind the IME. Four screens here are forms.
+    //
+    // Offset 0 — the group layout's ScreenSafeArea already starts this
+    // below the status bar.
+    <KeyboardAvoidingView
       style={[
         styles.root,
         {
           backgroundColor: theme.colors.background,
         },
       ]}
+      // 'padding' on BOTH platforms, not 'height' on Android.
+      // 'height' animates the container's own height, so closing the
+      // keyboard is a full relayout of the subtree — and Android answers
+      // a relayout that big by resetting accessibility focus to the top
+      // of the screen. Reported as "finish typing, press Done, and the
+      // cursor jumps back to the start". Padding adds space below
+      // instead and leaves the tree alone.
+      behavior="padding"
+      keyboardVerticalOffset={0}
     >
       <AmbientGlow size={Layout.GLOW_SIZE_LG} x={-60} y={-140} />
       {/* The second blob is paler and comes from the opposite corner, so
@@ -56,14 +78,24 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.brandRow}>
+        {/* The cursor lands HERE, at the literal top of the content, not
+            on the title below it. Same rule as the onboarding shell:
+            never drop someone into the middle of a screen with things
+            already behind them. `accessible` collapses the mark and the
+            wordmark into the one stop they read as. */}
+        <View
+          ref={firstFocusRef}
+          accessible
+          accessibilityLabel={t(Translations.AUTH_HEADER_TEXT)}
+          style={styles.brandRow}
+        >
           <LinearGradient
             colors={[theme.colors.gradientStart, theme.colors.gradientEnd]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.mark}
           >
-            <MaterialCommunityIcons
+            <AppIcon
               name="map-marker-outline"
               size={27}
               color={theme.colors.onGradient}
@@ -79,17 +111,22 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
           </AppText>
         </View>
 
-        <AppText
-          variant="display"
-          style={[
-            styles.title,
-            {
-              color: theme.colors.onBackground,
-            },
-          ]}
-        >
-          {title}
-        </AppText>
+        {/* Same reason as the onboarding shell: arriving on a screen must
+            say which screen it is, not read out whatever sits where the
+            cursor happened to be. */}
+        <View accessible accessibilityRole="header">
+          <AppText
+            variant="display"
+            style={[
+              styles.title,
+              {
+                color: theme.colors.onBackground,
+              },
+            ]}
+          >
+            {title}
+          </AppText>
+        </View>
 
         {subtitle ? (
           <AppText
@@ -114,7 +151,7 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
           </>
         ) : null}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

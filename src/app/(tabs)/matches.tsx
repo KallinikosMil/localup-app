@@ -11,7 +11,8 @@ import {
 import { ActivityIndicator } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Routes } from '@shared/routes';
+import AppIcon from '@shared/components/AppIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -110,7 +111,7 @@ const Avatar = ({
         },
       ]}
     >
-      <MaterialCommunityIcons
+      <AppIcon
         name="account"
         size={size / 2}
         color={theme.colors.onSurfaceVariant}
@@ -261,7 +262,7 @@ function MatchesScreenContent() {
 
   const openChat = (item: Match) =>
     router.push({
-      pathname: '/chat/[matchId]',
+      pathname: Routes.chat,
       params: {
         matchId: item.id,
         name: item.display_name,
@@ -278,7 +279,7 @@ function MatchesScreenContent() {
 
   const openProfile = (item: Match) =>
     router.push({
-      pathname: '/profile/[userId]',
+      pathname: Routes.profile.user,
       params: {
         userId: item.user_id,
         matchId: item.id,
@@ -421,6 +422,7 @@ function MatchesScreenContent() {
       <View style={styles.header}>
         <AppText
           variant="display"
+          accessibilityRole="header"
           style={{
             color: theme.colors.onBackground,
           }}
@@ -448,7 +450,7 @@ function MatchesScreenContent() {
         </View>
       ) : isError ? (
         <View style={styles.center}>
-          <MaterialCommunityIcons
+          <AppIcon
             name="alert-circle-outline"
             size={40}
             color={theme.colors.onSurfaceVariant}
@@ -481,7 +483,7 @@ function MatchesScreenContent() {
         >
           {/* The pin, outlined and beside text — the LABEL form of the
               mark (see YesMark). Never a heart. */}
-          <MaterialCommunityIcons
+          <AppIcon
             name="map-marker-outline"
             size={48}
             color={theme.colors.onSurfaceFaint}

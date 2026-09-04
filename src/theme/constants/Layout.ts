@@ -196,6 +196,31 @@ export const Layout = {
   COMPOSER_PADDING_H: 18,
   STATUS_DOT: 6,
 
+  // ---- onboarding step 2 ----
+  // The map card is feedback, not decoration: it is how "we think you
+  // are here" gets SHOWN rather than asserted. Tall enough to read as a
+  // place, short enough that the question under it stays above the fold.
+  CITY_MAP_HEIGHT: 170,
+  // A result row is one button, so it clears the 44 minimum with room
+  // for the country line under the city name.
+  CITY_ROW_HEIGHT: 60,
+
+  // ---- date picker ----
+  // A row is a tap target, so it clears 44. The list shows five of them,
+  // which is enough to read as a list rather than a peephole without the
+  // sheet outgrowing a small screen.
+  DOB_BOX_GAP: 10,
+  DOB_YEAR_CELL: 56,
+  DOB_MONTH_CELL: 46,
+  // Exactly the 44 minimum, in a 7-wide grid — the tightest thing in
+  // the sheet. Do not shrink the gap to fit a wider frame.
+  DOB_DAY_CELL: 44,
+  SHEET_RADIUS: 28,
+  SHEET_GRABBER_W: 40,
+  SHEET_GRABBER_H: 4,
+  PICKER_ROW_HEIGHT: 44,
+  PICKER_HEIGHT: 220,
+
   // ---- settings ----
   // A settings row is taller than a list row on purpose: it is a single
   // tap target with one line in it, and 60 keeps the whole card well

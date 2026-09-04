@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Routes } from '@shared/routes';
+import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
@@ -132,7 +133,7 @@ function ProfileScreenContent() {
           },
         ]}
       >
-        <MaterialCommunityIcons
+        <AppIcon
           name="alert-circle-outline"
           size={40}
           color={theme.colors.onSurfaceVariant}
@@ -200,7 +201,7 @@ function ProfileScreenContent() {
           // the bottom of the page lives behind it now.
           rightAction={
             <Pressable
-              onPress={() => router.push('/settings')}
+              onPress={() => router.push(Routes.settings)}
               accessibilityRole="button"
               accessibilityLabel={t(Translations.PROFILE_SETTINGS)}
               hitSlop={Layout.HIT_SLOP}
@@ -212,7 +213,7 @@ function ProfileScreenContent() {
                 },
               ]}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name="cog-outline"
                 size={20}
                 color={theme.colors.onHeaderPill}
@@ -224,7 +225,7 @@ function ProfileScreenContent() {
         <View style={styles.body}>
           <View style={styles.actionRow}>
             <Pressable
-              onPress={() => router.push('/profile/edit')}
+              onPress={() => router.push(Routes.profile.edit)}
               accessibilityRole="button"
               accessibilityLabel={t(Translations.PROFILE_EDIT_FULL)}
               style={styles.editButton}
@@ -235,7 +236,7 @@ function ProfileScreenContent() {
                 end={{ x: 1, y: 1 }}
                 style={styles.editButtonFill}
               >
-                <MaterialCommunityIcons
+                <AppIcon
                   name="pencil-outline"
                   size={18}
                   color={theme.colors.onGradient}
@@ -257,7 +258,7 @@ function ProfileScreenContent() {
             <Pressable
               onPress={() =>
                 router.push({
-                  pathname: '/profile/edit',
+                  pathname: Routes.profile.edit,
                   params: {
                     focus: 'photos',
                   },
@@ -273,7 +274,7 @@ function ProfileScreenContent() {
                 },
               ]}
             >
-              <MaterialCommunityIcons
+              <AppIcon
                 name="camera-outline"
                 size={20}
                 color={theme.colors.onSurfaceVariant}
