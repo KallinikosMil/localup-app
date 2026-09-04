@@ -15,6 +15,10 @@ import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { toISODate } from '@shared/utils/date';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { useCompleteOnboarding } from '@features/onboarding/hooks/useOnboarding';
+import {
+  INTEREST_MAX,
+  INTEREST_MIN,
+} from '@features/profile/utils/interestSelection';
 import { supabase } from '@config/supabase';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
@@ -22,8 +26,13 @@ import { Typography } from '@theme/typography';
 import { Spacing } from '@theme/constants/Spacing';
 import { Layout } from '@theme/constants/Layout';
 
-const MIN_INTERESTS = 3;
-const MAX_INTERESTS = 5;
+// Imported, not redeclared. This screen kept its own private 3 and 5 while
+// features/profile/utils/interestSelection.ts held the same pair for the
+// edit screen — two copies of one rule, and raising the cap to 8 in one
+// place would have let someone pick eight here and then be told by Edit
+// profile that they are over the maximum.
+const MIN_INTERESTS = INTEREST_MIN;
+const MAX_INTERESTS = INTEREST_MAX;
 
 // category and is_active are NOT NULL in the database as of the
 // interests_category_and_is_active_not_null migration. They were nullable

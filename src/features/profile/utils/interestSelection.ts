@@ -6,7 +6,15 @@
 // UI needs to disable a button, not the one that decides.
 
 export const INTEREST_MIN = 3;
-export const INTEREST_MAX = 5;
+// Raised 5 -> 8 when the catalogue went 32 -> 90. Expected overlap between
+// two users is about k^2/N, so holding the cap while tripling the catalogue
+// would have cut average shared interests from 0.78 to 0.28 and pushed the
+// measured 53.5% of pairs sharing NOTHING toward 80%.
+//
+// set_user_interests enforces the same 3-8 and is the one that DECIDES.
+// This number must never exceed it, or the UI lets someone build a
+// selection the save rejects at the end.
+export const INTEREST_MAX = 8;
 
 // Adding past the cap is a no-op rather than an error: the chips are a
 // toggle grid, and the honest response to "you already have five" is that

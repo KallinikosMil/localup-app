@@ -7,6 +7,15 @@ import {
   toggleInterest,
 } from './interestSelection';
 
+// Derived from the constants rather than written out. These were literal
+// five-element arrays, so raising the cap to 8 broke tests that were
+// describing the cap correctly — the numbers had simply been copied out of
+// it. Building them here means the suite follows the rule wherever it goes.
+const ids = (n: number): string[] =>
+  Array.from({ length: n }, (_, i) => `i${i}`);
+const atCap = ids(INTEREST_MAX);
+const overCap = ids(INTEREST_MAX + 1);
+
 describe('toggleInterest', () => {
   it('adds one that is not selected', () => {
     expect(toggleInterest(['a'], 'b')).toEqual(['a', 'b']);
@@ -16,21 +25,16 @@ describe('toggleInterest', () => {
     expect(toggleInterest(['a', 'b', 'c'], 'b')).toEqual(['a', 'c']);
   });
 
-  // The grid is a toggle, so the honest response to a sixth tap is that the
-  // chip does not light up — not an error the user has to dismiss.
+  // The grid is a toggle, so the honest response to one tap past the cap is
+  // that the chip does not light up — not an error the user has to dismiss.
   it('ignores an addition past the cap', () => {
-    const full = ['a', 'b', 'c', 'd', 'e'];
-    expect(full).toHaveLength(INTEREST_MAX);
-    expect(toggleInterest(full, 'f')).toEqual(full);
+    expect(atCap).toHaveLength(INTEREST_MAX);
+    expect(toggleInterest(atCap, 'extra')).toEqual(atCap);
   });
 
   it('still allows removal when full', () => {
-    expect(toggleInterest(['a', 'b', 'c', 'd', 'e'], 'c')).toEqual([
-      'a',
-      'b',
-      'd',
-      'e',
-    ]);
+    const [first, ...rest] = atCap;
+    expect(toggleInterest(atCap, first)).toEqual(rest);
   });
 
   it('does not mutate the input', () => {
@@ -47,11 +51,11 @@ describe('canSaveInterests', () => {
 
   it('accepts the floor and the cap', () => {
     expect(canSaveInterests(['a', 'b', 'c'])).toBe(true);
-    expect(canSaveInterests(['a', 'b', 'c', 'd', 'e'])).toBe(true);
+    expect(canSaveInterests(atCap)).toBe(true);
   });
 
   it('refuses above the cap, which toggle cannot produce but a caller can', () => {
-    expect(canSaveInterests(['a', 'b', 'c', 'd', 'e', 'f'])).toBe(false);
+    expect(canSaveInterests(overCap)).toBe(false);
   });
 });
 
