@@ -88,8 +88,21 @@ const SwipeCard = ({
   const current = photos[Math.min(photoIndex, photos.length - 1)];
 
   const shared = new Set(candidate.shared_interest_names);
-  const chips = candidate.interest_names.slice(0, MAX_CHIPS);
-  const overflow = Math.max(candidate.interest_names.length - MAX_CHIPS, 0);
+  // The card opens on four chips and a "+N". That badge used to be a
+  // plain View: it announced that more existed and offered no way to
+  // reach them, so the honest reading was "this person has interests you
+  // are not allowed to see". It is a button now, and the answer belongs
+  // here rather than one screen deeper — the deck is where people decide.
+  //
+  // Four stays the opening state. The block sits over the photo, and
+  // eight chips cover a face before anybody has asked to read them.
+  const [showAllChips, setShowAllChips] = useState(false);
+  const chips = showAllChips
+    ? candidate.interest_names
+    : candidate.interest_names.slice(0, MAX_CHIPS);
+  const overflow = showAllChips
+    ? 0
+    : Math.max(candidate.interest_names.length - MAX_CHIPS, 0);
 
   const isTraveler = candidate.candidate_mode === 'traveler';
 
@@ -402,7 +415,14 @@ const SwipeCard = ({
                 );
               })}
               {overflow > 0 ? (
-                <View
+                <Pressable
+                  onPress={() => setShowAllChips(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(
+                    Translations.DISCOVER_A11Y_SHOW_ALL_INTERESTS,
+                    { count: candidate.interest_names.length },
+                  )}
+                  hitSlop={Layout.HIT_SLOP}
                   style={[
                     styles.chip,
                     {
@@ -419,7 +439,7 @@ const SwipeCard = ({
                   >
                     {`+${overflow}`}
                   </AppText>
-                </View>
+                </Pressable>
               ) : null}
             </View>
           ) : null}

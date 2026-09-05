@@ -60,5 +60,6 @@ export default {
   // agree here, but the separator is a translator's decision.
   discoverNameAge: '{{name}}, {{age}}',
   discoverA11yNextPhoto: 'Photo {{current}} of {{total}}. Tap to change.',
+  discoverA11yShowAllInterests: 'Show all {{count}} interests',
   discoverFilters: 'Filters',
 };

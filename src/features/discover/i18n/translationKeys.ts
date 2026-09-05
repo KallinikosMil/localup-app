@@ -48,5 +48,6 @@ export enum Translations {
   DISCOVER_STAMP_NOPE = 'discoverStampNope',
   DISCOVER_NAME_AGE = 'discoverNameAge',
   DISCOVER_A11Y_NEXT_PHOTO = 'discoverA11yNextPhoto',
+  DISCOVER_A11Y_SHOW_ALL_INTERESTS = 'discoverA11yShowAllInterests',
   DISCOVER_FILTERS = 'discoverFilters',
 }

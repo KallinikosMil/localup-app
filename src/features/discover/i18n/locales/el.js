@@ -57,5 +57,6 @@ export default {
   discoverNameAge: '{{name}}, {{age}}',
   discoverA11yNextPhoto:
     'Φωτογραφία {{current}} από {{total}}. Πάτησε για αλλαγή.',
+  discoverA11yShowAllInterests: 'Δες και τα {{count}} ενδιαφέροντα',
   discoverFilters: 'Φίλτρα',
 };
