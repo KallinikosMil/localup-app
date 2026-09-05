@@ -33,7 +33,17 @@ export default function PushRegistrar() {
       // and the constant is what routes.test.ts checks against a real
       // file on every run.
       if (data?.matchId) {
-        router.push({
+        // navigate, NOT push. A tapped notification used to add another
+        // chat screen every single time, even when that very conversation
+        // was already open — ten notifications, ten identical screens
+        // stacked on each other, and ten presses of the phone's back
+        // button to escape the app. Reported on a Samsung as "back does
+        // not get me out, it is as if the screens are piled up".
+        //
+        // navigate reuses a matching screen already in the stack and only
+        // pushes when there is none, which is what opening a conversation
+        // from outside the app should mean.
+        router.navigate({
           pathname: Routes.chat,
           params: { matchId: data.matchId },
         });

@@ -219,8 +219,13 @@ export default function UserProfileScreen() {
               blocked or unmatched from another entry point. */}
           {matchId ? (
             <Pressable
+              // navigate, NOT push. The chat header opens this screen and
+              // this button goes back to the chat, so two pushes made a
+              // loop that grew the stack by two every round and never
+              // gave anything back. navigate returns to the chat already
+              // sitting underneath instead of laying a second one on top.
               onPress={() =>
-                router.push({
+                router.navigate({
                   pathname: Routes.chat,
                   params: {
                     matchId,

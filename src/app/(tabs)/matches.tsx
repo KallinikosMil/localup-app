@@ -260,8 +260,13 @@ function MatchesScreenContent() {
   const all = matches ?? [];
   const fresh = all.filter(isNewMatch);
 
+  // navigate, NOT push: reopening a conversation from the list should
+  // return to the one already in the stack rather than stack a second
+  // copy of it. Same reason as the notification handler and the profile
+  // screen — three doors into one room, and each of them used to build
+  // another room.
   const openChat = (item: Match) =>
-    router.push({
+    router.navigate({
       pathname: Routes.chat,
       params: {
         matchId: item.id,
