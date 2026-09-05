@@ -33,6 +33,13 @@ import {
 } from '@features/profile/hooks/useProfile';
 import { computeMode, type ProfileMode } from '@features/profile/utils/mode';
 import PhotoGrid from '@features/profile/components/PhotoGrid';
+import BeliefPicker from '@features/profile/components/BeliefPicker';
+import {
+  POLITICS,
+  RELIGION,
+  type Politics,
+  type Religion,
+} from '@features/profile/utils/beliefs';
 import { useAppTheme } from '@theme/paper';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import {
@@ -50,6 +57,30 @@ import { Typography } from '@theme/typography';
 import { Spacing } from '@theme/constants/Spacing';
 import { Layout } from '@theme/constants/Layout';
 import { BorderRadius } from '@theme/constants/BorderRadius';
+
+// The chip labels, keyed by the stored value. A map rather than a switch
+// so a value added to the vocabulary without a translation fails the
+// typecheck instead of rendering its raw database string to a user.
+const POLITICS_LABEL: Record<Politics, string> = {
+  left: Translations.POLITICS_LEFT,
+  centre_left: Translations.POLITICS_CENTRE_LEFT,
+  centre: Translations.POLITICS_CENTRE,
+  centre_right: Translations.POLITICS_CENTRE_RIGHT,
+  right: Translations.POLITICS_RIGHT,
+  apolitical: Translations.POLITICS_APOLITICAL,
+};
+
+const RELIGION_LABEL: Record<Religion, string> = {
+  agnostic: Translations.RELIGION_AGNOSTIC,
+  atheist: Translations.RELIGION_ATHEIST,
+  buddhist: Translations.RELIGION_BUDDHIST,
+  christian: Translations.RELIGION_CHRISTIAN,
+  hindu: Translations.RELIGION_HINDU,
+  jewish: Translations.RELIGION_JEWISH,
+  muslim: Translations.RELIGION_MUSLIM,
+  spiritual: Translations.RELIGION_SPIRITUAL,
+  other: Translations.RELIGION_OTHER,
+};
 
 const MAX_PHOTOS = 6;
 const BIO_LIMIT = 240;
@@ -192,6 +223,35 @@ function EditProfileScreenContent() {
       {
         mode_override: next,
       },
+      {
+        onError: err =>
+          setErrorMsg(errorMessage(err, Translations.PROFILE_SAVE_ERROR)),
+      },
+    );
+  };
+
+  // Saved on the tap, like mode — deliberately NOT gathered up into the
+  // Save button with name/city/bio.
+  //
+  // These are GDPR Article 9 answers, and removing one has to take effect
+  // the moment somebody removes it. Holding a withdrawal in local state
+  // until they remember to press Save means the app keeps processing a
+  // belief the person has already taken back, and loses it entirely if
+  // they leave the screen — which is the one thing that must not happen
+  // with special-category data.
+  const setPolitics = (next: Politics | null) => {
+    updateProfile.mutate(
+      { politics: next },
+      {
+        onError: err =>
+          setErrorMsg(errorMessage(err, Translations.PROFILE_SAVE_ERROR)),
+      },
+    );
+  };
+
+  const setReligion = (next: Religion | null) => {
+    updateProfile.mutate(
+      { religion: next },
       {
         onError: err =>
           setErrorMsg(errorMessage(err, Translations.PROFILE_SAVE_ERROR)),
@@ -709,6 +769,39 @@ function EditProfileScreenContent() {
 
         <SectionRule />
 
+        {/* Its OWN section, well away from the interest chips.
+            GDPR Article 9 covers politics and religion, and consent has to
+            be informed — which it is not if the question arrives dressed
+            as one more hobby in the same grid as Coffee Culture. A heading
+            and a sentence saying what happens to the answer is the
+            smallest honest version of that. */}
+        <Section title={t(Translations.PROFILE_SECTION_BELIEFS)}>
+          <AppText
+            variant="caption"
+            style={[styles.beliefsNote, { color: theme.colors.onSurfaceFaint }]}
+          >
+            {t(Translations.PROFILE_BELIEFS_NOTE)}
+          </AppText>
+
+          <BeliefPicker
+            label={t(Translations.PROFILE_POLITICS_LABEL)}
+            options={POLITICS}
+            value={profile?.politics ?? null}
+            onChange={setPolitics}
+            labelFor={o => t(POLITICS_LABEL[o])}
+          />
+
+          <BeliefPicker
+            label={t(Translations.PROFILE_RELIGION_LABEL)}
+            options={RELIGION}
+            value={profile?.religion ?? null}
+            onChange={setReligion}
+            labelFor={o => t(RELIGION_LABEL[o])}
+          />
+        </Section>
+
+        <SectionRule />
+
         {/* A summary that opens its own screen, not chips you edit here.
             The 3-5 rule would otherwise disable the Save for this WHOLE
             form the moment someone dropped to two — while they were
@@ -826,6 +919,9 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  beliefsNote: {
+    marginBottom: Spacing.lg,
+  },
   interestsCard: {
     flexDirection: 'row',
     alignItems: 'center',

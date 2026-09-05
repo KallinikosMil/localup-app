@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 
 import { supabase } from '@config/supabase';
+import type { Politics, Religion } from '@features/profile/utils/beliefs';
 import { RootState } from '@store';
 import { haversineKm } from '@features/profile/utils/mode';
 import type { ProfileMode } from '@features/profile/utils/mode';
@@ -28,6 +29,10 @@ export type Profile = {
   date_of_birth: string | null;
   avatar_url: string | null;
   mode_override: ProfileMode | null;
+  // GDPR Art.9 special category, both of them. Optional everywhere and
+  // null until the person chooses to answer.
+  politics: Politics | null;
+  religion: Religion | null;
   interests: string[];
 };
 
@@ -83,7 +88,7 @@ export const useProfile = () => {
       const { data: profile, error } = await supabase
         .from('profiles')
         .select(
-          'user_id, display_name, home_city, home_lat, home_lng, current_lat, current_lng, bio, date_of_birth, avatar_url, mode_override',
+          'user_id, display_name, home_city, home_lat, home_lng, current_lat, current_lng, bio, date_of_birth, avatar_url, mode_override, politics, religion',
         )
         .eq('user_id', uid!)
         .single();
@@ -174,6 +179,10 @@ export type ProfileUpdate = Partial<{
   home_lat: number | null;
   home_lng: number | null;
   mode_override: ProfileMode | null;
+  // null is a real value here, not an absent one: it is how somebody
+  // takes an answer back after giving it.
+  politics: Politics | null;
+  religion: Religion | null;
 }>;
 
 export const useUpdateProfile = () => {
