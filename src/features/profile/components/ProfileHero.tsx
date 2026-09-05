@@ -116,6 +116,12 @@ const ProfileHero = ({
         styles.hero,
         {
           height: heroHeight,
+          // Same hole the deck card had: no background, so a photo that
+          // has not loaded yet leaves the page showing through where a
+          // face should be. Less alarming here than in the deck — there
+          // is no second profile stacked underneath — but it is the same
+          // flash of nothing, and the same surface fixes it.
+          backgroundColor: theme.colors.surfaceVariant,
         },
         // See the header comment: the light hero ends on an edge, the dark
         // one dissolves.

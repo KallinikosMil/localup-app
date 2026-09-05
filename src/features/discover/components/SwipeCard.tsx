@@ -168,7 +168,28 @@ const SwipeCard = ({
 
   return (
     <GestureDetector gesture={pan}>
-      <Animated.View style={[styles.card, cardStyle]}>
+      {/* The card is one of a STACK, and it had no background at all — so
+          anything the photo did not cover showed the NEXT candidate
+          straight through it. Reported as "I tapped to change the photo
+          and the profile behind appeared", and it only happened on a
+          photo's FIRST load: once cached the image paints immediately and
+          hides the hole, which is why it looked intermittent.
+
+          I first read this as a swipe stealing the gesture. It was not —
+          no swipe is involved, the card is simply see-through.
+
+          It also has to exist before the photo cross-fade is safe: fading
+          in from 0.45 over nothing would have shown the next person on
+          EVERY photo change rather than only the first. Same surface the
+          no-photo placeholder already uses, so a card with no picture and
+          a card with one still loading look like the same object. */}
+      <Animated.View
+        style={[
+          styles.card,
+          { backgroundColor: theme.colors.surfaceVariant },
+          cardStyle,
+        ]}
+      >
         {current ? (
           <Animated.View style={[styles.image, photoFadeStyle]}>
             <Image
