@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -121,7 +121,14 @@ export default function ChatScreen() {
   }, [matchId, isLoading, isError, newestActivity, markRead]);
 
   const [text, setText] = useState('');
-  const listRef = useRef<FlatList>(null);
+  // Newest FIRST, because the list is inverted — index 0 renders at the
+  // visual bottom. The cache stays oldest-first: every merge, sort and
+  // day comparison downstream reads more naturally in reading order, and
+  // this is the only place that wants the other direction.
+  const newestFirst = useMemo(
+    () => [...(messages ?? [])].reverse(),
+    [messages],
+  );
 
   // After a few seconds of loading, reassure the user the screen
   // isn't frozen — a Supabase project waking from auto-pause can
@@ -185,10 +192,11 @@ export default function ChatScreen() {
     index: number;
   }) => {
     const isMine = item.sender_id === uid;
-    // Oldest first (the list scrolls to the end, it is not inverted), so
-    // the previous index is the older message and a separator belongs
-    // ABOVE the first message of each day.
-    const older = messages?.[index - 1];
+    // The list is INVERTED and its data is newest-first, so the NEXT
+    // index is the older message. Inside a cell the JSX order is upright
+    // (inverted applies the flip twice), so the separator still renders
+    // before the bubble and still appears above it.
+    const older = newestFirst[index + 1];
     const showDay =
       !older || !sameCalendarDay(item.created_at, older.created_at);
 
@@ -438,31 +446,41 @@ export default function ChatScreen() {
             onPress={() => refetch()}
           />
         </View>
+      ) : /* Rendered INSTEAD of the list, not as ListEmptyComponent: an
+             inverted FlatList carries a scaleY(-1) that its cells undo,
+             and the empty component is not a cell — it would come out
+             upside down. */
+      newestFirst.length === 0 ? (
+        <View style={styles.center}>
+          <AppText
+            variant="body"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              textAlign: 'center',
+            }}
+          >
+            {t(Translations.CHAT_EMPTY)}
+          </AppText>
+        </View>
       ) : (
+        // INVERTED, which is how a chat opens on its newest message
+        // without moving.
+        //
+        // It used to scrollToEnd from onContentSizeChange. On a short
+        // conversation that is invisible; on a long one you watch it
+        // render the OLDEST messages and then jump — and because
+        // virtualisation has not measured the offscreen rows yet, the
+        // jump lands short and repeats as more of them measure.
+        //
+        // Inverted has nothing to correct: index 0 IS the bottom row, so
+        // the newest message is simply where the list starts. New
+        // messages arriving also need no scroll call.
         <FlatList
-          ref={listRef}
-          data={messages ?? []}
+          data={newestFirst}
+          inverted
           keyExtractor={item => item.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.list}
-          onContentSizeChange={() =>
-            listRef.current?.scrollToEnd({
-              animated: false,
-            })
-          }
-          ListEmptyComponent={
-            <View style={styles.center}>
-              <AppText
-                variant="body"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  textAlign: 'center',
-                }}
-              >
-                {t(Translations.CHAT_EMPTY)}
-              </AppText>
-            </View>
-          }
         />
       )}
 
@@ -627,10 +645,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
   },
   list: {
-    flexGrow: 1,
+    // No flexGrow: an inverted list already anchors its content to the
+    // bottom, and growing it to fill pushes a short conversation back up
+    // to the top — the opposite of what inverted is here for.
+    //
+    // The two vertical paddings are SWAPPED against how they read. The
+    // container is inside the scaleY(-1), so paddingTop lands at the
+    // visual bottom (against the composer) and paddingBottom at the
+    // visual top (under the header).
     paddingHorizontal: Layout.CHAT_AVATAR / 2,
-    paddingTop: Layout.CHAT_AVATAR / 2,
-    paddingBottom: Spacing.sm,
+    paddingTop: Spacing.sm,
+    paddingBottom: Layout.CHAT_AVATAR / 2,
   },
   bubble: {
     maxWidth: Layout.BUBBLE_MAX_WIDTH,
