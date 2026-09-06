@@ -86,7 +86,7 @@ export const useUpdateInterests = () => {
     // two statements, and a client that dies between them leaves the user
     // with none — which would take profiles.interest_ids down with it,
     // since the trigger follows this table. set_user_interests does both in
-    // one transaction and enforces the 3-5 rule server-side, where a second
+    // one transaction and enforces the 3-8 rule server-side, where a second
     // client cannot skip it.
     mutationFn: async (interestIds: string[]) => {
       const { error } = await supabase.rpc('set_user_interests', {

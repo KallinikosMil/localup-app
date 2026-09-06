@@ -219,13 +219,17 @@ export default function UserProfileScreen() {
               blocked or unmatched from another entry point. */}
           {matchId ? (
             <Pressable
-              // navigate, NOT push. The chat header opens this screen and
-              // this button goes back to the chat, so two pushes made a
-              // loop that grew the stack by two every round and never
-              // gave anything back. navigate returns to the chat already
-              // sitting underneath instead of laying a second one on top.
+              // dismissTo, NOT push and NOT navigate. The chat header
+              // opens this screen and this button goes back to the chat,
+              // so two pushes made a loop that grew the stack by two every
+              // round. navigate was the first fix and did nothing here:
+              // expo-router 6 reuses a route only when it is the CURRENT
+              // top, and from this screen the top is 'profile', so the
+              // chat was pushed again anyway. dismissTo pops back to the
+              // chat underneath — and still pushes one when this screen
+              // was reached from the deck and no chat is open.
               onPress={() =>
-                router.navigate({
+                router.dismissTo({
                   pathname: Routes.chat,
                   params: {
                     matchId,

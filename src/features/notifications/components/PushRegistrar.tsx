@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { Routes } from '@shared/routes';
 import { usePushRegistration } from '@features/notifications/hooks/usePushRegistration';
@@ -17,6 +18,7 @@ export default function PushRegistrar() {
 
   const uid = useSelector((s: RootState) => s.auth.user?.uid);
   const router = useRouter();
+  const queryClient = useQueryClient();
   // A cold start hands us the same response again on every mount, so it is
   // consumed once and then ignored — otherwise re-opening the app would
   // keep yanking the user back into that chat.
@@ -33,17 +35,27 @@ export default function PushRegistrar() {
       // and the constant is what routes.test.ts checks against a real
       // file on every run.
       if (data?.matchId) {
-        // navigate, NOT push. A tapped notification used to add another
-        // chat screen every single time, even when that very conversation
-        // was already open — ten notifications, ten identical screens
-        // stacked on each other, and ten presses of the phone's back
-        // button to escape the app. Reported on a Samsung as "back does
-        // not get me out, it is as if the screens are piled up".
+        // A push IS a server signal that this conversation changed, so
+        // drop the cache before showing it. Without this, a chat that is
+        // already open with a dead realtime channel and a fetch under
+        // 30s old would show the notification's message only after the
+        // person sent one themselves — refetchOnMount cannot help when
+        // the screen never remounts.
+        queryClient.invalidateQueries({
+          queryKey: ['chat', data.matchId],
+        });
+
+        // dismissTo, NOT push and not navigate. A tapped notification used
+        // to add another chat screen every time, even when that very
+        // conversation was already open — ten notifications, ten
+        // identical screens, ten presses of back to escape. Reported on a
+        // Samsung as "the screens are piled up".
         //
-        // navigate reuses a matching screen already in the stack and only
-        // pushes when there is none, which is what opening a conversation
-        // from outside the app should mean.
-        router.navigate({
+        // navigate was the first fix and does not do it: expo-router 6
+        // reuses a route only when it is the CURRENT top. dismissTo pops
+        // back to the chat wherever it sits in the stack, and pushes only
+        // when it is not there at all.
+        router.dismissTo({
           pathname: Routes.chat,
           params: { matchId: data.matchId },
         });

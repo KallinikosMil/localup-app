@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Image, Pressable, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppIcon from '@shared/components/AppIcon';
@@ -74,7 +74,17 @@ const SwipeCard = ({
   // empty card between photos, which reads as a flicker rather than a
   // transition.
   const photoFade = useSharedValue(1);
+  // Skip the mount run. The front card is REMOUNTED on every swipe, so
+  // without this every new candidate painted at 45% and faded up — a
+  // dimmed flash on each swipe that did not exist before the fade was
+  // added. The fade is feedback for a photo CHANGE, and a mount is not
+  // one.
+  const photoMounted = useRef(false);
   useEffect(() => {
+    if (!photoMounted.current) {
+      photoMounted.current = true;
+      return;
+    }
     photoFade.value = 0.45;
     photoFade.value = withTiming(1, { duration: 170 });
   }, [photoIndex, photoFade]);

@@ -54,6 +54,27 @@ from (values
 ) as v(id, email)
 on conflict (id) do nothing;
 
+-- 1b. Identities. The first version of this file skipped these while
+--     claiming "same convention as seed-test-users.sql" — and that file
+--     inserts them with the note "required for Supabase auth to work
+--     properly". An auth.users row with no identity is a user GoTrue
+--     has no provider for; the accounts worked as deck fodder and could
+--     not necessarily be signed in to. Now they can.
+insert into auth.identities (
+  id, user_id, provider_id, provider, identity_data,
+  last_sign_in_at, created_at, updated_at
+)
+select
+  u.id, u.id, u.id::text, 'email',
+  jsonb_build_object('sub', u.id::text, 'email', u.email),
+  now(), now(), now()
+from auth.users u
+where u.id::text like 'bbbbbbbb-00%'
+  and not exists (
+    select 1 from auth.identities i
+     where i.user_id = u.id and i.provider = 'email'
+  );
+
 -- 2. Profiles. Ages are spread 26-44 on purpose: wide enough that a
 --    default 18-99 filter and a narrowed one both leave somebody in the
 --    deck, so a filter test can tell "narrowed too far" from "empty".

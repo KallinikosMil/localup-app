@@ -2,7 +2,7 @@
 //
 // They were written once inside the onboarding screen and enforced nowhere
 // else, so the edit path had to either import a screen or copy them. The
-// server enforces the same 3-5 in set_user_interests; this is the copy the
+// server enforces the same 3-8 in set_user_interests; this is the copy the
 // UI needs to disable a button, not the one that decides.
 
 export const INTEREST_MIN = 3;

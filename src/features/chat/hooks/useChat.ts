@@ -66,6 +66,11 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
   // bound; correctness comes from the id dedupe, not the cap.
   const liveRef = useRef<Map<string, ChatMessage>>(new Map());
 
+  // One failure-refetch per channel LIFETIME. Reset when the channel is
+  // rebuilt (new thread, or return to foreground), because that is a
+  // genuinely new attempt that deserves its own one shot.
+  const refetchedOnFailure = useRef(false);
+
   const query = useQuery<ChatData>({
     queryKey: ['chat', matchId],
     enabled: !!uid && !!matchId,
@@ -163,6 +168,7 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
   // cache (dedup by id) — no refetch.
   useEffect(() => {
     if (!threadId) return;
+    refetchedOnFailure.current = false;
 
     const channel = supabase
       .channel(`messages-${threadId}`)
@@ -202,12 +208,21 @@ export const useChat = (matchId: string, initialThreadId?: string | null) => {
       // log, no retry, and a screen that quietly stops receiving. The
       // status callback is the only place that failure is observable.
       //
-      // On failure, refetch once. That does not restore live updates, but
-      // it means the person sees the messages that exist right now rather
-      // than an empty conversation they were just notified about.
+      // On failure, refetch ONCE — and the once is load-bearing.
+      // realtime-js never gives up: a rejected join is retried at 1s, 2s,
+      // 5s, 10s and then every 10s for as long as the screen is open, and
+      // EVERY attempt reports CHANNEL_ERROR here. Without the guard, a
+      // websocket blocked by a proxy turned into an unbounded stream of
+      // chat_messages fetches for the whole visit. One refetch gets the
+      // person the messages that exist now; nothing more is gained by
+      // repeating it.
       .subscribe(status => {
         if (__DEV__) console.log('[chat] messages channel', status);
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        if (
+          (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') &&
+          !refetchedOnFailure.current
+        ) {
+          refetchedOnFailure.current = true;
           queryClient.invalidateQueries({ queryKey: ['chat', matchId] });
         }
       });

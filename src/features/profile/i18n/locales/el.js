@@ -79,14 +79,14 @@ export default {
   profileInterestsTitle: 'Ενδιαφέροντα',
   profileInterestsWhy:
     'Τα κοινά ενδιαφέροντα μετράνε διπλάσια από την απόσταση όταν χτίζεται η τράπουλά σου. Αν τα αλλάξεις, ανακατεύεται αμέσως.',
-  profileInterestsRange: 'Διάλεξε από 3 έως 5',
+  profileInterestsRange: 'Διάλεξε από {{min}} έως {{max}}',
   profileInterestsNeedMore: 'Διάλεξε {{count}} ακόμη για αποθήκευση',
   profileInterestsAtMax: 'Έφτασες το μέγιστο',
   profileInterestsCount: '{{selected}} από {{max}} επιλεγμένα',
   profileInterestsMinHint:
     'Τρία είναι το ελάχιστο — κάτω από αυτό δεν υπάρχουν αρκετά για να σε ταιριάξουμε.',
   profileInterestsMaxHint:
-    'Πάτα ένα από τα πέντε σου για να ελευθερώσεις θέση. Τα πέντε κρατούν το σήμα καθαρό.',
+    'Πάτα ένα από τα {{max}} σου για να ελευθερώσεις θέση.',
   profileInterestsSaveError:
     'Τα ενδιαφέροντα δεν αποθηκεύτηκαν. Δοκίμασε ξανά.',
   profileCancel: 'Άκυρο',

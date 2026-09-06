@@ -80,14 +80,14 @@ export default {
   profileInterestsTitle: 'Interests',
   profileInterestsWhy:
     'Shared interests count double what distance does when your deck is built. Changing them reshuffles it right away.',
-  profileInterestsRange: 'Pick between 3 and 5',
+  profileInterestsRange: 'Pick between {{min}} and {{max}}',
   profileInterestsNeedMore: 'Pick {{count}} more to save',
   profileInterestsAtMax: 'That is the maximum',
   profileInterestsCount: '{{selected}} of {{max}} selected',
   profileInterestsMinHint:
     'Three is the minimum — below that there is not enough to match you on.',
   profileInterestsMaxHint:
-    'Tap one of your five to free a slot. Five keeps the signal sharp.',
+    'Tap one of your {{max}} to free a slot.',
   profileInterestsSaveError: "Couldn't save your interests. Please try again.",
   profileCancel: 'Cancel',
   profileSave: 'Save',

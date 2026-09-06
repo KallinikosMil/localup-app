@@ -197,6 +197,30 @@ export const useUpdateProfile = () => {
         .eq('user_id', uid!);
       if (error) throw error;
     },
+    // Optimistic: merge the patch into the cached profile before the
+    // round trip, and roll it back if the write fails.
+    //
+    // Found by the belief pickers, which compute "tap again to remove"
+    // from the CACHED value. Without this, the second tap arrives while
+    // the first write is in flight, reads the old null, and re-SETS the
+    // belief instead of clearing it — the exact withdrawal the picker
+    // promises, broken by tapping quickly. mode_override had the same
+    // shape and got away with it only because re-setting the same mode
+    // is idempotent. Same pattern as useReorderPhotos below.
+    onMutate: async (patch: ProfileUpdate) => {
+      const key = ['profile', uid];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<Profile>(key);
+      if (previous) {
+        queryClient.setQueryData<Profile>(key, { ...previous, ...patch });
+      }
+      return { previous };
+    },
+    onError: (_err, _patch, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['profile', uid], context.previous);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['profile', uid],

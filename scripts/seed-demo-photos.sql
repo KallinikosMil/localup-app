@@ -17,10 +17,17 @@
 -- pointing at a shared demo path renders. Several profiles referencing
 -- one object is fine for fixtures and saves six copies of the same file.
 --
--- ⚠️ One consequence worth knowing: useDeletePhoto finds a file THROUGH a
--- media row, so deleting a photo from one of these seeded profiles
--- removes the shared object and blanks it for the others. Re-run this
--- file after that happens; do not "fix" it by deleting rows.
+-- One consequence worth knowing, and the FIRST version of this note had
+-- it backwards: deleting a photo from a seeded profile does NOT remove
+-- the shared object. Storage RLS is owner-scoped on the first path
+-- segment, and these paths begin with a dddddddd-* uid that is not the
+-- seeded profile's own — so the storage remove() is a silent no-op and
+-- only the media row goes. The demo file survives for everyone else.
+-- Re-run this file to put the row back.
+--
+-- The same fact cuts the other way for a REAL user: their remove()
+-- succeeds, because the path is theirs. Never point a real profile at a
+-- shared demo path.
 --
 -- SAFE TO RE-RUN. Only touches @test.local accounts, and only ones with
 -- no photo at all — anyone who has uploaded is left alone.

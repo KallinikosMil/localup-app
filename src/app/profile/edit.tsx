@@ -803,7 +803,7 @@ function EditProfileScreenContent() {
         <SectionRule />
 
         {/* A summary that opens its own screen, not chips you edit here.
-            The 3-5 rule would otherwise disable the Save for this WHOLE
+            The 3-8 rule would otherwise disable the Save for this WHOLE
             form the moment someone dropped to two — while they were
             editing their bio, with the cause several hundred pixels
             further down. */}

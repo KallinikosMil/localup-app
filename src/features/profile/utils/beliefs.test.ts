@@ -1,90 +1,8 @@
-import {
-  POLITICS_AXIS,
-  UNANSWERED,
-  politicsAffinity,
-  religionAffinity,
-  toggleBelief,
-} from './beliefs';
+import { POLITICS, RELIGION, toggleBelief } from './beliefs';
 
-describe('politics is a spectrum, not a verdict', () => {
-  it('scores an identical position highest', () => {
-    expect(politicsAffinity('left', 'left')).toBe(1);
-  });
-
-  // The whole reason the axis is ordered.
-  it('scores neighbours higher than distant positions', () => {
-    const oneStep = politicsAffinity('left', 'centre_left');
-    const twoSteps = politicsAffinity('left', 'centre');
-    const opposite = politicsAffinity('left', 'right');
-    expect(oneStep).toBeGreaterThan(twoSteps);
-    expect(twoSteps).toBeGreaterThan(opposite);
-    expect(opposite).toBe(0);
-  });
-
-  it('is symmetric', () => {
-    expect(politicsAffinity('left', 'centre_right')).toBe(
-      politicsAffinity('centre_right', 'left'),
-    );
-  });
-
-  // 'apolitical' is not a point on the axis — it declines the question
-  // rather than answering it at one end.
-  it('treats apolitical as off the axis, not as an extreme', () => {
-    const offAxis = politicsAffinity('left', 'apolitical');
-    expect(offAxis).toBeGreaterThan(politicsAffinity('left', 'right'));
-    expect(offAxis).toBeLessThan(politicsAffinity('left', 'centre'));
-    expect(politicsAffinity('right', 'apolitical')).toBe(offAxis);
-  });
-
-  it('matches two apolitical people with each other', () => {
-    expect(politicsAffinity('apolitical', 'apolitical')).toBe(1);
-  });
-});
-
-// This is the GDPR-shaped requirement, not a preference: scoring a
-// non-answer at zero would rank everyone who declines level with everyone
-// who disagrees, which is a standing penalty for withholding Article 9
-// data — pressure to disclose it.
-describe('declining to answer is never punished', () => {
-  it('scores a missing answer in the middle of the field', () => {
-    expect(politicsAffinity(null, 'right')).toBe(UNANSWERED);
-    expect(politicsAffinity('left', null)).toBe(UNANSWERED);
-    expect(politicsAffinity(null, null)).toBe(UNANSWERED);
-    expect(religionAffinity(null, 'christian')).toBe(UNANSWERED);
-    expect(religionAffinity('atheist', null)).toBe(UNANSWERED);
-  });
-
-  it('puts a non-answer above the worst possible match', () => {
-    expect(politicsAffinity(null, 'right')).toBeGreaterThan(
-      politicsAffinity('left', 'right'),
-    );
-    expect(religionAffinity(null, 'muslim')).toBeGreaterThan(
-      religionAffinity('atheist', 'muslim'),
-    );
-  });
-
-  it('and below an actual agreement, so answering still means something', () => {
-    expect(politicsAffinity(null, 'left')).toBeLessThan(
-      politicsAffinity('left', 'left'),
-    );
-  });
-});
-
-describe('religion is categorical', () => {
-  it('scores the same faith highest', () => {
-    expect(religionAffinity('christian', 'christian')).toBe(1);
-  });
-
-  // No order exists in which hindu sits between jewish and muslim, so
-  // every difference is the same size.
-  it('treats every difference as equal', () => {
-    const a = religionAffinity('christian', 'muslim');
-    const b = religionAffinity('buddhist', 'atheist');
-    expect(a).toBe(b);
-    expect(a).toBeGreaterThan(0);
-    expect(a).toBeLessThan(1);
-  });
-});
+// The ranking maths lives in SQL (discover_candidates) and is not
+// duplicated here — an earlier copy was tested by nothing that ran in
+// the app. What the client owns is the vocabulary and the toggle.
 
 describe('an answer can always be taken back', () => {
   it('clears the choice when the chosen one is tapped again', () => {
@@ -100,17 +18,40 @@ describe('an answer can always be taken back', () => {
   });
 });
 
-describe('the axis matches the one the server ranks with', () => {
-  // discover_candidates hardcodes this order in v_politics_axis and
-  // measures distance along it. If the two ever disagree, the app would
-  // explain an ordering the database is not producing.
-  it('is the five on-axis positions, in order', () => {
-    expect([...POLITICS_AXIS]).toEqual([
+describe('the vocabularies match the database CHECK constraints', () => {
+  // These are the exact sets profiles_politics_check and
+  // profiles_religion_check accept. A value added here without the
+  // migration would be refused by the server on save; one added there
+  // without this would be unselectable. Both lists are in
+  // scripts/db/2026-09-05_beliefs_and_matching.sql §1.
+  it('politics: the five axis positions in order, then apolitical', () => {
+    expect([...POLITICS]).toEqual([
       'left',
       'centre_left',
       'centre',
       'centre_right',
       'right',
+      'apolitical',
     ]);
+  });
+
+  it('religion: the nine categories', () => {
+    expect([...RELIGION]).toEqual([
+      'agnostic',
+      'atheist',
+      'buddhist',
+      'christian',
+      'hindu',
+      'jewish',
+      'muslim',
+      'spiritual',
+      'other',
+    ]);
+  });
+
+  // Deliberately absent. Choosing nothing IS the answer; a chip for it
+  // would turn silence into a declaration the person has to make.
+  it('has no "prefer not to say" entry', () => {
+    expect([...POLITICS, ...RELIGION]).not.toContain('prefer_not_to_say');
   });
 });

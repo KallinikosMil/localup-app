@@ -1,4 +1,16 @@
 -- ===========================================
+-- ⚠️ SUPERSEDED — DO NOT APPLY.
+-- ===========================================
+-- This is an INTERMEDIATE version of discover_candidates (two-tier
+-- interests only). The live function has since gained the politics and
+-- religion terms. Re-applying this file would silently remove them from
+-- the ranking while the app kept collecting those answers — caught by a
+-- code review before anyone did it.
+--
+-- The current definition is in 2026-09-05_beliefs_and_matching.sql (§5).
+-- The rollback to BEFORE any of this is discover_candidates_ROLLBACK.sql.
+-- Kept only so the two-tier reasoning below stays readable.
+-- ===========================================
 -- discover_candidates — two-tier interest affinity
 -- ===========================================
 --

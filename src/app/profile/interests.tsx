@@ -19,6 +19,7 @@ import {
 } from '@features/profile/hooks/useInterests';
 import {
   INTEREST_MAX,
+  INTEREST_MIN,
   canSaveInterests,
   interestsChanged,
   interestsStillNeeded,
@@ -34,7 +35,7 @@ import { Translations } from '@features/profile/i18n/translationKeys';
 // once inside onboarding and nothing could ever touch them again.
 //
 // Its own screen rather than a section inside Edit profile, and the reason
-// is the 3-5 rule. Inline, dropping to two would disable the Save for the
+// is the 3-8 rule. Inline, dropping to two would disable the Save for the
 // WHOLE form while someone was editing their bio, and the cause would be
 // several hundred pixels further down. A rule that blocks a save should not
 // block a form it has nothing to do with.
@@ -84,12 +85,15 @@ export default function EditInterestsScreen() {
     ? t(Translations.PROFILE_INTERESTS_NEED_MORE, { count: needed })
     : atMax
       ? t(Translations.PROFILE_INTERESTS_AT_MAX)
-      : t(Translations.PROFILE_INTERESTS_RANGE);
+      : t(Translations.PROFILE_INTERESTS_RANGE, {
+          min: INTEREST_MIN,
+          max: INTEREST_MAX,
+        });
 
   const hint = !canSaveInterests(picked)
     ? t(Translations.PROFILE_INTERESTS_MIN_HINT)
     : atMax
-      ? t(Translations.PROFILE_INTERESTS_MAX_HINT)
+      ? t(Translations.PROFILE_INTERESTS_MAX_HINT, { max: INTEREST_MAX })
       : null;
 
   const loading = catalogue.isPending || mine.isPending;
