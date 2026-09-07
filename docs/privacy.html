@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LocalUp — Privacy Policy</title>
+<style>
+  :root{
+    --ground:#FBFAFD; --ink:#1A1725; --ink-2:#4A4360; --line:#E4E0EE;
+    --accent:#6D3BEF; --note:#F3F1F8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ground:#131120; --ink:#EFECF8; --ink-2:#BDB6D2; --line:#2E2945;
+      --accent:#A98BFF; --note:#1C1930;
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:40px 20px 80px;
+  }
+  main{max-width:44rem; margin:0 auto}
+  h1{font-size:2rem; line-height:1.15; margin:0 0 .25rem}
+  h2{font-size:1.15rem; margin:2.25rem 0 .5rem; border-bottom:1px solid var(--line); padding-bottom:.35rem}
+  h3{font-size:1rem; margin:1.5rem 0 .35rem}
+  .updated{color:var(--ink-2); margin:0 0 2rem}
+  p,li{color:var(--ink-2)}
+  li{margin-bottom:.4rem}
+  strong{color:var(--ink)}
+  a{color:var(--accent)}
+  .note{background:var(--note); border-left:3px solid var(--accent);
+        padding:14px 18px; border-radius:0 8px 8px 0; margin:1.25rem 0}
+  .note p:last-child{margin-bottom:0}
+  footer{margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+         color:var(--ink-2); font-size:.9rem}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Privacy Policy</h1>
+<p class="updated">LocalUp · Last updated 7 September 2026</p>
+
+<p>LocalUp connects travellers with locals in the same city. This policy explains
+exactly what the app stores, why, and who else ever sees it. It describes what the
+app actually does, not what an app like it might do.</p>
+
+<h2>Who we are</h2>
+<p>LocalUp is developed and operated by an individual developer. For any question
+about your data, or to exercise any right below, write to
+<strong>[SUPPORT EMAIL]</strong>.</p>
+
+<h2>What we collect, and why</h2>
+<ul>
+  <li><strong>Account</strong> — your email address and a password, or your Google
+      account if you choose to sign in that way. Used only to authenticate you.</li>
+  <li><strong>Profile</strong> — display name, date of birth, home city and its
+      coordinates, a short bio, and your chosen interests. This is what other users
+      see and what decides who you are shown to.</li>
+  <li><strong>Age</strong> — we store your date of birth and display only your age.
+      It confirms you are over 18 and drives age filtering.</li>
+  <li><strong>Photos</strong> — images you upload from your device's photo library.
+      We never access your camera, and we never read your library: you pick each
+      image yourself.</li>
+  <li><strong>Approximate location</strong> — your city-level position, so the app
+      can tell whether you are local or travelling and show you people nearby. We ask
+      when we need it and never collect it in the background.
+      <strong>Your precise position is never shown to another user.</strong></li>
+  <li><strong>Politics and religion</strong> — optional. See the section below; these
+      are treated differently from everything else here.</li>
+  <li><strong>Messages</strong> — text you send to people you have matched with,
+      stored so both of you can read the conversation.</li>
+  <li><strong>Notification token</strong> — an anonymous push identifier issued by
+      Expo, plus whether your device is Android or iOS. It carries no device
+      identifier, no advertising ID and no phone number.</li>
+  <li><strong>Preferences</strong> — your distance and age filters.</li>
+</ul>
+
+<h2>Politics and religion</h2>
+
+<div class="note">
+  <p>Under the GDPR these are <strong>special category data</strong> (Article 9),
+  alongside things like health and sexual orientation. We only process them with your
+  <strong>explicit consent</strong>, which you give by choosing an answer and withdraw
+  by removing it.</p>
+</div>
+
+<p>Both fields are <strong>entirely optional</strong>. No screen requires them, and
+nothing in the app is unavailable if you leave them blank.</p>
+
+<p>They are used for <strong>one purpose only: the order in which people appear in
+your deck.</strong> They are never used to filter — nobody is hidden from you, and you
+are hidden from nobody, because of an answer to either question.</p>
+
+<p><strong>Leaving them blank costs you nothing.</strong> Our ranking scores an
+unanswered question neutrally, in the middle of the range — never at the bottom. We do
+not want anyone pressured into disclosing a belief in order to be seen.</p>
+
+<p>To withdraw: open <em>Edit profile → Beliefs</em> and tap your answer again. It is
+removed immediately, not when you next press Save.</p>
+
+<h2>What we do not do</h2>
+<ul>
+  <li>We do not sell or rent your data.</li>
+  <li>We show no advertising and carry no advertising or analytics SDK.</li>
+  <li>We do not track you across other apps or websites.</li>
+  <li>We collect no payment information — the app is free and has nothing to buy.</li>
+  <li>We do not collect contacts, calendar, call logs, SMS, files or audio.</li>
+</ul>
+
+<h2>Who processes data on our behalf</h2>
+<ul>
+  <li><strong>Supabase</strong> — hosts the database, authentication and photo
+      storage. Everything listed above is stored there.</li>
+  <li><strong>Expo</strong> — delivers push notifications. Receives only the
+      notification token and the message we send.</li>
+  <li><strong>Google</strong> — only if you choose Google sign-in, and only to
+      confirm who you are.</li>
+  <li><strong>OpenStreetMap (Nominatim)</strong> — turns a city name into coordinates
+      and coordinates into a city name. It receives the city text you type and, on the
+      location step, your approximate coordinates. It receives nothing that identifies
+      you.</li>
+</ul>
+
+<h2>Who can see what</h2>
+<p>Other users see your display name, age, photos, bio, interests, home city, whether
+you are currently local or travelling, and any belief you chose to fill in. They never
+see your email address, your date of birth, or your precise coordinates. Messages are
+visible only to the two people in a match.</p>
+
+<h2>How long we keep it</h2>
+<p>We keep your data until you delete your account. Deleting removes your profile,
+photos, interests, matches, messages and notification tokens permanently. You can do
+this yourself from Settings inside the app; the process is described at
+<a href="./delete-account.html">the account deletion page</a>.</p>
+
+<h2>Your rights</h2>
+<p>If you are in the EU or the UK, the GDPR gives you the right to access, correct,
+export or delete your data, to withdraw consent, and to object to processing. Most of
+this is already in the app: your profile is editable in <em>Edit profile</em>, beliefs
+are removable with one tap, and deletion is in <em>Settings</em>. For anything else,
+write to <strong>[SUPPORT EMAIL]</strong> and we will respond within 30 days.</p>
+
+<h2>Age</h2>
+<p>LocalUp is for adults. You must be 18 or older, and the app refuses a date of birth
+that would make you younger.</p>
+
+<h2>Security</h2>
+<p>Traffic is encrypted in transit (HTTPS) and data is encrypted at rest by our
+hosting provider. Access is enforced at the database level with row-level security, so
+one account cannot read another's private data.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes materially we will update the date at the top and notify you
+in the app.</p>
+
+<footer>
+  LocalUp · <a href="./delete-account.html">Deleting your account</a>
+</footer>
+
+</main>
+</body>
+</html>
