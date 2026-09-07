@@ -26,4 +26,15 @@ export default {
   a11yAddPhoto: 'Προσθήκη φωτογραφίας',
   a11yOnboardingProgress: 'Βήμα {{step}} από {{total}}',
   commonStepCount: '{{step}} από {{total}}',
+
+  photoPickTitle: 'Προσθήκη φωτογραφίας',
+  photoPickCamera: 'Τράβηξε φωτογραφία',
+  photoPickLibrary: 'Επίλεξε από τη συλλογή',
+  photoPickCancel: 'Άκυρο',
+  photoCameraDeniedTitle: 'Η πρόσβαση στην κάμερα είναι κλειστή',
+  photoCameraDeniedBody:
+    'Για να τραβήξεις φωτογραφία τώρα, ενεργοποίησε την πρόσβαση στην κάμερα για το LocalUp από τις ρυθμίσεις της συσκευής σου. Μπορείς αντ᾽ αυτού να διαλέξεις μία από τη συλλογή σου.',
+  photoLibraryDeniedTitle: 'Η πρόσβαση στις φωτογραφίες είναι κλειστή',
+  photoLibraryDeniedBody:
+    'Για να διαλέξεις φωτογραφία, ενεργοποίησε την πρόσβαση στις φωτογραφίες για το LocalUp από τις ρυθμίσεις της συσκευής σου. Μπορείς αντ᾽ αυτού να τραβήξεις μια νέα με την κάμερα.',
 };

@@ -126,8 +126,6 @@ export default {
   religionOther: 'Other',
   profileSectionYourGallery: 'Your gallery',
   profilePhotoHint: 'Press and hold to remove',
-  profilePhotoPermissionTitle: 'Permission needed',
-  profilePhotoPermissionBody: 'Allow photo library access to add photos.',
   profileNameRequired: 'Your name cannot be empty.',
   profilePhotoLastTitle: 'Keep at least one photo',
   profilePhotoLastBody:

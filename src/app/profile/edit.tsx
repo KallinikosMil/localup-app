@@ -13,7 +13,7 @@ import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import * as ImagePicker from 'expo-image-picker';
+import { pickPhoto } from '@shared/utils/photoPicker';
 
 import AppText from '@shared/components/AppText';
 import InterestChip from '@shared/components/InterestChip';
@@ -279,23 +279,13 @@ function EditProfileScreenContent() {
     );
   };
 
-  const pickPhoto = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert(
-        t(Translations.PROFILE_PHOTO_PERMISSION_TITLE),
-        t(Translations.PROFILE_PHOTO_PERMISSION_BODY),
-      );
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-      allowsEditing: false,
-    });
-    if (result.canceled || !result.assets[0]) return;
+  const addPhoto = async () => {
+    // No crop here, unlike onboarding: this grid shows what was
+    // uploaded, so a photo that was already framed once should not be
+    // put through a second frame.
+    const asset = await pickPhoto({ t, allowsEditing: false });
+    if (!asset) return;
 
-    const asset = result.assets[0];
     uploadPhoto.mutate(
       {
         uri: asset.uri,
@@ -618,7 +608,7 @@ function EditProfileScreenContent() {
             photos={photos ?? []}
             maxSlots={MAX_PHOTOS}
             busy={uploadPhoto.isPending || reorderPhotos.isPending}
-            onAdd={pickPhoto}
+            onAdd={addPhoto}
             onRemove={(photo: Photo) => confirmDelete(photo.id)}
             /* Onboarding treats one photo as mandatory in three separate
                places, and Edit let you drop below it — leaving a profile

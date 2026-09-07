@@ -41,4 +41,19 @@ export enum Translations {
   // which says 'Step 1 of 4' in full because a reader has no bar to
   // look at.
   COMMON_STEP_COUNT = 'commonStepCount',
+
+  // Choosing where a photo comes from. Shared because both onboarding
+  // and Edit profile ask the same question and must give the same
+  // answer — they used to differ, and one of them did not ask for a
+  // permission at all.
+  PHOTO_PICK_TITLE = 'photoPickTitle',
+  PHOTO_PICK_CAMERA = 'photoPickCamera',
+  PHOTO_PICK_LIBRARY = 'photoPickLibrary',
+  PHOTO_PICK_CANCEL = 'photoPickCancel',
+  // A refusal is not an error, so these say what to do rather than what
+  // went wrong.
+  PHOTO_CAMERA_DENIED_TITLE = 'photoCameraDeniedTitle',
+  PHOTO_CAMERA_DENIED_BODY = 'photoCameraDeniedBody',
+  PHOTO_LIBRARY_DENIED_TITLE = 'photoLibraryDeniedTitle',
+  PHOTO_LIBRARY_DENIED_BODY = 'photoLibraryDeniedBody',
 }

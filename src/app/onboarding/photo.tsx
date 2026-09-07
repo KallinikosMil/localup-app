@@ -3,11 +3,11 @@ import { StyleSheet, View, Image, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
 
 import AppText from '@shared/components/AppText';
+import { pickPhoto } from '@shared/utils/photoPicker';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
 import { useOnboardingData } from '@features/onboarding/context/OnboardingContext';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
@@ -42,18 +42,17 @@ const PhotoScreen = () => {
   // second" without the caller knowing which it is.
   const pickImage = useCallback(
     async (index: number) => {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'images',
+      const asset = await pickPhoto({
+        t,
         // 3:4 rather than square: the card this feeds is a portrait hero,
         // and cropping to a circle here only to letterbox it there is how
         // people end up with their heads cut off in the deck.
         allowsEditing: true,
         aspect: [3, 4],
-        quality: 0.8,
       });
 
-      if (result.canceled || result.assets.length === 0) return;
-      const uri = result.assets[0].uri;
+      if (!asset) return;
+      const uri = asset.uri;
 
       const next = [...photos];
       if (index < next.length) {
@@ -63,7 +62,7 @@ const PhotoScreen = () => {
       }
       update({ photoUris: next.slice(0, MAX_PHOTOS) });
     },
-    [photos, update],
+    [photos, t, update],
   );
 
   // Removing the first photo promotes the second rather than leaving a

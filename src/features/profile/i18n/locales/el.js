@@ -126,9 +126,6 @@ export default {
   religionOther: 'Άλλο',
   profileSectionYourGallery: 'Η συλλογή σου',
   profilePhotoHint: 'Παρατεταμένο πάτημα για αφαίρεση',
-  profilePhotoPermissionTitle: 'Απαιτείται άδεια',
-  profilePhotoPermissionBody:
-    'Δώσε πρόσβαση στη συλλογή φωτογραφιών για να προσθέσεις φωτογραφίες.',
   profileNameRequired: 'Το όνομά σου δεν μπορεί να είναι κενό.',
   profilePhotoLastTitle: 'Κράτα τουλάχιστον μία φωτογραφία',
   profilePhotoLastBody:

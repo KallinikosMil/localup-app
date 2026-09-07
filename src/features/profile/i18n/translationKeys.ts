@@ -131,8 +131,6 @@ export enum Translations {
   RELIGION_OTHER = 'religionOther',
   PROFILE_SECTION_YOUR_GALLERY = 'profileSectionYourGallery',
   PROFILE_PHOTO_HINT = 'profilePhotoHint',
-  PROFILE_PHOTO_PERMISSION_TITLE = 'profilePhotoPermissionTitle',
-  PROFILE_PHOTO_PERMISSION_BODY = 'profilePhotoPermissionBody',
   PROFILE_NAME_REQUIRED = 'profileNameRequired',
   PROFILE_PHOTO_LAST_TITLE = 'profilePhotoLastTitle',
   PROFILE_PHOTO_LAST_BODY = 'profilePhotoLastBody',
