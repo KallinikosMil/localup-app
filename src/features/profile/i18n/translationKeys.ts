@@ -33,6 +33,10 @@ export enum Translations {
   PROFILE_PHOTO_MAIN = 'profilePhotoMain',
   PROFILE_PHOTO_REMOVE = 'profilePhotoRemove',
   PROFILE_PHOTO_REMOVE_NTH = 'profilePhotoRemoveNth',
+  // Spoken, not printed: both label a spinner, which announces nothing
+  // on its own.
+  PROFILE_PHOTO_UPLOADING = 'profilePhotoUploading',
+  PROFILE_PHOTO_DELETING = 'profilePhotoDeleting',
   PROFILE_PHOTO_COUNT_OF = 'profilePhotoCountOf',
   PROFILE_PHOTO_REORDER_HINT = 'profilePhotoReorderHint',
   PROFILE_REORDER_ERROR = 'profileReorderError',

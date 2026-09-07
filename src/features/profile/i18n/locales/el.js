@@ -18,6 +18,8 @@ export default {
   profilePhotoMain: 'Κύρια',
   profilePhotoRemove: 'Αφαίρεση φωτογραφίας',
   profilePhotoRemoveNth: 'Αφαίρεση φωτογραφίας {{position}} από {{total}}',
+  profilePhotoUploading: 'Προσθήκη της φωτογραφίας σου',
+  profilePhotoDeleting: 'Αφαίρεση αυτής της φωτογραφίας',
   profilePhotoCountOf: '{{count}} από {{max}}',
   profilePhotoReorderHint:
     'Σύρε για αναδιάταξη. Η πρώτη φωτογραφία είναι αυτή που βλέπουν στο Discover.',

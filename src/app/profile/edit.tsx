@@ -607,7 +607,22 @@ function EditProfileScreenContent() {
           <PhotoGrid
             photos={photos ?? []}
             maxSlots={MAX_PHOTOS}
-            busy={uploadPhoto.isPending || reorderPhotos.isPending}
+            busy={
+              uploadPhoto.isPending ||
+              reorderPhotos.isPending ||
+              // Was missing, so during a delete nothing was disabled at
+              // all: the grid stayed draggable, and a reorder committed
+              // mid-delete sends reorder_photos a list containing the row
+              // being removed.
+              deletePhoto.isPending
+            }
+            uploading={uploadPhoto.isPending}
+            // Which tile, not just whether. React Query keeps the
+            // mutation's argument in `variables` while it is in flight,
+            // and useDeletePhoto takes the photo id — so the tile being
+            // removed is the one that shows the spinner, rather than all
+            // six going grey.
+            deletingId={deletePhoto.isPending ? deletePhoto.variables : null}
             onAdd={addPhoto}
             onRemove={(photo: Photo) => confirmDelete(photo.id)}
             /* Onboarding treats one photo as mandatory in three separate

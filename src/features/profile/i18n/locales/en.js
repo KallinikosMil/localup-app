@@ -22,6 +22,8 @@ export default {
   profilePhotoMain: 'Main',
   profilePhotoRemove: 'Remove photo',
   profilePhotoRemoveNth: 'Remove photo {{position}} of {{total}}',
+  profilePhotoUploading: 'Adding your photo',
+  profilePhotoDeleting: 'Removing this photo',
   profilePhotoCountOf: '{{count}} of {{max}}',
   profilePhotoReorderHint:
     'Drag to reorder. The first photo is the one people see in Discover.',

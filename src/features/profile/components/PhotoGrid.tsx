@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, Pressable } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
 import AppIcon from '@shared/components/AppIcon';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -44,6 +45,13 @@ type PhotoGridProps = {
   // RPC refuses one, deliberately.
   onReorder: (ids: string[]) => void;
   busy?: boolean;
+  // `busy` only ever DISABLED things, which is not the same as saying
+  // anything. Picking a photo left the grid looking untouched for as long
+  // as the upload took — no slot, no spinner — and deleting one left the
+  // tile sitting there fully interactive until it vanished. These two say
+  // where the work is happening.
+  uploading?: boolean;
+  deletingId?: string | null;
 };
 
 const PhotoGrid = ({
@@ -53,6 +61,8 @@ const PhotoGrid = ({
   onRemove,
   onReorder,
   busy = false,
+  uploading = false,
+  deletingId = null,
 }: PhotoGridProps) => {
   const theme = useAppTheme();
   const { t } = useTranslation();
@@ -68,14 +78,21 @@ const PhotoGrid = ({
   const [order, setOrder] = useState<Photo[] | null>(null);
   const live = order ?? photos;
 
-  const emptySlots = Math.max(maxSlots - live.length, 0);
+  // The upload takes the FIRST empty slot rather than appearing as an
+  // extra tile: that is the slot the photo will land in, so the spinner
+  // sits where the result will be and the grid does not reflow when it
+  // arrives.
+  const pendingSlots = uploading ? 1 : 0;
+  const emptySlots = Math.max(maxSlots - live.length - pendingSlots, 0);
 
   const slotPosition = (index: number) => ({
     x: (index % COLUMNS) * (tileWidth + GAP),
     y: Math.floor(index / COLUMNS) * (TILE_HEIGHT + GAP),
   });
 
-  const rows = Math.ceil(Math.max(live.length + emptySlots, 1) / COLUMNS);
+  const rows = Math.ceil(
+    Math.max(live.length + pendingSlots + emptySlots, 1) / COLUMNS,
+  );
 
   const commit = (next: Photo[]) => {
     setOrder(null);
@@ -104,6 +121,7 @@ const PhotoGrid = ({
               tileWidth={tileWidth}
               slotPosition={slotPosition}
               disabled={busy || live.length < 2}
+              deleting={deletingId === photo.id}
               onRemove={() => onRemove(photo)}
               onDrop={targetIndex => {
                 if (targetIndex === index) {
@@ -122,9 +140,39 @@ const PhotoGrid = ({
           ))
         : null}
 
+      {/* The slot the photo is landing in. Same dashed box as an empty
+          slot, so nothing jumps when it fills — only the plus is replaced
+          by a spinner. It is `accessible` with its own label because a
+          spinner alone announces nothing, and this is the one moment
+          where the screen is doing something invisible. */}
+      {tileWidth > 0 && uploading
+        ? (() => {
+            const { x, y } = slotPosition(live.length);
+            return (
+              <View
+                accessible
+                accessibilityLabel={t(Translations.PROFILE_PHOTO_UPLOADING)}
+                style={[
+                  styles.tile,
+                  styles.empty,
+                  {
+                    left: x,
+                    top: y,
+                    width: tileWidth,
+                    backgroundColor: theme.colors.surfaceElevated,
+                    borderColor: theme.colors.outlineDashed,
+                  },
+                ]}
+              >
+                <ActivityIndicator color={theme.colors.primary} />
+              </View>
+            );
+          })()
+        : null}
+
       {tileWidth > 0
         ? Array.from({ length: emptySlots }, (_, i) => {
-            const index = live.length + i;
+            const index = live.length + pendingSlots + i;
             const { x, y } = slotPosition(index);
             return (
               <Pressable
@@ -165,6 +213,7 @@ type TileProps = {
   tileWidth: number;
   slotPosition: (index: number) => { x: number; y: number };
   disabled: boolean;
+  deleting: boolean;
   isMain: boolean;
   onRemove: () => void;
   onDrop: (targetIndex: number) => void;
@@ -179,6 +228,7 @@ const DraggableTile = ({
   tileWidth,
   slotPosition,
   disabled,
+  deleting,
   isMain,
   onRemove,
   onDrop,
@@ -195,7 +245,11 @@ const DraggableTile = ({
   // pick one up instead.
   const drag = Gesture.Pan()
     .activateAfterLongPress(200)
-    .enabled(!disabled)
+    // A tile being deleted must not be draggable. Reordering mid-delete
+    // would send `reorder_photos` a list containing a row that is on its
+    // way out, and the RPC rewrites every position in one statement from
+    // exactly that list.
+    .enabled(!disabled && !deleting)
     .onStart(() => {
       lifted.value = withSpring(1);
     })
@@ -271,8 +325,14 @@ const DraggableTile = ({
             gets deleted by accident. */}
         <Pressable
           onPress={onRemove}
+          // Tapping remove a second time fires a second delete for a row
+          // the first one is already removing — the second fails on a
+          // missing row and surfaces as an error for something that
+          // actually worked.
+          disabled={deleting}
           hitSlop={11}
           accessibilityRole="button"
+          accessibilityState={{ disabled: deleting }}
           // Six identical "Remove photo" buttons tell a screen-reader
           // user nothing about which one they are on. The tile already
           // knows its index and the count.
@@ -300,6 +360,24 @@ const DraggableTile = ({
             ]}
             pointerEvents="none"
           />
+        ) : null}
+
+        {/* Last, so it covers the MAIN tag and the ring as well as the
+            photo — a tile that is half greyed and half not reads as a
+            rendering fault rather than as work in progress. */}
+        {deleting ? (
+          <View
+            accessible
+            accessibilityLabel={t(Translations.PROFILE_PHOTO_DELETING)}
+            style={[
+              styles.scrim,
+              {
+                backgroundColor: theme.colors.BLACK_A75,
+              },
+            ]}
+          >
+            <ActivityIndicator color={theme.colors.ON_PHOTO} />
+          </View>
         ) : null}
       </Animated.View>
     </GestureDetector>
@@ -341,6 +419,11 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderWidth: 2,
     borderRadius: Layout.FIELD_RADIUS,
+  },
+  scrim: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   remove: {
     position: 'absolute',
