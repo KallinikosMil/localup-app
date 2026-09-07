@@ -61,6 +61,23 @@ comment on column public.profiles.politics is
 comment on column public.profiles.religion is
   'GDPR Art.9 special category. Optional, self-declared, never required. NULL = not answered and is scored neutrally.';
 
+-- MISSING IN THE FIRST RUN, added 2026-09-07 after every write from Edit
+-- profile failed with "42501: permission denied for table profiles".
+--
+-- UPDATE on profiles is granted to `authenticated` as a COLUMN WHITELIST,
+-- not on the table: a client may write bio and display_name but not
+-- user_id, onboarding_complete, avatar_url, interest_ids or the generated
+-- geographies. Adding a user-editable column is therefore TWO steps, and
+-- only the first one is visible in the table definition.
+--
+-- RLS is not involved. "Profiles editable by owner" already covers these
+-- rows; the refusal happens a level below it, in the grant.
+--
+-- Verified both ways: as `authenticated` with the owner's JWT claim the
+-- politics/religion write now succeeds, and onboarding_complete is still
+-- refused — so the whitelist is extended by exactly these two.
+grant update (politics, religion) on public.profiles to authenticated;
+
 -- ---------------------------------------------------------------
 -- 2. Weights — below interests (10) and distance (5) on purpose
 -- ---------------------------------------------------------------
