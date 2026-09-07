@@ -2,12 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
-  ScrollView,
   Pressable,
   Alert,
   TextInput as RNTextInput,
-  KeyboardAvoidingView,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { Routes } from '@shared/routes';
 import AppIcon from '@shared/components/AppIcon';
@@ -436,28 +435,11 @@ function EditProfileScreenContent() {
   }
 
   return (
-    // The bio sat under the keyboard with no way to see what you were
-    // typing — the same defect the onboarding shell and chat already had.
-    // `windowSoftInputMode="adjustResize"` is set in the manifest and does
-    // nothing here, because edgeToEdgeEnabled draws the app behind the IME
-    // and the window no longer resizes: the input's measured bounds are
-    // identical before and after the keyboard opens. Three screens have
-    // now hit this; this was the last one still unfixed.
-    //
-    // Offset 0, NOT insets.top: this content renders inside
-    // ScreenSafeArea, so its top edge already starts below the status bar
-    // and measuring from there again would double it.
-    <KeyboardAvoidingView
+    <View
       style={{
         flex: 1,
         backgroundColor: theme.colors.background,
       }}
-      // 'padding' on BOTH platforms, not 'height' on Android. 'height'
-      // animates the container's own height, so closing the keyboard is a
-      // full relayout of the subtree — and Android answers a relayout that
-      // big by resetting accessibility focus to the top of the screen.
-      behavior="padding"
-      keyboardVerticalOffset={0}
     >
       {/* Glass-style top bar */}
       <View
@@ -555,9 +537,27 @@ function EditProfileScreenContent() {
         </Pressable>
       </View>
 
-      <ScrollView
+      {/* KeyboardAwareScrollView, not ScrollView inside a
+          KeyboardAvoidingView. Padding alone only SHRANK this list; it
+          never scrolled, so whether a field stayed visible came down to
+          where it happened to sit when you tapped it. Bio worked because
+          it is far down the page and you have already scrolled; Name sits
+          under the tall photo grid and went straight under the keyboard.
+          This reads the real IME insets and brings the focused field up
+          itself.
+
+          `windowSoftInputMode="adjustResize"` is in the manifest and does
+          nothing, because edgeToEdgeEnabled draws behind the IME and the
+          window never resizes — which is also why Android's own
+          scroll-to-focused-input never fired here.
+
+          bottomOffset leaves a field's own height of air above the
+          keyboard, so the field lands clear of it rather than flush
+          against the top edge of the keys. */}
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        bottomOffset={Layout.FIELD_HEIGHT}
       >
         {/* The circular avatar that used to sit here is gone. Photos ARE
             the grid below, and slot 1 IS the avatar — showing both raised
@@ -881,7 +881,7 @@ function EditProfileScreenContent() {
         </Section>
 
         <Spacer spacing={Spacing.xxl} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <Snackbar
         visible={!!errorMsg}
@@ -890,7 +890,7 @@ function EditProfileScreenContent() {
       >
         {errorMsg ?? ''}
       </Snackbar>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

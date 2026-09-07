@@ -1,6 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import Shell from '@providers/Shell';
 import AppGuard from '@features/auth/components/AppGuard';
@@ -33,9 +34,17 @@ export default function AppProviders({
       <Provider store={store}>
         <ThemeModeProvider>
           <PushRegistrar />
-          <Shell>
-            <AppGuard>{children}</AppGuard>
-          </Shell>
+          {/* Outermost of the visual providers, and it has to be: it
+              installs the listener that reports the REAL IME insets, and
+              every KeyboardAwareScrollView below reads from it. Mounted
+              once at the root rather than per screen — the native
+              listener is a singleton, and a second provider deeper in
+              the tree would shadow it with its own. */}
+          <KeyboardProvider>
+            <Shell>
+              <AppGuard>{children}</AppGuard>
+            </Shell>
+          </KeyboardProvider>
         </ThemeModeProvider>
       </Provider>
     </QueryClientProvider>

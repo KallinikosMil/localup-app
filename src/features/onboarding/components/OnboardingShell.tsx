@@ -1,12 +1,6 @@
 import React, { useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-  Pressable,
-  BackHandler,
-  KeyboardAvoidingView,
-} from 'react-native';
+import { StyleSheet, View, Pressable, BackHandler } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppIcon from '@shared/components/AppIcon';
 import { router, useNavigation } from 'expo-router';
@@ -52,6 +46,12 @@ type OnboardingShellProps = {
   // screen that can start a second one.
   backDisabled?: boolean;
 };
+
+// How much of the screen the pinned action occupies: the xl button plus
+// the padding around it in `styles.action`. Derived from those same
+// values rather than typed as a number, so moving the button's padding
+// cannot silently leave a focused field sitting behind it.
+const ACTION_BAR_HEIGHT = Layout.BUTTON_XL + Spacing.md + Spacing.xl;
 
 const OnboardingShell = ({
   step,
@@ -106,37 +106,35 @@ const OnboardingShell = ({
   const segments = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
-    // The bio field on step 4 sat under the keyboard with no way to see
-    // what you were typing. `windowSoftInputMode="adjustResize"` is set in
-    // the manifest and does nothing, because edgeToEdgeEnabled draws the
-    // app behind the IME and the window no longer resizes — the input's
-    // measured bounds are identical before and after the keyboard opens.
-    // Chat hit this first and solved it the same way; the shells never
-    // got the same treatment.
+    // A plain View, and that is the point: this root must NOT shrink.
     //
-    // Offset 0, NOT insets.top as chat uses: this shell renders inside the
-    // group layout's ScreenSafeArea, so its top edge already starts below
-    // the status bar and measuring from there again would double it.
-    <KeyboardAvoidingView
+    // It used to be a KeyboardAvoidingView, which padded the whole shell
+    // when the keyboard opened — and since Next is pinned to the bottom
+    // as a SIBLING of the scroll area, padding the root lifted the button
+    // too. Reported twice as "the Next buttons rise again". The button is
+    // deliberately not part of the scrolling content; making the
+    // container shrink put it back in the keyboard's way by another
+    // route.
+    //
+    // Now the root stays full height, Next stays where it is (behind the
+    // keyboard, which is correct — you dismiss the keyboard to press it),
+    // and only the scroll area below reacts to the IME.
+    <View
       style={[
         styles.root,
         {
           backgroundColor: theme.colors.background,
         },
       ]}
-      // 'padding' on BOTH platforms, not 'height' on Android.
-      // 'height' animates the container's own height, so closing the
-      // keyboard is a full relayout of the subtree — and Android answers
-      // a relayout that big by resetting accessibility focus to the top
-      // of the screen. Reported as "finish typing, press Done, and the
-      // cursor jumps back to the start". Padding adds space below
-      // instead and leaves the tree alone.
-      behavior="padding"
-      keyboardVerticalOffset={0}
     >
       <AmbientGlow size={Layout.GLOW_SIZE_LG} x={-60} y={-140} />
 
-      <ScrollView
+      {/* Reads the real IME insets and scrolls the focused field clear of
+          the keyboard itself. `windowSoftInputMode="adjustResize"` is in
+          the manifest and does nothing, because edgeToEdgeEnabled draws
+          behind the IME and the window never resizes — which is also why
+          Android's own scroll-to-focused-input never fired here. */}
+      <KeyboardAwareScrollView
         contentContainerStyle={[
           styles.content,
           {
@@ -145,6 +143,10 @@ const OnboardingShell = ({
           },
         ]}
         keyboardShouldPersistTaps="handled"
+        // The pinned Next sits over the bottom of this scroll area, so
+        // the focused field has to clear the button as well as the
+        // keyboard — otherwise it lands underneath it.
+        bottomOffset={ACTION_BAR_HEIGHT}
       >
         <View style={styles.header}>
           {showBack ? (
@@ -257,7 +259,7 @@ const OnboardingShell = ({
         ) : null}
 
         <View style={styles.body}>{children}</View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* OUTSIDE the ScrollView, pinned to the bottom.
           It used to sit at the end of the scrolling content behind a flex
@@ -287,7 +289,7 @@ const OnboardingShell = ({
           </GradientButton>
         </View>
       )}
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

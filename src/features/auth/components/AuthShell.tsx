@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-  KeyboardAvoidingView,
-} from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppIcon from '@shared/components/AppIcon';
 import { useTranslation } from 'react-i18next';
@@ -40,35 +36,31 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
   const { t } = useTranslation();
 
   return (
-    // Same edge-to-edge keyboard problem as onboarding and chat: the
-    // manifest asks for adjustResize and gets nothing, because the app
-    // draws behind the IME. Four screens here are forms.
-    //
-    // Offset 0 — the group layout's ScreenSafeArea already starts this
-    // below the status bar.
-    <KeyboardAvoidingView
+    // The root does not shrink; the scroll area below handles the
+    // keyboard. Both ambient blobs are positioned against this container,
+    // so padding it when the IME opened used to slide them up the screen
+    // with everything else.
+    <View
       style={[
         styles.root,
         {
           backgroundColor: theme.colors.background,
         },
       ]}
-      // 'padding' on BOTH platforms, not 'height' on Android.
-      // 'height' animates the container's own height, so closing the
-      // keyboard is a full relayout of the subtree — and Android answers
-      // a relayout that big by resetting accessibility focus to the top
-      // of the screen. Reported as "finish typing, press Done, and the
-      // cursor jumps back to the start". Padding adds space below
-      // instead and leaves the tree alone.
-      behavior="padding"
-      keyboardVerticalOffset={0}
     >
       <AmbientGlow size={Layout.GLOW_SIZE_LG} x={-60} y={-140} />
       {/* The second blob is paler and comes from the opposite corner, so
           a form with nothing typed in it still has somewhere to look. */}
       <AmbientGlow size={Layout.GLOW_SIZE_SM} x={220} y={520} />
 
-      <ScrollView
+      {/* Reads the real IME insets and brings the focused field up
+          itself. The manifest asks for adjustResize and gets nothing,
+          because edgeToEdgeEnabled draws the app behind the keyboard and
+          the window never resizes — so Android's own
+          scroll-to-focused-input never fired either. Four screens here
+          are forms; the password fields are the lowest on the page and
+          were the worst hit. */}
+      <KeyboardAwareScrollView
         contentContainerStyle={[
           styles.content,
           {
@@ -77,6 +69,7 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
           },
         ]}
         keyboardShouldPersistTaps="handled"
+        bottomOffset={Spacing.xxl}
       >
         {/* The cursor lands HERE, at the literal top of the content, not
             on the title below it. Same rule as the onboarding shell:
@@ -150,8 +143,8 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
             <View style={styles.footer}>{footer}</View>
           </>
         ) : null}
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+    </View>
   );
 };
 
