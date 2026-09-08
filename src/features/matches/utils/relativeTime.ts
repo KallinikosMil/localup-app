@@ -54,6 +54,41 @@ export const relativeTime = (
   return { kind: 'date', date: then };
 };
 
+// Which DAY a message belongs to, for the separator inside a conversation.
+//
+// Deliberately not derived from relativeTime(). That function answers "how
+// long ago", and the two questions disagree at exactly one point: midnight.
+// A message sent at 23:50 and read at 00:10 is twenty minutes old — which
+// is the right answer on a Matches row — but it belongs under YESTERDAY's
+// separator. The chat screen used to map the elapsed-time kinds 'now',
+// 'minutes' and 'hours' onto "Today", and the first two carry no calendar
+// information at all, so every late-night conversation read as today's
+// until the messages aged past an hour.
+export type CalendarDay =
+  | { kind: 'today' }
+  | { kind: 'yesterday' }
+  | { kind: 'weekday'; date: Date }
+  | { kind: 'date'; date: Date }
+  | { kind: 'none' };
+
+export const calendarDay = (
+  iso: string | null | undefined,
+  now: Date = new Date(),
+): CalendarDay => {
+  if (!iso) return { kind: 'none' };
+
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return { kind: 'none' };
+
+  const gap = Math.round((startOfDay(now) - startOfDay(then)) / 86_400_000);
+  // Clock skew can date a message slightly in the reader's future; it
+  // still belongs to the day the reader is having.
+  if (gap <= 0) return { kind: 'today' };
+  if (gap === 1) return { kind: 'yesterday' };
+  if (gap < 7) return { kind: 'weekday', date: then };
+  return { kind: 'date', date: then };
+};
+
 // Whether two timestamps fall on the same calendar day for the reader.
 // Used to decide where a day separator goes in a conversation — and, like
 // everything above, it compares dates rather than subtracting instants,

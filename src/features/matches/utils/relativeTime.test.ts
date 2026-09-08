@@ -1,4 +1,4 @@
-import { relativeTime, sameCalendarDay } from './relativeTime';
+import { calendarDay, relativeTime, sameCalendarDay } from './relativeTime';
 
 // Local time throughout: the rule is about the reader's calendar, and
 // `new Date(y, m, d, h, min)` builds a local instant, which is exactly
@@ -102,5 +102,64 @@ describe('sameCalendarDay', () => {
     expect(sameCalendarDay(null, iso(2026, 7, 26))).toBe(false);
     expect(sameCalendarDay(iso(2026, 7, 26), undefined)).toBe(false);
     expect(sameCalendarDay('nope', iso(2026, 7, 26))).toBe(false);
+  });
+});
+
+describe('calendarDay', () => {
+  // Just past midnight — the only moment the two questions disagree, and
+  // the moment the bug was reported from.
+  const justAfterMidnight = new Date(2026, 8, 9, 0, 20, 0);
+
+  // The reported bug: a message ten minutes old, sent before midnight.
+  // relativeTime correctly calls it 'minutes'; the separator must still
+  // say yesterday.
+  it('puts a message from before midnight under yesterday', () => {
+    expect(calendarDay(iso(2026, 8, 8, 23, 50), justAfterMidnight)).toEqual({
+      kind: 'yesterday',
+    });
+    expect(relativeTime(iso(2026, 8, 8, 23, 50), justAfterMidnight)).toEqual({
+      kind: 'minutes',
+      value: 30,
+    });
+  });
+
+  it('puts a message from after midnight under today', () => {
+    expect(calendarDay(iso(2026, 8, 9, 0, 5), justAfterMidnight)).toEqual({
+      kind: 'today',
+    });
+  });
+
+  // 23 hours apart and the same label would be wrong: these are two days.
+  it('does not confuse elapsed hours with a day', () => {
+    const now = new Date(2026, 8, 9, 22, 0);
+    expect(calendarDay(iso(2026, 8, 8, 23, 0), now)).toEqual({
+      kind: 'yesterday',
+    });
+  });
+
+  it('names the weekday inside the last week', () => {
+    const now = new Date(2026, 8, 9, 12, 0);
+    expect(calendarDay(iso(2026, 8, 5, 12, 0), now)).toMatchObject({
+      kind: 'weekday',
+    });
+  });
+
+  it('falls back to a date beyond a week', () => {
+    const now = new Date(2026, 8, 9, 12, 0);
+    expect(calendarDay(iso(2026, 7, 20, 12, 0), now)).toMatchObject({
+      kind: 'date',
+    });
+  });
+
+  // Clock skew: the server can stamp a message a few seconds ahead of the
+  // handset. It is still part of the day the reader is having.
+  it('treats a future timestamp as today', () => {
+    const now = new Date(2026, 8, 9, 12, 0);
+    expect(calendarDay(iso(2026, 8, 9, 12, 1), now)).toEqual({ kind: 'today' });
+  });
+
+  it('has nothing to say about a missing or unparseable timestamp', () => {
+    expect(calendarDay(null)).toEqual({ kind: 'none' });
+    expect(calendarDay('nope')).toEqual({ kind: 'none' });
   });
 });

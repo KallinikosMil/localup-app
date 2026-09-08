@@ -37,7 +37,7 @@ import { Typography } from '@theme/typography';
 import AmbientGlow from '@shared/components/AmbientGlow';
 import { formatDate } from '@shared/utils/date';
 import {
-  relativeTime,
+  calendarDay,
   sameCalendarDay,
 } from '@features/matches/utils/relativeTime';
 import { Translations } from '@features/chat/i18n/translationKeys';
@@ -160,15 +160,13 @@ export default function ChatScreen() {
     });
   };
 
-  // Reuses the list's relative-time rules so a conversation and the
-  // Matches row above it never disagree about what day something was.
-  // Anything from today reads "Today" — the hour is on the row, not here.
+  // Asks the CALENDAR question, not the elapsed-time one. The separator
+  // above already splits on calendar days; labelling it from "how long
+  // ago" made the two disagree for an hour after every midnight.
   const dayLabel = (iso: string) => {
-    const r = relativeTime(iso);
+    const r = calendarDay(iso);
     switch (r.kind) {
-      case 'now':
-      case 'minutes':
-      case 'hours':
+      case 'today':
         return t(Translations.CHAT_DAY_TODAY);
       case 'yesterday':
         return t(Translations.CHAT_DAY_YESTERDAY);
