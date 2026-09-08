@@ -164,6 +164,12 @@ export const usePushRegistration = () => {
         return true;
       };
 
+      // The first line of an attempt, before any check can swallow it.
+      // Without it, "the effect never ran" and "the effect ran and gave up
+      // on its very first branch" look identical from outside: both are
+      // silence, and we spent a day telling them apart by hand.
+      pushLog('attempting for', uid.slice(0, 8));
+
       if (isExpoGo) {
         pushLog('skipped: Expo Go cannot receive remote push');
         return;
