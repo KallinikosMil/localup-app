@@ -5,6 +5,10 @@ import { useSelector } from 'react-redux';
 import { supabase } from '@config/supabase';
 import { RootState } from '@store';
 import { useMatches, type Match } from '@features/matches/hooks/useMatches';
+import {
+  isUnread as isUnreadMatch,
+  readAt,
+} from '@features/matches/utils/unread';
 
 // Read state lives on the server now (`public.match_reads`), so it follows
 // the account rather than the handset, and a notification service can ask
@@ -18,17 +22,6 @@ import { useMatches, type Match } from '@features/matches/hooks/useMatches';
 // There is deliberately no "mark unread": the table has no DELETE policy
 // and a BEFORE UPDATE trigger clamps the timestamp so it can never move
 // backwards.
-
-// The instant a match last had activity: its newest message, or — for a
-// brand-new match with no messages yet — when the match itself was made.
-// A match stays unread until it has been opened AFTER this instant, so
-// both "new match" and "new message" light the badge with one rule.
-const activityAt = (m: Match) =>
-  new Date(m.last_message_at ?? m.created_at).getTime();
-
-// No row means never opened, which must read as "older than everything".
-const readAt = (m: Match) =>
-  m.last_read_at ? new Date(m.last_read_at).getTime() : 0;
 
 // Marks a match read up to `at` (default now). Patches the matches cache
 // first so the badge clears on the tap rather than on the round trip.
@@ -77,7 +70,7 @@ export const useMarkMatchRead = () => {
 export const useUnreadMatches = () => {
   const { data: matches } = useMatches();
 
-  const isUnread = useCallback((m: Match) => activityAt(m) > readAt(m), []);
+  const isUnread = useCallback((m: Match) => isUnreadMatch(m), []);
 
   const unreadIds = (matches ?? []).filter(isUnread).map(m => m.id);
   return {
