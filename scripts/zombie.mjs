@@ -226,7 +226,17 @@ const commands = {
       await new Promise(r => setTimeout(r, POLL_MS));
       const incoming = await call(
         `/chat_messages?select=body,created_at&thread_id=eq.${threadId}` +
-          `&sender_id=eq.${targetUid}&created_at=gt.${since}&order=created_at.asc`,
+          `&sender_id=eq.${targetUid}` +
+          // encodeURIComponent, and it is load-bearing. Postgres hands
+          // back timestamps as 2026-09-08T16:15:33.18828+00:00, and a
+          // bare '+' in a query string decodes to a SPACE — so the
+          // server received "…18828 00:00" and answered 22007, invalid
+          // input syntax for timestamptz. The very first reply worked
+          // because `since` was still a Z-suffixed ISO string from
+          // new Date(); it only broke on the second poll, once `since`
+          // came from the database.
+          `&created_at=gt.${encodeURIComponent(since)}` +
+          `&order=created_at.asc`,
       );
       if (!incoming.length) continue;
       since = incoming[incoming.length - 1].created_at;
