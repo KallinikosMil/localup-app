@@ -191,9 +191,15 @@ export default function ChatScreen() {
   }) => {
     const isMine = item.sender_id === uid;
     // The list is INVERTED and its data is newest-first, so the NEXT
-    // index is the older message. Inside a cell the JSX order is upright
-    // (inverted applies the flip twice), so the separator still renders
-    // before the bubble and still appears above it.
+    // index is the older message — that part holds, and it is why the day
+    // pill is attached to the FIRST message of each day.
+    //
+    // Where it goes inside the cell was asserted here and never checked:
+    // the old comment claimed the double flip left JSX order upright, so
+    // separator-then-bubble would read top-to-bottom. On a device it does
+    // not. The pill came out BELOW its own message, which put "Today" one
+    // message late — under the first message of today rather than above
+    // it. Verified on the Redmi, not reasoned about: see below.
     const older = newestFirst[index + 1];
     const showDay =
       !older || !sameCalendarDay(item.created_at, older.created_at);
@@ -242,8 +248,12 @@ export default function ChatScreen() {
 
     if (!showDay) return bubble;
 
+    // Bubble FIRST, pill second. In this cell the two come out in the
+    // reverse of their JSX order, so this is what puts the pill above the
+    // message it introduces.
     return (
       <>
+        {bubble}
         <View
           style={[
             styles.dayPill,
@@ -262,7 +272,6 @@ export default function ChatScreen() {
             {dayLabel(item.created_at)}
           </AppText>
         </View>
-        {bubble}
       </>
     );
   };
