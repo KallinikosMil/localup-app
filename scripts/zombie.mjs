@@ -80,22 +80,39 @@ const signIn = async who => {
 
 // Every call carries the zombie's OWN token, so RLS and auth.uid() see a
 // normal signed-in user. Nothing here is privileged.
-const api = (token) => async (path, init = {}) => {
-  const res = await fetch(`${URL_BASE}/rest/v1${path}`, {
-    ...init,
-    headers: {
-      apikey: ANON,
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      ...(init.headers ?? {}),
-    },
-  });
-  const text = await res.text();
-  const body = text ? JSON.parse(text) : null;
-  if (!res.ok) {
-    throw new Error(`${path} → ${res.status} ${JSON.stringify(body)}`);
-  }
-  return body;
+//
+// The session deliberately outlives its access token. Supabase expires one
+// after an hour, and `auto` is meant to sit there all afternoon: the first
+// version died mid-conversation on PGRST303 "JWT expired" after five
+// perfectly good replies, which reads as a crash and is really a clock.
+// Signing in again is enough for a dev script — the fixture password is
+// right here, and refresh-token rotation would only be more to get wrong.
+const openSession = async who => {
+  let { token, uid } = await signIn(who);
+
+  const call = async (path, init = {}, mayRetry = true) => {
+    const res = await fetch(`${URL_BASE}/rest/v1${path}`, {
+      ...init,
+      headers: {
+        apikey: ANON,
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        ...(init.headers ?? {}),
+      },
+    });
+    const text = await res.text();
+    const body = text ? JSON.parse(text) : null;
+    if (res.status === 401 && mayRetry) {
+      ({ token } = await signIn(who));
+      return call(path, init, false);
+    }
+    if (!res.ok) {
+      throw new Error(`${path} → ${res.status} ${JSON.stringify(body)}`);
+    }
+    return body;
+  };
+
+  return { call, uid };
 };
 
 const resolveTarget = async (call, target) => {
@@ -184,8 +201,7 @@ const REPLIES = [
 
 const commands = {
   async like(zombie, target) {
-    const { token, uid } = await signIn(zombie);
-    const call = api(token);
+    const { call } = await openSession(zombie);
     const targetUid = await resolveTarget(call, target);
     const [result] = await call('/rpc/handle_swipe', {
       method: 'POST',
@@ -201,8 +217,7 @@ const commands = {
   async say(zombie, target, ...words) {
     const message = words.join(' ');
     if (!message) throw new Error('nothing to say — pass a message');
-    const { token, uid } = await signIn(zombie);
-    const call = api(token);
+    const { call, uid } = await openSession(zombie);
     const targetUid = await resolveTarget(call, target);
     const matchId = await activeMatch(call, uid, targetUid);
     await send(call, matchId, uid, message);
@@ -211,8 +226,7 @@ const commands = {
 
   async auto(zombie, target, seconds = '3') {
     const delay = Number(seconds) * 1000;
-    const { token, uid } = await signIn(zombie);
-    const call = api(token);
+    const { call, uid } = await openSession(zombie);
     const targetUid = await resolveTarget(call, target);
     const matchId = await activeMatch(call, uid, targetUid);
     const threadId = await threadFor(call, matchId);
