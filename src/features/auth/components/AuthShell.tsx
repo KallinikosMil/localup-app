@@ -61,6 +61,7 @@ const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => {
           are forms; the password fields are the lowest on the page and
           were the worst hit. */}
       <KeyboardAwareScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
           {

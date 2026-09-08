@@ -483,6 +483,7 @@ export default function ChatScreen() {
         // the newest message is simply where the list starts. New
         // messages arriving also need no scroll call.
         <FlatList
+          showsVerticalScrollIndicator={false}
           data={newestFirst}
           inverted
           keyExtractor={item => item.id}

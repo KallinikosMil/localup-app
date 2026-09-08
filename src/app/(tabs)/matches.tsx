@@ -478,6 +478,7 @@ function MatchesScreenContent() {
         </View>
       ) : all.length === 0 ? (
         <ScrollView
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.empty}
           refreshControl={
             <RefreshControl
@@ -517,6 +518,7 @@ function MatchesScreenContent() {
         </ScrollView>
       ) : (
         <FlatList
+          showsVerticalScrollIndicator={false}
           data={all}
           keyExtractor={item => item.id}
           renderItem={renderItem}

@@ -533,6 +533,7 @@ function EditProfileScreenContent() {
           keyboard, so the field lands clear of it rather than flush
           against the top edge of the keys. */}
       <KeyboardAwareScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         bottomOffset={Layout.FIELD_HEIGHT}

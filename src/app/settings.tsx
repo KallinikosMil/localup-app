@@ -216,7 +216,10 @@ export default function SettingsScreen() {
         <View style={styles.headerSide} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.body}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.body}
+      >
         <SectionLabel theme={theme}>
           {t(Translations.PROFILE_APPEARANCE)}
         </SectionLabel>

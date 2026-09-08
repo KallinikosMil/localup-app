@@ -173,6 +173,7 @@ function ProfileScreenContent() {
       {isFocused ? <StatusBar barStyle="light-content" /> : null}
 
       <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
           {

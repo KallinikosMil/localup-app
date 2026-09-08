@@ -376,6 +376,7 @@ export default function DiscoverScreen() {
     return (
       <>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           style={{
             backgroundColor: theme.colors.background,
           }}
@@ -421,6 +422,7 @@ export default function DiscoverScreen() {
           only claims a drag once it's 12px HORIZONTAL (activeOffsetX in
           SwipeCard), which a downward pull never is. */}
       <ScrollView
+        showsVerticalScrollIndicator={false}
         style={styles.deckScroll}
         contentContainerStyle={styles.deckContent}
         refreshControl={

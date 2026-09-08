@@ -197,7 +197,10 @@ export default function FiltersScreen() {
             <ActivityIndicator animating size="large" />
           </View>
         ) : (
-          <ScrollView contentContainerStyle={styles.body}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.body}
+          >
             {/* Distance */}
             <View style={styles.sectionHead}>
               <AppText

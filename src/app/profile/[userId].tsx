@@ -174,7 +174,10 @@ export default function UserProfileScreen() {
           bar style by itself. */}
       <StatusBar barStyle="light-content" />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
         <ProfileHero
           photoUrls={(photos ?? []).map(p => p.url)}
           fallbackUrl={profile.avatar_url}

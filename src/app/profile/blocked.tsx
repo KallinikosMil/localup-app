@@ -274,6 +274,7 @@ export default function BlockedUsersScreen() {
         </View>
       ) : (
         <FlatList
+          showsVerticalScrollIndicator={false}
           data={blocked}
           keyExtractor={item => item.user_id}
           renderItem={renderItem}

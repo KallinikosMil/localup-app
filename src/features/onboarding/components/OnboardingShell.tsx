@@ -135,6 +135,7 @@ const OnboardingShell = ({
           behind the IME and the window never resizes — which is also why
           Android's own scroll-to-focused-input never fired here. */}
       <KeyboardAwareScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
           {

@@ -193,6 +193,7 @@ export default function EditInterestsScreen() {
           </View>
         ) : (
           <ScrollView
+            showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.body}
             keyboardShouldPersistTaps="handled"
           >

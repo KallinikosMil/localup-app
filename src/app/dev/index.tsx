@@ -68,7 +68,10 @@ const DevGallery = () => {
         },
       ]}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         <AppText
           variant="h1"
           accessibilityRole="header"
