@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { useSelector } from 'react-redux';
@@ -19,8 +19,16 @@ Notifications.setNotificationHandler({
   }),
 });
 
+// Deliberately NOT gated on __DEV__. Every way this hook can give up —
+// permission refused, no projectId, a token fetch that never settles —
+// ends in one of these lines, and in a release build they all compiled to
+// nothing. So on the one kind of build that matters, a device that never
+// registered looked exactly like a device where the code never ran, and
+// there was no way to tell them apart from the outside. Nothing logged
+// here is secret: the token is trimmed to its tail so a logcat capture is
+// not a working address to push to.
 const pushLog = (...args: unknown[]) => {
-  if (__DEV__) console.log('[push]', ...args);
+  console.log('[push]', ...args);
 };
 
 // Remote push does not exist in Expo Go on Android any more: Expo Go is a
@@ -139,16 +147,23 @@ export const usePushRegistration = () => {
       currentToken = null;
     }
     previousUid.current = uid;
+    // Bumped on the way out too, so a registration still in flight for the
+    // account that just signed out cannot land after it and claim this
+    // device for someone who is no longer here.
+    generation.current += 1;
     if (!uid) return;
 
-    const myGeneration = ++generation.current;
-    const superseded = () => {
-      if (myGeneration === generation.current) return false;
-      pushLog('registration superseded by a newer run → abandoning');
-      return true;
-    };
-
     const register = async () => {
+      // Claimed per ATTEMPT rather than per effect run, because the
+      // foreground retry below can start a second one while the first is
+      // still waiting on the token fetch.
+      const myGeneration = ++generation.current;
+      const superseded = () => {
+        if (myGeneration === generation.current) return false;
+        pushLog('registration superseded by a newer run → abandoning');
+        return true;
+      };
+
       if (isExpoGo) {
         pushLog('skipped: Expo Go cannot receive remote push');
         return;
@@ -194,7 +209,7 @@ export const usePushRegistration = () => {
           pushLog('register failed', error.message);
           return;
         }
-        pushLog('registered', token);
+        pushLog('registered', `…${token.slice(-10)}`);
       } catch (e) {
         // Never fatal. A device that cannot receive push is a device that
         // gets no notifications, not a device that cannot use the app.
@@ -203,5 +218,18 @@ export const usePushRegistration = () => {
     };
 
     void register();
+
+    // Permission can be granted long AFTER this effect ran — from
+    // Android's settings, or from a dialog answered on a later launch —
+    // and nothing remounts the provider tree when it is. The app is
+    // resumed rather than started, `uid` never changes, so the effect
+    // never re-runs and the account holds no token for as long as the
+    // process lives. Every return to the foreground is another chance,
+    // taken only while there is still nothing to lose by trying.
+    const resumed = AppState.addEventListener('change', state => {
+      if (state !== 'active' || tokenRef.current) return;
+      void register();
+    });
+    return () => resumed.remove();
   }, [uid]);
 };
