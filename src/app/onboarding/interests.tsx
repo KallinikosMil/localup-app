@@ -10,6 +10,7 @@ import AppText from '@shared/components/AppText';
 import AppButton from '@shared/components/AppButton';
 import Spacer from '@shared/components/Spacer';
 import InterestChip from '@shared/components/InterestChip';
+import BeliefSelect from '@features/profile/components/BeliefSelect';
 import OnboardingShell from '@features/onboarding/components/OnboardingShell';
 import { useErrorMessage } from '@shared/hooks/useErrorMessage';
 import { toISODate } from '@shared/utils/date';
@@ -19,6 +20,13 @@ import {
   INTEREST_MAX,
   INTEREST_MIN,
 } from '@features/profile/utils/interestSelection';
+import {
+  POLITICS,
+  RELIGION,
+  POLITICS_LABEL,
+  RELIGION_LABEL,
+} from '@features/profile/utils/beliefs';
+import { Translations as ProfileT } from '@features/profile/i18n/translationKeys';
 import { supabase } from '@config/supabase';
 import { Translations } from '@features/onboarding/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
@@ -73,6 +81,9 @@ const InterestsScreen = () => {
     onboardingData.interestIds,
   );
   const [bio, setBio] = useState(onboardingData.bio);
+  // null is the starting value and a complete answer — see BeliefSelect.
+  const [politics, setPolitics] = useState(onboardingData.politics);
+  const [religion, setReligion] = useState(onboardingData.religion);
   const [missing, setMissing] = useState<MissingField | null>(null);
   const [progress, setProgress] = useState<{
     done: number;
@@ -178,6 +189,8 @@ const InterestsScreen = () => {
     update({
       interestIds: selectedIds,
       bio,
+      politics,
+      religion,
     });
 
     mutate({
@@ -189,6 +202,8 @@ const InterestsScreen = () => {
       photoUris,
       interestIds: selectedIds,
       bio,
+      politics,
+      religion,
       onProgress: (done, total) => setProgress({ done, total }),
     });
   };
@@ -208,6 +223,40 @@ const InterestsScreen = () => {
       actionDisabled={!canFinish || isPending}
       backDisabled={isPending}
     >
+      {/* Above the interests, and optional in a way the control itself
+          makes obvious: both dropdowns rest on "Prefer not to say", so
+          scrolling straight past them IS an answer.
+
+          They were only in Edit profile before, which a new person has
+          no reason to open — so the ranking term for beliefs scored
+          everybody at the neutral middle and the whole feature was
+          inert. Here they are seen; there they were not.
+
+          Not their own onboarding step on purpose. A dedicated screen
+          for two questions about politics and religion, inside a flow
+          you must finish to use the app, reads as a demand however it is
+          worded. Sitting quietly above the interests, already answered,
+          does not. */}
+      <View style={styles.beliefs}>
+        <BeliefSelect
+          label={t(ProfileT.PROFILE_POLITICS_LABEL)}
+          value={politics}
+          options={POLITICS}
+          labelFor={o => t(POLITICS_LABEL[o])}
+          onChange={setPolitics}
+        />
+        <BeliefSelect
+          label={t(ProfileT.PROFILE_RELIGION_LABEL)}
+          hint={t(ProfileT.PROFILE_BELIEFS_NOTE)}
+          value={religion}
+          options={RELIGION}
+          labelFor={o => t(RELIGION_LABEL[o])}
+          onChange={setReligion}
+        />
+      </View>
+
+      <Spacer spacing={Spacing.lg} />
+
       <AppText
         variant="caption"
         style={{
@@ -385,6 +434,9 @@ const InterestsScreen = () => {
 export default InterestsScreen;
 
 const styles = StyleSheet.create({
+  beliefs: {
+    gap: Layout.STRIP_GAP,
+  },
   fieldLabel: {
     marginBottom: Layout.FIELD_LABEL_GAP,
   },

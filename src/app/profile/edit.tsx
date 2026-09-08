@@ -36,6 +36,8 @@ import BeliefPicker from '@features/profile/components/BeliefPicker';
 import {
   POLITICS,
   RELIGION,
+  POLITICS_LABEL,
+  RELIGION_LABEL,
   type Politics,
   type Religion,
 } from '@features/profile/utils/beliefs';
@@ -56,30 +58,6 @@ import { Typography } from '@theme/typography';
 import { Spacing } from '@theme/constants/Spacing';
 import { Layout } from '@theme/constants/Layout';
 import { BorderRadius } from '@theme/constants/BorderRadius';
-
-// The chip labels, keyed by the stored value. A map rather than a switch
-// so a value added to the vocabulary without a translation fails the
-// typecheck instead of rendering its raw database string to a user.
-const POLITICS_LABEL: Record<Politics, string> = {
-  left: Translations.POLITICS_LEFT,
-  centre_left: Translations.POLITICS_CENTRE_LEFT,
-  centre: Translations.POLITICS_CENTRE,
-  centre_right: Translations.POLITICS_CENTRE_RIGHT,
-  right: Translations.POLITICS_RIGHT,
-  apolitical: Translations.POLITICS_APOLITICAL,
-};
-
-const RELIGION_LABEL: Record<Religion, string> = {
-  agnostic: Translations.RELIGION_AGNOSTIC,
-  atheist: Translations.RELIGION_ATHEIST,
-  buddhist: Translations.RELIGION_BUDDHIST,
-  christian: Translations.RELIGION_CHRISTIAN,
-  hindu: Translations.RELIGION_HINDU,
-  jewish: Translations.RELIGION_JEWISH,
-  muslim: Translations.RELIGION_MUSLIM,
-  spiritual: Translations.RELIGION_SPIRITUAL,
-  other: Translations.RELIGION_OTHER,
-};
 
 const MAX_PHOTOS = 6;
 const BIO_LIMIT = 240;

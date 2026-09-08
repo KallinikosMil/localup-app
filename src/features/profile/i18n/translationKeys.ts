@@ -118,6 +118,10 @@ export enum Translations {
   PROFILE_POLITICS_LABEL = 'profilePoliticsLabel',
   PROFILE_RELIGION_LABEL = 'profileReligionLabel',
   PROFILE_BELIEF_CLEAR_HINT = 'profileBeliefClearHint',
+  // The resting state of a belief dropdown, and the first item in it.
+  // Shown wherever the answer is null — which is a real answer, not a
+  // missing one.
+  BELIEF_PREFER_NOT_SAY = 'beliefPreferNotSay',
   POLITICS_LEFT = 'politicsLeft',
   POLITICS_CENTRE_LEFT = 'politicsCentreLeft',
   POLITICS_CENTRE = 'politicsCentre',

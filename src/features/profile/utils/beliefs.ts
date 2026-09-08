@@ -1,3 +1,5 @@
+import { Translations } from '@features/profile/i18n/translationKeys';
+
 // Politics and religion: the vocabularies, and how a choice is toggled.
 //
 // ⚠️ Both are GDPR Article 9 SPECIAL CATEGORY data — "political opinions"
@@ -62,3 +64,32 @@ export const toggleBelief = <T extends string>(
   current: T | null,
   tapped: T,
 ): T | null => (current === tapped ? null : tapped);
+
+// The chip labels, keyed by the stored value. A map rather than a switch
+// so a value added to the vocabulary without a translation fails the
+// typecheck instead of rendering its raw database string to a user.
+//
+// These live here, beside the vocabularies they index, because two
+// screens now read them: Edit profile's chip grid and onboarding's
+// dropdowns. Kept in one place, a new option cannot be labelled in one
+// and left raw in the other.
+export const POLITICS_LABEL: Record<Politics, string> = {
+  left: Translations.POLITICS_LEFT,
+  centre_left: Translations.POLITICS_CENTRE_LEFT,
+  centre: Translations.POLITICS_CENTRE,
+  centre_right: Translations.POLITICS_CENTRE_RIGHT,
+  right: Translations.POLITICS_RIGHT,
+  apolitical: Translations.POLITICS_APOLITICAL,
+};
+
+export const RELIGION_LABEL: Record<Religion, string> = {
+  agnostic: Translations.RELIGION_AGNOSTIC,
+  atheist: Translations.RELIGION_ATHEIST,
+  buddhist: Translations.RELIGION_BUDDHIST,
+  christian: Translations.RELIGION_CHRISTIAN,
+  hindu: Translations.RELIGION_HINDU,
+  jewish: Translations.RELIGION_JEWISH,
+  muslim: Translations.RELIGION_MUSLIM,
+  spiritual: Translations.RELIGION_SPIRITUAL,
+  other: Translations.RELIGION_OTHER,
+};

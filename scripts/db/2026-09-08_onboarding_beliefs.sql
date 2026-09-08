@@ -1,0 +1,47 @@
+-- complete_onboarding now carries politics and religion.
+--
+-- WHY
+-- The two fields existed only in Edit profile, which a new user has no
+-- reason to open. So the beliefs term in discover_candidates scored every
+-- single person at the neutral 0.5, forever, and the feature was inert —
+-- the schema, the RPC weights and the Play declaration all described
+-- something no human ever saw. Found on device: a full run through
+-- onboarding never showed the question.
+--
+-- DROP THEN CREATE, NOT REPLACE
+-- Adding parameters changes the signature, so CREATE OR REPLACE would
+-- have left the old nine-argument function in place beside the new one
+-- and given PostgREST two candidates for the same name.
+--
+-- TWO THINGS DROP TAKES WITH IT
+--   1. The grants. This function was granted to `authenticated` and
+--      `service_role` only, never PUBLIC. A newly created function is
+--      executable by PUBLIC by default, so the grants are revoked and
+--      restored explicitly below.
+--   2. Supabase's default privileges for new functions in `public` also
+--      add `anon`, which the previous definition did not have. Verified
+--      after applying and revoked separately — it was not exploitable
+--      (the body raises on a null auth.uid()) but an unauthenticated role
+--      should not hold EXECUTE on a SECURITY DEFINER function that writes
+--      profiles.
+--
+-- The two new parameters default to NULL so a client that has not shipped
+-- the picker yet still calls this successfully.
+--
+-- Applied live 2026-09-08. This file is the record, not the source of
+-- truth — re-dump before re-applying.
+
+-- (definition as applied: see migrations
+--  complete_onboarding_accepts_beliefs and
+--  complete_onboarding_revoke_anon)
+
+-- Final state to verify against:
+--   args:  ..., p_interest_ids uuid[], p_politics text, p_religion text
+--   prosecdef: true
+--   proconfig: {search_path=public, pg_temp}
+--   proacl:    {postgres=X, authenticated=X, service_role=X}
+--
+-- select p.proacl::text, p.proconfig, p.prosecdef,
+--        pg_get_function_identity_arguments(p.oid)
+-- from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+-- where n.nspname = 'public' and p.proname = 'complete_onboarding';

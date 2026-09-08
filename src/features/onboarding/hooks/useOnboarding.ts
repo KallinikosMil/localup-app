@@ -4,6 +4,7 @@ import { supabase } from '@config/supabase';
 import { store } from '@store';
 import { setOnboardingComplete } from '@features/auth/slices/authSlice';
 import { PHOTO_BUCKET } from '@shared/utils/storage';
+import { type Politics, type Religion } from '@features/profile/utils/beliefs';
 
 type OnboardingData = {
   displayName: string;
@@ -14,6 +15,12 @@ type OnboardingData = {
   photoUris: string[];
   interestIds: string[];
   bio?: string;
+  // Nullable rather than optional, and that is the point: null is the
+  // answer "prefer not to say", not the absence of one. Optional would
+  // let a caller omit them and leave it ambiguous whether the person
+  // declined or the screen forgot to pass them through.
+  politics: Politics | null;
+  religion: Religion | null;
   // Called as each photo starts uploading. Finishing used to be one
   // upload behind a bare spinner; with up to six it is long enough that
   // an unlabelled spinner reads as a hang.
@@ -126,6 +133,12 @@ export function useCompleteOnboarding() {
         p_avatar_path: path,
         p_avatar_url: urlData.publicUrl,
         p_interest_ids: data.interestIds,
+        // Null when the person left "Prefer not to say" alone, which is
+        // the default. The RPC defaults both to null as well, so an
+        // older client that has not shipped the picker still calls this
+        // successfully instead of erroring on a missing argument.
+        p_politics: data.politics,
+        p_religion: data.religion,
       });
       if (rpcError) {
         // The upload in step 1 already succeeded, so a failure here leaves

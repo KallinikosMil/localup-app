@@ -6,6 +6,8 @@ import React, {
   useMemo,
 } from 'react';
 
+import { type Politics, type Religion } from '@features/profile/utils/beliefs';
+
 export type OnboardingData = {
   displayName: string;
   dateOfBirth: Date | null;
@@ -18,6 +20,14 @@ export type OnboardingData = {
   photoUris: string[];
   interestIds: string[];
   bio: string;
+  // GDPR Article 9 special category, and null is a real answer here, not
+  // an empty field waiting to be filled: it is what "Prefer not to say"
+  // sends, and the server scores it in the middle of the range rather
+  // than at the bottom. Typed as nullable for that reason — there is no
+  // sentinel string for "unanswered", because the database CHECK would
+  // refuse one and the ranking already understands NULL.
+  politics: Politics | null;
+  religion: Religion | null;
 };
 
 type OnboardingContextValue = {
@@ -34,6 +44,8 @@ const initialData: OnboardingData = {
   photoUris: [],
   interestIds: [],
   bio: '',
+  politics: null,
+  religion: null,
 };
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);

@@ -111,6 +111,7 @@ export default {
   profilePoliticsLabel: 'Politics',
   profileReligionLabel: 'Religion',
   profileBeliefClearHint: 'Tap your answer again to remove it',
+  beliefPreferNotSay: 'Prefer not to say',
   politicsLeft: 'Left',
   politicsCentreLeft: 'Centre-left',
   politicsCentre: 'Centre',

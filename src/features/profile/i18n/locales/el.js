@@ -111,6 +111,7 @@ export default {
   profilePoliticsLabel: 'Πολιτική',
   profileReligionLabel: 'Θρησκεία',
   profileBeliefClearHint: 'Πάτησε ξανά την απάντησή σου για να την αφαιρέσεις',
+  beliefPreferNotSay: 'Προτιμώ να μην πω',
   politicsLeft: 'Αριστερά',
   politicsCentreLeft: 'Κεντροαριστερά',
   politicsCentre: 'Κέντρο',
