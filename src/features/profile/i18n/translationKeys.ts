@@ -36,6 +36,7 @@ export enum Translations {
   PROFILE_VIEW_REPORT_REASON_OTHER = 'profileViewReportReasonOther',
   PROFILE_VIEW_REPORT_DETAILS = 'profileViewReportDetails',
   PROFILE_VIEW_REPORT_DETAILS_REQUIRED = 'profileViewReportDetailsRequired',
+  PROFILE_VIEW_REPORT_DETAILS_REQUIRED_HINT = 'profileViewReportDetailsRequiredHint',
   PROFILE_VIEW_REPORT_SUBMIT = 'profileViewReportSubmit',
   PROFILE_VIEW_REPORT_SENT = 'profileViewReportSent',
   PROFILE_VIEW_REPORT_ERROR = 'profileViewReportError',

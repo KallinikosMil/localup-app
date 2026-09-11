@@ -682,7 +682,11 @@ export default function UserProfileScreen() {
             setReportDetails(text);
             if (text.trim()) setReportDetailsMissing(false);
           }}
-          placeholder={t(Translations.PROFILE_VIEW_REPORT_DETAILS)}
+          placeholder={t(
+            reportReason && needsDetails(reportReason)
+              ? Translations.PROFILE_VIEW_REPORT_DETAILS_REQUIRED_HINT
+              : Translations.PROFILE_VIEW_REPORT_DETAILS,
+          )}
           placeholderTextColor={theme.colors.onSurfaceFaint}
           multiline
           maxLength={DETAILS_MAX}
@@ -854,7 +858,12 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     marginBottom: Spacing.sm,
   },
+  // CustomModal centres its children, which suits a title and a button
+  // and shrinks a form to its content: on the device the details box
+  // collapsed to the width of whatever had been typed in it. Both form
+  // parts stretch.
   reasonList: {
+    alignSelf: 'stretch',
     gap: Spacing.xs,
   },
   reasonRow: {
@@ -867,6 +876,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
   },
   detailsInput: {
+    alignSelf: 'stretch',
     minHeight: 72,
     borderWidth: 1,
     borderRadius: BorderRadius.md,

@@ -178,6 +178,7 @@ export default {
   profileViewReportReasonOther: 'Κάτι άλλο',
   profileViewReportDetails: 'Θέλεις να μας πεις κάτι παραπάνω; (προαιρετικό)',
   profileViewReportDetailsRequired: 'Πες μας λίγα λόγια παραπάνω.',
+  profileViewReportDetailsRequiredHint: 'Πες μας τι συνέβη',
   profileViewReportSubmit: 'Αποστολή αναφοράς',
   profileViewReportSent: 'Ευχαριστούμε — θα το εξετάσουμε.',
   profileViewReportError: 'Η αναφορά δεν στάλθηκε. Δοκίμασε ξανά.',

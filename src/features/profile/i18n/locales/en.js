@@ -178,6 +178,7 @@ export default {
   profileViewReportReasonOther: 'Something else',
   profileViewReportDetails: 'Anything else we should know? (optional)',
   profileViewReportDetailsRequired: 'Please tell us a little more.',
+  profileViewReportDetailsRequiredHint: 'Tell us what happened',
   profileViewReportSubmit: 'Send report',
   profileViewReportSent: 'Thanks — we will look into it.',
   profileViewReportError: "Couldn't send the report. Please try again.",
