@@ -23,6 +23,22 @@ export enum Translations {
   PROFILE_VIEW_BLOCK_BODY = 'profileViewBlockBody',
   PROFILE_VIEW_BLOCK_CONFIRM = 'profileViewBlockConfirm',
   PROFILE_VIEW_BLOCK_ERROR = 'profileViewBlockError',
+  // Reporting someone. The reason keys mirror REPORT_REASONS and the
+  // CHECK constraint on public.reports; keep the three in step.
+  PROFILE_VIEW_REPORT = 'profileViewReport',
+  PROFILE_VIEW_REPORT_TITLE = 'profileViewReportTitle',
+  PROFILE_VIEW_REPORT_BODY = 'profileViewReportBody',
+  PROFILE_VIEW_REPORT_REASON_UNDERAGE = 'profileViewReportReasonUnderage',
+  PROFILE_VIEW_REPORT_REASON_HARASSMENT = 'profileViewReportReasonHarassment',
+  PROFILE_VIEW_REPORT_REASON_INAPPROPRIATE_PHOTOS = 'profileViewReportReasonInappropriatePhotos',
+  PROFILE_VIEW_REPORT_REASON_FAKE_PROFILE = 'profileViewReportReasonFakeProfile',
+  PROFILE_VIEW_REPORT_REASON_SPAM = 'profileViewReportReasonSpam',
+  PROFILE_VIEW_REPORT_REASON_OTHER = 'profileViewReportReasonOther',
+  PROFILE_VIEW_REPORT_DETAILS = 'profileViewReportDetails',
+  PROFILE_VIEW_REPORT_DETAILS_REQUIRED = 'profileViewReportDetailsRequired',
+  PROFILE_VIEW_REPORT_SUBMIT = 'profileViewReportSubmit',
+  PROFILE_VIEW_REPORT_SENT = 'profileViewReportSent',
+  PROFILE_VIEW_REPORT_ERROR = 'profileViewReportError',
 
   // Profile tab
   PROFILE_TITLE = 'profileTitle',

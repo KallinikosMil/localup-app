@@ -5,6 +5,7 @@ import {
   ScrollView,
   Pressable,
   StatusBar,
+  TextInput,
 } from 'react-native';
 import { ActivityIndicator, Snackbar } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,6 +27,13 @@ import { useUserProfile, usePhotos } from '@features/profile/hooks/useProfile';
 import { formatDistance } from '@features/discover/utils/format';
 import { useUnmatch } from '@features/matches/hooks/useUnmatch';
 import { useBlockUser } from '@features/matches/hooks/useBlockUser';
+import { useReportUser } from '@features/matches/hooks/useReportUser';
+import {
+  REPORT_REASONS,
+  DETAILS_MAX,
+  needsDetails,
+  type ReportReason,
+} from '@features/profile/utils/reportReasons';
 import { Translations } from '@features/profile/i18n/translationKeys';
 import { Translations as Common } from '@shared/i18n/translationKeys';
 import { useAppTheme } from '@theme/paper';
@@ -68,6 +76,60 @@ export default function UserProfileScreen() {
   );
   const { modalProps, openModal, closeModal } = useModal();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Reporting is its own modal, not a third branch of the one above: it
+  // asks a question (why?) rather than a confirmation (sure?), and its
+  // body is a form. Folding it into pendingAction would have meant a
+  // switch inside every line of that modal.
+  const report = useReportUser();
+  const reportModal = useModal();
+  const [reportReason, setReportReason] = useState<ReportReason | null>(null);
+  const [reportDetails, setReportDetails] = useState('');
+  const [reportDetailsMissing, setReportDetailsMissing] = useState(false);
+  const [reportSent, setReportSent] = useState(false);
+
+  const REASON_LABEL: Record<ReportReason, Translations> = {
+    underage: Translations.PROFILE_VIEW_REPORT_REASON_UNDERAGE,
+    harassment: Translations.PROFILE_VIEW_REPORT_REASON_HARASSMENT,
+    inappropriate_photos:
+      Translations.PROFILE_VIEW_REPORT_REASON_INAPPROPRIATE_PHOTOS,
+    fake_profile: Translations.PROFILE_VIEW_REPORT_REASON_FAKE_PROFILE,
+    spam: Translations.PROFILE_VIEW_REPORT_REASON_SPAM,
+    other: Translations.PROFILE_VIEW_REPORT_REASON_OTHER,
+  };
+
+  const openReport = () => {
+    setReportReason(null);
+    setReportDetails('');
+    setReportDetailsMissing(false);
+    reportModal.openModal();
+  };
+
+  const submitReport = () => {
+    if (!userId || !reportReason) return;
+    if (needsDetails(reportReason) && !reportDetails.trim()) {
+      setReportDetailsMissing(true);
+      return;
+    }
+    report.mutate(
+      {
+        userId,
+        matchId: matchId ?? null,
+        reason: reportReason,
+        details: reportDetails,
+      },
+      {
+        onSuccess: () => {
+          reportModal.closeModal();
+          setReportSent(true);
+        },
+        onError: err =>
+          setErrorMsg(
+            errorMessage(err, Translations.PROFILE_VIEW_REPORT_ERROR),
+          ),
+      },
+    );
+  };
 
   const displayName = profile?.display_name ?? name ?? '';
   const mode = profile?.profile_mode ?? null;
@@ -373,6 +435,34 @@ export default function UserProfileScreen() {
 
           <View style={styles.spacer} />
 
+          {/* Report sits ABOVE the two destructive buttons and looks like
+              a link, not a button: it does nothing to the match. It is a
+              message to us about this person, and the reporter stays free
+              to block afterwards — the button for that is right below. */}
+          <Pressable
+            onPress={openReport}
+            disabled={busy}
+            accessibilityRole="button"
+            accessibilityLabel={t(Translations.PROFILE_VIEW_REPORT, {
+              name: displayName,
+            })}
+            style={styles.reportLink}
+          >
+            <AppIcon
+              name="flag-outline"
+              size={16}
+              color={theme.colors.onSurfaceVariant}
+            />
+            <AppText
+              variant="bodySmallStrong"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+              }}
+            >
+              {t(Translations.PROFILE_VIEW_REPORT, { name: displayName })}
+            </AppText>
+          </Pressable>
+
           {/* Both destructive, side by side, and neither is a primary
               button. Unmatch is neutral, Block wears the error tone —
               they are not equivalent: unmatch ends a conversation, block
@@ -514,12 +604,141 @@ export default function UserProfileScreen() {
         </AppButton>
       </CustomModal>
 
+      <CustomModal {...reportModal.modalProps}>
+        <AppText
+          variant="h3"
+          style={[
+            styles.modalText,
+            {
+              color: theme.colors.onSurface,
+            },
+          ]}
+        >
+          {t(Translations.PROFILE_VIEW_REPORT_TITLE, { name: displayName })}
+        </AppText>
+        <Spacer spacing={Spacing.sm} />
+        <AppText
+          variant="body"
+          style={[
+            styles.modalText,
+            {
+              color: theme.colors.onSurfaceVariant,
+            },
+          ]}
+        >
+          {t(Translations.PROFILE_VIEW_REPORT_BODY)}
+        </AppText>
+        <Spacer spacing={Spacing.md} />
+
+        <View style={styles.reasonList}>
+          {REPORT_REASONS.map(reason => {
+            const selected = reportReason === reason;
+            return (
+              <Pressable
+                key={reason}
+                onPress={() => {
+                  setReportReason(reason);
+                  setReportDetailsMissing(false);
+                }}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: selected }}
+                style={[
+                  styles.reasonRow,
+                  {
+                    backgroundColor: selected
+                      ? theme.colors.primaryContainer
+                      : theme.colors.surfaceElevated,
+                    borderColor: selected
+                      ? theme.colors.primary
+                      : theme.colors.outlineVariant,
+                  },
+                ]}
+              >
+                <AppIcon
+                  name={selected ? 'radiobox-marked' : 'radiobox-blank'}
+                  size={20}
+                  color={selected ? theme.colors.primary : theme.colors.outline}
+                />
+                <AppText
+                  variant="bodySmallStrong"
+                  style={{
+                    color: selected
+                      ? theme.colors.onPrimaryContainer
+                      : theme.colors.onSurface,
+                    flexShrink: 1,
+                  }}
+                >
+                  {t(REASON_LABEL[reason])}
+                </AppText>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Spacer spacing={Spacing.md} />
+        <TextInput
+          value={reportDetails}
+          onChangeText={text => {
+            setReportDetails(text);
+            if (text.trim()) setReportDetailsMissing(false);
+          }}
+          placeholder={t(Translations.PROFILE_VIEW_REPORT_DETAILS)}
+          placeholderTextColor={theme.colors.onSurfaceFaint}
+          multiline
+          maxLength={DETAILS_MAX}
+          accessibilityLabel={t(Translations.PROFILE_VIEW_REPORT_DETAILS)}
+          style={[
+            styles.detailsInput,
+            {
+              color: theme.colors.onSurface,
+              backgroundColor: theme.colors.surfaceElevated,
+              borderColor: reportDetailsMissing
+                ? theme.colors.error
+                : theme.colors.outlineVariant,
+            },
+          ]}
+        />
+        {reportDetailsMissing ? (
+          <AppText
+            variant="bodySmall"
+            style={{
+              color: theme.colors.error,
+              marginTop: Spacing.xs,
+            }}
+          >
+            {t(Translations.PROFILE_VIEW_REPORT_DETAILS_REQUIRED)}
+          </AppText>
+        ) : null}
+
+        <Spacer spacing={Spacing.lg} />
+        <AppButton
+          variant="primary"
+          onPress={submitReport}
+          disabled={!reportReason || report.isPending}
+          loading={report.isPending}
+        >
+          {t(Translations.PROFILE_VIEW_REPORT_SUBMIT)}
+        </AppButton>
+        <Spacer spacing={Spacing.sm} />
+        <AppButton variant="link" onPress={reportModal.closeModal}>
+          {t(Translations.PROFILE_VIEW_UNMATCH_CANCEL)}
+        </AppButton>
+      </CustomModal>
+
       <Snackbar
         visible={!!errorMsg}
         onDismiss={() => setErrorMsg(null)}
         duration={4000}
       >
         {errorMsg ?? ''}
+      </Snackbar>
+
+      <Snackbar
+        visible={reportSent}
+        onDismiss={() => setReportSent(false)}
+        duration={4000}
+      >
+        {t(Translations.PROFILE_VIEW_REPORT_SENT)}
       </Snackbar>
     </View>
   );
@@ -624,5 +843,35 @@ const styles = StyleSheet.create({
   },
   modalText: {
     textAlign: 'center',
+  },
+  reportLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    // A generous hit area for a small link, without it looking like a
+    // button: the padding is vertical only.
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  reasonList: {
+    gap: Spacing.xs,
+  },
+  reasonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  detailsInput: {
+    minHeight: 72,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    textAlignVertical: 'top',
   },
 });
