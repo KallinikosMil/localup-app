@@ -42,8 +42,9 @@ export type Candidate = {
   // WHICH ones are shared, not how many. `shared_interests` is a count and
   // you cannot colour a chip with a count.
   shared_interest_names: string[];
-  current_lat: number | null;
-  current_lng: number | null;
+  // No coordinates. The RPC returns distance_km and nothing else about
+  // where a candidate is; the columns it still carries are null and
+  // deliberately not typed here, so nothing can start reading them.
   languages: string[];
   last_location_at: string | null;
   distance_km: number;
