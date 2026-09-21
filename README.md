@@ -1,9 +1,9 @@
 # LocalUp
 
-> **Actively developed.** LocalUp is an MVP built solo as a university thesis —
-> architecture, app and backend. Every flow below works end to end and the
-> design pass is done; it is being prepared for a Google Play release and is not
-> production-hardened yet.
+> **In closed testing on Google Play** (approved 2026-09-20). LocalUp is built
+> solo as a university thesis — architecture, app and backend. Every flow below
+> works end to end on real devices; the remaining gaps are listed under
+> *Status & scope*.
 
 **LocalUp connects travelers with locals in the same city.** Not a dating app —
 think "Bumble meets Airbnb's editorial style": clean, curated, trust-oriented.
@@ -36,15 +36,22 @@ reads **TRAVELER**. That is the whole product in two labels.
 
 ## What you can do today
 
-- **Sign up & build a profile** — name, bio, interests, languages, date of birth,
-  and up to six photos. One is enough to finish; the first is the one people see
-  first, and the order is yours to change.
+- **Sign up & build a profile** — email/password or Google sign-in; name, bio,
+  interests, date of birth, optional beliefs, and up to six photos. One is enough
+  to finish; the first is the one people see first, and the order is yours to
+  change.
 - **Get placed automatically** — the app reads your location and assigns your
   mode (local vs. traveler).
 - **Discover** — swipe through a deck of opposite-mode people near you. Each card
   shows their mode badge, home city, bio, and shared interests.
-- **Match** — a mutual like creates a match.
-- **Chat** — matched users get a thread to coordinate meeting up.
+- **Filter** — distance and age, with a live count of who a setting would show
+  and a suggested radius when yours is too narrow.
+- **Match** — a mutual like creates a match; the other side never learns about a
+  one-sided like.
+- **Chat** — matched users get a realtime thread, with unread badges and push
+  notifications for new matches and messages.
+- **Stay safe** — unmatch, block (silent, both directions) and report from any
+  match's profile; delete your account from Settings.
 
 ### How the deck is built
 
@@ -60,6 +67,8 @@ the survivors scored:
 | Distance | 5 | linear decay across your maximum radius |
 | Activity recency | 3 | how recently their location was updated, over a 14-day window |
 | Shared language | 2 | any overlap at all |
+| Political affinity | 3 | distance along a left–right axis; unanswered scores 0.5, not 0 |
+| Religious affinity | 3 | same or not; unanswered scores 0.5, not 0 |
 
 Those weights live in a `match_weights` table rather than in the function body,
 so the ranking can be retuned with an `UPDATE` — no migration, no redeploy, and
@@ -76,7 +85,8 @@ opposite-mode rule is a hard filter, never a weight.
 | UI         | React Native Paper |
 | Backend    | [Supabase](https://supabase.com) — Postgres, Auth, Storage, Realtime |
 | Logic      | Postgres RPCs (`SECURITY DEFINER`/`INVOKER`) + Row-Level Security |
-| i18n       | i18next (English + Greek) |
+| i18n       | i18next — English shipped; Greek translation complete, not yet switched on |
+| Push       | Expo Push → FCM, triggered from Postgres via `pg_net` + an Edge Function |
 
 Sensitive/multi-step operations (mutual-match resolution, onboarding, the matches
 overview) run as **Postgres functions**, so they're atomic and enforced at the
@@ -102,22 +112,34 @@ src/
   config/       # Supabase client, i18n
 ```
 
+## Release
+
+Native builds go through EAS Build to Google Play; JavaScript-only changes ship
+over the air through EAS Update on the `production` channel, pinned to the
+native fingerprint. The public pages Google Play requires — privacy policy,
+community guidelines and child-safety standards, account deletion — are served
+from [`docs/`](docs/) via GitHub Pages. A scheduled workflow pings the
+database every other day so the free-tier project does not pause between real
+users.
+
 ## Roadmap
 
-- [ ] **Search filters** — designed, and the server side is done: reading and
-      writing preferences, a live count of who a setting would show, and the
-      distance spread behind the "your radius is too narrow" warning. The
-      screen itself is what is left.
-- [ ] **Editing interests** — same: designed, and the write path enforces the
-      3–5 rule in one transaction. Only the screen is missing.
-- [ ] Google Play release — privacy policy, the Data Safety form and a
-      production keystore
+- [ ] Switch the Greek translation on (one line, after a pass over every screen
+      with the longer strings)
+- [ ] Declare only approximate location on Android, so the system never offers
+      an upgrade to precise
+- [ ] Retry push-token registration with backoff when Play Services refuse it
+- [ ] Notify the admin on every new user report
+- [ ] "Plan ahead" — declare a future trip and be discoverable in that city
+      before arriving
 
 ## Status & scope
 
-This is a thesis MVP: auth, profiles, location-based discovery with a swipe deck,
-opposite-mode filtering, mutual matching, and chat all work — matching has been
-verified end-to-end between two real devices. It is **not** production-hardened.
+This is a thesis MVP in closed testing: auth, profiles, location-based discovery
+with a swipe deck, opposite-mode filtering, mutual matching, realtime chat, push
+notifications, block/report and account deletion all work and have been
+verified end-to-end on real devices. Android only for now — the code is shared,
+the iOS build has not been exercised. It is **not** production-hardened.
 
 ## License
 
