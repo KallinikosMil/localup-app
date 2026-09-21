@@ -1,0 +1,38 @@
+# Supabase pauses a free-tier project after 7 days without API traffic, and
+# a paused database means every user sees "login failed" until someone
+# restores it by hand. It happened on 2026-09-19, while Google was still
+# reviewing the closed-testing build and nobody had opened the app.
+#
+# This is one tiny read through the same REST endpoint the app uses, every
+# other day, with the public anon key. Reads through PostgREST count as
+# activity; queries from the dashboard or MCP do not. It proves nothing
+# about the app — it only keeps the lights on until real users do.
+#
+# GitHub disables scheduled workflows after 60 days without a commit on
+# the default branch; a push (or the "Run workflow" button) re-enables it.
+name: keep-supabase-awake
+
+on:
+  schedule:
+    - cron: '17 6 */2 * *' # every second day, 06:17 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Read one row through PostgREST
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -sS -o /tmp/body -w '%{http_code}' \
+            --max-time 30 \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/interests?select=id&limit=1")
+          echo "HTTP $code"
+          # 200 = awake. Anything else (paused projects answer 5xx or hang)
+          # fails the job so the email from GitHub is the alarm.
+          test "$code" = "200"
