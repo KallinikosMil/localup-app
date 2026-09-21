@@ -251,6 +251,7 @@ const listZombies = async () => {
     'thodoris','katerina','mitsos','anthi','kostis','lena',
     'manolis','argyro','sifis','marina','aris','chara',
     'jukka','aino','pekka','myrto','vangelis','ioanna',
+    'stavros','eleni','giannis','niki','petros','elpida',
   ].map(n => `z.${n}@test.local`);
   void anon;
   return [...seeded, ...extra];

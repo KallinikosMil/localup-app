@@ -2,8 +2,8 @@
 -- Zombies for the closed test: five cities, both sides of the deck
 -- ===========================================
 --
--- The twelve testers live in Athens, Thessaloniki, Larissa, Heraklion and
--- Lappeenranta. A tester who opens the app and sees "No one nearby" has
+-- The twelve testers live in Athens, Thessaloniki, Larissa, Heraklion,
+-- Lappeenranta and Nürnberg. A tester who opens the app and sees "No one nearby" has
 -- nothing to test, so every one of those cities gets three locals and
 -- three travellers — thirty @test.local accounts that can also be driven
 -- by scripts/zombie.mjs (they sign in with the fixture password).
@@ -68,7 +68,14 @@ from (values
   ('eeeeeeee-0503-4000-8000-000000000503'::uuid, 'z.pekka@test.local'),
   ('eeeeeeee-0504-4000-8000-000000000504'::uuid, 'z.myrto@test.local'),
   ('eeeeeeee-0505-4000-8000-000000000505'::uuid, 'z.vangelis@test.local'),
-  ('eeeeeeee-0506-4000-8000-000000000506'::uuid, 'z.ioanna@test.local')
+  ('eeeeeeee-0506-4000-8000-000000000506'::uuid, 'z.ioanna@test.local'),
+  -- Nürnberg (η μάνα του Καλλίνικου είναι tester εκεί)
+  ('eeeeeeee-0601-4000-8000-000000000601'::uuid, 'z.stavros@test.local'),
+  ('eeeeeeee-0602-4000-8000-000000000602'::uuid, 'z.eleni@test.local'),
+  ('eeeeeeee-0603-4000-8000-000000000603'::uuid, 'z.giannis@test.local'),
+  ('eeeeeeee-0604-4000-8000-000000000604'::uuid, 'z.niki@test.local'),
+  ('eeeeeeee-0605-4000-8000-000000000605'::uuid, 'z.petros@test.local'),
+  ('eeeeeeee-0606-4000-8000-000000000606'::uuid, 'z.elpida@test.local')
 ) as v(id, email)
 on conflict (id) do nothing;
 
@@ -165,6 +172,20 @@ values
    'Κρητικός στο χιόνι. Έφερα ρακή για την ομάδα. Η ομάδα τώρα με λέει αρχηγό.', '{el,en}', true),
   ('eeeeeeee-0506-4000-8000-000000000506','Ιωάννα','Θεσσαλονίκη',40.6401,22.9444, 61.0600,28.1830, now(), '1995-08-08',
    'Ήρθα για το βόρειο σέλας. Είδα σύννεφα. ΑΛΛΑ ΑΥΤΟΙ ΕΙΣΤΕ, τα σύννεφα.', '{el,en}', true)
+
+  -- ---------- Nürnberg (49.4521, 11.0767) ----------
+  ('eeeeeeee-0601-4000-8000-000000000601','Σταύρος','Nürnberg',49.4521,11.0767, 49.4490,11.0800, now(), '1983-05-14',
+   'Ντόπιος εδώ και 20 χρόνια. Ακόμα ψάχνω σωστό γύρο. Θα σε πάω στον λιγότερο λάθος.', '{el,de,en}', true),
+  ('eeeeeeee-0602-4000-8000-000000000602','Ελένη','Nürnberg',49.4521,11.0767, 49.4560,11.0720, now(), '1990-09-27',
+   'Έμαθα γερμανικά από τα λεωφορεία. Ξέρω να λέω «επόμενη στάση» με 40 τρόπους.', '{el,de,en}', true),
+  ('eeeeeeee-0603-4000-8000-000000000603','Γιάννης','Nürnberg',49.4521,11.0767, 49.4450,11.0850, now(), '1976-12-03',
+   'Ήμουν κι εγώ ταξιδιώτης σαν εσένα. Μετά έφαγα ένα βέλος στο γόνατο. Στη Christkindlesmarkt.', '{el,de}', true),
+  ('eeeeeeee-0604-4000-8000-000000000604','Νίκη','Αθήνα',37.9838,23.7275, 49.4530,11.0790, now(), '1997-03-08',
+   'Ήρθα για δουλειά. Η δουλειά είναι να τρώω λουκάνικα και να λέω ότι μου λείπει η φέτα.', '{el,en}', true),
+  ('eeeeeeee-0605-4000-8000-000000000605','Πέτρος','Θεσσαλονίκη',40.6401,22.9444, 49.4500,11.0740, now(), '1988-07-19',
+   'Καλά κρασιά. Εδώ έχουν μπίρες. Καλά κρασιά.', '{el,en}', true),
+  ('eeeeeeee-0606-4000-8000-000000000606','Ελπίδα','Ηράκλειο',35.3387,25.1442, 49.4580,11.0830, now(), '1993-11-25',
+   'Έφερα ρακή στη Γερμανία. Τα σύνορα με ρώτησαν αν είναι όπλο. Είναι.', '{el,en}', true)
 on conflict (user_id) do update set
   home_city        = excluded.home_city,
   home_lat         = excluded.home_lat,
@@ -222,7 +243,14 @@ from (values
   ('eeeeeeee-0503-4000-8000-000000000503','Fishing'),('eeeeeeee-0503-4000-8000-000000000503','Beer & Breweries'),('eeeeeeee-0503-4000-8000-000000000503','Board Game Cafes'),
   ('eeeeeeee-0504-4000-8000-000000000504','Language Exchange'),('eeeeeeee-0504-4000-8000-000000000504','Local Cuisine'),('eeeeeeee-0504-4000-8000-000000000504','Live Music'),
   ('eeeeeeee-0505-4000-8000-000000000505','Skiing'),('eeeeeeee-0505-4000-8000-000000000505','Tavernas'),('eeeeeeee-0505-4000-8000-000000000505','Karaoke'),
-  ('eeeeeeee-0506-4000-8000-000000000506','Stargazing'),('eeeeeeee-0506-4000-8000-000000000506','Photography'),('eeeeeeee-0506-4000-8000-000000000506','Coffee Culture'),('eeeeeeee-0506-4000-8000-000000000506','Museums')
+  ('eeeeeeee-0506-4000-8000-000000000506','Stargazing'),('eeeeeeee-0506-4000-8000-000000000506','Photography'),('eeeeeeee-0506-4000-8000-000000000506','Coffee Culture'),('eeeeeeee-0506-4000-8000-000000000506','Museums'),
+
+  ('eeeeeeee-0601-4000-8000-000000000601','Local Cuisine'),('eeeeeeee-0601-4000-8000-000000000601','Football'),('eeeeeeee-0601-4000-8000-000000000601','Beer & Breweries'),
+  ('eeeeeeee-0602-4000-8000-000000000602','Museums'),('eeeeeeee-0602-4000-8000-000000000602','Coffee Culture'),('eeeeeeee-0602-4000-8000-000000000602','Gardens & Parks'),('eeeeeeee-0602-4000-8000-000000000602','Bakeries'),
+  ('eeeeeeee-0603-4000-8000-000000000603','History'),('eeeeeeee-0603-4000-8000-000000000603','Castles & Ruins'),('eeeeeeee-0603-4000-8000-000000000603','Tavernas'),
+  ('eeeeeeee-0604-4000-8000-000000000604','Street Food'),('eeeeeeee-0604-4000-8000-000000000604','Markets & Bazaars'),('eeeeeeee-0604-4000-8000-000000000604','Photography'),
+  ('eeeeeeee-0605-4000-8000-000000000605','Beer & Breweries'),('eeeeeeee-0605-4000-8000-000000000605','Live Music'),('eeeeeeee-0605-4000-8000-000000000605','Football'),('eeeeeeee-0605-4000-8000-000000000605','Coffee Culture'),
+  ('eeeeeeee-0606-4000-8000-000000000606','Museums'),('eeeeeeee-0606-4000-8000-000000000606','Desserts'),('eeeeeeee-0606-4000-8000-000000000606','Gardens & Parks')
 ) as v(user_id, interest_name)
 join public.interests i on i.name = v.interest_name
 on conflict do nothing;
@@ -260,7 +288,7 @@ update public.profiles p
 
 commit;
 
--- Sanity: 30 rows, 3 locals + 3 travellers per city.
+-- Sanity: 36 rows, 3 locals + 3 travellers per city.
 select p.home_city,
        count(*) filter (where ST_Distance(p.home_geog, p.current_geog) / 1000 <= 50) as locals_here,
        count(*) filter (where ST_Distance(p.home_geog, p.current_geog) / 1000 >  50) as travellers_here
