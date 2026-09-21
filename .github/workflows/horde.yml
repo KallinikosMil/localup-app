@@ -1,0 +1,39 @@
+# The closed test has thirty seeded "zombies" spread over the testers'
+# cities. This runs one pass of scripts/zombie.mjs horde every quarter hour:
+# each zombie likes whoever is in its deck (so a tester's like becomes a
+# match on the spot), opens a fresh match with one line, and answers
+# anything unread — in Greek internet memes, so nobody mistakes it for a
+# person. It only ever touches real accounts; seed-to-seed traffic is
+# skipped in the script.
+#
+# Fast replies come from `node scripts/zombie.mjs horde` running on a
+# machine; this is the backstop so testers still get an answer when no
+# machine is on. Disable by deleting the schedule or the workflow.
+name: zombie-horde
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: zombie-horde
+  cancel-in-progress: false
+
+jobs:
+  pass:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: One pass over the roster
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          # The script reads .env the way the dev machine has it.
+          printf 'EXPO_PUBLIC_SUPABASE_URL=%s\nEXPO_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > .env
+          node scripts/zombie.mjs horde --once 2
