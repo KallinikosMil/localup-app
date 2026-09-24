@@ -38,6 +38,16 @@ export function useLogin() {
   });
 }
 
+// Where the confirmation link lands AFTER Supabase has verified the
+// token. Without this the link falls back to the project's Site URL,
+// which ships as http://localhost:3000 — the account was confirmed fine
+// but the person got ERR_CONNECTION_REFUSED in their browser and assumed
+// it had failed. A hosted page is used rather than the localup-app://
+// deep link because this opens in whatever browser the mail app picked,
+// and a custom scheme there is blocked as often as it works.
+const CONFIRM_LANDING =
+  'https://kallinikosmil.github.io/localup-app/auth-confirmed.html';
+
 export function useRegister() {
   return useMutation({
     mutationFn: async ({
@@ -50,6 +60,7 @@ export function useRegister() {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: { emailRedirectTo: CONFIRM_LANDING },
       });
 
       // Check the error FIRST. It used to be checked last, after the
