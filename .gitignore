@@ -78,3 +78,7 @@ fcm-service-account.json
 # Vendored agent skills — tooling, not app source, and the repo is public.
 .agents/
 skills-lock.json
+
+# The backend inventory: what every table, policy and function is for,
+# and which parts are load-bearing. Internal — the repo is public.
+BACKEND-INVENTORY.md
