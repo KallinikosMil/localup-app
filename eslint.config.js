@@ -9,7 +9,13 @@ module.exports = defineConfig([
       // Vendored agent skills. Somebody else's scripts, on somebody
       // else's conventions — linting them turned the verify gate into
       // 148 errors from files we do not own and cannot fix.
+      //
+      // Both paths, because the harness has used both: `.agents/` on the
+      // old machine, `.claude/` on the one set up 2026-09-30. The same 148
+      // errors came back on the first `npm run verify` there, from the same
+      // vendored files under a different directory name.
       '.agents/**',
+      '.claude/**',
       '.expo/**',
       'android/**',
       'ios/**',
