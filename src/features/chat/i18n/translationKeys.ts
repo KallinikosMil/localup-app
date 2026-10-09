@@ -8,4 +8,6 @@ export enum Translations {
   CHAT_INPUT_PLACEHOLDER = 'chatInputPlaceholder',
   CHAT_EMPTY = 'chatEmpty',
   CHAT_SEND_ERROR = 'chatSendError',
+  CHAT_A11Y_MESSAGE_MINE = 'chatA11yMessageMine',
+  CHAT_A11Y_MESSAGE_THEIRS = 'chatA11yMessageTheirs',
 }

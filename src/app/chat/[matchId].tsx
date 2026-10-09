@@ -206,6 +206,19 @@ export default function ChatScreen() {
 
     const bubble = (
       <View
+        // One bubble, one thing to announce. `isMine` below decides a
+        // gradient, a colour and a side — all of it invisible to a screen
+        // reader, which otherwise hears every message in the same voice and
+        // cannot tell its own replies from the other person's.
+        accessible
+        accessibilityLabel={
+          isMine
+            ? t(Translations.CHAT_A11Y_MESSAGE_MINE, { body: item.body })
+            : t(Translations.CHAT_A11Y_MESSAGE_THEIRS, {
+                name: name ?? t(Translations.CHAT_TITLE_FALLBACK),
+                body: item.body,
+              })
+        }
         style={[
           styles.bubble,
           isMine

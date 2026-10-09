@@ -156,8 +156,11 @@ const ProfileHero = ({
           style={StyleSheet.absoluteFill}
           onPress={e => onTap(e.nativeEvent.locationX)}
           accessibilityRole="button"
-          accessibilityLabel={t(Translations.PROFILE_PHOTO_COUNT, {
-            current: index + 1,
+          // NOT profilePhotoCount: that string is the visible pill below and
+          // reads "1 of 3", which is a caption next to a photo and a riddle
+          // on its own. Spoken aloud the noun has to be in the sentence.
+          accessibilityLabel={t(Common.A11Y_PHOTO_OF_TOTAL, {
+            index: index + 1,
             total: photos.length,
           })}
         />

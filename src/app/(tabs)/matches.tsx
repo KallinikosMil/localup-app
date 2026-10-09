@@ -312,10 +312,23 @@ function MatchesScreenContent() {
       <Pressable
         // The row is one destination, so it is announced as one item. The
         // unread state is a tint and a heavier weight — neither of which a
-        // reader can see, hence the explicit state.
+        // reader can see, so it has to be said.
+        //
+        // It used to be said with accessibilityState={{ selected }}, which
+        // TalkBack reads out as "selected". That is a different idea: a
+        // selected row is one you picked, and nothing here selects anything.
+        // The count goes in the label instead, in the same words the tab bar
+        // already uses for the same number (the key is named for the tab; the
+        // string itself is not tab-specific).
         accessibilityRole="button"
-        accessibilityLabel={item.display_name ?? ''}
-        accessibilityState={{ selected: unread }}
+        accessibilityLabel={
+          unread
+            ? t(Common.A11Y_TAB_WITH_UNREAD, {
+                label: item.display_name ?? '',
+                count: item.unread_count ?? 1,
+              })
+            : (item.display_name ?? '')
+        }
         style={[
           styles.row,
           {

@@ -56,7 +56,7 @@ export default {
   discoverStampNope: 'ΠΑΣΟ',
   discoverNameAge: '{{name}}, {{age}}',
   discoverA11yNextPhoto:
-    'Φωτογραφία {{current}} από {{total}}. Πάτησε για αλλαγή.',
+    'Φωτογραφία {{current}} από {{total}}. Πάτα για την επόμενη.',
   discoverA11yShowAllInterests: 'Δες και τα {{count}} ενδιαφέροντα',
   discoverFilters: 'Φίλτρα',
 };

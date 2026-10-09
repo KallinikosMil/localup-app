@@ -59,7 +59,9 @@ export default {
   // A format string, not a concatenation: Greek and English happen to
   // agree here, but the separator is a translator's decision.
   discoverNameAge: '{{name}}, {{age}}',
-  discoverA11yNextPhoto: 'Photo {{current}} of {{total}}. Tap to change.',
+  // "Tap to change" was profile-editing language on somebody else's card:
+  // the tap moves to their next photo, it does not change anything.
+  discoverA11yNextPhoto: 'Photo {{current}} of {{total}}. Tap for the next.',
   discoverA11yShowAllInterests: 'Show all {{count}} interests',
   discoverFilters: 'Filters',
 };

@@ -8,4 +8,6 @@ export default {
   chatInputPlaceholder: 'Γράψε ένα μήνυμα...',
   chatEmpty: 'Δεν υπάρχουν μηνύματα ακόμα.\nΠες ένα γεια!',
   chatSendError: 'Το μήνυμα δεν στάλθηκε. Δοκίμασε ξανά.',
+  chatA11yMessageMine: 'Εσύ: {{body}}',
+  chatA11yMessageTheirs: '{{name}}: {{body}}',
 };
